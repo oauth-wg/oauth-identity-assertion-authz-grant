@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-24T00:51:29.602117+00:00",
+  "timestamp": "2025-07-27T00:56:30.670470+00:00",
   "repo": "aaronpk/draft-parecki-oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -845,9 +845,17 @@
       "labels": [],
       "body": "There are two places where refresh tokens might come into the picture:\n\n* The Token Exchange request (use an ID Token to get an ID-JAG)\n* The Access Token request (use an ID-JAG to get an access token)\n\nWe should have some guidance or security considerations around the implications of returning refresh tokens for both of these.\n\n## IDP refresh tokens\n\nThe implication of returning a refresh token along with the ID-JAG is that the requesting application could use the refresh token in place of the ID token in future requests. This could allow the IDP to return new ID-JAGs without a new ID token having been requested.\n\n## Resource App refresh tokens\n\nThe resource app could return a refresh token along with the access token. This pattern should be discouraged, as this enables the client to request access tokens in the future which the IDP wouldn't know about.\n",
       "createdAt": "2025-07-18T21:19:21Z",
-      "updatedAt": "2025-07-18T21:19:21Z",
+      "updatedAt": "2025-07-25T17:27:22Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "joshcanhelp",
+          "authorAssociation": "NONE",
+          "body": "I've had some time to think about this and just wanted to add a few comments and thoughts on this. \n\nFor the first option, **IDP refresh tokens**, there could be a refresh token returned with the initial ID token (green text appended to the diagram on the MCP PR):\n\n<img width=\"927\" height=\"409\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/f14802c0-b57a-48e8-bfd8-1f4fd5a926fd\" />\n\nTo refresh the service's access token, the MCP Client (\"Client\" going forward) would:\n\n1. Use the refresh token with the IDP to get a new ID token\n2. Use that ID token with the IDP to get a new ID JAG\n3. ... continues as previously described\n\nThat would allow the IDP to stay in the loop and invalidate the refresh process as needed (admin action, automated protection, etc). That would end up being 3 HTTP requests for a single refresh, though, which is a lot in the case of access tokens with a short life. \n\nFor the second, **Resource App refresh tokens**, you said that the Client could request access tokens that the IDP wouldn't know about but the IDP would know that refresh tokens were allowed. Section 5 (page 8) of the \"Identity Assertion Authorization Grant\" document talks about the token exchange request and includes API scopes as a part of that request.\n\nhttps://datatracker.ietf.org/doc/draft-parecki-oauth-identity-assertion-authz-grant/\n\nThe `offline_access` scope could be requested there and then the IDP would know that refresh tokens are being requested. It could not control the refresh process, of course, so it makes sense to caution about that approach.\n\nThat leads me to a question here in the context of this being applied to 3rd party APIs: how can the IDP be aware of the scopes being requested, `offline_access` or otherwise? I don't see that property mentioned in [your blog post](https://aaronparecki.com/2025/05/12/27/enterprise-ready-mcp) and can't really think of a great way for the IDP to get that knowledge and keep it up to date.\n\nOne thing that came to mind is maybe the 3rd party URL could present a consent screen with all allowed scopes as selectable. Claude can get a text response with an URL and present it to a user and this type of interaction looks like it will be more formalized in the spec going forward (https://github.com/modelcontextprotocol/modelcontextprotocol/pull/887).\n\nThanks again for your work in this space!",
+          "createdAt": "2025-07-25T17:27:22Z",
+          "updatedAt": "2025-07-25T17:27:22Z"
+        }
+      ]
     },
     {
       "number": 36,
