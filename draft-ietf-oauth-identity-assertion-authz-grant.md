@@ -775,39 +775,6 @@ The authors would like to thank the following people for their contributions and
 
 \[\[ To be removed from the final specification ]]
 
--06
-
-* Update change controller for registration requests from IESG to IETF per general IANA suggestion
-* Fix the two IANA "*** BROKEN REFERENCE ***"s
-
--05
-
-* Use `audience` instead of `resource` to reference the authorization server issuer
-* Add optional `resource` to indicate the resource server identifier
-* Added a section on how to advertise support in the IdP metadata
-
--04
-
-* Improved section references to other specs
-* Editorial clarifications
-* Updated references to RFC9728
-* Rewrote intro
-* Added Brian Campbell as co-author
-* Changed "SHOULD NOT" to "MUST NOT" issue access tokens in response to an ID-JAG it issued itself
-
--03
-
-* Added example for AI Agent
-
--02
-
-* Changed the `aud` property to the Issuer URL instead of the token endpoint
-
--01
-
-* Corrected the `scope` property in the JWT to match token exchange and JWT access token profile
-* Formatting and editorial fixes
-
 -00
 
-* Initial revision
+* Initial revision as adopted working group draft
