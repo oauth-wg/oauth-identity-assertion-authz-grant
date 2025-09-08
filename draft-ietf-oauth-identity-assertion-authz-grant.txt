@@ -5,14 +5,14 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 29 December 2025                                    Independent
+Expires: 12 March 2026                                       Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                            27 June 2025
+                                                        8 September 2025
 
 
                  Identity Assertion Authorization Grant
-       draft-parecki-oauth-identity-assertion-authz-grant-latest
+         draft-ietf-oauth-identity-assertion-authz-grant-latest
 
 Abstract
 
@@ -27,11 +27,10 @@ About This Document
    This note is to be removed before publishing as an RFC.
 
    The latest revision of this draft can be found at
-   https://drafts.aaronpk.com/draft-parecki-oauth-identity-assertion-
-   authz-grant/draft-parecki-oauth-identity-assertion-authz-grant.html.
-   Status information for this document may be found at
-   https://datatracker.ietf.org/doc/draft-parecki-oauth-identity-
-   assertion-authz-grant/.
+   https://drafts.oauth.net/oauth-identity-assertion-authz-grant/draft-
+   ietf-oauth-identity-assertion-authz-grant.html.  Status information
+   for this document may be found at https://datatracker.ietf.org/doc/
+   draft-ietf-oauth-identity-assertion-authz-grant/.
 
    Discussion of this document takes place on the Web Authorization
    Protocol Working Group mailing list (mailto:oauth@ietf.org), which is
@@ -39,8 +38,7 @@ About This Document
    Subscribe at https://www.ietf.org/mailman/listinfo/oauth/.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-
-   authz-grant.
+   https://github.com/oaouth-wg/oauth-identity-assertion-authz-grant.
 
 Status of This Memo
 
@@ -57,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 December 2025.
+   This Internet-Draft will expire on 12 March 2026.
 
 Copyright Notice
 
@@ -88,16 +86,18 @@ Table of Contents
    6.  Access Token Request
      6.1.  Processing Rules
      6.2.  Response
-   7.  Security Considerations
-     7.1.  Client Authentication
-     7.2.  Step-Up Authentication
-     7.3.  Cross-Domain Use
-   8.  IANA Considerations
-     8.1.  Media Types
-     8.2.  OAuth URI Registration
-   9.  References
-     9.1.  Normative References
-     9.2.  Informative References
+   7.  Authorization Server (IdP) Metadata
+   8.  Security Considerations
+     8.1.  Client Authentication
+     8.2.  Step-Up Authentication
+     8.3.  Cross-Domain Use
+   9.  IANA Considerations
+     9.1.  Media Types
+     9.2.  OAuth URI Registration
+     9.3.  JSON Web Token Claims Registration
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
    Appendix A.  Use Cases
      A.1.  Enterprise Deployment
        A.1.1.  Preconditions
@@ -566,19 +566,32 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
      "token_type": "Bearer",
      "access_token": "2YotnFZFEjr1zCsicMWpAA",
      "expires_in": 86400,
-     "scope": "chat.read chat.history",
-     "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
+     "scope": "chat.read chat.history"
    }
 
-7.  Security Considerations
+7.  Authorization Server (IdP) Metadata
 
-7.1.  Client Authentication
+   An IdP can advertise its support for this profile in its OAuth
+   Authorization Server Metadata [RFC8414].  Identity and Authorization
+   Chaining Across Domains [I-D.ietf-oauth-identity-chaining] defines a
+   new metadata property
+   identity_chaining_requested_token_types_supported for this purpose.
+
+   To advertise support for the Identity Assertion Authorization Grant,
+   the authorization server SHOULD include the following value in the
+   identity_chaining_requested_token_types_supported property:
+
+   urn:ietf:params:oauth:token-type:id-jag
+
+8.  Security Considerations
+
+8.1.  Client Authentication
 
    This specification SHOULD only be supported for confidential clients.
    Public clients SHOULD redirect the user with an OAuth 2.0
    Authorization Request.
 
-7.2.  Step-Up Authentication
+8.2.  Step-Up Authentication
 
    In the initial token exchange request, the IdP may require step-up
    authentication for the subject if the authentication context in the
@@ -606,7 +619,7 @@ Cache-Control: no-store
    Connect for SSO when performing a step-up to skip the need for
    additional token exchange round-trip.
 
-7.3.  Cross-Domain Use
+8.3.  Cross-Domain Use
 
    This specification is intended for cross-domain uses where the
    Client, Resource App, and Identity Provider are all in different
@@ -614,16 +627,16 @@ Cache-Control: no-store
    access tokens in response to an ID-JAG it issued itself.  Doing so
    could lead to unintentional broadening of the scope of authorization.
 
-8.  IANA Considerations
+9.  IANA Considerations
 
-8.1.  Media Types
+9.1.  Media Types
 
    This section registers oauth-id-jag+jwt, a new media type [RFC2046]
-   in the "Media Types" registry [IANA.MediaTypes] in the manner
+   in the "Media Types" registry [IANA.media-types] in the manner
    described in [RFC6838].  It can be used to indicate that the content
    is a Identity Assertion Authorization Grant JWT.
 
-8.2.  OAuth URI Registration
+9.2.  OAuth URI Registration
 
    This section registers urn:ietf:params:oauth:token-type:id-jag in the
    "OAuth URI" subregistry of the "OAuth Parameters" registry
@@ -634,24 +647,42 @@ Cache-Control: no-store
    *  Common Name: Token type URI for a Identity Assertion JWT
       Authorization Grant
 
-   *  Change Controller: IESG
+   *  Change Controller: IETF
 
    *  Specification Document: This document
 
-9.  References
+9.3.  JSON Web Token Claims Registration
 
-9.1.  Normative References
+   This section registers resource in the "JSON Web Token Claims"
+   subregistry of the "JSON Web Token (JWT)" registry [IANA.jwt].  The
+   "JSON Web Token Claims" subregistry was established by [RFC7519].
+
+   *  Claim Name: resource
+
+   *  Claim Description: Resource
+
+   *  Change Controller: IETF
+
+   *  Specification Document(s): Section 5.3
+
+10.  References
+
+10.1.  Normative References
 
    [I-D.ietf-oauth-identity-chaining]
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
               M. J., and B. Campbell, "OAuth Identity and Authorization
               Chaining Across Domains", Work in Progress, Internet-
-              Draft, draft-ietf-oauth-identity-chaining-04, 27 February
-              2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
-              oauth-identity-chaining-04>.
+              Draft, draft-ietf-oauth-identity-chaining-05, 3 July 2025,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
+              identity-chaining-05>.
 
-   [IANA.MediaTypes]
-              "*** BROKEN REFERENCE ***".
+   [IANA.jwt] IANA, "JSON Web Token (JWT)",
+              <https://www.iana.org/assignments/jwt>.
+
+   [IANA.media-types]
+              IANA, "Media Types",
+              <https://www.iana.org/assignments/media-types>.
 
    [IANA.oauth-parameters]
               IANA, "OAuth Parameters",
@@ -708,7 +739,7 @@ Cache-Control: no-store
               DOI 10.17487/RFC8725, February 2020,
               <https://www.rfc-editor.org/rfc/rfc8725>.
 
-9.2.  Informative References
+10.2.  Informative References
 
    [RFC8414]  Jones, M., Sakimura, N., and J. Bradley, "OAuth 2.0
               Authorization Server Metadata", RFC 8414,
@@ -874,23 +905,13 @@ Content-Type: application/json
   "grant_types_supported": [
     "authorization_code", "refresh_token", "urn:ietf:params:oauth:grant-type:token-exchange"
   ],
+  "identity_chaining_requested_token_types_supported": ["urn:ietf:params:oauth:token-type:id-jag"],
   ...
 }
 
    LLM Agent discovers all necessary endpoints for authentication as
-   well as support for the Token Exchange grant type
-   urn:ietf:params:oauth:grant-type:token-exchange
-
-      Note: Token Exchange [RFC8693] doesn't define an authorization
-      server metadata parameter for requested_token_types_supported to
-      discover if urn:ietf:params:oauth:token-type:id-jag is
-      specifically supported.  Currently, the LLM Agent needs to first
-      attempt Token Exchange to learn if the specific Enterprise IdP
-      supports issuing an Identity Assertion Grant.  This specification
-      could define an Authorization Server Metadata [RFC8414] parameter
-      to enable the agent to discover if this request is supported.  See
-      issue #16 (https://github.com/aaronpk/draft-parecki-oauth-
-      identity-assertion-authz-grant/issues/16).
+   well as support for the Identity Chaining requested token type
+   urn:ietf:params:oauth:token-type:id-jag
 
 A.3.3.  IdP Authorization Request (with PKCE)
 
@@ -1142,8 +1163,7 @@ A.3.7.  LLM Agent obtains an Access Token for Enterprise External Tool
      "token_type": "Bearer",
      "access_token": "2YotnFZFEjr1zCsicMWpAA",
      "expires_in": 86400,
-     "scope": "agent.read agent.write",
-     "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
+     "scope": "agent.read agent.write"
    }
 
 A.3.8.  LLM Agent makes an authorized External Tool request
@@ -1174,12 +1194,21 @@ Document History
 
    [[ To be removed from the final specification ]]
 
+   -06
+
+   *  Update change controller for registration requests from IESG to
+      IETF per general IANA suggestion
+
+   *  Fix the two IANA "_** BROKEN REFERENCE **_"s
+
    -05
 
    *  Use audience instead of resource to reference the authorization
       server issuer
 
    *  Add optional resource to indicate the resource server identifier
+
+   *  Added a section on how to advertise support in the IdP metadata
 
    -04
 
