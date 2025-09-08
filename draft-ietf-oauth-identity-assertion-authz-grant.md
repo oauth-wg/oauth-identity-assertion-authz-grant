@@ -3,7 +3,7 @@ title: "Identity Assertion Authorization Grant"
 abbrev: "ID Token Authz Grant"
 category: std
 
-docname: draft-parecki-oauth-identity-assertion-authz-grant-latest
+docname: draft-ietf-oauth-identity-assertion-authz-grant-latest
 submissiontype: IETF
 number:
 date:
@@ -22,8 +22,8 @@ venue:
   type: "Working Group"
   mail: "oauth@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/oauth/"
-  github: "aaronpk/draft-parecki-oauth-identity-assertion-authz-grant"
-  latest: "https://drafts.aaronpk.com/draft-parecki-oauth-identity-assertion-authz-grant/draft-parecki-oauth-identity-assertion-authz-grant.html"
+  github: "oaouth-wg/oauth-identity-assertion-authz-grant"
+  latest: "https://drafts.oauth.net/oauth-identity-assertion-authz-grant/draft-ietf-oauth-identity-assertion-authz-grant.html"
 
 author:
  -
