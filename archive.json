@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-09T00:42:48.123713+00:00",
+  "timestamp": "2025-09-11T00:02:32.663383+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -906,7 +906,7 @@
       "labels": [],
       "body": "A short lived id-jag token mitigates many threats such as token theft and the need to implement token revocation mechanisms, among others (although other mitigations in place such as client auth)\nShould the security considerations or somewhere in the spec specificy that the token should be short lived? Sorry if this was already present and I missed it, or if it will be present in the pending Refresh token updates.",
       "createdAt": "2025-07-23T18:07:45Z",
-      "updatedAt": "2025-09-09T00:12:41Z",
+      "updatedAt": "2025-09-09T16:58:57Z",
       "closedAt": null,
       "comments": [
         {
@@ -915,6 +915,13 @@
           "body": "This should be covered in https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-05#section-5.5.  Do we need anything specific in this document?",
           "createdAt": "2025-09-09T00:12:40Z",
           "updatedAt": "2025-09-09T00:12:40Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "ID chaining is only mentioned in the introduction so I would probably want that section highlight or added in security concerns. might be too repetitive, but \ud83e\udd37 ",
+          "createdAt": "2025-09-09T16:58:28Z",
+          "updatedAt": "2025-09-09T16:58:57Z"
         }
       ]
     },
@@ -946,9 +953,17 @@
       "labels": [],
       "body": "We currently have the following note about tenants in https://drafts.oauth.net/oauth-identity-assertion-authz-grant/draft-ietf-oauth-identity-assertion-authz-grant.html#section-5.3\n\n> If the IdP is multi-tenant and uses the same issuer for all tenants, the Resource Application will already have IdP-specific logic to determine the tenant from the OpenID Connect ID Token (e.g. a custom hd claim in Google) or SAML assertion, and will need to use that if the IdP also has only one client registration for the Resource Application\n\nWe should consider adopting the `tenant` claim defined in [OpenID Enterprise Extensions](https://openid.net/specs/openid-connect-enterprise-extensions-1_0.html#name-tenant-2) to standardize how the ID-JAG conveys tenant information to a downstream Authorization Server.  This will simplify processing for Resource Application Authorization Servers.\n\n\n",
       "createdAt": "2025-09-08T23:25:28Z",
-      "updatedAt": "2025-09-08T23:25:28Z",
+      "updatedAt": "2025-09-09T14:07:32Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "++1. \nWe should add a claim for conveying tenant or for setting context for the resource AS.",
+          "createdAt": "2025-09-09T14:07:32Z",
+          "updatedAt": "2025-09-09T14:07:32Z"
+        }
+      ]
     },
     {
       "number": 40,
@@ -962,9 +977,17 @@
       "labels": [],
       "body": "The document introduces the term \"Resource App\" which has multiple roles including an Authorization Server role and Protected Resource role.  We should make sure when describing interactions that we clearly identify the OAuth 2.0 roles and are consistent across the document to make sure readers who are familiar with OAuth 2.0 and the many extensions can quickly understand the interactions and minimize use of new terms where possible.",
       "createdAt": "2025-09-08T23:34:45Z",
-      "updatedAt": "2025-09-08T23:34:45Z",
+      "updatedAt": "2025-09-09T14:11:20Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "In addition, we should clearly state any additional metadata that can indicate support for id-jag->access-token exchange in both Authorization Server metadata and Protected Resource metadata on the Resource side.",
+          "createdAt": "2025-09-09T14:11:20Z",
+          "updatedAt": "2025-09-09T14:11:20Z"
+        }
+      ]
     },
     {
       "number": 41,
@@ -978,7 +1001,94 @@
       "labels": [],
       "body": "Document could do a better job of making it clear the delta between an ID-JAG and vanilla JWT Assertion Grant.  It should be clear to a reader that ID-JAG is profiling an JWT Assertion Grant and defining claims and processing instructions for cross-domain access that uses the IdP as the issuer.",
       "createdAt": "2025-09-08T23:40:00Z",
-      "updatedAt": "2025-09-08T23:40:00Z",
+      "updatedAt": "2025-09-09T14:12:11Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "++1.",
+          "createdAt": "2025-09-09T14:12:11Z",
+          "updatedAt": "2025-09-09T14:12:11Z"
+        }
+      ]
+    },
+    {
+      "number": 43,
+      "id": "I_kwDOKv5r-s7KlAHE",
+      "title": "Include more examples of claims in the id-jag",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/43",
+      "state": "OPEN",
+      "author": "meghnadubey",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Can we include more examples of claims in the id-jag for common but more advanced cases, like multiple resources and scopes for them, even though it conforms to existing standards. Since, this is a new spec, I think documenting use cases will help widen the possibilities for id-jag and convey the effectiveness of id-jag token-exchange.",
+      "createdAt": "2025-09-09T14:18:04Z",
+      "updatedAt": "2025-09-09T14:18:04Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 44,
+      "id": "I_kwDOKv5r-s7Km-R9",
+      "title": "SAML support is overly vague",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/44",
+      "state": "OPEN",
+      "author": "sdesen",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "SAML implementations should include security best practices due to variable nature of NameID\n[Refresh tokens](https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/35) are related because SAML assertions are more short lived than id_tokens, commonly, causing the client to execute all id-jag requests within its lifetime.\nAdditionally it should be clear SAML can only be support for requesting apps, as the resource apps must implement Oauth (maybe that is overly obvious, though)",
+      "createdAt": "2025-09-09T16:55:09Z",
+      "updatedAt": "2025-09-09T16:55:09Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 45,
+      "id": "I_kwDOKv5r-s7KogEj",
+      "title": "Clarify that IdP client can be mapped via ID-JAG to AS specific client",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/45",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The document doesn't make clear than the IdP can map requesting client for the Token Exchange at the IdP to a different client that is specific to the Resource App's Authorization Server in the issue ID-JAG.  \n\nIt might also make sense to flow the original client as an actor claim\n\n```\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"U019488227\",\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"client1234@acme.chat.example\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"scope\": \"chat.read chat.history\",\n  \"act\":\n     {\n       \"iss\":  \"https://acme.idp.example\"\n       \"client_id\": \"f53f191f9311af35\"\n     }\n}\n```",
+      "createdAt": "2025-09-09T19:07:23Z",
+      "updatedAt": "2025-09-10T20:42:40Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "I very much agree the document doesn't make this clear. But it also is not opinionated on how the Idp implements this mapping.\n\nWhat value does the resource authz server get from this information in ID-JAG:\n```\n\"act\":\n     {\n       \"iss\":  \"https://acme.idp.example\"\n       \"client_id\": \"f53f191f9311af35\"\n     }\n```\nthat maybe the [potential](https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/39) `tenant` claim would not provide ",
+          "createdAt": "2025-09-10T20:32:11Z",
+          "updatedAt": "2025-09-10T20:32:11Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "The one use case I can think of is if the IdP starts supporting client metadata(client id through client metadata), which makes client registration at resource server redundant. The clientId in IdP system probably cannot convey any other info since it is internal to the IdP, and is redundant otherwise.",
+          "createdAt": "2025-09-10T20:42:40Z",
+          "updatedAt": "2025-09-10T20:42:40Z"
+        }
+      ]
+    },
+    {
+      "number": 46,
+      "id": "I_kwDOKv5r-s7K1ejk",
+      "title": "Add metadata recommendation and example for protected resource",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/46",
+      "state": "OPEN",
+      "author": "meghnadubey",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "We should add protected resource metadata recommendation and examples/best practices for resource servers.\nAnd particularly emphasize the value of up-to-date `scopes_supported` object in the `.well-known/oauth-protected-resource` response. This can then power the discovery of scopes for IdPs and requesting parties implementing `id-jag`.",
+      "createdAt": "2025-09-10T15:58:00Z",
+      "updatedAt": "2025-09-10T15:59:08Z",
       "closedAt": null,
       "comments": []
     }
