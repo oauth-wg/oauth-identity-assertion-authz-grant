@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-11T00:02:32.663383+00:00",
+  "timestamp": "2025-09-14T00:02:41.315033+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1057,7 +1057,7 @@
       "labels": [],
       "body": "The document doesn't make clear than the IdP can map requesting client for the Token Exchange at the IdP to a different client that is specific to the Resource App's Authorization Server in the issue ID-JAG.  \n\nIt might also make sense to flow the original client as an actor claim\n\n```\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"U019488227\",\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"client1234@acme.chat.example\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"scope\": \"chat.read chat.history\",\n  \"act\":\n     {\n       \"iss\":  \"https://acme.idp.example\"\n       \"client_id\": \"f53f191f9311af35\"\n     }\n}\n```",
       "createdAt": "2025-09-09T19:07:23Z",
-      "updatedAt": "2025-09-10T20:42:40Z",
+      "updatedAt": "2025-09-12T17:57:47Z",
       "closedAt": null,
       "comments": [
         {
@@ -1073,6 +1073,20 @@
           "body": "The one use case I can think of is if the IdP starts supporting client metadata(client id through client metadata), which makes client registration at resource server redundant. The clientId in IdP system probably cannot convey any other info since it is internal to the IdP, and is redundant otherwise.",
           "createdAt": "2025-09-10T20:42:40Z",
           "updatedAt": "2025-09-10T20:42:40Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "This spec needs to exist on its own and not depend on [OAuth Client ID Metadata Document (CIMD)](https://www.ietf.org/archive/id/draft-parecki-oauth-client-id-metadata-document-03.html) .  Since existing deployments don't support CIMD there will be a need for a client to be pre-registered in both the IdP and the Resource App's Authorization Server.  They will most likely have different client identifiers.  I think at a minimum we need to have a callout in security considerations  as the Resource App may want to implement security controls to restrict what clients the IdP can issue ID-JAGs for.  The IDP can assert any client it wants in the ID-JAG which isn't great.  \n\nThe `act` chain claim is valuable for audibility and fine-grained access in the Resource App.  There may be one-to-many relationship between IdP client and Resource App clients. The same Resource App client could use both ID-JAG or classic authorization code grant.   It would be beneficial when correlating security logs across your SaaS apps to know the original actor.  The Resource App could also choose to support FGA where it wants to restrict access based on the original actor and not just the client.  These are are optional but wanted to create a discussion.",
+          "createdAt": "2025-09-12T03:13:36Z",
+          "updatedAt": "2025-09-12T03:13:36Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": ">  I think at a minimum we need to have a callout in security considerations as the Resource App may want to implement security controls to restrict what clients the IdP can issue ID-JAGs for. \n\nYeah, I can see the value of this.\n",
+          "createdAt": "2025-09-12T17:57:29Z",
+          "updatedAt": "2025-09-12T17:57:47Z"
         }
       ]
     },
