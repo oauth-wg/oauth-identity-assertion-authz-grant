@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 12 March 2026                                       Independent
+Expires: 24 March 2026                                       Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                        8 September 2025
+                                                       20 September 2025
 
 
                  Identity Assertion Authorization Grant
@@ -38,7 +38,7 @@ About This Document
    Subscribe at https://www.ietf.org/mailman/listinfo/oauth/.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/oaouth-wg/oauth-identity-assertion-authz-grant.
+   https://github.com/oauth-wg/oauth-identity-assertion-authz-grant.
 
 Status of This Memo
 
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 March 2026.
+   This Internet-Draft will expire on 24 March 2026.
 
 Copyright Notice
 
@@ -673,9 +673,9 @@ Cache-Control: no-store
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
               M. J., and B. Campbell, "OAuth Identity and Authorization
               Chaining Across Domains", Work in Progress, Internet-
-              Draft, draft-ietf-oauth-identity-chaining-05, 3 July 2025,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              identity-chaining-05>.
+              Draft, draft-ietf-oauth-identity-chaining-06, 12 September
+              2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              oauth-identity-chaining-06>.
 
    [IANA.jwt] IANA, "JSON Web Token (JWT)",
               <https://www.iana.org/assignments/jwt>.
