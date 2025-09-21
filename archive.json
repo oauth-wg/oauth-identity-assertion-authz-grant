@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-18T00:02:31.281859+00:00",
+  "timestamp": "2025-09-21T00:03:03.293252+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1103,6 +1103,22 @@
       "body": "We should add protected resource metadata recommendation and examples/best practices for resource servers.\nAnd particularly emphasize the value of up-to-date `scopes_supported` object in the `.well-known/oauth-protected-resource` response. This can then power the discovery of scopes for IdPs and requesting parties implementing `id-jag`.",
       "createdAt": "2025-09-10T15:58:00Z",
       "updatedAt": "2025-09-10T15:59:08Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 48,
+      "id": "I_kwDOKv5r-s7MkGrV",
+      "title": "The spec states that `refresh_token` SHOULD NOT be used",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/48",
+      "state": "OPEN",
+      "author": "meghnadubey",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The spec currently states that, `refresh_token` SHOULD NOT be used. I also saw that there is an old closed issue with the comment:\n> Instead we'll recommend using the refresh token to get a new ID token.\n\nIs that decision final, because I do have some security concerns with using `refresh_token` for an `id-jag` and it also seems to be discouraged by RFC 8693, that states:\n> A refresh token will typically not be issued when the exchange is of one temporary credential (the subject_token) for a different temporary credential (the issued token) for use in some other context.\n\n",
+      "createdAt": "2025-09-18T21:29:23Z",
+      "updatedAt": "2025-09-18T21:29:23Z",
       "closedAt": null,
       "comments": []
     }
