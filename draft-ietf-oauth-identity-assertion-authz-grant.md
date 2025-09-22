@@ -171,7 +171,7 @@ Note: The Enterprise IdP may enforce security controls such as multi-factor auth
     grant_type=authorization_code
     &code=.....
 
-    HTTP/1.1 200 Ok
+    HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
@@ -433,7 +433,7 @@ This specification is intended for cross-domain uses where the Client, Resource 
 
 ## Media Types
 
-This section registers `oauth-id-jag+jwt`, a new media type {{RFC2046}} in the "Media Types" registry {{IANA.media-types}} in the manner described in {{RFC6838}}. It can be used to indicate that the content is a Identity Assertion Authorization Grant JWT.
+This section registers `oauth-id-jag+jwt`, a new media type {{RFC2046}} in the "Media Types" registry {{IANA.media-types}} in the manner described in {{RFC6838}}. It can be used to indicate that the content is an Identity Assertion Authorization Grant JWT.
 
 
 ## OAuth URI Registration
@@ -441,7 +441,7 @@ This section registers `oauth-id-jag+jwt`, a new media type {{RFC2046}} in the "
 This section registers `urn:ietf:params:oauth:token-type:id-jag` in the "OAuth URI" subregistry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
 
 * URN: urn:ietf:params:oauth:token-type:id-jag
-* Common Name: Token type URI for a Identity Assertion JWT Authorization Grant
+* Common Name: Token type URI for an Identity Assertion JWT Authorization Grant
 * Change Controller: IETF
 * Specification Document: This document
 
@@ -466,7 +466,7 @@ This section registers `resource` in the "JSON Web Token Claims" subregistry of 
 
 Enterprises often have hundreds of SaaS applications.  SaaS applications often have integrations to other SaaS applications that are critical to the application experience and jobs to be done.  When a SaaS app needs to request an access token on behalf of a user to a 3rd party SaaS integration's API, the end-user typically needs to complete an interactive delegated OAuth 2.0 flow, as the SaaS application is not in the same security or policy domain as the 3rd party SaaS integration.
 
-It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilites for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.
+It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilities for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.
 
 This specification can be used to extend the SSO relationship of multiple SaaS applications to include API access between these applications as well. This specification enables federation for Authorization Servers across policy or administrative boundaries. The same enterprise IdP that is trusted by applications for SSO can be extended to broker access to APIs.  This enables the enterprise to centralize more access decisions across their SaaS ecosystem and provides better end-user experience for users that need to connect multiple applications via OAuth 2.0.
 
@@ -480,7 +480,7 @@ This specification can be used to extend the SSO relationship of multiple SaaS a
 
 ## Email and Calendaring Applications
 
-Email clients can be used with arbitrary email servers, and cannot require pre-established relationships between each email client and each email server. When an email client uses OAuth to obtain an access token to an email server, this provides the security benefit of being able to use strong multi-factor authentication methods provided by the email server's authorization server, but does require that the user go through a web-based flow to log in to the email client. However, this web-based flow is often seen as distruptive to the user experience when initiated from a desktop or mobile native application, and so is often attempted to be minimized as much as possible.
+Email clients can be used with arbitrary email servers, and cannot require pre-established relationships between each email client and each email server. When an email client uses OAuth to obtain an access token to an email server, this provides the security benefit of being able to use strong multi-factor authentication methods provided by the email server's authorization server, but does require that the user go through a web-based flow to log in to the email client. However, this web-based flow is often seen as disruptive to the user experience when initiated from a desktop or mobile native application, and so is often attempted to be minimized as much as possible.
 
 When the email client needs access to a separate API, such as a third-party calendaring application, traditionally this would require that the email client go through another web-based OAuth redirect flow to obtain authorization and ultimately an access token.
 
@@ -506,7 +506,7 @@ AI agents, including those based on large language models (LLMs), are designed t
 
 ### LLM Agent establishes a User Identity with Enterprise IdP
 
-LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured `issuer` that was previously establshed.
+LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured `issuer` that was previously established.
 
 > Note: IdP discovery where an agent discovers which IdP the agent should use to authenticate a given user is out of scope of this specification.
 
@@ -571,7 +571,7 @@ LLM Agent exchanges the `code` and PKCE `code_verifier` to obtain an ID Token an
     &client_id=com.example.ai-agent
     &code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 
-    HTTP/1.1 200 Ok
+    HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
@@ -617,7 +617,7 @@ LLM Agent fetches the external tool resource's OAuth 2.0 Protected Resource Meta
     Host: saas.example.net
     Accept: application/json
 
-    HTTP/1.1 200 Ok
+    HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
@@ -660,7 +660,7 @@ LLM Agent discovers the Authorization Server configuration per {{RFC8414}}
       ...
     }
 
-LLM Agent has learned all necessary endpoints and supported capabilites to obtain an access token for the external tool.
+LLM Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.
 
 If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard `authorization_code` from the SaaS Application's Authorization Server
 
