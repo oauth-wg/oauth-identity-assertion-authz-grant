@@ -712,7 +712,7 @@ Identity Assertion Authorization Grant JWT claims:
       "sub": "1llb-b4c0-0000-8000-t800b4ck0000",
       "aud": "https://authorization-server.saas.com",
       "resource": "https://saas.example.net/",
-      "client_id": "com.example.ai-agent",
+      "client_id": "4960880b83dc9",
       "exp": 1984445160,
       "iat": 1984445100,
       "scope": "agent.read agent.write"
@@ -768,7 +768,7 @@ LLM Agent tool calls an external tool provided by the Enterprise SaaS Applicatio
 # Acknowledgments
 {:numbered="false"}
 
-The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Pieter Kasselman, Kai Lehmann, Dean H. Saxe, Filip Skokan.
+The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Kai Lehmann, Dean H. Saxe, Filip Skokan, Phil Whipps.
 
 # Document History
 {:numbered="false"}
