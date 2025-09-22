@@ -1054,7 +1054,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Parecki, et al.</td>
-<td class="center">Expires 24 March 2026</td>
+<td class="center">Expires 26 March 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,12 +1067,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-oauth-identity-assertion-authz-grant-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-20" class="published">20 September 2025</time>
+<time datetime="2025-09-22" class="published">22 September 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-03-24">24 March 2026</time></dd>
+<dd class="expires"><time datetime="2026-03-26">26 March 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1130,7 +1130,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 24 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 26 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1490,7 +1490,7 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=authorization_code
 &amp;code=.....
 
-HTTP/1.1 200 Ok
+HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -1898,7 +1898,7 @@ Cache-Control: no-store
         <h3 id="name-media-types">
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-media-types" class="section-name selfRef">Media Types</a>
         </h3>
-<p id="section-9.1-1">This section registers <code>oauth-id-jag+jwt</code>, a new media type <span>[<a href="#RFC2046" class="cite xref">RFC2046</a>]</span> in the "Media Types" registry <span>[<a href="#IANA.media-types" class="cite xref">IANA.media-types</a>]</span> in the manner described in <span>[<a href="#RFC6838" class="cite xref">RFC6838</a>]</span>. It can be used to indicate that the content is a Identity Assertion Authorization Grant JWT.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-1">This section registers <code>oauth-id-jag+jwt</code>, a new media type <span>[<a href="#RFC2046" class="cite xref">RFC2046</a>]</span> in the "Media Types" registry <span>[<a href="#IANA.media-types" class="cite xref">IANA.media-types</a>]</span> in the manner described in <span>[<a href="#RFC6838" class="cite xref">RFC6838</a>]</span>. It can be used to indicate that the content is an Identity Assertion Authorization Grant JWT.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="oauth-uri-registration">
@@ -1912,7 +1912,7 @@ Cache-Control: no-store
             <p id="section-9.2-2.1.1">URN: urn:ietf:params:oauth:token-type:id-jag<a href="#section-9.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-9.2-2.2">
-            <p id="section-9.2-2.2.1">Common Name: Token type URI for a Identity Assertion JWT Authorization Grant<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-9.2-2.2.1">Common Name: Token type URI for an Identity Assertion JWT Authorization Grant<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-9.2-2.3">
             <p id="section-9.2-2.3.1">Change Controller: IETF<a href="#section-9.2-2.3.1" class="pilcrow">¶</a></p>
@@ -2055,7 +2055,7 @@ Cache-Control: no-store
 <a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-enterprise-deployment" class="section-name selfRef">Enterprise Deployment</a>
         </h3>
 <p id="appendix-A.1-1">Enterprises often have hundreds of SaaS applications.  SaaS applications often have integrations to other SaaS applications that are critical to the application experience and jobs to be done.  When a SaaS app needs to request an access token on behalf of a user to a 3rd party SaaS integration's API, the end-user typically needs to complete an interactive delegated OAuth 2.0 flow, as the SaaS application is not in the same security or policy domain as the 3rd party SaaS integration.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-2">It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilites for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-2">It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilities for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
 <p id="appendix-A.1-3">This specification can be used to extend the SSO relationship of multiple SaaS applications to include API access between these applications as well. This specification enables federation for Authorization Servers across policy or administrative boundaries. The same enterprise IdP that is trusted by applications for SSO can be extended to broker access to APIs.  This enables the enterprise to centralize more access decisions across their SaaS ecosystem and provides better end-user experience for users that need to connect multiple applications via OAuth 2.0.<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
 <div id="preconditions">
 <section id="appendix-A.1.1">
@@ -2088,7 +2088,7 @@ Cache-Control: no-store
         <h3 id="name-email-and-calendaring-appli">
 <a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-email-and-calendaring-appli" class="section-name selfRef">Email and Calendaring Applications</a>
         </h3>
-<p id="appendix-A.2-1">Email clients can be used with arbitrary email servers, and cannot require pre-established relationships between each email client and each email server. When an email client uses OAuth to obtain an access token to an email server, this provides the security benefit of being able to use strong multi-factor authentication methods provided by the email server's authorization server, but does require that the user go through a web-based flow to log in to the email client. However, this web-based flow is often seen as distruptive to the user experience when initiated from a desktop or mobile native application, and so is often attempted to be minimized as much as possible.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-1">Email clients can be used with arbitrary email servers, and cannot require pre-established relationships between each email client and each email server. When an email client uses OAuth to obtain an access token to an email server, this provides the security benefit of being able to use strong multi-factor authentication methods provided by the email server's authorization server, but does require that the user go through a web-based flow to log in to the email client. However, this web-based flow is often seen as disruptive to the user experience when initiated from a desktop or mobile native application, and so is often attempted to be minimized as much as possible.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
 <p id="appendix-A.2-2">When the email client needs access to a separate API, such as a third-party calendaring application, traditionally this would require that the email client go through another web-based OAuth redirect flow to obtain authorization and ultimately an access token.<a href="#appendix-A.2-2" class="pilcrow">¶</a></p>
 <p id="appendix-A.2-3">To streamline the user experience, this specification can be used to enable the email client to use the identity assertion to obtain an access token for the third-party calendaring application without any user interaction.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
 <div id="preconditions-1">
@@ -2146,7 +2146,7 @@ Cache-Control: no-store
           <h4 id="name-llm-agent-establishes-a-use">
 <a href="#appendix-A.3.2" class="section-number selfRef">A.3.2. </a><a href="#name-llm-agent-establishes-a-use" class="section-name selfRef">LLM Agent establishes a User Identity with Enterprise IdP</a>
           </h4>
-<p id="appendix-A.3.2-1">LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured <code>issuer</code> that was previously establshed.<a href="#appendix-A.3.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.2-1">LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured <code>issuer</code> that was previously established.<a href="#appendix-A.3.2-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-A.3.2-2.1">
               <p id="appendix-A.3.2-2.1.1">Note: IdP discovery where an agent discovers which IdP the agent should use to authenticate a given user is out of scope of this specification.<a href="#appendix-A.3.2-2.1.1" class="pilcrow">¶</a></p>
@@ -2230,7 +2230,7 @@ grant_type=authorization_code
 &amp;client_id=com.example.ai-agent
 &amp;code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 
-HTTP/1.1 200 Ok
+HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -2289,7 +2289,7 @@ GET /.well-known/oauth-protected-resource
 Host: saas.example.net
 Accept: application/json
 
-HTTP/1.1 200 Ok
+HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
@@ -2335,7 +2335,7 @@ Content-Type: application/json
 }
 </pre><a href="#appendix-A.3.5-7" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.5-8">LLM Agent has learned all necessary endpoints and supported capabilites to obtain an access token for the external tool.<a href="#appendix-A.3.5-8" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.5-8">LLM Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.<a href="#appendix-A.3.5-8" class="pilcrow">¶</a></p>
 <p id="appendix-A.3.5-9">If the <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard <code>authorization_code</code> from the SaaS Application's Authorization Server<a href="#appendix-A.3.5-9" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-A.3.5-10.1">

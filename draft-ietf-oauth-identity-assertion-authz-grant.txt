@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 24 March 2026                                       Independent
+Expires: 26 March 2026                                       Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                       20 September 2025
+                                                       22 September 2025
 
 
                  Identity Assertion Authorization Grant
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 March 2026.
+   This Internet-Draft will expire on 26 March 2026.
 
 Copyright Notice
 
@@ -299,7 +299,7 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid&cli
    grant_type=authorization_code
    &code=.....
 
-   HTTP/1.1 200 Ok
+   HTTP/1.1 200 OK
    Content-Type: application/json
 
    {
@@ -634,7 +634,7 @@ Cache-Control: no-store
    This section registers oauth-id-jag+jwt, a new media type [RFC2046]
    in the "Media Types" registry [IANA.media-types] in the manner
    described in [RFC6838].  It can be used to indicate that the content
-   is a Identity Assertion Authorization Grant JWT.
+   is an Identity Assertion Authorization Grant JWT.
 
 9.2.  OAuth URI Registration
 
@@ -644,7 +644,7 @@ Cache-Control: no-store
 
    *  URN: urn:ietf:params:oauth:token-type:id-jag
 
-   *  Common Name: Token type URI for a Identity Assertion JWT
+   *  Common Name: Token type URI for an Identity Assertion JWT
       Authorization Grant
 
    *  Change Controller: IETF
@@ -771,7 +771,7 @@ A.1.  Enterprise Deployment
 
    It is industry best practice for an enterprise to connect their
    ecosystem of SaaS applications to their Identity Provider (IdP) to
-   centralize identity and access management capabilites for the
+   centralize identity and access management capabilities for the
    organization.  End-users get a better experience (SSO) and
    administrators get better security outcomes such multi-factor
    authentication and zero-trust.  SaaS applications today enable the
@@ -814,7 +814,7 @@ A.2.  Email and Calendaring Applications
    of being able to use strong multi-factor authentication methods
    provided by the email server's authorization server, but does require
    that the user go through a web-based flow to log in to the email
-   client.  However, this web-based flow is often seen as distruptive to
+   client.  However, this web-based flow is often seen as disruptive to
    the user experience when initiated from a desktop or mobile native
    application, and so is often attempted to be minimized as much as
    possible.
@@ -876,7 +876,7 @@ A.3.2.  LLM Agent establishes a User Identity with Enterprise IdP
 
    LLM Agent discovers the Enterprise IdP's OpenID Connect Provider
    configuration based on a configured issuer that was previously
-   establshed.
+   established.
 
       Note: IdP discovery where an agent discovers which IdP the agent
       should use to authenticate a given user is out of scope of this
@@ -951,7 +951,7 @@ https://ai-agent.example.com/oauth2/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=x
    &client_id=com.example.ai-agent
    &code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 
-   HTTP/1.1 200 Ok
+   HTTP/1.1 200 OK
    Content-Type: application/json
 
    {
@@ -1003,7 +1003,7 @@ A.3.5.  LLM Agent calls Enterprise External Tool
    Host: saas.example.net
    Accept: application/json
 
-   HTTP/1.1 200 Ok
+   HTTP/1.1 200 OK
    Content-Type: application/json
 
    {
@@ -1048,7 +1048,7 @@ Content-Type: application/json
 }
 
    LLM Agent has learned all necessary endpoints and supported
-   capabilites to obtain an access token for the external tool.
+   capabilities to obtain an access token for the external tool.
 
    If the urn:ietf:params:oauth:grant-type:jwt-bearer grant type is
    supported the LLM can first attempt to silently obtain an access
