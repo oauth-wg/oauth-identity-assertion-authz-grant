@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-21T00:03:03.293252+00:00",
+  "timestamp": "2025-09-23T00:02:19.368260+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1759,26 +1759,42 @@
       "id": "PR_kwDOKv5r-s6oxq70",
       "title": "Wrong Git Link and Typos",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/47",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "WhippsP",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Updates to point to correct GIT URL and updated some typos.",
       "createdAt": "2025-09-16T06:10:15Z",
-      "updatedAt": "2025-09-16T06:10:15Z",
+      "updatedAt": "2025-09-22T21:42:48Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "52f8cb056d43fe732fadec55ad578685885fe504",
       "headRepository": "WhippsP/oauth-identity-assertion-authz-grant",
       "headRefName": "main",
       "headRefOid": "c7004f79eb76e84b4f54a73fc25bf04be7527293",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-09-22T21:42:48Z",
+      "mergedAt": "2025-09-22T21:42:48Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "600bba0cdd30d88e22ba8abd8727e1269d9c98e0"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7CB5l4",
+          "commit": {
+            "abbreviatedOid": "c7004f7"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-22T21:40:36Z",
+          "updatedAt": "2025-09-22T21:40:36Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
