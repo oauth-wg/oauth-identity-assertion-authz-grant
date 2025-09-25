@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-23T00:02:19.368260+00:00",
+  "timestamp": "2025-09-25T00:03:26.678124+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1057,7 +1057,7 @@
       "labels": [],
       "body": "The document doesn't make clear than the IdP can map requesting client for the Token Exchange at the IdP to a different client that is specific to the Resource App's Authorization Server in the issue ID-JAG.  \n\nIt might also make sense to flow the original client as an actor claim\n\n```\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"U019488227\",\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"client1234@acme.chat.example\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"scope\": \"chat.read chat.history\",\n  \"act\":\n     {\n       \"iss\":  \"https://acme.idp.example\"\n       \"client_id\": \"f53f191f9311af35\"\n     }\n}\n```",
       "createdAt": "2025-09-09T19:07:23Z",
-      "updatedAt": "2025-09-12T17:57:47Z",
+      "updatedAt": "2025-09-24T16:38:18Z",
       "closedAt": null,
       "comments": [
         {
@@ -1087,6 +1087,13 @@
           "body": ">  I think at a minimum we need to have a callout in security considerations as the Resource App may want to implement security controls to restrict what clients the IdP can issue ID-JAGs for. \n\nYeah, I can see the value of this.\n",
           "createdAt": "2025-09-12T17:57:29Z",
           "updatedAt": "2025-09-12T17:57:47Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "From mailing list\n\n> Thanks for clarifying! I would be good to add this to 5.1 to make it easier to follow.\n\n> The Resource App will only ever know about one client_id for the Requesting App, the one that was registered at the Resourced App's AS. It's the IdP that needs to be aware of both client_ids. The IdP has a registered client representing its SSO relationship to the Requesting App, and the IdP also needs to know the client_id that the Requesting App uses when talking to the Resource App.",
+          "createdAt": "2025-09-24T16:38:18Z",
+          "updatedAt": "2025-09-24T16:38:18Z"
         }
       ]
     },
@@ -1118,9 +1125,24 @@
       "labels": [],
       "body": "The spec currently states that, `refresh_token` SHOULD NOT be used. I also saw that there is an old closed issue with the comment:\n> Instead we'll recommend using the refresh token to get a new ID token.\n\nIs that decision final, because I do have some security concerns with using `refresh_token` for an `id-jag` and it also seems to be discouraged by RFC 8693, that states:\n> A refresh token will typically not be issued when the exchange is of one temporary credential (the subject_token) for a different temporary credential (the issued token) for use in some other context.\n\n",
       "createdAt": "2025-09-18T21:29:23Z",
-      "updatedAt": "2025-09-18T21:29:23Z",
+      "updatedAt": "2025-09-24T17:02:56Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Unfortunately there isn't a great solution for RPs that use SAML for SSO and don't want to migrate over to OIDC (aka that majority of SaaS live today).  They won't be able to obtain new ID-JAGs once the SSO assertion lifetime expires and would need to redirect back on front channel to IdP to get a new SAML Assertion.   Its unclear if this be acceptable from a user experience perspective which is why recommendation is currently `SHOULD NOT`.   ",
+          "createdAt": "2025-09-24T16:42:54Z",
+          "updatedAt": "2025-09-24T16:42:54Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "Thank you for providing the background for that decision. That makes sense. ",
+          "createdAt": "2025-09-24T17:02:56Z",
+          "updatedAt": "2025-09-24T17:02:56Z"
+        }
+      ]
     }
   ],
   "pulls": [
