@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-25T00:03:26.678124+00:00",
+  "timestamp": "2025-10-02T00:02:23.912051+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -890,9 +890,17 @@
       "labels": [],
       "body": "```\n[8.1. ](https://datatracker.ietf.org/doc/html/draft-parecki-oauth-identity-assertion-authz-grant-05#section-8.1)[Client Authentication](https://datatracker.ietf.org/doc/html/draft-parecki-oauth-identity-assertion-authz-grant-05#name-client-authentication)\nThis specification SHOULD only be supported for confidential clients. Public clients SHOULD redirect the user with an OAuth 2.0 Authorization Request.\n```\n\nWhy SHOULD and not MUST?",
       "createdAt": "2025-07-22T17:28:23Z",
-      "updatedAt": "2025-07-22T17:28:23Z",
+      "updatedAt": "2025-10-01T21:22:57Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Should we consider adding support for ID-JAG as a `response_type` for an authorization request? This would enable public clients to obtain an ID-JAG without needing token exchange.  The constraint around confidential client IIRC was to ensure only the client that was the audience of the `id_token` is the presenter of the assertion in the token exchange request.  \n\nI see value unbundling ID-JAG from token exchange to help standardize ID-JAG as a cross-domain identity assertion so that id_tokens are not used from cross-domain use cases.  \n\nAdditionally there is a draft for [OpenID Connect Key Binding](https://dickhardt.github.io/openid-key-binding/main.html) that would allow us to drop requirement of a confidential client as the client could use DPOP when presenting the id_token instead of client authentication.",
+          "createdAt": "2025-10-01T21:22:57Z",
+          "updatedAt": "2025-10-01T21:22:57Z"
+        }
+      ]
     },
     {
       "number": 37,
@@ -953,7 +961,7 @@
       "labels": [],
       "body": "We currently have the following note about tenants in https://drafts.oauth.net/oauth-identity-assertion-authz-grant/draft-ietf-oauth-identity-assertion-authz-grant.html#section-5.3\n\n> If the IdP is multi-tenant and uses the same issuer for all tenants, the Resource Application will already have IdP-specific logic to determine the tenant from the OpenID Connect ID Token (e.g. a custom hd claim in Google) or SAML assertion, and will need to use that if the IdP also has only one client registration for the Resource Application\n\nWe should consider adopting the `tenant` claim defined in [OpenID Enterprise Extensions](https://openid.net/specs/openid-connect-enterprise-extensions-1_0.html#name-tenant-2) to standardize how the ID-JAG conveys tenant information to a downstream Authorization Server.  This will simplify processing for Resource Application Authorization Servers.\n\n\n",
       "createdAt": "2025-09-08T23:25:28Z",
-      "updatedAt": "2025-09-09T14:07:32Z",
+      "updatedAt": "2025-09-30T15:12:07Z",
       "closedAt": null,
       "comments": [
         {
@@ -962,6 +970,27 @@
           "body": "++1. \nWe should add a claim for conveying tenant or for setting context for the resource AS.",
           "createdAt": "2025-09-09T14:07:32Z",
           "updatedAt": "2025-09-09T14:07:32Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "Am I correct that the two valid values of tenant would be `personal` or `organization`",
+          "createdAt": "2025-09-30T14:32:33Z",
+          "updatedAt": "2025-09-30T14:32:33Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "or a tenant identifier. those are well known values.  ",
+          "createdAt": "2025-09-30T14:35:51Z",
+          "updatedAt": "2025-09-30T14:35:51Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "`tenant id` is the interesting one, since it will convey specific context.",
+          "createdAt": "2025-09-30T15:12:07Z",
+          "updatedAt": "2025-09-30T15:12:07Z"
         }
       ]
     },
@@ -1762,7 +1791,7 @@
       "labels": [],
       "body": "Make clear that public clients need to fallback to existing authorization code flow to Resource App to obtain user consent interactively",
       "createdAt": "2025-09-09T00:01:32Z",
-      "updatedAt": "2025-09-09T00:01:32Z",
+      "updatedAt": "2025-10-01T21:24:37Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "52f8cb056d43fe732fadec55ad578685885fe504",
@@ -1773,7 +1802,22 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "Does this mean public clients should obtain user consent via authz_code, and then subsequently pickup this flow and make a call to the IdP? Wouldn't the authz_code flow already provide a token?",
+          "createdAt": "2025-10-01T18:30:27Z",
+          "updatedAt": "2025-10-01T18:30:27Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "This was response to mailing list feedback \r\n\r\n> > 8.1 Client Authentication\r\n> > This specification SHOULD only be supported for confidential clients. Public clients SHOULD redirect the user with an OAuth 2.0 Authorization Request.\r\n> \r\n> Which AS are the public clients redirecting the user? How would this work? If this works, then why are needing this specification?\r\n\r\nMy attempt with the PR was to help reader understand that public client can't currently use token exchange to obtain an ID-JAG and must fall back to what they do today and redirect user to the Resource App AS to get an authorization code.  \r\n\r\nRelated is #36   ",
+          "createdAt": "2025-10-01T21:22:30Z",
+          "updatedAt": "2025-10-01T21:24:37Z"
+        }
+      ],
       "reviews": []
     },
     {
