@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-02T00:02:23.912051+00:00",
+  "timestamp": "2025-10-05T00:03:27.688238+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1172,6 +1172,22 @@
           "updatedAt": "2025-09-24T17:02:56Z"
         }
       ]
+    },
+    {
+      "number": 49,
+      "id": "I_kwDOKv5r-s7PgmaL",
+      "title": "Add scope to 6.1 processing rules",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/49",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-00.html#section-6.1\n",
+      "createdAt": "2025-10-03T14:54:11Z",
+      "updatedAt": "2025-10-03T14:54:11Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
