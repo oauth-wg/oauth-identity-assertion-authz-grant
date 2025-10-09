@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-05T00:03:27.688238+00:00",
+  "timestamp": "2025-10-09T00:02:26.657404+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -47,6 +47,16 @@
       "name": "wontfix",
       "description": "This will not be worked on",
       "color": "ffffff"
+    },
+    {
+      "name": "ietf-124",
+      "description": "Publication deadline Oct 20, 2025",
+      "color": "0dd6e5"
+    },
+    {
+      "name": "ietf-125",
+      "description": "",
+      "color": "52f6d3"
     }
   ],
   "issues": [
@@ -671,12 +681,14 @@
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/28",
       "state": "OPEN",
       "author": "mcguinness",
-      "authorAssociation": "CONTRIBUTOR",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-124"
+      ],
       "body": "The spec currently isn't clear how a client should meet proof-of-possesion requirements such as DPOP for an ID-JAG for Resource App's Authorization Server token request or the issued token from a Resource App's Authorization Server for a Resource App's Resource Server\n\nOAuth Identity and Authorization Chaining Across Domains has a section on [Delegated Key Binding](https://drafts.oauth.net/oauth-identity-chaining/draft-ietf-oauth-identity-chaining.html#name-delegated-key-binding)\n\nID Assertions currently don't support proof-of-possesion although some folks [have found workarounds](https://github.com/openpubkey/openpubkey)\n\nSince `actor_token` is not used by this profile, we currently don't flow any `cnf` claims into the ID-JAG.  \n\n- Should the client just send a DPoP proof JWT in a DPoP header when making an access token request to the Resource App's Authorization Server?   \n  - A client is currently free to use a different key with each Resource App Authorization Server as there is not binding back to the ID-JAG\n- Should we also support a DPoP proof with ID-JAG? \n  - A client can pass the proof on the token exchange request and we could flow to the ID-JAG and the Resource App Authorization Server could verify the proof. \n\n\n\nI think it should be possible to bind a ID-JAG to a key\n\n\n",
       "createdAt": "2025-06-27T05:18:48Z",
-      "updatedAt": "2025-07-04T11:33:46Z",
+      "updatedAt": "2025-10-07T21:12:34Z",
       "closedAt": null,
       "comments": [
         {
@@ -688,7 +700,7 @@
         },
         {
           "author": "mcguinness",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "body": "Since the client needs to send the DPoP proof in a header for a token request with sender-constrained ID-JAG for the Resource App's AS, its not clear that the client is also requesting that the issued access token is also sender-constrained.  The DPoP proof is needed to validate the ID-JAG but also indicates desire to key bind the access token with RFC 9449.   \n\nThe simple answer is that if the ID-JAG contains a `cnf` claim then the issued access token is also bound to the same `cnf` when the AS supports issuing sender-constrained access token for the audience.   A client can't use a different key and can't opt-out of sender-constraining an access token for Resource App if they presented a sender-constrained ID-JAG and the Resource App supports sender-constrained access tokens for the Resource Apps' audience.  Thoughts?",
           "createdAt": "2025-07-03T22:08:29Z",
           "updatedAt": "2025-07-03T22:08:29Z"
@@ -842,10 +854,12 @@
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-124"
+      ],
       "body": "There are two places where refresh tokens might come into the picture:\n\n* The Token Exchange request (use an ID Token to get an ID-JAG)\n* The Access Token request (use an ID-JAG to get an access token)\n\nWe should have some guidance or security considerations around the implications of returning refresh tokens for both of these.\n\n## IDP refresh tokens\n\nThe implication of returning a refresh token along with the ID-JAG is that the requesting application could use the refresh token in place of the ID token in future requests. This could allow the IDP to return new ID-JAGs without a new ID token having been requested.\n\n## Resource App refresh tokens\n\nThe resource app could return a refresh token along with the access token. This pattern should be discouraged, as this enables the client to request access tokens in the future which the IDP wouldn't know about.\n",
       "createdAt": "2025-07-18T21:19:21Z",
-      "updatedAt": "2025-07-30T15:52:55Z",
+      "updatedAt": "2025-10-07T22:05:29Z",
       "closedAt": null,
       "comments": [
         {
@@ -857,7 +871,7 @@
         },
         {
           "author": "mcguinness",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "body": "This was resolved in the Identity Chaining Issue https://github.com/oauth-wg/oauth-identity-chaining/pull/151#discussion_r2084222098\n\n1. Client should request `offline_access` scope from IdP and obtain a refresh token\n2. Client should use the IdP refresh token to obtain a new ID Token\n3. Client should use a non-expired ID Token to Token Exchange for an ID-JAG\n4. Client should only obtain an access token from the Resource App Authorization Server. The Resource App AS should never issue a Refresh Token for an ID-JAG\n\nI wanted profiles like ID-JAG to make their own assessment on whether the Resource App AS can issue a Refresh Token (e.g Enterprise has a valid revocation mechanism such as CAEP/SSF) but this was overruled.",
           "createdAt": "2025-07-29T05:07:25Z",
           "updatedAt": "2025-07-29T05:07:25Z"
@@ -1025,12 +1039,14 @@
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/41",
       "state": "OPEN",
       "author": "mcguinness",
-      "authorAssociation": "CONTRIBUTOR",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-124"
+      ],
       "body": "Document could do a better job of making it clear the delta between an ID-JAG and vanilla JWT Assertion Grant.  It should be clear to a reader that ID-JAG is profiling an JWT Assertion Grant and defining claims and processing instructions for cross-domain access that uses the IdP as the issuer.",
       "createdAt": "2025-09-08T23:40:00Z",
-      "updatedAt": "2025-09-09T14:12:11Z",
+      "updatedAt": "2025-10-07T21:23:30Z",
       "closedAt": null,
       "comments": [
         {
