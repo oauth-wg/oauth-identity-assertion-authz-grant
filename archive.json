@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-14T00:02:24.704578+00:00",
+  "timestamp": "2025-10-16T00:02:42.676791+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1198,12 +1198,12 @@
       "labels": [],
       "body": "The spec currently states that, `refresh_token` SHOULD NOT be used. I also saw that there is an old closed issue with the comment:\n> Instead we'll recommend using the refresh token to get a new ID token.\n\nIs that decision final, because I do have some security concerns with using `refresh_token` for an `id-jag` and it also seems to be discouraged by RFC 8693, that states:\n> A refresh token will typically not be issued when the exchange is of one temporary credential (the subject_token) for a different temporary credential (the issued token) for use in some other context.\n\n",
       "createdAt": "2025-09-18T21:29:23Z",
-      "updatedAt": "2025-09-24T17:02:56Z",
+      "updatedAt": "2025-10-14T02:50:58Z",
       "closedAt": null,
       "comments": [
         {
           "author": "mcguinness",
-          "authorAssociation": "CONTRIBUTOR",
+          "authorAssociation": "COLLABORATOR",
           "body": "Unfortunately there isn't a great solution for RPs that use SAML for SSO and don't want to migrate over to OIDC (aka that majority of SaaS live today).  They won't be able to obtain new ID-JAGs once the SSO assertion lifetime expires and would need to redirect back on front channel to IdP to get a new SAML Assertion.   Its unclear if this be acceptable from a user experience perspective which is why recommendation is currently `SHOULD NOT`.   ",
           "createdAt": "2025-09-24T16:42:54Z",
           "updatedAt": "2025-09-24T16:42:54Z"
@@ -1214,6 +1214,13 @@
           "body": "Thank you for providing the background for that decision. That makes sense. ",
           "createdAt": "2025-09-24T17:02:56Z",
           "updatedAt": "2025-09-24T17:02:56Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Should we consider having clients convert a SAML2 assertion to a IdP-specific refresh token with Token Exchange for client deployments that need to obtain new ID-JAGs when a Resource App's access token expires? \n\n```\nPOST /oauth2/token HTTP/1.1\nHost: acme.idp.example\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&subject_token_type=urn:ietf:params:oauth:token-type:saml2\n&subject_token=PHNhbWxwOl...[base64url-encoded SAML2 Assertion]...\n&requested_token_type=urn:ietf:params:oauth:token-type:refresh_token\n&audience=https://acme.idp.example\n&scope=openid%20offline_access\n&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer\n&client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...\n```\n\nThe IdP would need a way to map the SAML2 audience entityID to a OAuth2 client to ensure its the same \"RP\".  This would provide a mechanism to slowly migrate a RP over to OIDC even though the initial SSO was SAML.  SSO/AppAdmins don't need change SSO configuration but instead just link the SAML SP to a OAuth Client. \n\nOnce the client obtains the refresh token they can perform a token request and get a new `id_token` and `access_token`.  This simplifies the story going forward as everything is `id_tokens`.",
+          "createdAt": "2025-10-14T02:50:58Z",
+          "updatedAt": "2025-10-14T02:50:58Z"
         }
       ]
     },
@@ -1245,7 +1252,7 @@
       "labels": [],
       "body": "**Summary**\nThis proposal considers a protocol-level solution for scenarios where a user needs to connect to a specific instance (e.g., tenant, organziation, workspace) of a Resource App, particularly when these multiple instances share a common issuer URL. The goal is to create a mechanism that allows a Requesting App to specify the target instance and ensures this choice is communicated end-to-end, so it can be correctly interpreted by both the IdP and the Resource App's authorization server.\n\n**Problem**\nIn many enterprise environments, a single application may offer multiple distinct instances. For example, consider an observability platform with separate instances for `development` and `production` logs. Often, these instances share a single `audience` (i.e., issuer URL) and `resource` identifier for their APIs. In these cases, access to the Resource App's API is managed by a custom claim injected into the `access_token` after the user authenticates with a specific instance.\n\nThe current Identity Assertion Authorization Grant does not define a standard way for a Requesting App to specify a target instance under these conditions. This ambiguity prevents a seamless user experience, which should ideally mirror selecting an application from an SSO dashboard and being directed to the correct instance.\n\nThis overall challenge can be broken down into two parts:\n\n**1. The Discovery Problem** \nBefore a user can make a choice, the Requesting App must first know what choices are available. How can the Requesting App learn which Resource Apps, and their specific instances, the logged-in user is permitted to connect to?\n\nWhile solving discovery is critical for the end-to-end experience, it is handled separately in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/52. For this issue, we will assume the Requesting App has a method to determine which instance the user wants to access.\n\n**2. The Request Problem** \nThis is the focus of the proposal. Once the user has selected an instance, how does the Requesting App communicate this choice to the IdP? The current protocol lacks a standard parameter to differentiate the target instance when it shares an `audience`/issuer URL with others.\n\n**Proposal**\n**We propose using the `client_id` of the target Resource App instance within the IdP** as the unique identifier. This `client_id` would be included in the initial Token Exchange request and the resulting Identity Assertion (ID-JAG).\n\nRationale:\n- Uniqueness & Existing Trust: Each Resource App instance registered with the IdP for SSO already has a unique `client_id`. This identifier is known and trusted by both the IdP and the Resource App.\n- IdP Policy Enforcement: The IdP can use the provided `client_id` to locate and apply the specific authorization policies associated with that instance.\n- Resource App Tenant Mapping: The Resource App's Authorization Server already relies on this `client_id` for its OIDC federation with the IdP. It can therefore use the `client_id` from the assertion to unambiguously map the request to the correct internal tenant, organization, or workspace.\n",
       "createdAt": "2025-10-10T09:15:21Z",
-      "updatedAt": "2025-10-13T17:16:55Z",
+      "updatedAt": "2025-10-14T20:03:30Z",
       "closedAt": null,
       "comments": [
         {
@@ -1324,6 +1331,41 @@
           "body": "The `sub_client_id` isn't part of the actor chain.  Its just part of a complex subject identifier similar to `iss_sub` or something in https://www.rfc-editor.org/rfc/rfc9493 & https://openid.net/specs/openid-sharedsignals-framework-1_0-ID3.html#section-3.3 and needed to resolve a global subject identifier type such as\n\n```\n  \"sub_id\": {\n    \"format\": \"iss_client_sub\",\n    \"iss\": \"https://issuer.example.com\",\n    \"sub\": \"public_identifier\"\n    \"client_id\": \"123\"\n  }\n```\n\nSince this wasn't a Security Event that can describe multiple types of subjects, my suggestion was just to flatten the complex type as `iss` and `sub` are already required claims with existing semantics. '\n\nThe actor chain and the `client_id` in the ID-JWT should describe who is acting as the user.",
           "createdAt": "2025-10-13T17:16:53Z",
           "updatedAt": "2025-10-13T17:16:53Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "Considering the concept we want to capture (the client_id of the target resource app on the IdP) seems to be very specific to cross-app/domain scenarios, rather than using a more generic term, I I wonder if it would be better to be more specific and name the new param `resoruce_app_client_id`?\n\n",
+          "createdAt": "2025-10-14T16:15:38Z",
+          "updatedAt": "2025-10-14T16:15:38Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "that\u2019s what the `client_id` is. What is unique here is that we need to the SSO client id and not the requesting app client for the resource app which is what folks are used to. It\u2019s tied to the subject and not the requesting app. ",
+          "createdAt": "2025-10-14T16:20:30Z",
+          "updatedAt": "2025-10-14T16:20:30Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "We can add the prefix _resource_app_, to distinguish it from the client_id (tied to the requesting app). I kind of see how it is tied to the sub, but it is less intuitive to understand as a way to point to a specific resoruce app instance.",
+          "createdAt": "2025-10-14T16:39:07Z",
+          "updatedAt": "2025-10-14T16:44:54Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Resource app isn't really an OIDC or OAuth term so I prefer to avoid using that term in claim names.  We are considering revising the document to remove this term as it doesn't appear in any other OIDC or OAuth specs and is a new concept that introduces cognitive complexity to the reader who is coming from either OIDC or OAuth.  Resource app is just a relying party that has an OAuth Client for SSO with an OpenID Provider and also provides an Authorization Server for its protected resources and is in a different trust domain than the client. \n\nWe are basically trying to find a workaround for a tenant identifier for the audience (`aud_tenant`) of the ID-JAG.  Using the client identifier for the RP that was used to account link the subject in the ID Token is a proxy for the `aud_tenant` to enable account resolution.  Since its a proxy, its not perfect for all deployments.  Since the OP doesn't known this value it would require additional administrative configuration and also introduces new security complexity to account linking/resolution when its admin-defined.  Note, this would only be for RPs where the OP doesn't have a connection with SCIM or OP Commands that could obtain an RP specific identifier for the account or tenant.\n\nLooking over to our friend SAML, they did define the concept of `SPNameQualifier` which help scopes the Subject `NameID` \n\n```\nSPNameQualifier [Optional]\nFurther qualifies a name with the name of a service provider or affiliation of providers. This\nattribute provides an additional means to federate names on the basis of the relying party or\nparties.\n```\n\nThis effectively enables \"tenant\" like scenarios in SAML subjects.  This is what I was after with `sub_client_id` as way to qualify the subject identifier.  If `tenant` is too strong a term and we want a more generic concept then we could take inspiration from SAML and have `aud_sub_qualifier` or something (note: `aud_sub` is a claim in [OIDC Enterprise Extensions](https://openid.net/specs/openid-connect-enterprise-extensions-1_0.html#name-aud_sub)).  Not sure if this any better IMHO than `sub_client_id` but curious what others think.\n",
+          "createdAt": "2025-10-14T17:33:06Z",
+          "updatedAt": "2025-10-14T18:26:49Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "Thanks for the context. Now I understand better.\n\nI think you touch an interesting point which is the fact that sending the resource app client_id is really a proxy to determine the tenant. Actually, in some cases where the IdP and the Resource App AS have a closer, automated provisioning, it would be \u201ceasy\u201d to know (obtain) the `tenant_id` at the the IdP. Therefore,  perhaps it would be a good idea to have an `aud_sub_qualifier`, as an object that can convey different attributes, like the resource app `client_id` - which could be added always - and the `tenant_id` at the resource app AS, added when that is known to the IdP\u2026.??",
+          "createdAt": "2025-10-14T20:03:30Z",
+          "updatedAt": "2025-10-14T20:03:30Z"
         }
       ]
     },
@@ -1339,7 +1381,7 @@
       "labels": [],
       "body": "As raised in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51, a seamless user experience requires that Requesting Apps have a way to discover which applications, and their specific instances, a user is allowed to access. This would allow mirroring the experience of SSO dashboards, where users can simply select the app instance they want to use.\n\nThis raises several questions:\n- Should the IdP expose an \"Accessible Resources API\" to list the available Resource Apps and their instances for an authenticated user?\n- How should such an API structure its data to clearly differentiate between multiple instances of the same application?\n- **Should this API be standardized?**",
       "createdAt": "2025-10-10T09:22:45Z",
-      "updatedAt": "2025-10-13T17:46:56Z",
+      "updatedAt": "2025-10-14T02:55:15Z",
       "closedAt": null,
       "comments": [
         {
@@ -1373,9 +1415,9 @@
         {
           "author": "mcguinness",
           "authorAssociation": "COLLABORATOR",
-          "body": "have some other thoughts on SAML i will be adding to #44 ",
+          "body": "My thoughts for SAML was that it would solve a lot of problems and simplify things if the requesting app converted the SAML Assertion to a Refresh Token and obtained an `id_token` and `access_token` (see https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/48#issuecomment-3399917001).  \n\nThe client could then use the access token to discover OAuth/OIDC OP metadata such as the example above.",
           "createdAt": "2025-10-13T17:46:56Z",
-          "updatedAt": "2025-10-13T17:46:56Z"
+          "updatedAt": "2025-10-14T02:55:15Z"
         }
       ]
     },
@@ -1391,9 +1433,17 @@
       "labels": [],
       "body": "Is there a spec-level recommendation to _enforce_ `https` for the `audience` which represents the Resource App Authz Issuerurl?\n\nThe Idp will authorize ID-JAGs to be used at this endpoint, so with the exception of localhost, etc, perhaps this should be a security recommendation if not already via Oauth.\n\nPerhaps this is a few layers deep in RFCs. cc @meghnadubey",
       "createdAt": "2025-10-13T19:02:38Z",
-      "updatedAt": "2025-10-13T19:02:38Z",
+      "updatedAt": "2025-10-14T03:31:45Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We have it currently defined as the AS issuer identifier which maps to https://www.rfc-editor.org/rfc/rfc8414#section-2 which says `https`.  \n\nIf we end up relaxing this per https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51#issuecomment-3393564904 then we may need additional guidance",
+          "createdAt": "2025-10-14T03:31:45Z",
+          "updatedAt": "2025-10-14T03:31:45Z"
+        }
+      ]
     }
   ],
   "pulls": [
