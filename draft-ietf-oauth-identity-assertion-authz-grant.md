@@ -341,7 +341,7 @@ The IdP may also introspect the authentication context described in the SSO asse
 
 ### Response
 
-If access is granted, the IdP creates a signed Identity Assertion Authorization Grant JWT and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
+If access is granted, the IdP creates a signed Identity Assertion Authorization Grant JWT ({{jwt-authorization-grant}}) and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
 
     HTTP/1.1 200 OK
     Content-Type: application/json
