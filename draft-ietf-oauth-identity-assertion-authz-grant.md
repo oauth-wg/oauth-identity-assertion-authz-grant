@@ -152,7 +152,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}
 
 `tenant`:
-: OPTIONAL -  JSON string that represents the tenant identifier for a multi-tenant issuer as defined in {{OpenID.Enterprise}}
+: OPTIONAL - JSON string that represents the tenant identifier for a multi-tenant issuer as defined in {{OpenID.Enterprise}}
 
 `auth_time`:
 : OPTIONAL - Time when end-user authenticated to the client as defined in {{OpenID.Core}}
