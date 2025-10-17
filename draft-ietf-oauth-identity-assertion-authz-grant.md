@@ -134,7 +134,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the Resource Application's authorization server as defined in {{RFC8414}}
 
 `client_id`:
-: REQUIRED - An identifier of the client that will act as the resource owner. It MUST be recognized by the Resource Application's authorization server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}.
+: REQUIRED - An identifier of the client that will act on behalf of the resource owner. It MUST be recognized by the Resource Application's authorization server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}.
 
 `jti`:
 : REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}
