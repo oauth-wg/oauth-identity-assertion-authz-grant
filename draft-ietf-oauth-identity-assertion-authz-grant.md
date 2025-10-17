@@ -822,6 +822,13 @@ The authors would like to thank the following people for their contributions and
 
 \[\[ To be removed from the final specification ]]
 
+-01
+
+* Moved ID-JAG definition to document root instead of nested under Token Exchange
+* Added proposed OpenID Connect `tenant` claim
+* Added authentication claims from ID Token
+
+
 -00
 
 * Initial revision as adopted working group draft
