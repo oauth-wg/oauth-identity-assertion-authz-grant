@@ -53,9 +53,29 @@ normative:
   IANA.jwt:
   RFC6838:
   RFC2046:
+  RFC8414:
+
+  OpenID.Core:
+    title: OpenID Connect Core 1.0 incorporating errata set 2
+    target: https://openid.net/specs/openid-connect-core-1_0.html
+    date: December 15, 2023
+    author:
+      - ins: N. Sakimura
+      - ins: J. Bradley
+      - ins: M. Jones
+      - ins: B. de Medeiros
+      - ins: C. Mortimore
+
+  OpenID.Enterprise:
+    title: OpenID Connect Enterprise Extensions 1.0 - draft 01
+    target: https://openid.net/specs/openid-connect-enterprise-extensions-1_0.html
+    date: September 25, 2025
+    author:
+      - ins: D. Hardt
+      - ins: K. McGuinness
+
 
 informative:
-  RFC8414:
   RFC9470:
   RFC9728:
 
@@ -64,6 +84,7 @@ informative:
 This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through a common enterprise identity provider using Token Exchange {{RFC8693}} and JWT Profile for OAuth 2.0 Authorization Grants {{RFC7523}}.
 
 --- middle
+
 
 # Introduction
 
@@ -93,7 +114,94 @@ Resource Application
 Authorization Server (IdP)
 : The Identity Provider that is trusted by a set of applications in an organization's app ecosystem. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Authorization Server of the Protected Resource in trust domain B.
 
-# Overview
+# Identity Assertion JWT Authorization Grant {#jwt-authorization-grant}
+
+The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server.  
+
+An Identity Assertion JWT Authorization Grant is issued and signed by an IdP similar to an ID Token {{OpenID.Core}} and contains claims about an end-user but instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued for an Authorization Server in another trust domain. It replaces the need for the client to obtain an authorization code from the Resource App's authorization server to delegate access to the client and instead uses the IdP which is trusted by the Authorization Server to delegate access to the client.
+
+ID Tokens are only intended to be processed by the Issuer (e.g revocation) or the Relying Party specified as the ID Token audience and not by other actors in a different trust domain such as an Authorization Server.
+
+The following claims are used within the Identity Assertion JWT Authorization Grant:
+
+`iss`:
+: REQUIRED - The issuer identifier of the IdP authorization server as defined in {{RFC8414}}
+
+`sub`:
+: REQUIRED - The subject identifier (e.g. user ID) of the resource owner at the Resource Application as defined in {{OpenID.Core}}
+
+`aud`:
+: REQUIRED - The issuer identifier of the Resource Application's authorization server as defined in {{RFC8414}}
+
+`client_id`:
+: REQUIRED - An identifier of the client that will act as the resource owner. It MUST be recognized by the Resource Application's authorization server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}.
+
+`jti`:
+: REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}
+
+`exp`:
+: REQUIRED - as defined in {{Section 4.1.4 of RFC7519}}
+
+`iat`:
+: REQUIRED - as defined in {{Section 4.1.6 of RFC7519}}
+
+`resource`:
+: OPTIONAL - The Resource Identifier ({{Section 2 of RFC8707}}) of the Resource Application's Resource Server (either a single URI or an array of URIs)
+
+`scope`:
+: OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}
+
+`tenant`:
+: OPTIONAL -  JSON string that represents the tenant identifier for a multi-tenant issuer as defined in {{OpenID.Enterprise}}
+
+`auth_time`:
+: OPTIONAL - Time when end-user authenticated to the client as defined in {{OpenID.Core}}
+
+`acr`:
+: OPTIONAL -  Authentication Context Class Reference that was satisfied when authenticating the end-user as defined in {{OpenID.Core}}
+
+`amr`:
+: OPTIONAL -  Identifiers for authentication methods used when authenticating the end-user as defined in {{OpenID.Core}}
+
+The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices {{RFC8725}}.
+
+An example JWT shown with expanded header and payload claims is below:
+
+    {
+      "typ": "oauth-id-jag+jwt"
+    }
+    .
+    {
+      "jti": "9e43f81b64a33f20116179",
+      "iss": "https://acme.idp.example",
+      "sub": "U019488227",
+      "aud": "https://acme.chat.example/",
+      "client_id": "f53f191f9311af35",
+      "exp": 1311281970,
+      "iat": 1311280970,
+      "resource": "https://acme.chat.example/api"
+      "scope": "chat.read chat.history",
+      "auth_time": 1311280970,
+      "amr": [
+        "mfa",
+        "phrh"
+        "hwk"
+        "user"
+      ]
+    }
+    .
+    signature
+
+The Identity Assertion Authorization Grant JWT may contain additional Authentication, Identity, or Authorization claims that are valid for an ID Token as the grant functions as an identity assertion for the Resource App.
+
+
+Implementation notes:
+
+* `sub` should be an opaque ID, as `iss`+`sub` is unique. The IdP might want to also include the user's email here, which it should do as a new `email` claim. This would let the app dedupe existing users who may have an account with an email address but have not done SSO yet.
+
+# Cross-Domain Access
+
+## Overview
 
 The example flow is for an enterprise `acme`, which uses a wiki app and chat app from different vendors, both of which are integrated into the enterprise's Identity Provider using OpenID Connect.
 
@@ -151,7 +259,7 @@ Sequence Diagram
 This specification is constrained to deployments where all Resource Application Resource Servers are leveraging the same IdP Authorization Server for Single-Sign-On (SSO) and session management services. The IdP provides a consistent trust boundary enabling the set of Resource Application Authorization Servers to honor the JWT Authorization Grant (ID-JAG) issued by the IdP. This specification also assumes that the Resource Server Authorization Servers delegate user authorization authority to the IdP (e.g. the IdP is trusted to ensure the scopes identified in the ID-JAG have been correctly authorized before issuing the ID-JAG token).
 
 
-# User Authentication
+## User Authentication
 
 The Client initiates an authentication request with the IdP using OpenID Connect or SAML.
 
@@ -182,7 +290,7 @@ Note: The Enterprise IdP may enforce security controls such as multi-factor auth
     }
 
 
-# Token Exchange
+## Token Exchange
 
 The Client makes a Token Exchange {{RFC8693}} request to the IdP's Token Endpoint with the following parameters:
 
@@ -223,7 +331,7 @@ The example below uses an ID Token as the Identity Assertion, and uses a JWT Bea
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
-## Processing Rules
+### Processing Rules
 
 The IdP MUST validate the subject token, and MUST validate that the audience of the Subject Token (e.g. the `aud` claim of the ID Token) matches the `client_id` of the client authentication of the request.
 
@@ -231,7 +339,7 @@ The IdP evaluates administrator-defined policy for the token exchange request an
 
 The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.
 
-## Response
+### Response
 
 If access is granted, the IdP creates a signed Identity Assertion Authorization Grant JWT and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
 
@@ -266,8 +374,7 @@ If access is granted, the IdP creates a signed Identity Assertion Authorization 
 `refresh_token`:
 : OPTIONAL according to Section 2.2 of {{RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
 
-
-### Error Response
+#### Error Response
 
 On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in Section 5.2 of {{RFC6749}}, e.g:
 
@@ -281,67 +388,7 @@ On an error condition, the IdP returns an OAuth 2.0 Token Error response as defi
     }
 
 
-## Identity Assertion Authorization Grant JWT {#jwt-authorization-grant}
-
-The Identity Assertion Authorization Grant JWT is issued and signed by the IdP, and describes the intended audience of the authorization grant as well as the client to which it was issued and the subject identifier of the resource owner, using the following claims:
-
-`iss`:
-: REQUIRED - The IdP `issuer` URL as defined in Section 4.1.1 of {{RFC7519}}
-
-`sub`:
-: REQUIRED - The subject identifier (e.g. user ID) of the resource owner at the Resource Application as defined in {{Section 4.1.2 of RFC7519}}
-
-`aud`:
-: REQUIRED - The Issuer URL ({{Section 2 of RFC8414}}) of the Resource Application's authorization server as defined in {{Section 4.1.3 of RFC7519}}
-
-`resource`:
-: OPTIONAL - The Resource Identifier ({{Section 2 of RFC8707}}) of the Resource Application's resource server (either a single URI or an array of URIs)
-
-`client_id`:
-: REQUIRED - An identifier of the client that this JWT was issued to, which MUST be recognized by the Resource Application's authorization server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}.
-
-`jti`:
-: REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}
-
-`exp`:
-: REQUIRED - as defined in {{Section 4.1.4 of RFC7519}}
-
-`iat`:
-: REQUIRED - as defined in {{Section 4.1.6 of RFC7519}}
-
-`scope`:
-: OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}
-
-The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices {{RFC8725}}.
-
-An example JWT shown with expanded header and payload claims is below:
-
-    {
-      "typ": "oauth-id-jag+jwt"
-    }
-    .
-    {
-      "jti": "9e43f81b64a33f20116179",
-      "iss": "https://acme.idp.example",
-      "sub": "U019488227",
-      "aud": "https://acme.chat.example/",
-      "client_id": "f53f191f9311af35",
-      "exp": 1311281970,
-      "iat": 1311280970,
-      "scope": "chat.read chat.history"
-    }
-    .
-    signature
-
-The authorization server MAY add additional claims as necessary.
-
-Implementation notes:
-
-* If the IdP is multi-tenant and uses the same `issuer` for all tenants, the Resource Application will already have IdP-specific logic to determine the tenant from the OpenID Connect ID Token (e.g. a custom `hd` claim in Google) or SAML assertion, and will need to use that if the IdP also has only one client registration for the Resource Application.
-* `sub` should be an opaque ID, as `iss`+`sub` is unique. The IdP might want to also include the user's email here, which it should do as a new `email` claim. This would let the app dedupe existing users who may have an account with an email address but have not done SSO yet.
-
-
-# Access Token Request {#token-request}
+## Access Token Request {#token-request}
 
 The Client makes an access token request to the Resource Application's token endpoint using the previously obtained Identity Assertion Authorization Grant as a JWT Assertion as defined by {{RFC7523}}.
 
@@ -363,7 +410,7 @@ For example:
     assertion=eyJhbGciOiJIUzI1NiIsI...
 
 
-## Processing Rules
+### Processing Rules
 
 All of Section 5.2 of {{RFC7521}} applies, in addition to the following processing rules:
 
@@ -372,7 +419,7 @@ All of Section 5.2 of {{RFC7521}} applies, in addition to the following processi
 * The `client_id` claim MUST identify the same client as the client authentication in the request.
 
 
-## Response
+### Response
 
 The Resource Application token endpoint responds with an OAuth 2.0 Token Response, e.g.:
 
@@ -778,3 +825,5 @@ The authors would like to thank the following people for their contributions and
 -00
 
 * Initial revision as adopted working group draft
+
+
