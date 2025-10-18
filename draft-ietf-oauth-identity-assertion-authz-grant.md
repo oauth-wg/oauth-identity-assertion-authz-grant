@@ -183,13 +183,13 @@ A non-normative example JWT with expanded header and payload claims is below:
       "client_id": "f53f191f9311af35",
       "exp": 1311281970,
       "iat": 1311280970,
-      "resource": "https://acme.chat.example/api"
+      "resource": "https://acme.chat.example/api",
       "scope": "chat.read chat.history",
       "auth_time": 1311280970,
       "amr": [
         "mfa",
-        "phrh"
-        "hwk"
+        "phrh",
+        "hwk",
         "user"
       ]
     }
