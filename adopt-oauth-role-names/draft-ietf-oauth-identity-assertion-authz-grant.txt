@@ -196,9 +196,10 @@ Table of Contents
       tokens issued by the Resource Authorization Server.  In
       [I-D.ietf-oauth-identity-chaining], this is the Protected Resource
       in trust domain B.  The Resource Server has no direct trust
-      relationship with the IdP Authorization Server uses its trusted
-      Resource Authorization Server to determine who should have access
-      to resources.
+      relationship with the IdP Authorization Server.  Instead, it
+      validates access tokens issued by its trusted Resource
+      Authorization Server to determine who should have access to
+      resources.
 
 3.  Identity Assertion JWT Authorization Grant
 
