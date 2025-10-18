@@ -1298,7 +1298,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
 <p id="section-1-1">In typical enterprise scenarios, applications are configured for single sign-on to the enterprise identity provider (IdP) using OpenID Connect or SAML. This enables users to access all the necessary enterprise applications using a single account at the IdP, and enables the enterprise to manage which users can access which applications.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">When one application wants to access a user's data at another application, it will start an interactive OAuth flow (<span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>) to obtain an access token for the application on behalf of the user. This OAuth flow enables a direct app-to-app connection between the two apps, and is not visible to the IdP used to log in to each app.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-2">When one application wants to access a user's data at another application, it will start an interactive OAuth flow <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> to obtain an access token for the application on behalf of the user. This OAuth flow enables a direct app-to-app connection between the two apps, and is not visible to the IdP used to log in to each app.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This specification enables this kind of "Cross App Access" to be managed by the enterprise IdP, similar to how the IdP manages single sign-on to individual applications.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">The draft specification Identity Chaining Across Trust Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines how to request a JWT authorization grant from an Authorization Server and exchange it for an Access Token at another Authorization Server in a different trust domain. The specification combines OAuth 2.0 Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> and JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>. The draft supports multiple different use cases by leaving many details of the token exchange request and JWT authorization grant unspecified.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <p id="section-1-5">This specification defines the additional details necessary to support interoperable implementations in enterprise scenarios when two applications are configured for single sign-on to the same enterprise identity provider. In particular, this specification uses identity assertions as the input to the token exchange request. This way, the same enterprise identity provider that is trusted by applications for single sign-on can be extended to broker access to APIs.<a href="#section-1-5" class="pilcrow">¶</a></p>
@@ -1677,7 +1677,7 @@ Content-Type: application/json
 </dl>
 <p id="section-4.3-3">The additional parameters defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> <code>actor_token</code> and <code>actor_token_type</code> are not used in this specification.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.3-4">Client authentication to the authorization server is done using the standard mechanisms provided by OAuth 2.0. <span><a href="https://rfc-editor.org/rfc/rfc6749#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> defines password-based authentication of the client (<code>client_id</code> and <code>client_secret</code>), however, client authentication is extensible and other mechanisms are possible. For example, <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> defines client authentication using bearer JSON Web Tokens using <code>client_assertion</code> and <code>client_assertion_type</code>.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
-<p id="section-4.3-5">The example below uses an ID Token as the Identity Assertion, and uses a JWT Bearer Assertion (<span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>) as the client authentication method, (tokens truncated for brevity):<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+<p id="section-4.3-5">The example below uses an ID Token as the Identity Assertion, and uses a JWT Bearer Assertion <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> as the client authentication method, (tokens truncated for brevity):<a href="#section-4.3-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3-6">
 <pre>
 POST /oauth2/token HTTP/1.1
@@ -1710,7 +1710,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
           <h4 id="name-response">
 <a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-response" class="section-name selfRef">Response</a>
           </h4>
-<p id="section-4.3.2-1">If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>) and returns it in the token exchange response defined in Section 2.2 of <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-1">If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>) and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.2-2">
 <pre>
 HTTP/1.1 200 OK
@@ -1761,7 +1761,7 @@ Pragma: no-cache
 <dt id="section-4.3.2-3.11">
 <code>refresh_token</code>:</dt>
             <dd style="margin-left: 1.5em" id="section-4.3.2-3.12">
-              <p id="section-4.3.2-3.12.1"><span class="bcp14">OPTIONAL</span> according to Section 2.2 of <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. In the context of this specification, this parameter <span class="bcp14">SHOULD NOT</span> be used.<a href="#section-4.3.2-3.12.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.2-3.12.1"><span class="bcp14">OPTIONAL</span> according to <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. In the context of this specification, this parameter <span class="bcp14">SHOULD NOT</span> be used.<a href="#section-4.3.2-3.12.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>
@@ -1806,7 +1806,7 @@ signature
             <h5 id="name-error-response">
 <a href="#section-4.3.2.2" class="section-number selfRef">4.3.2.2. </a><a href="#name-error-response" class="section-name selfRef">Error Response</a>
             </h5>
-<p id="section-4.3.2.2-1">On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in Section 5.2 of <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, e.g:<a href="#section-4.3.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2.2-1">On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, e.g:<a href="#section-4.3.2.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.2.2-2">
 <pre>
 HTTP/1.1 400 Bad Request
@@ -1862,10 +1862,10 @@ assertion=eyJhbGciOiJIUzI1NiIsI...
           <h4 id="name-processing-rules-2">
 <a href="#section-4.4.1" class="section-number selfRef">4.4.1. </a><a href="#name-processing-rules-2" class="section-name selfRef">Processing Rules</a>
           </h4>
-<p id="section-4.4.1-1">All of Section 5.2 of <span>[<a href="#RFC7521" class="cite xref">RFC7521</a>]</span> applies, in addition to the following processing rules:<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.1-1">All of <span><a href="https://rfc-editor.org/rfc/rfc7521#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC7521" class="cite xref">RFC7521</a>]</span> applies, in addition to the following processing rules:<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4.1-2.1">
-              <p id="section-4.4.1-2.1.1">Validate the JWT <code>typ</code> is <code>oauth-id-jag+jwt</code> (per <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span>)<a href="#section-4.4.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-4.4.1-2.1.1">Validate the JWT <code>typ</code> is <code>oauth-id-jag+jwt</code> (per <span><a href="https://rfc-editor.org/rfc/rfc8725#section-3.11" class="relref">Section 3.11</a> of [<a href="#RFC8725" class="cite xref">RFC8725</a>]</span>)<a href="#section-4.4.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.4.1-2.2">
               <p id="section-4.4.1-2.2.1">The <code>aud</code> claim <span class="bcp14">MUST</span> identify the Issuer URL of the Resource Authorization Server as the intended audience of the JWT.<a href="#section-4.4.1-2.2.1" class="pilcrow">¶</a></p>
@@ -2452,7 +2452,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 </pre><a href="#appendix-A.3.2.5-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.5-3">If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in Section 2.2 of <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.3.2.5-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.2.5-3">If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.3.2.5-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.3.2.5-4">
 <pre>
 HTTP/1.1 200 OK
@@ -2596,6 +2596,9 @@ Content-Type: application/json
 </li>
         <li class="normal" id="appendix-C-3.6">
           <p id="appendix-C-3.6.1">Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"<a href="#appendix-C-3.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.7">
+          <p id="appendix-C-3.7.1">Updated section references with more specific links<a href="#appendix-C-3.7.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-C-4">-00<a href="#appendix-C-4" class="pilcrow">¶</a></p>

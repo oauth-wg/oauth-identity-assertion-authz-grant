@@ -120,7 +120,7 @@ Table of Contents
    applications.
 
    When one application wants to access a user's data at another
-   application, it will start an interactive OAuth flow ([RFC6749]) to
+   application, it will start an interactive OAuth flow [RFC6749] to
    obtain an access token for the application on behalf of the user.
    This OAuth flow enables a direct app-to-app connection between the
    two apps, and is not visible to the IdP used to log in to each app.
@@ -478,7 +478,7 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid&cli
    client_assertion and client_assertion_type.
 
    The example below uses an ID Token as the Identity Assertion, and
-   uses a JWT Bearer Assertion ([RFC7523]) as the client authentication
+   uses a JWT Bearer Assertion [RFC7523] as the client authentication
    method, (tokens truncated for brevity):
 
 POST /oauth2/token HTTP/1.1
@@ -623,7 +623,8 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    All of Section 5.2 of [RFC7521] applies, in addition to the following
    processing rules:
 
-   *  Validate the JWT typ is oauth-id-jag+jwt (per [RFC8725])
+   *  Validate the JWT typ is oauth-id-jag+jwt (per Section 3.11 of
+      [RFC8725])
 
    *  The aud claim MUST identify the Issuer URL of the Resource
       Authorization Server as the intended audience of the JWT.
@@ -1310,6 +1311,8 @@ Document History
 
    *  Updated all inconsistent references of ID-JAG to "Identity
       Assertion JWT Authorization Grant"
+
+   *  Updated section references with more specific links
 
    -00
 
