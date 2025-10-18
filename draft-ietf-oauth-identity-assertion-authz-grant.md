@@ -346,7 +346,7 @@ The IdP may also introspect the authentication context described in the SSO asse
 
 ### Response
 
-If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant ({{id-jag}}) and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
+If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant ({{id-jag}}) and returns it in the token exchange response defined in {{Section 2.2 of RFC8693}}:
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -377,7 +377,7 @@ If access is granted, the IdP creates a signed Identity Assertion JWT Authorizat
 : RECOMMENDED - The lifetime in seconds of the authorization grant.
 
 `refresh_token`:
-: OPTIONAL according to Section 2.2 of {{RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
+: OPTIONAL according to {{Section 2.2 of RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
 
 #### Issued Identity Assertion JWT Authorization Grant
 
@@ -410,7 +410,7 @@ The following is a non-normative example of the issued token
 
 #### Error Response
 
-On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in Section 5.2 of {{RFC6749}}, e.g:
+On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}, e.g:
 
     HTTP/1.1 400 Bad Request
     Content-Type: application/json
@@ -446,9 +446,9 @@ For example:
 
 ### Processing Rules
 
-All of Section 5.2 of {{RFC7521}} applies, in addition to the following processing rules:
+All of {{Section 5.2 of RFC7521}} applies, in addition to the following processing rules:
 
-* Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{RFC8725}})
+* Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{Section 3.11 of RFC8725}})
 * The `aud` claim MUST identify the Issuer URL of the Resource Authorization Server as the intended audience of the JWT.
 * The `client_id` claim MUST identify the same client as the client authentication in the request.
 
@@ -769,7 +769,7 @@ LLM Agent makes an Identity Assertion JWT Authorization Grant Token Exchange {{R
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
-If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
+If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in {{Section 2.2 of RFC8693}}:
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -868,6 +868,7 @@ The authors would like to thank the following people for their contributions and
 * Adopted standard OAuth 2.0 role names instead of Resource App or Resource App's Authorization Server
 * Updated sequence diagram
 * Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"
+* Updated section references with more specific links
 
 -00
 
