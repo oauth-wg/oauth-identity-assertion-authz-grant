@@ -1,6 +1,6 @@
 ---
-title: "Identity Assertion Authorization Grant"
-abbrev: "ID Token Authz Grant"
+title: "Identity Assertion JWT Authorization Grant"
+abbrev: "ID JWT Authz Grant"
 category: std
 
 docname: draft-ietf-oauth-identity-assertion-authz-grant-latest
@@ -106,19 +106,23 @@ This specification defines the additional details necessary to support interoper
 ## Roles
 
 Client
-: The application that wants to obtain an OAuth 2.0 access token on behalf of a signed-in user to an external/3rd party application's API (Resource Server below). In {{I-D.ietf-oauth-identity-chaining}}, this is the Client in trust domain A. This is also sometimes referred to as the "Requesting Application".
+: The application that wants to obtain an OAuth 2.0 access token on behalf of a signed-in user to an external/3rd party application's API (Resource Server below). In {{I-D.ietf-oauth-identity-chaining}}, this is the Client in trust domain A.  The application has direct relationship with the IdP Authorization Server for single sign-on as a Relying Party and another independent OAuth 2.0 client relationship with the Resource Authorization Server in trust domain B.
 
-Resource Application
-: The application that provides an OAuth 2.0 Protected Resource. In {{I-D.ietf-oauth-identity-chaining}}, this is the Protected Resource in trust domain B. The Resource Application is made up of both an Authorization Server and a Resource Server as defined in {{Section 1.1 of RFC6749}}.
+IdP Authorization Server
+: A SAML 2.0 Identity Provider or OpenID Connect Provider (OP) {{OpenID.Core}} that issues identity assertions for single sign-on and cross-domain authorization grants {{id-jag}} for a set of trusted applications in an organization's application ecosystem.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.
 
-Authorization Server (IdP)
-: The Identity Provider that is trusted by a set of applications in an organization's app ecosystem. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Authorization Server of the Protected Resource in trust domain B.
+Resource Authorization Server
+: Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain B that trusts cross-domain authorization grants {{id-jag}} from the IdP Authorization Server.
 
-# Identity Assertion JWT Authorization Grant {#jwt-authorization-grant}
+Resource Server
+: Hosts protected resources and validates access tokens issued by the Resource Authorization Server.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Protected Resource in trust domain B.  The Resource Server has no direct trust relationship with the IdP Authorization Server uses its trusted Resource Authorization Server to determine who should have access to resources.
+
+
+# Identity Assertion JWT Authorization Grant {#id-jag}
 
 The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server.
 
-An Identity Assertion JWT Authorization Grant is issued and signed by an IdP similar to an ID Token {{OpenID.Core}}, and contains claims about an end-user. Instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain. It replaces the need for the client to obtain an authorization code from the Resource App's authorization server to delegate access to the client, and instead uses the IdP which is trusted by the Authorization Server to delegate access to the client.
+An Identity Assertion JWT Authorization Grant is issued and signed by an IdP similar to an ID Token {{OpenID.Core}}, and contains claims about an end-user. Instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain. It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP which is trusted by the Authorization Server to delegate access to the client.
 
 As described in {{OpenID.Core}}, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.
 
@@ -128,13 +132,13 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the IdP authorization server as defined in {{RFC8414}}
 
 `sub`:
-: REQUIRED - The subject identifier (e.g. user ID) of the resource owner at the Resource Application as defined in {{OpenID.Core}}
+: REQUIRED - The subject identifier (e.g. user ID) of the resource owner at the Resource Authorization Server as defined in {{OpenID.Core}}
 
 `aud`:
-: REQUIRED - The issuer identifier of the Resource Application's authorization server as defined in {{RFC8414}}
+: REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}
 
 `client_id`:
-: REQUIRED - An identifier of the client that will act on behalf of the resource owner. It MUST be recognized by the Resource Application's authorization server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}.
+: REQUIRED - An identifier of the client that will act on behalf of the resource owner. It MUST be recognized by the Resource Authorization Server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}.
 
 `jti`:
 : REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}
@@ -146,7 +150,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - as defined in {{Section 4.1.6 of RFC7519}}
 
 `resource`:
-: OPTIONAL - The Resource Identifier ({{Section 2 of RFC8707}}) of the Resource Application's Resource Server (either a single URI or an array of URIs)
+: OPTIONAL - The Resource Identifier ({{Section 2 of RFC8707}}) of the Resource Server (either a single URI or an array of URIs)
 
 `scope`:
 : OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}
@@ -165,7 +169,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 
 The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices {{RFC8725}}.
 
-An example JWT shown with expanded header and payload claims is below:
+A non-normative example JWT with expanded header and payload claims is below:
 
     {
       "typ": "oauth-id-jag+jwt"
@@ -192,7 +196,7 @@ An example JWT shown with expanded header and payload claims is below:
     .
     signature
 
-The Identity Assertion Authorization Grant JWT may contain additional Authentication, Identity, or Authorization claims that are valid for an ID Token as the grant functions as an identity assertion for the Resource App.
+The Identity Assertion JWT Authorization Grant may contain additional Authentication, Identity, or Authorization claims that are valid for an ID Token as the grant functions as an identity assertion for the Resource App.
 
 
 Implementation notes:
@@ -203,60 +207,60 @@ Implementation notes:
 
 ## Overview
 
-The example flow is for an enterprise `acme`, which uses a wiki app and chat app from different vendors, both of which are integrated into the enterprise's Identity Provider using OpenID Connect.
+The example flow is for an enterprise `acme`, which uses a multi-tenant wiki app and chat app from different vendors, both of which are integrated into the enterprise's multi-tenant Identity Provider using OpenID Connect.
 
 | Role     | App URL | Tenant URL   | Description |
 | -------- | -------- | -------- | ----------- |
-| Client | `https://wiki.example` | `https://acme.wiki.example` | Wiki app that embeds content from one or more resource applications |
-| Resource Application   | `https://chat.example` | `https://acme.chat.example` | Chat and communication app |
-| Identity Provider      | `https://idp.example`   | `https://acme.idp.example` | Identity Provider |
+| Client | `https://wiki.example` | `https://acme.wiki.example` | Wiki app that embeds content from one or more resource servers |
+| Resource Authorization Server   | `https://chat.example` | `https://acme.chat.example` | Authorization Server for an chat and communication app |
+| Identity Provider Authorization Server | `https://idp.example`   | `https://acme.idp.example` | Enterprise Identity Provider
+| Resource Server | `https://api.chat.example`   | `https://api.chat.example` |  Public API for the chat and communications app
 
 Sequence Diagram
 
-    +---------+      +--------------+   +---------------+  +--------------+
-    |         |      |              |   |   Resource    |  |   Resource   |
-    |         |      |    IdP       |   |  Application  |  |  Application |
-    | Client  |      | Authorization|   | Authorization |  |   Resource   |
-    |         |      |   Server     |   |    Server     |  |    Server    |
-    +----+----+      +-------+------+   +-------+-------+  +------+-------+
-         |                   |                  |                 |
-         |                   |                  |                 |
-         |  -------------->  |                  |                 |
-         |   1 User SSO      |                  |                 |
-         |                   |                  |                 |
-         |     ID Token      |                  |                 |
-         |  <- - - - - - - - |                  |                 |
-         |                   |                  |                 |
-         |                   |                  |                 |
-         |                   |                  |                 |
-         | 2 Token Exchange  |                  |                 |
-         | ----------------> |                  |                 |
-         |                   |                  |                 |
-         |   ID-JAG          |                  |                 |
-         | <- - - - - - - -  |                  |                 |
-         |                   |                  |                 |
-         |                   |                  |                 |
-         |                   |                  |                 |
-         |  3 Present ID-JAG |                  |                 |
-         | ------------------+----------------> |                 |
-         |                   |                  |                 |
-         |    Access Token   |                  |                 |
-         | <- - - - - - - - - - - - - - - - - - |                 |
-         |                   |                  |                 |
-         |                   |                  |                 |
-         |                   |                  |                 |
-         |  4 Resource Request with Access Token|                 |
-         | -----------------------------------------------------> |
-         |                   |                  |                 |
-         |                   |                  |                 |
-         |                   |                  |                 |
+    +---------+      +---------------+   +---------------+  +----------+
+    |         |      |      IdP      |   |   Resource    |  | Resource |
+    | Client  |      | Authorization |   | Authorization |  |  Server  |
+    |         |      |    Server     |   |    Server     |  |          |
+    +----+----+      +-------+-------+   +-------+-------+  +-----+----+
+         |                   |                   |                 |
+         |                   |                   |                 |
+         |  -------------->  |                   |                 |
+         |   1 User SSO      |                   |                 |
+         |                   |                   |                 |
+         |     ID Token      |                   |                 |
+         |  <- - - - - - - - |                   |                 |
+         |                   |                   |                 |
+         |                   |                   |                 |
+         |                   |                   |                 |
+         | 2 Token Exchange  |                   |                 |
+         | ----------------> |                   |                 |
+         |                   |                   |                 |
+         |   ID-JAG          |                   |                 |
+         | <- - - - - - - -  |                   |                 |
+         |                   |                   |                 |
+         |                   |                   |                 |
+         |                   |                   |                 |
+         | 3 Present ID-JAG  |                   |                 |
+         | ------------------+-----------------> |                 |
+         |                   |                   |                 |
+         |    Access Token   |                   |                 |
+         | <- - - - - - - - - - - - - - - - - - -|                 |
+         |                   |                   |                 |
+         |                   |                   |                 |
+         |                   |                   |                 |
+         | 4 Resource Request with Access Token  |                 |
+         | ------------------------------------------------------> |
+         |                   |                   |                 |
+         |                   |                   |                 |
+         |                   |                   |                 |
 
 1. User logs in to the Client, the Client obtains the Identity Assertion (e.g. OpenID Connect ID Token or SAML assertion)
-2. Client uses the Identity Assertion to request an Identity Assertion Authorization Grant for the Resource Application from the IdP
-3. Client exchanges the Identity Assertion Authorization Grant JWT for an Access Token at the Resource Application's token endpoint
+2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP
+3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
 4. Client makes an API request with the Access Token
 
-This specification is constrained to deployments where all Resource Application Resource Servers are leveraging the same IdP Authorization Server for Single-Sign-On (SSO) and session management services. The IdP provides a consistent trust boundary enabling the set of Resource Application Authorization Servers to honor the JWT Authorization Grant (ID-JAG) issued by the IdP. This specification also assumes that the Resource Server Authorization Servers delegate user authorization authority to the IdP (e.g. the IdP is trusted to ensure the scopes identified in the ID-JAG have been correctly authorized before issuing the ID-JAG token).
+This specification is constrained to deployments where all Resource Authorization Servers are leveraging the same IdP Authorization Server for Single-Sign-On (SSO) and session management services. The IdP provides a consistent trust boundary enabling the set of Resource Authorization Server Authorization Servers to honor the JWT Authorization Grant (ID-JAG) issued by the IdP. This specification also assumes that the Resource Authorization Servers delegate user authorization authority to the IdP (e.g. the IdP is trusted to ensure the scopes identified in the ID-JAG have been correctly authorized before issuing the ID-JAG token).
 
 
 ## User Authentication
@@ -298,13 +302,13 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP's Token Endpoin
 : REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an ID Assertion JWT is being requested.
 
 `audience`:
-: REQUIRED - The Issuer URL of the Resource Application's authorization server as defined in {{Section 2 of RFC8414}}.
+: REQUIRED - The Issuer URL of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}.
 
 `resource`:
-: OPTIONAL - The Resource Identifier of the Resource Application's resource server as defined in {{Section 2 of RFC8707}}.
+: OPTIONAL - The Resource Identifier of the Resource Server as defined in {{Section 2 of RFC8707}}.
 
 `scope`:
-: OPTIONAL - The space-separated list of scopes at the Resource Application that is being requested.
+: OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
 
 `subject_token`:
 : REQUIRED - The identity assertion (e.g. the OpenID Connect ID Token or SAML assertion) for the target end-user.
@@ -325,6 +329,7 @@ The example below uses an ID Token as the Identity Assertion, and uses a JWT Bea
     grant_type=urn:ietf:params:oauth:grant-type:token-exchange
     &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
     &audience=https://acme.chat.example/
+    &resource=https://api.chat.example
     &scope=chat.read+chat.history
     &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
     &subject_token_type=urn:ietf:params:oauth:token-type:id_token
@@ -341,7 +346,7 @@ The IdP may also introspect the authentication context described in the SSO asse
 
 ### Response
 
-If access is granted, the IdP creates a signed Identity Assertion Authorization Grant JWT ({{jwt-authorization-grant}}) and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
+If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant ({{id-jag}}) and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -360,7 +365,7 @@ If access is granted, the IdP creates a signed Identity Assertion Authorization 
 : REQUIRED - `urn:ietf:params:oauth:token-type:id-jag`
 
 `access_token`:
-: REQUIRED - The Identity Assertion Authorization Grant JWT. (Note: Token Exchange requires the `access_token` response parameter for historical reasons, even though this is not an OAuth access token.)
+: REQUIRED - The Identity Assertion JWT Authorization Grant. (Note: Token Exchange requires the `access_token` response parameter for historical reasons, even though this is not an OAuth access token.)
 
 `token_type`:
 : REQUIRED - `N_A` (because this is not an OAuth access token.)
@@ -373,6 +378,35 @@ If access is granted, the IdP creates a signed Identity Assertion Authorization 
 
 `refresh_token`:
 : OPTIONAL according to Section 2.2 of {{RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
+
+#### Issued Identity Assertion JWT Authorization Grant
+
+The following is a non-normative example of the issued token
+
+    {
+      "typ": "oauth-id-jag+jwt"
+    }
+    .
+    {
+      "jti": "9e43f81b64a33f20116179",
+      "iss": "https://acme.idp.example",
+      "sub": "U019488227",
+      "aud": "https://acme.chat.example/",
+      "client_id": "f53f191f9311af35",
+      "exp": 1311281970,
+      "iat": 1311280970,
+      "resource": "https://api.chat.example"
+      "scope": "chat.read chat.history",
+      "auth_time": 1311280970,
+      "amr": [
+        "mfa",
+        "phrh"
+        "hwk"
+        "user"
+      ]
+    }
+    .
+    signature
 
 #### Error Response
 
@@ -390,15 +424,15 @@ On an error condition, the IdP returns an OAuth 2.0 Token Error response as defi
 
 ## Access Token Request {#token-request}
 
-The Client makes an access token request to the Resource Application's token endpoint using the previously obtained Identity Assertion Authorization Grant as a JWT Assertion as defined by {{RFC7523}}.
+The Client makes an access token request to the Resource Authorization Server's token endpoint using the previously obtained Identity Assertion JWT Authorization Grant as a JWT Bearer Assertion as defined by {{RFC7523}}.
 
 `grant_type`:
 : REQUIRED - The value of `grant_type` is `urn:ietf:params:oauth:grant-type:jwt-bearer`
 
 `assertion`:
-: REQUIRED - The Identity Assertion Authorization Grant JWT obtained in the previous token exchange step
+: REQUIRED - The Identity Assertion JWT Authorization Grant obtained in the previous token exchange step
 
-The Client authenticates with its credentials as registered with the Resource Application's authorization server.
+The Client authenticates with its credentials as registered with the Resource Authorization Server.
 
 For example:
 
@@ -415,13 +449,13 @@ For example:
 All of Section 5.2 of {{RFC7521}} applies, in addition to the following processing rules:
 
 * Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{RFC8725}})
-* The `aud` claim MUST identify the Issuer URL of the Resource Application's authorization server as the intended audience of the JWT.
+* The `aud` claim MUST identify the Issuer URL of the Resource Authorization Server as the intended audience of the JWT.
 * The `client_id` claim MUST identify the same client as the client authentication in the request.
 
 
 ### Response
 
-The Resource Application token endpoint responds with an OAuth 2.0 Token Response, e.g.:
+The Resource Authorization Server's token endpoint responds with an OAuth 2.0 Token Response, e.g.:
 
     HTTP/1.1 200 OK
     Content-Type: application/json;charset=UTF-8
@@ -440,7 +474,7 @@ The Resource Application token endpoint responds with an OAuth 2.0 Token Respons
 
 An IdP can advertise its support for this profile in its OAuth Authorization Server Metadata {{RFC8414}}. Identity and Authorization Chaining Across Domains {{I-D.ietf-oauth-identity-chaining}} defines a new metadata property `identity_chaining_requested_token_types_supported` for this purpose.
 
-To advertise support for the Identity Assertion Authorization Grant, the authorization server SHOULD include the following value in the `identity_chaining_requested_token_types_supported` property:
+To advertise support for the Identity Assertion JWT Authorization Grant, the authorization server SHOULD include the following value in the `identity_chaining_requested_token_types_supported` property:
 
 `urn:ietf:params:oauth:token-type:id-jag`
 
@@ -469,7 +503,7 @@ In the initial token exchange request, the IdP may require step-up authenticatio
 
 The Client would need to redirect the user back to the IdP to obtain a new assertion that meets the requirements and retry the token exchange.
 
-TBD: It may make more sense to request the Identity Assertion Authorization Grant in the authorization request if using OpenID Connect for SSO when performing a step-up to skip the need for additional token exchange round-trip.
+TBD: It may make more sense to request the Identity Assertion JWT Authorization Grant in the authorization request if using OpenID Connect for SSO when performing a step-up to skip the need for additional token exchange round-trip.
 
 ## Cross-Domain Use
 
@@ -480,7 +514,7 @@ This specification is intended for cross-domain uses where the Client, Resource 
 
 ## Media Types
 
-This section registers `oauth-id-jag+jwt`, a new media type {{RFC2046}} in the "Media Types" registry {{IANA.media-types}} in the manner described in {{RFC6838}}. It can be used to indicate that the content is an Identity Assertion Authorization Grant JWT.
+This section registers `oauth-id-jag+jwt`, a new media type {{RFC2046}} in the "Media Types" registry {{IANA.media-types}} in the manner described in {{RFC6838}}. It can be used to indicate that the content is an Identity Assertion JWT Authorization Grant.
 
 
 ## OAuth URI Registration
@@ -500,7 +534,7 @@ This section registers `resource` in the "JSON Web Token Claims" subregistry of 
 * Claim Name: `resource`
 * Claim Description: Resource
 * Change Controller: IETF
-* Specification Document(s): {{jwt-authorization-grant}}
+* Specification Document(s): {{id-jag}}
 
 
 
@@ -520,10 +554,10 @@ This specification can be used to extend the SSO relationship of multiple SaaS a
 ### Preconditions
 
 * The Client has a registered OAuth 2.0 Client with the IdP Authorization Server
-* The Client has a registered OAuth 2.0 Client with the Resource Application
-* Enterprise has established a trust relationship between their IdP and the Client for SSO and Identity Assertion Authorization Grant
-* Enterprise has established a trust relationship between their IdP and the Resource Application for SSO and Identity Assertion Authorization Grant
-* Enterprise has granted the Client permission to act on behalf of users for the Resource Application with a set of scopes
+* The Client has a registered OAuth 2.0 Client with the Resource Authorization Server
+* Enterprise has established a trust relationship between their IdP and the Client for SSO and Identity Assertion JWT Authorization Grant
+* Enterprise has established a trust relationship between their IdP and the Resource Authorization Server for SSO and Identity Assertion JWT Authorization Grant
+* Enterprise has granted the Client permission to act on behalf of users for the Resource Authorization Server with a set of scopes
 
 ## Email and Calendaring Applications
 
@@ -535,9 +569,9 @@ To streamline the user experience, this specification can be used to enable the 
 
 ### Preconditions
 
-* The Client does not have a pre-registered OAuth 2.0 client at the IdP Authorization Server or the Resource Application
+* The Client does not have a pre-registered OAuth 2.0 client at the IdP Authorization Server or the Resource Authorization Server
 * The Client has obtained an Identity Assertion (e.g. ID Token) from the IdP Authorization Server
-* The Resource Application is configured to allow the Identity Assertion Authorization Grant from unregistered clients
+* The Resource Authorization Server is configured to allow the Identity Assertion JWT Authorization Grant from unregistered clients
 
 ## LLM Agent using Enterprise Tools
 
@@ -548,7 +582,7 @@ AI agents, including those based on large language models (LLMs), are designed t
 * The LLM Agent has a registered OAuth 2.0 Client (`com.example.ai-agent`) with the Enterprise IdP (`cyberdyne.idp.example`)
 * The LLM Agent has a registered OAuth 2.0 Client (`4960880b83dc9`) with the External Tool Application (`saas.example.net`)
 * Enterprise has established a trust relationship between their IdP and the LLM Agent for SSO
-* Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion Authorization Grant
+* Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion JWT Authorization Grant
 * Enterprise has granted the LLM Agent permission to act on behalf of users for the External Tool Application with a specific set of scopes
 
 ### LLM Agent establishes a User Identity with Enterprise IdP
@@ -709,13 +743,13 @@ LLM Agent discovers the Authorization Server configuration per {{RFC8414}}
 
 LLM Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.
 
-If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard `authorization_code` from the SaaS Application's Authorization Server
+If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard `authorization_code` from the SaaS Application's Authorization Server
 
-> Note: This would benefit from an Authorization Server Metadata {{RFC8414}} property to indicate whether the Identity Assertion Authorization Grant form of `jwt-bearer` would be accepted by this authorization server. There are other uses of `jwt-bearer` that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion Authorization Grant would be supported. See [issue #16](https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16).
+> Note: This would benefit from an Authorization Server Metadata {{RFC8414}} property to indicate whether the Identity Assertion JWT Authorization Grant form of `jwt-bearer` would be accepted by this authorization server. There are other uses of `jwt-bearer` that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion JWT Authorization Grant would be supported. See [issue #16](https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16).
 
-### LLM Agent obtains an Identity Assertion Grant for Enterprise External Tool from the Enterprise IdP
+### LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP
 
-LLM Agent makes an Identity Assertion Grant Token Exchange {{RFC8693}} request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's `OAuth 2.0 Protected Resource Metadata`
+LLM Agent makes an Identity Assertion JWT Authorization Grant Token Exchange {{RFC8693}} request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's `OAuth 2.0 Protected Resource Metadata`
 
     POST /oauth2/token HTTP/1.1
     Host: cyberdyne.idp.example
@@ -731,7 +765,7 @@ LLM Agent makes an Identity Assertion Grant Token Exchange {{RFC8693}} request f
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
-If access is granted, the Enterprise IdP creates a signed Identity Assertion Authorization Grant JWT and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
+If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in Section 2.2 of {{RFC8693}}:
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -746,7 +780,7 @@ If access is granted, the Enterprise IdP creates a signed Identity Assertion Aut
       "expires_in": 300
     }
 
-Identity Assertion Authorization Grant JWT claims:
+Identity Assertion JWT Authorization Grant claims:
 
     {
       "alg": "ES256",
@@ -769,7 +803,7 @@ Identity Assertion Authorization Grant JWT claims:
 
 ### LLM Agent obtains an Access Token for Enterprise External Tool
 
-LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by {{RFC7523}}.
+LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by {{RFC7523}}.
 
 The LLM Agent authenticates with its client credentials that were registered with the SaaS Authorization Server
 
@@ -782,7 +816,7 @@ The LLM Agent authenticates with its client credentials that were registered wit
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
     assertion=eyJhbGciOiJIUzI1NiIsI...
 
-SaaS Authorization Server validates the Identity Assertion Authorization Grant using the published JWKS for the trusted Enterprise IdP
+SaaS Authorization Server validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP
 
     HTTP/1.1 200 OK
     Content-Type: application/json;charset=UTF-8
