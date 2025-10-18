@@ -370,7 +370,7 @@ All of Section 5.2 of {{RFC7521}} applies, in addition to the following processi
 * Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{RFC8725}})
 * The `aud` claim MUST identify the Issuer URL of the Resource Application's authorization server as the intended audience of the JWT.
 * The `client_id` claim MUST identify the same client as the client authentication in the request.
-* The Resource Authorization Server MUST follow Section 3.3 of {{RF6749}} when processing the `scope` claim.
+* The Resource Authorization Server MUST follow {{Section 3.3 of RFC6749}} when processing the `scope` claim.
 
 ## Response
 
