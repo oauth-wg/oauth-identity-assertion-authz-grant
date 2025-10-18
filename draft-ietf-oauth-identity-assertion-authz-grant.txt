@@ -632,6 +632,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    *  The client_id claim MUST identify the same client as the client
       authentication in the request.
 
+   *  The Resource Authorization Server MUST follow Section 3.3 of
+      [RFC6749] when processing the scope claim.
+
 4.4.2.  Response
 
    The Resource Authorization Server's token endpoint responds with an
