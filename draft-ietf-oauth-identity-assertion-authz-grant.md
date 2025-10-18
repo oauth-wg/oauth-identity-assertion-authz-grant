@@ -834,7 +834,7 @@ SaaS Authorization Server validates the Identity Assertion JWT Authorization Gra
       "scope": "agent.read agent.write"
     }
 
-### LLM Agent makes an authorized External Tool request
+#### LLM Agent makes an authorized External Tool request
 
 LLM Agent tool calls an external tool provided by the Enterprise SaaS Application (Resource Server) with a valid access token
 
