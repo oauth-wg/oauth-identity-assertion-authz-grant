@@ -189,7 +189,7 @@ Table of Contents
    Resource Authorization Server  Issues OAuth 2.0 access tokens for
       protected resources provided by the Resource Server.  In
       [I-D.ietf-oauth-identity-chaining], this is the Authorization
-      Server in trust domain B that trusts cross-domain authorization
+      Server in trust domain B, and trusts cross-domain authorization
       grants Section 3 from the IdP Authorization Server.
 
    Resource Server  Hosts protected resources and validates access
