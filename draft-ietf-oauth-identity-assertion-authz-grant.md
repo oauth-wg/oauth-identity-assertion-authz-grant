@@ -329,7 +329,7 @@ The example below uses an ID Token as the Identity Assertion, and uses a JWT Bea
     grant_type=urn:ietf:params:oauth:grant-type:token-exchange
     &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
     &audience=https://acme.chat.example/
-    &resource=https://api.chat.example
+    &resource=https://api.chat.example/
     &scope=chat.read+chat.history
     &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
     &subject_token_type=urn:ietf:params:oauth:token-type:id_token
