@@ -78,6 +78,7 @@ normative:
 informative:
   RFC9470:
   RFC9728:
+  I-D.ietf-oauth-client-id-metadata-document:
 
 --- abstract
 
@@ -138,7 +139,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}
 
 `client_id`:
-: REQUIRED - An identifier of the client that will act on behalf of the resource owner. It MUST be recognized by the Resource Authorization Server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}.
+: REQUIRED - An identifier of the client that will act on behalf of the resource owner. It MUST be recognized by the Resource Authorization Server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}. See {{client-id-mapping}} for additional considerations.
 
 `jti`:
 : REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}
@@ -468,6 +469,22 @@ The Resource Authorization Server's token endpoint responds with an OAuth 2.0 To
       "expires_in": 86400,
       "scope": "chat.read chat.history"
     }
+
+# Cross-Domain Client ID Handling {#client-id-mapping}
+
+There are three separate OAuth/OpenID Connect/SAML relationships involved in this flow:
+
+* Client to IdP Authorization Server (OpenID Connect or SAML)
+* Client to Resource Authorization Server (OAuth)
+* Resource Authorization Server to IdP Authorization Server (OpenID Connect or SAML)
+
+Each relationship is typically represented by independent registrations between each party. For example, the IdP Authorization Server typically issues a Client ID for the OpenID Connect Client to use for single sign-on. Similarly, the Resource Authorization Server typically issues a Client ID for the Client to use for API access to the Resource Server.
+
+In this flow, the IdP Authorization Server accepts a Token Exchange request from the Client, and issues an ID-JAG that will be consumed by the Resource Authorization Server. This means the IdP Authorization Server needs to know about the relationship between the Client and the Resource Authorization Server, in order to include a `client_id` claim in the ID-JAG that will be recognized by the Resource Authorization Server.
+
+This can be handled by the IdP Authorization Server maintaining a record of each `client_id` used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.
+
+Alternatively, if clients use "Client ID Metadata Document" {{I-D.ietf-oauth-client-id-metadata-document}} as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.
 
 
 # Authorization Server (IdP) Metadata {#idp-metadata}
@@ -870,6 +887,7 @@ The authors would like to thank the following people for their contributions and
 * Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"
 * Updated section references with more specific links
 * Added reference to scope parameter in ID-JAG processing rules
+* Added a section discussing client ID mapping and reference to Client ID Metadata Document
 
 -00
 
