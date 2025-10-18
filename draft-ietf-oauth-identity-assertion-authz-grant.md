@@ -167,7 +167,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 `amr`:
 : OPTIONAL -  Identifiers for authentication methods used when authenticating the end-user as defined in {{OpenID.Core}}
 
-The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices {{RFC8725}}.
+The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices ({{Section 3.11 of RFC8725}}).
 
 A non-normative example JWT with expanded header and payload claims is below:
 
