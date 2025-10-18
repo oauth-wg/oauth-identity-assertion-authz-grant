@@ -389,7 +389,7 @@ The following is a non-normative example of the issued token
     .
     {
       "jti": "9e43f81b64a33f20116179",
-      "iss": "https://acme.idp.example",
+      "iss": "https://acme.idp.example/",
       "sub": "U019488227",
       "aud": "https://acme.chat.example/",
       "client_id": "f53f191f9311af35",
