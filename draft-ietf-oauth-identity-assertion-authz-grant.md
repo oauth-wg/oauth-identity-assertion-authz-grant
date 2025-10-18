@@ -861,7 +861,9 @@ The authors would like to thank the following people for their contributions and
 * Moved ID-JAG definition to document root instead of nested under Token Exchange
 * Added proposed OpenID Connect `tenant` claim
 * Added authentication claims from ID Token
-
+* Adopted standard OAuth 2.0 role names instead of Resource App or Resource App's Authorization Server
+* Updated sequence diagram
+* Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"
 
 -00
 
