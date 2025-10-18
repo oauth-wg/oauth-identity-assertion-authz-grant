@@ -869,6 +869,7 @@ The authors would like to thank the following people for their contributions and
 * Updated sequence diagram
 * Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"
 * Updated section references with more specific links
+* Added reference to scope parameter in ID-JAG processing rules
 
 -00
 
