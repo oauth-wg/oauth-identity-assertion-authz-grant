@@ -483,7 +483,7 @@ To advertise support for the Identity Assertion JWT Authorization Grant, the aut
 
 ## Client Authentication
 
-This specification SHOULD only be supported for confidential clients.  Public clients SHOULD redirect the user with an OAuth 2.0 Authorization Request.
+This specification SHOULD only be supported for confidential clients.  Public clients SHOULD use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.
 
 ## Step-Up Authentication
 
