@@ -395,13 +395,13 @@ The following is a non-normative example of the issued token
       "client_id": "f53f191f9311af35",
       "exp": 1311281970,
       "iat": 1311280970,
-      "resource": "https://api.chat.example/"
+      "resource": "https://api.chat.example/",
       "scope": "chat.read chat.history",
       "auth_time": 1311280970,
       "amr": [
         "mfa",
-        "phrh"
-        "hwk"
+        "phrh",
+        "hwk",
         "user"
       ]
     }
