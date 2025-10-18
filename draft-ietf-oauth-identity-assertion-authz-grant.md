@@ -585,7 +585,11 @@ AI agents, including those based on large language models (LLMs), are designed t
 * Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion JWT Authorization Grant
 * Enterprise has granted the LLM Agent permission to act on behalf of users for the External Tool Application with a specific set of scopes
 
-### LLM Agent establishes a User Identity with Enterprise IdP
+### Example Sequence
+
+The steps below describe the sequence of the LLM agent obtaining an access token using an Identity Assertion JWT Authorization Grant ({{id-jag}}).
+
+#### LLM Agent establishes a User Identity with Enterprise IdP
 
 LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured `issuer` that was previously established.
 
@@ -620,7 +624,7 @@ LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration b
 
 LLM Agent discovers all necessary endpoints for authentication as well as support for the Identity Chaining requested token type `urn:ietf:params:oauth:token-type:id-jag`
 
-### IdP Authorization Request (with PKCE)
+#### IdP Authorization Request (with PKCE)
 
 LLM Agent generates a PKCE `code_verifier` and a `code_challenge` (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP with an authorization request
 
@@ -634,7 +638,7 @@ LLM Agent generates a PKCE `code_verifier` and a `code_challenge` (usually a SHA
       &code_challenge_method=S256
     Host: cyberdyne.idp.example
 
-### User authenticates and authorizes LLM Agent
+#### User authenticates and authorizes LLM Agent
 
 Enterprise IdP authenticates the end-user and redirects back to the LLM Agent's registered client redirect URI with an authorization code:
 
@@ -678,7 +682,7 @@ LLM Agent validates the ID Token using the published JWKS for the IdP
 
 LLM Agent now has an identity binding for context
 
-### LLM Agent calls Enterprise External Tool
+#### LLM Agent calls Enterprise External Tool
 
 LLM Agent tool calls an external tool provided by an Enterprise SaaS Application (Resource Server) without a valid access token and is issued an authentication challenge per Protected Resource Metadata {{RFC9728}}.
 
@@ -747,7 +751,7 @@ If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the
 
 > Note: This would benefit from an Authorization Server Metadata {{RFC8414}} property to indicate whether the Identity Assertion JWT Authorization Grant form of `jwt-bearer` would be accepted by this authorization server. There are other uses of `jwt-bearer` that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion JWT Authorization Grant would be supported. See [issue #16](https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16).
 
-### LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP
+#### LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP
 
 LLM Agent makes an Identity Assertion JWT Authorization Grant Token Exchange {{RFC8693}} request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's `OAuth 2.0 Protected Resource Metadata`
 
@@ -801,7 +805,7 @@ Identity Assertion JWT Authorization Grant claims:
     .
     signature
 
-### LLM Agent obtains an Access Token for Enterprise External Tool
+#### LLM Agent obtains an Access Token for Enterprise External Tool
 
 LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by {{RFC7523}}.
 
