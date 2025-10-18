@@ -172,7 +172,7 @@ Table of Contents
       token on behalf of a signed-in user to an external/3rd party
       application's API (Resource Server below).  In
       [I-D.ietf-oauth-identity-chaining], this is the Client in trust
-      domain A.  The application has direct relationship with the IdP
+      domain A.  The application has a direct relationship with the IdP
       Authorization Server for single sign-on as a Relying Party and
       another independent OAuth 2.0 client relationship with the
       Resource Authorization Server in trust domain B.
