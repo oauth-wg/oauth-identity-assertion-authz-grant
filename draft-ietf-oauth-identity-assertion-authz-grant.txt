@@ -106,7 +106,6 @@ Table of Contents
      A.3.  LLM Agent using Enterprise Tools
        A.3.1.  Preconditions
        A.3.2.  Example Sequence
-       A.3.3.  LLM Agent makes an authorized External Tool request
    Acknowledgments
    Document History
    Authors' Addresses
@@ -1266,7 +1265,7 @@ A.3.2.6.  LLM Agent obtains an Access Token for Enterprise External Tool
      "scope": "agent.read agent.write"
    }
 
-A.3.3.  LLM Agent makes an authorized External Tool request
+A.3.2.7.  LLM Agent makes an authorized External Tool request
 
    LLM Agent tool calls an external tool provided by the Enterprise SaaS
    Application (Resource Server) with a valid access token
