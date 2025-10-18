@@ -115,7 +115,7 @@ Resource Authorization Server
 : Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain B, and trusts cross-domain authorization grants {{id-jag}} from the IdP Authorization Server.
 
 Resource Server
-: Hosts protected resources and validates access tokens issued by the Resource Authorization Server.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Protected Resource in trust domain B.  The Resource Server has no direct trust relationship with the IdP Authorization Server uses its trusted Resource Authorization Server to determine who should have access to resources.
+: Hosts protected resources and validates access tokens issued by the Resource Authorization Server.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Protected Resource in trust domain B.  The Resource Server has no direct trust relationship with the IdP Authorization Server. Instead, it validates access tokens issued by its trusted Resource Authorization Server to determine who should have access to resources.
 
 
 # Identity Assertion JWT Authorization Grant {#id-jag}
