@@ -112,7 +112,7 @@ IdP Authorization Server
 : A SAML 2.0 Identity Provider or OpenID Connect Provider (OP) {{OpenID.Core}} that issues identity assertions for single sign-on and cross-domain authorization grants {{id-jag}} for a set of trusted applications in an organization's application ecosystem.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.
 
 Resource Authorization Server
-: Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain B that trusts cross-domain authorization grants {{id-jag}} from the IdP Authorization Server.
+: Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain B, and trusts cross-domain authorization grants {{id-jag}} from the IdP Authorization Server.
 
 Resource Server
 : Hosts protected resources and validates access tokens issued by the Resource Authorization Server.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Protected Resource in trust domain B.  The Resource Server has no direct trust relationship with the IdP Authorization Server uses its trusted Resource Authorization Server to determine who should have access to resources.
