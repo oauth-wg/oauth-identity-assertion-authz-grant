@@ -1307,6 +1307,14 @@ Document History
 
    *  Added authentication claims from ID Token
 
+   *  Adopted standard OAuth 2.0 role names instead of Resource App or
+      Resource App's Authorization Server
+
+   *  Updated sequence diagram
+
+   *  Updated all inconsistent references of ID-JAG to "Identity
+      Assertion JWT Authorization Grant"
+
    -00
 
    *  Initial revision as adopted working group draft
