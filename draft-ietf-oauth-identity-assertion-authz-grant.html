@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
-<title>Identity Assertion Authorization Grant</title>
+<title>Identity Assertion JWT Authorization Grant</title>
 <meta content="Aaron Parecki" name="author">
 <meta content="Karl McGuinness" name="author">
 <meta content="Brian Campbell" name="author">
 <meta content="
        This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through a common enterprise identity provider using Token Exchange   and JWT Profile for OAuth 2.0 Authorization Grants  . 
     " name="description">
-<meta content="xml2rfc 3.30.2" name="generator">
+<meta content="xml2rfc 3.31.0" name="generator">
 <meta content="cross-domain" name="keyword">
 <meta content="authorization" name="keyword">
 <meta content="authz" name="keyword">
@@ -19,18 +19,17 @@
 <meta content="enterprise" name="keyword">
 <meta content="draft-ietf-oauth-identity-assertion-authz-grant-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.30.2
-    Python 3.12.11
+  xml2rfc 3.31.0
+    Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
     lxml 5.3.1
-    platformdirs 4.4.0
+    platformdirs 4.5.0
     pycountry 24.6.1
     PyYAML 6.0.2
     requests 2.32.5
-    setuptools 80.9.0
     wcwidth 0.2.14
 -->
 <link href="draft-ietf-oauth-identity-assertion-authz-grant.xml" rel="alternate" type="application/rfc+xml">
@@ -1049,12 +1048,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <table class="ears">
 <thead><tr>
 <td class="left">Internet-Draft</td>
-<td class="center">ID Token Authz Grant</td>
+<td class="center">ID JWT Authz Grant</td>
 <td class="right">October 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Parecki, et al.</td>
-<td class="center">Expires 20 April 2026</td>
+<td class="center">Expires 21 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,12 +1066,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-oauth-identity-assertion-authz-grant-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-10-17" class="published">17 October 2025</time>
+<time datetime="2025-10-18" class="published">18 October 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-20">20 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-21">21 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1090,7 +1089,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </dd>
 </dl>
 </div>
-<h1 id="title">Identity Assertion Authorization Grant</h1>
+<h1 id="title">Identity Assertion JWT Authorization Grant</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through a common enterprise identity provider using Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> and JWT Profile for OAuth 2.0 Authorization Grants <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
@@ -1130,7 +1129,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1286,7 +1285,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
                     <p id="section-toc.1-1.9.2.3.2.5.1"><a href="#appendix-A.3.5" class="auto internal xref">A.3.5</a>.  <a href="#name-llm-agent-calls-enterprise-" class="internal xref">LLM Agent calls Enterprise External Tool</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3.2.6">
-                    <p id="section-toc.1-1.9.2.3.2.6.1"><a href="#appendix-A.3.6" class="auto internal xref">A.3.6</a>.  <a href="#name-llm-agent-obtains-an-identi" class="internal xref">LLM Agent obtains an Identity Assertion Grant for Enterprise External Tool from the Enterprise IdP</a></p>
+                    <p id="section-toc.1-1.9.2.3.2.6.1"><a href="#appendix-A.3.6" class="auto internal xref">A.3.6</a>.  <a href="#name-llm-agent-obtains-an-identi" class="internal xref">LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3.2.7">
                     <p id="section-toc.1-1.9.2.3.2.7.1"><a href="#appendix-A.3.7" class="auto internal xref">A.3.7</a>.  <a href="#name-llm-agent-obtains-an-access" class="internal xref">LLM Agent obtains an Access Token for Enterprise External Tool</a></p>
@@ -1340,17 +1339,22 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <span class="break"></span><dl class="dlParallel" id="section-2.1-1">
           <dt id="section-2.1-1.1">Client</dt>
           <dd style="margin-left: 1.5em" id="section-2.1-1.2">
-            <p id="section-2.1-1.2.1">The application that wants to obtain an OAuth 2.0 access token on behalf of a signed-in user to an external/3rd party application's API (Resource Server below). In <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>, this is the Client in trust domain A. This is also sometimes referred to as the "Requesting Application".<a href="#section-2.1-1.2.1" class="pilcrow">¶</a></p>
+            <p id="section-2.1-1.2.1">The application that wants to obtain an OAuth 2.0 access token on behalf of a signed-in user to an external/3rd party application's API (Resource Server below). In <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>, this is the Client in trust domain A.  The application has a direct relationship with the IdP Authorization Server for single sign-on as a Relying Party and another independent OAuth 2.0 client relationship with the Resource Authorization Server in trust domain B.<a href="#section-2.1-1.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-2.1-1.3">Resource Application</dt>
+<dt id="section-2.1-1.3">IdP Authorization Server</dt>
           <dd style="margin-left: 1.5em" id="section-2.1-1.4">
-            <p id="section-2.1-1.4.1">The application that provides an OAuth 2.0 Protected Resource. In <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>, this is the Protected Resource in trust domain B. The Resource Application is made up of both an Authorization Server and a Resource Server as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-1.1" class="relref">Section 1.1</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>.<a href="#section-2.1-1.4.1" class="pilcrow">¶</a></p>
+            <p id="section-2.1-1.4.1">A SAML 2.0 Identity Provider or OpenID Connect Provider (OP) <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span> that issues identity assertions for single sign-on and cross-domain authorization grants <a href="#id-jag" class="auto internal xref">Section 3</a> for a set of trusted applications in an organization's application ecosystem.  In <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.<a href="#section-2.1-1.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="section-2.1-1.5">Authorization Server (IdP)</dt>
+<dt id="section-2.1-1.5">Resource Authorization Server</dt>
           <dd style="margin-left: 1.5em" id="section-2.1-1.6">
-            <p id="section-2.1-1.6.1">The Identity Provider that is trusted by a set of applications in an organization's app ecosystem. In <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>, this is the Authorization Server in trust domain A, which is also trusted by the Authorization Server of the Protected Resource in trust domain B.<a href="#section-2.1-1.6.1" class="pilcrow">¶</a></p>
+            <p id="section-2.1-1.6.1">Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>, this is the Authorization Server in trust domain B, and trusts cross-domain authorization grants <a href="#id-jag" class="auto internal xref">Section 3</a> from the IdP Authorization Server.<a href="#section-2.1-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-2.1-1.7">Resource Server</dt>
+          <dd style="margin-left: 1.5em" id="section-2.1-1.8">
+            <p id="section-2.1-1.8.1">Hosts protected resources and validates access tokens issued by the Resource Authorization Server.  In <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>, this is the Protected Resource in trust domain B.  The Resource Server has no direct trust relationship with the IdP Authorization Server. Instead, it validates access tokens issued by its trusted Resource Authorization Server to determine who should have access to resources.<a href="#section-2.1-1.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
@@ -1358,13 +1362,13 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 </div>
 </section>
 </div>
-<div id="jwt-authorization-grant">
+<div id="id-jag">
 <section id="section-3">
       <h2 id="name-identity-assertion-jwt-auth">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-identity-assertion-jwt-auth" class="section-name selfRef">Identity Assertion JWT Authorization Grant</a>
       </h2>
 <p id="section-3-1">The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">An Identity Assertion JWT Authorization Grant is issued and signed by an IdP similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an end-user. Instead of being issued for a client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain. It replaces the need for the client to obtain an authorization code from the Resource App's authorization server to delegate access to the client, and instead uses the IdP which is trusted by the Authorization Server to delegate access to the client.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-2">An Identity Assertion JWT Authorization Grant is issued and signed by an IdP similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an end-user. Instead of being issued for a client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain. It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP which is trusted by the Authorization Server to delegate access to the client.<a href="#section-3-2" class="pilcrow">¶</a></p>
 <p id="section-3-3">As described in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <p id="section-3-4">The following claims are used within the Identity Assertion JWT Authorization Grant:<a href="#section-3-4" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-3-5">
@@ -1377,19 +1381,19 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <dt id="section-3-5.3">
 <code>sub</code>:</dt>
         <dd style="margin-left: 1.5em" id="section-3-5.4">
-          <p id="section-3-5.4.1"><span class="bcp14">REQUIRED</span> - The subject identifier (e.g. user ID) of the resource owner at the Resource Application as defined in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span><a href="#section-3-5.4.1" class="pilcrow">¶</a></p>
+          <p id="section-3-5.4.1"><span class="bcp14">REQUIRED</span> - The subject identifier (e.g. user ID) of the resource owner at the Resource Authorization Server as defined in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span><a href="#section-3-5.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-3-5.5">
 <code>aud</code>:</dt>
         <dd style="margin-left: 1.5em" id="section-3-5.6">
-          <p id="section-3-5.6.1"><span class="bcp14">REQUIRED</span> - The issuer identifier of the Resource Application's authorization server as defined in <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span><a href="#section-3-5.6.1" class="pilcrow">¶</a></p>
+          <p id="section-3-5.6.1"><span class="bcp14">REQUIRED</span> - The issuer identifier of the Resource Authorization Server as defined in <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span><a href="#section-3-5.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-3-5.7">
 <code>client_id</code>:</dt>
         <dd style="margin-left: 1.5em" id="section-3-5.8">
-          <p id="section-3-5.8.1"><span class="bcp14">REQUIRED</span> - An identifier of the client that will act on behalf of the resource owner. It <span class="bcp14">MUST</span> be recognized by the Resource Application's authorization server. For interoperability, the client identifier <span class="bcp14">SHOULD</span> be a <code>client_id</code> as defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>.<a href="#section-3-5.8.1" class="pilcrow">¶</a></p>
+          <p id="section-3-5.8.1"><span class="bcp14">REQUIRED</span> - An identifier of the client that will act on behalf of the resource owner. It <span class="bcp14">MUST</span> be recognized by the Resource Authorization Server. For interoperability, the client identifier <span class="bcp14">SHOULD</span> be a <code>client_id</code> as defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>.<a href="#section-3-5.8.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-3-5.9">
@@ -1413,7 +1417,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <dt id="section-3-5.15">
 <code>resource</code>:</dt>
         <dd style="margin-left: 1.5em" id="section-3-5.16">
-          <p id="section-3-5.16.1"><span class="bcp14">OPTIONAL</span> - The Resource Identifier (<span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span>) of the Resource Application's Resource Server (either a single URI or an array of URIs)<a href="#section-3-5.16.1" class="pilcrow">¶</a></p>
+          <p id="section-3-5.16.1"><span class="bcp14">OPTIONAL</span> - The Resource Identifier (<span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span>) of the Resource Server (either a single URI or an array of URIs)<a href="#section-3-5.16.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-3-5.17">
@@ -1448,7 +1452,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <dd class="break"></dd>
 </dl>
 <p id="section-3-6">The <code>typ</code> of the JWT indicated in the JWT header <span class="bcp14">MUST</span> be <code>oauth-id-jag+jwt</code>. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span>.<a href="#section-3-6" class="pilcrow">¶</a></p>
-<p id="section-3-7">An example JWT shown with expanded header and payload claims is below:<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-7">A non-normative example JWT with expanded header and payload claims is below:<a href="#section-3-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-3-8">
 <pre>
 {
@@ -1477,7 +1481,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 signature
 </pre><a href="#section-3-8" class="pilcrow">¶</a>
 </div>
-<p id="section-3-9">The Identity Assertion Authorization Grant JWT may contain additional Authentication, Identity, or Authorization claims that are valid for an ID Token as the grant functions as an identity assertion for the Resource App.<a href="#section-3-9" class="pilcrow">¶</a></p>
+<p id="section-3-9">The Identity Assertion JWT Authorization Grant may contain additional Authentication, Identity, or Authorization claims that are valid for an ID Token as the grant functions as an identity assertion for the Resource App.<a href="#section-3-9" class="pilcrow">¶</a></p>
 <p id="section-3-10">Implementation notes:<a href="#section-3-10" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3-11.1">
@@ -1496,7 +1500,7 @@ signature
         <h3 id="name-overview">
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-overview" class="section-name selfRef">Overview</a>
         </h3>
-<p id="section-4.1-1">The example flow is for an enterprise <code>acme</code>, which uses a wiki app and chat app from different vendors, both of which are integrated into the enterprise's Identity Provider using OpenID Connect.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-1">The example flow is for an enterprise <code>acme</code>, which uses a multi-tenant wiki app and chat app from different vendors, both of which are integrated into the enterprise's multi-tenant Identity Provider using OpenID Connect.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-1">
           <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
 <thead>
@@ -1516,70 +1520,79 @@ signature
               <td class="text-left" rowspan="1" colspan="1">
                 <code>https://acme.wiki.example</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">Wiki app that embeds content from one or more resource applications</td>
+              <td class="text-left" rowspan="1" colspan="1">Wiki app that embeds content from one or more resource servers</td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">Resource Application</td>
+              <td class="text-left" rowspan="1" colspan="1">Resource Authorization Server</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>https://chat.example</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>https://acme.chat.example</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">Chat and communication app</td>
+              <td class="text-left" rowspan="1" colspan="1">Authorization Server for an chat and communication app</td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">Identity Provider</td>
+              <td class="text-left" rowspan="1" colspan="1">Identity Provider Authorization Server</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>https://idp.example</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>https://acme.idp.example</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">Identity Provider</td>
+              <td class="text-left" rowspan="1" colspan="1">Enterprise Identity Provider</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Resource Server</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>https://api.chat.example</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>https://api.chat.example</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">Public API for the chat and communications app</td>
             </tr>
           </tbody>
         </table>
 <p id="section-4.1-3">Sequence Diagram<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1-4">
 <pre>
-+---------+      +--------------+   +---------------+  +--------------+
-|         |      |              |   |   Resource    |  |   Resource   |
-|         |      |    IdP       |   |  Application  |  |  Application |
-| Client  |      | Authorization|   | Authorization |  |   Resource   |
-|         |      |   Server     |   |    Server     |  |    Server    |
-+----+----+      +-------+------+   +-------+-------+  +------+-------+
-     |                   |                  |                 |
-     |                   |                  |                 |
-     |  --------------&gt;  |                  |                 |
-     |   1 User SSO      |                  |                 |
-     |                   |                  |                 |
-     |     ID Token      |                  |                 |
-     |  &lt;- - - - - - - - |                  |                 |
-     |                   |                  |                 |
-     |                   |                  |                 |
-     |                   |                  |                 |
-     | 2 Token Exchange  |                  |                 |
-     | ----------------&gt; |                  |                 |
-     |                   |                  |                 |
-     |   ID-JAG          |                  |                 |
-     | &lt;- - - - - - - -  |                  |                 |
-     |                   |                  |                 |
-     |                   |                  |                 |
-     |                   |                  |                 |
-     |  3 Present ID-JAG |                  |                 |
-     | ------------------+----------------&gt; |                 |
-     |                   |                  |                 |
-     |    Access Token   |                  |                 |
-     | &lt;- - - - - - - - - - - - - - - - - - |                 |
-     |                   |                  |                 |
-     |                   |                  |                 |
-     |                   |                  |                 |
-     |  4 Resource Request with Access Token|                 |
-     | -----------------------------------------------------&gt; |
-     |                   |                  |                 |
-     |                   |                  |                 |
-     |                   |                  |                 |
++---------+      +---------------+   +---------------+  +----------+
+|         |      |      IdP      |   |   Resource    |  | Resource |
+| Client  |      | Authorization |   | Authorization |  |  Server  |
+|         |      |    Server     |   |    Server     |  |          |
++----+----+      +-------+-------+   +-------+-------+  +-----+----+
+     |                   |                   |                 |
+     |                   |                   |                 |
+     |  --------------&gt;  |                   |                 |
+     |   1 User SSO      |                   |                 |
+     |                   |                   |                 |
+     |     ID Token      |                   |                 |
+     |  &lt;- - - - - - - - |                   |                 |
+     |                   |                   |                 |
+     |                   |                   |                 |
+     |                   |                   |                 |
+     | 2 Token Exchange  |                   |                 |
+     | ----------------&gt; |                   |                 |
+     |                   |                   |                 |
+     |   ID-JAG          |                   |                 |
+     | &lt;- - - - - - - -  |                   |                 |
+     |                   |                   |                 |
+     |                   |                   |                 |
+     |                   |                   |                 |
+     | 3 Present ID-JAG  |                   |                 |
+     | ------------------+-----------------&gt; |                 |
+     |                   |                   |                 |
+     |    Access Token   |                   |                 |
+     | &lt;- - - - - - - - - - - - - - - - - - -|                 |
+     |                   |                   |                 |
+     |                   |                   |                 |
+     |                   |                   |                 |
+     | 4 Resource Request with Access Token  |                 |
+     | ------------------------------------------------------&gt; |
+     |                   |                   |                 |
+     |                   |                   |                 |
+     |                   |                   |                 |
 </pre><a href="#section-4.1-4" class="pilcrow">¶</a>
 </div>
 <ol start="1" type="1" class="normal type-1" id="section-4.1-5">
@@ -1587,16 +1600,16 @@ signature
             <p id="section-4.1-5.1.1">User logs in to the Client, the Client obtains the Identity Assertion (e.g. OpenID Connect ID Token or SAML assertion)<a href="#section-4.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.1-5.2">
-            <p id="section-4.1-5.2.1">Client uses the Identity Assertion to request an Identity Assertion Authorization Grant for the Resource Application from the IdP<a href="#section-4.1-5.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-5.2.1">Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP<a href="#section-4.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.1-5.3">
-            <p id="section-4.1-5.3.1">Client exchanges the Identity Assertion Authorization Grant JWT for an Access Token at the Resource Application's token endpoint<a href="#section-4.1-5.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-5.3.1">Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint<a href="#section-4.1-5.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.1-5.4">
             <p id="section-4.1-5.4.1">Client makes an API request with the Access Token<a href="#section-4.1-5.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-4.1-6">This specification is constrained to deployments where all Resource Application Resource Servers are leveraging the same IdP Authorization Server for Single-Sign-On (SSO) and session management services. The IdP provides a consistent trust boundary enabling the set of Resource Application Authorization Servers to honor the JWT Authorization Grant (ID-JAG) issued by the IdP. This specification also assumes that the Resource Server Authorization Servers delegate user authorization authority to the IdP (e.g. the IdP is trusted to ensure the scopes identified in the ID-JAG have been correctly authorized before issuing the ID-JAG token).<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">This specification is constrained to deployments where all Resource Authorization Servers are leveraging the same IdP Authorization Server for Single-Sign-On (SSO) and session management services. The IdP provides a consistent trust boundary enabling the set of Resource Authorization Server Authorization Servers to honor the JWT Authorization Grant (ID-JAG) issued by the IdP. This specification also assumes that the Resource Authorization Servers delegate user authorization authority to the IdP (e.g. the IdP is trusted to ensure the scopes identified in the ID-JAG have been correctly authorized before issuing the ID-JAG token).<a href="#section-4.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="user-authentication">
@@ -1652,19 +1665,19 @@ Content-Type: application/json
 <dt id="section-4.3-2.3">
 <code>audience</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.4">
-            <p id="section-4.3-2.4.1"><span class="bcp14">REQUIRED</span> - The Issuer URL of the Resource Application's authorization server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-2" class="relref">Section 2</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.4.1"><span class="bcp14">REQUIRED</span> - The Issuer URL of the Resource Authorization Server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-2" class="relref">Section 2</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.3-2.5">
 <code>resource</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.6">
-            <p id="section-4.3-2.6.1"><span class="bcp14">OPTIONAL</span> - The Resource Identifier of the Resource Application's resource server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span>.<a href="#section-4.3-2.6.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.6.1"><span class="bcp14">OPTIONAL</span> - The Resource Identifier of the Resource Server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span>.<a href="#section-4.3-2.6.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.3-2.7">
 <code>scope</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.8">
-            <p id="section-4.3-2.8.1"><span class="bcp14">OPTIONAL</span> - The space-separated list of scopes at the Resource Application that is being requested.<a href="#section-4.3-2.8.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.8.1"><span class="bcp14">OPTIONAL</span> - The space-separated list of scopes at the Resource Server that is being requested.<a href="#section-4.3-2.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.3-2.9">
@@ -1692,6 +1705,7 @@ Content-Type: application/x-www-form-urlencoded
 grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;requested_token_type=urn:ietf:params:oauth:token-type:id-jag
 &amp;audience=https://acme.chat.example/
+&amp;resource=https://api.chat.example/
 &amp;scope=chat.read+chat.history
 &amp;subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
 &amp;subject_token_type=urn:ietf:params:oauth:token-type:id_token
@@ -1714,7 +1728,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
           <h4 id="name-response">
 <a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-response" class="section-name selfRef">Response</a>
           </h4>
-<p id="section-4.3.2-1">If access is granted, the IdP creates a signed Identity Assertion Authorization Grant JWT (<a href="#jwt-authorization-grant" class="auto internal xref">Section 3</a>) and returns it in the token exchange response defined in Section 2.2 of <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-1">If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>) and returns it in the token exchange response defined in Section 2.2 of <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.2-2">
 <pre>
 HTTP/1.1 200 OK
@@ -1741,7 +1755,7 @@ Pragma: no-cache
 <dt id="section-4.3.2-3.3">
 <code>access_token</code>:</dt>
             <dd style="margin-left: 1.5em" id="section-4.3.2-3.4">
-              <p id="section-4.3.2-3.4.1"><span class="bcp14">REQUIRED</span> - The Identity Assertion Authorization Grant JWT. (Note: Token Exchange requires the <code>access_token</code> response parameter for historical reasons, even though this is not an OAuth access token.)<a href="#section-4.3.2-3.4.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.2-3.4.1"><span class="bcp14">REQUIRED</span> - The Identity Assertion JWT Authorization Grant. (Note: Token Exchange requires the <code>access_token</code> response parameter for historical reasons, even though this is not an OAuth access token.)<a href="#section-4.3.2-3.4.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
 <dt id="section-4.3.2-3.5">
@@ -1769,13 +1783,49 @@ Pragma: no-cache
 </dd>
           <dd class="break"></dd>
 </dl>
-<div id="error-response">
+<div id="issued-identity-assertion-jwt-authorization-grant">
 <section id="section-4.3.2.1">
-            <h5 id="name-error-response">
-<a href="#section-4.3.2.1" class="section-number selfRef">4.3.2.1. </a><a href="#name-error-response" class="section-name selfRef">Error Response</a>
+            <h5 id="name-issued-identity-assertion-j">
+<a href="#section-4.3.2.1" class="section-number selfRef">4.3.2.1. </a><a href="#name-issued-identity-assertion-j" class="section-name selfRef">Issued Identity Assertion JWT Authorization Grant</a>
             </h5>
-<p id="section-4.3.2.1-1">On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in Section 5.2 of <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, e.g:<a href="#section-4.3.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2.1-1">The following is a non-normative example of the issued token<a href="#section-4.3.2.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.2.1-2">
+<pre>
+{
+  "typ": "oauth-id-jag+jwt"
+}
+.
+{
+  "jti": "9e43f81b64a33f20116179",
+  "iss": "https://acme.idp.example/",
+  "sub": "U019488227",
+  "aud": "https://acme.chat.example/",
+  "client_id": "f53f191f9311af35",
+  "exp": 1311281970,
+  "iat": 1311280970,
+  "resource": "https://api.chat.example/"
+  "scope": "chat.read chat.history",
+  "auth_time": 1311280970,
+  "amr": [
+    "mfa",
+    "phrh"
+    "hwk"
+    "user"
+  ]
+}
+.
+signature
+</pre><a href="#section-4.3.2.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="error-response">
+<section id="section-4.3.2.2">
+            <h5 id="name-error-response">
+<a href="#section-4.3.2.2" class="section-number selfRef">4.3.2.2. </a><a href="#name-error-response" class="section-name selfRef">Error Response</a>
+            </h5>
+<p id="section-4.3.2.2-1">On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in Section 5.2 of <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, e.g:<a href="#section-4.3.2.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.2.2-2">
 <pre>
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
@@ -1785,7 +1835,7 @@ Cache-Control: no-store
   "error": "invalid_grant",
   "error_description": "Audience validation failed"
 }
-</pre><a href="#section-4.3.2.1-2" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.2.2-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -1798,7 +1848,7 @@ Cache-Control: no-store
         <h3 id="name-access-token-request">
 <a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-access-token-request" class="section-name selfRef">Access Token Request</a>
         </h3>
-<p id="section-4.4-1">The Client makes an access token request to the Resource Application's token endpoint using the previously obtained Identity Assertion Authorization Grant as a JWT Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-1">The Client makes an access token request to the Resource Authorization Server's token endpoint using the previously obtained Identity Assertion JWT Authorization Grant as a JWT Bearer Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-4.4-2">
           <dt id="section-4.4-2.1">
 <code>grant_type</code>:</dt>
@@ -1809,11 +1859,11 @@ Cache-Control: no-store
 <dt id="section-4.4-2.3">
 <code>assertion</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.4-2.4">
-            <p id="section-4.4-2.4.1"><span class="bcp14">REQUIRED</span> - The Identity Assertion Authorization Grant JWT obtained in the previous token exchange step<a href="#section-4.4-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.4-2.4.1"><span class="bcp14">REQUIRED</span> - The Identity Assertion JWT Authorization Grant obtained in the previous token exchange step<a href="#section-4.4-2.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
-<p id="section-4.4-3">The Client authenticates with its credentials as registered with the Resource Application's authorization server.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.4-3">The Client authenticates with its credentials as registered with the Resource Authorization Server.<a href="#section-4.4-3" class="pilcrow">¶</a></p>
 <p id="section-4.4-4">For example:<a href="#section-4.4-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.4-5">
 <pre>
@@ -1836,7 +1886,7 @@ assertion=eyJhbGciOiJIUzI1NiIsI...
               <p id="section-4.4.1-2.1.1">Validate the JWT <code>typ</code> is <code>oauth-id-jag+jwt</code> (per <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span>)<a href="#section-4.4.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.4.1-2.2">
-              <p id="section-4.4.1-2.2.1">The <code>aud</code> claim <span class="bcp14">MUST</span> identify the Issuer URL of the Resource Application's authorization server as the intended audience of the JWT.<a href="#section-4.4.1-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-4.4.1-2.2.1">The <code>aud</code> claim <span class="bcp14">MUST</span> identify the Issuer URL of the Resource Authorization Server as the intended audience of the JWT.<a href="#section-4.4.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.4.1-2.3">
               <p id="section-4.4.1-2.3.1">The <code>client_id</code> claim <span class="bcp14">MUST</span> identify the same client as the client authentication in the request.<a href="#section-4.4.1-2.3.1" class="pilcrow">¶</a></p>
@@ -1849,7 +1899,7 @@ assertion=eyJhbGciOiJIUzI1NiIsI...
           <h4 id="name-response-2">
 <a href="#section-4.4.2" class="section-number selfRef">4.4.2. </a><a href="#name-response-2" class="section-name selfRef">Response</a>
           </h4>
-<p id="section-4.4.2-1">The Resource Application token endpoint responds with an OAuth 2.0 Token Response, e.g.:<a href="#section-4.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.2-1">The Resource Authorization Server's token endpoint responds with an OAuth 2.0 Token Response, e.g.:<a href="#section-4.4.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.4.2-2">
 <pre>
 HTTP/1.1 200 OK
@@ -1877,7 +1927,7 @@ Pragma: no-cache
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-authorization-server-idp-me" class="section-name selfRef">Authorization Server (IdP) Metadata</a>
       </h2>
 <p id="section-5-1">An IdP can advertise its support for this profile in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. Identity and Authorization Chaining Across Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines a new metadata property <code>identity_chaining_requested_token_types_supported</code> for this purpose.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">To advertise support for the Identity Assertion Authorization Grant, the authorization server <span class="bcp14">SHOULD</span> include the following value in the <code>identity_chaining_requested_token_types_supported</code> property:<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-2">To advertise support for the Identity Assertion JWT Authorization Grant, the authorization server <span class="bcp14">SHOULD</span> include the following value in the <code>identity_chaining_requested_token_types_supported</code> property:<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3"><code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1914,7 +1964,7 @@ Cache-Control: no-store
 </pre><a href="#section-6.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-6.2-3">The Client would need to redirect the user back to the IdP to obtain a new assertion that meets the requirements and retry the token exchange.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
-<p id="section-6.2-4">TBD: It may make more sense to request the Identity Assertion Authorization Grant in the authorization request if using OpenID Connect for SSO when performing a step-up to skip the need for additional token exchange round-trip.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">TBD: It may make more sense to request the Identity Assertion JWT Authorization Grant in the authorization request if using OpenID Connect for SSO when performing a step-up to skip the need for additional token exchange round-trip.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="cross-domain-use">
@@ -1937,7 +1987,7 @@ Cache-Control: no-store
         <h3 id="name-media-types">
 <a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-media-types" class="section-name selfRef">Media Types</a>
         </h3>
-<p id="section-7.1-1">This section registers <code>oauth-id-jag+jwt</code>, a new media type <span>[<a href="#RFC2046" class="cite xref">RFC2046</a>]</span> in the "Media Types" registry <span>[<a href="#IANA.media-types" class="cite xref">IANA.media-types</a>]</span> in the manner described in <span>[<a href="#RFC6838" class="cite xref">RFC6838</a>]</span>. It can be used to indicate that the content is an Identity Assertion Authorization Grant JWT.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-1">This section registers <code>oauth-id-jag+jwt</code>, a new media type <span>[<a href="#RFC2046" class="cite xref">RFC2046</a>]</span> in the "Media Types" registry <span>[<a href="#IANA.media-types" class="cite xref">IANA.media-types</a>]</span> in the manner described in <span>[<a href="#RFC6838" class="cite xref">RFC6838</a>]</span>. It can be used to indicate that the content is an Identity Assertion JWT Authorization Grant.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="oauth-uri-registration">
@@ -1979,7 +2029,7 @@ Cache-Control: no-store
             <p id="section-7.3-2.3.1">Change Controller: IETF<a href="#section-7.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.3-2.4">
-            <p id="section-7.3-2.4.1">Specification Document(s): <a href="#jwt-authorization-grant" class="auto internal xref">Section 3</a><a href="#section-7.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-7.3-2.4.1">Specification Document(s): <a href="#id-jag" class="auto internal xref">Section 3</a><a href="#section-7.3-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -2114,16 +2164,16 @@ Cache-Control: no-store
               <p id="appendix-A.1.1-1.1.1">The Client has a registered OAuth 2.0 Client with the IdP Authorization Server<a href="#appendix-A.1.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.1.1-1.2">
-              <p id="appendix-A.1.1-1.2.1">The Client has a registered OAuth 2.0 Client with the Resource Application<a href="#appendix-A.1.1-1.2.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.1.1-1.2.1">The Client has a registered OAuth 2.0 Client with the Resource Authorization Server<a href="#appendix-A.1.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.1.1-1.3">
-              <p id="appendix-A.1.1-1.3.1">Enterprise has established a trust relationship between their IdP and the Client for SSO and Identity Assertion Authorization Grant<a href="#appendix-A.1.1-1.3.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.1.1-1.3.1">Enterprise has established a trust relationship between their IdP and the Client for SSO and Identity Assertion JWT Authorization Grant<a href="#appendix-A.1.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.1.1-1.4">
-              <p id="appendix-A.1.1-1.4.1">Enterprise has established a trust relationship between their IdP and the Resource Application for SSO and Identity Assertion Authorization Grant<a href="#appendix-A.1.1-1.4.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.1.1-1.4.1">Enterprise has established a trust relationship between their IdP and the Resource Authorization Server for SSO and Identity Assertion JWT Authorization Grant<a href="#appendix-A.1.1-1.4.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.1.1-1.5">
-              <p id="appendix-A.1.1-1.5.1">Enterprise has granted the Client permission to act on behalf of users for the Resource Application with a set of scopes<a href="#appendix-A.1.1-1.5.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.1.1-1.5.1">Enterprise has granted the Client permission to act on behalf of users for the Resource Authorization Server with a set of scopes<a href="#appendix-A.1.1-1.5.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -2145,13 +2195,13 @@ Cache-Control: no-store
           </h4>
 <ul class="normal">
 <li class="normal" id="appendix-A.2.1-1.1">
-              <p id="appendix-A.2.1-1.1.1">The Client does not have a pre-registered OAuth 2.0 client at the IdP Authorization Server or the Resource Application<a href="#appendix-A.2.1-1.1.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.2.1-1.1.1">The Client does not have a pre-registered OAuth 2.0 client at the IdP Authorization Server or the Resource Authorization Server<a href="#appendix-A.2.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.2.1-1.2">
               <p id="appendix-A.2.1-1.2.1">The Client has obtained an Identity Assertion (e.g. ID Token) from the IdP Authorization Server<a href="#appendix-A.2.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.2.1-1.3">
-              <p id="appendix-A.2.1-1.3.1">The Resource Application is configured to allow the Identity Assertion Authorization Grant from unregistered clients<a href="#appendix-A.2.1-1.3.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.2.1-1.3.1">The Resource Authorization Server is configured to allow the Identity Assertion JWT Authorization Grant from unregistered clients<a href="#appendix-A.2.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -2180,7 +2230,7 @@ Cache-Control: no-store
               <p id="appendix-A.3.1-1.3.1">Enterprise has established a trust relationship between their IdP and the LLM Agent for SSO<a href="#appendix-A.3.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.3.1-1.4">
-              <p id="appendix-A.3.1-1.4.1">Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion Authorization Grant<a href="#appendix-A.3.1-1.4.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.3.1-1.4.1">Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion JWT Authorization Grant<a href="#appendix-A.3.1-1.4.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.3.1-1.5">
               <p id="appendix-A.3.1-1.5.1">Enterprise has granted the LLM Agent permission to act on behalf of users for the External Tool Application with a specific set of scopes<a href="#appendix-A.3.1-1.5.1" class="pilcrow">¶</a></p>
@@ -2383,20 +2433,20 @@ Content-Type: application/json
 </pre><a href="#appendix-A.3.5-7" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.3.5-8">LLM Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.<a href="#appendix-A.3.5-8" class="pilcrow">¶</a></p>
-<p id="appendix-A.3.5-9">If the <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard <code>authorization_code</code> from the SaaS Application's Authorization Server<a href="#appendix-A.3.5-9" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.5-9">If the <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard <code>authorization_code</code> from the SaaS Application's Authorization Server<a href="#appendix-A.3.5-9" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-A.3.5-10.1">
-              <p id="appendix-A.3.5-10.1.1">Note: This would benefit from an Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> property to indicate whether the Identity Assertion Authorization Grant form of <code>jwt-bearer</code> would be accepted by this authorization server. There are other uses of <code>jwt-bearer</code> that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion Authorization Grant would be supported. See <a href="https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16">issue #16</a>.<a href="#appendix-A.3.5-10.1.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.3.5-10.1.1">Note: This would benefit from an Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> property to indicate whether the Identity Assertion JWT Authorization Grant form of <code>jwt-bearer</code> would be accepted by this authorization server. There are other uses of <code>jwt-bearer</code> that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion JWT Authorization Grant would be supported. See <a href="https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16">issue #16</a>.<a href="#appendix-A.3.5-10.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
 </div>
-<div id="llm-agent-obtains-an-identity-assertion-grant-for-enterprise-external-tool-from-the-enterprise-idp">
+<div id="llm-agent-obtains-an-identity-assertion-jwt-authorization-grant-for-enterprise-external-tool-from-the-enterprise-idp">
 <section id="appendix-A.3.6">
           <h4 id="name-llm-agent-obtains-an-identi">
-<a href="#appendix-A.3.6" class="section-number selfRef">A.3.6. </a><a href="#name-llm-agent-obtains-an-identi" class="section-name selfRef">LLM Agent obtains an Identity Assertion Grant for Enterprise External Tool from the Enterprise IdP</a>
+<a href="#appendix-A.3.6" class="section-number selfRef">A.3.6. </a><a href="#name-llm-agent-obtains-an-identi" class="section-name selfRef">LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP</a>
           </h4>
-<p id="appendix-A.3.6-1">LLM Agent makes an Identity Assertion Grant Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's <code>OAuth 2.0 Protected Resource Metadata</code><a href="#appendix-A.3.6-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.6-1">LLM Agent makes an Identity Assertion JWT Authorization Grant Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's <code>OAuth 2.0 Protected Resource Metadata</code><a href="#appendix-A.3.6-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.3.6-2">
 <pre>
 POST /oauth2/token HTTP/1.1
@@ -2414,7 +2464,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 </pre><a href="#appendix-A.3.6-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.6-3">If access is granted, the Enterprise IdP creates a signed Identity Assertion Authorization Grant JWT and returns it in the token exchange response defined in Section 2.2 of <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.3.6-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.6-3">If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in Section 2.2 of <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.3.6-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.3.6-4">
 <pre>
 HTTP/1.1 200 OK
@@ -2431,7 +2481,7 @@ Pragma: no-cache
 }
 </pre><a href="#appendix-A.3.6-4" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.6-5">Identity Assertion Authorization Grant JWT claims:<a href="#appendix-A.3.6-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.6-5">Identity Assertion JWT Authorization Grant claims:<a href="#appendix-A.3.6-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.3.6-6">
 <pre>
 {
@@ -2461,7 +2511,7 @@ signature
           <h4 id="name-llm-agent-obtains-an-access">
 <a href="#appendix-A.3.7" class="section-number selfRef">A.3.7. </a><a href="#name-llm-agent-obtains-an-access" class="section-name selfRef">LLM Agent obtains an Access Token for Enterprise External Tool</a>
           </h4>
-<p id="appendix-A.3.7-1">LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#appendix-A.3.7-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.7-1">LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#appendix-A.3.7-1" class="pilcrow">¶</a></p>
 <p id="appendix-A.3.7-2">The LLM Agent authenticates with its client credentials that were registered with the SaaS Authorization Server<a href="#appendix-A.3.7-2" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-A.3.7-3.1">
@@ -2478,7 +2528,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
 assertion=eyJhbGciOiJIUzI1NiIsI...
 </pre><a href="#appendix-A.3.7-4" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.7-5">SaaS Authorization Server validates the Identity Assertion Authorization Grant using the published JWKS for the trusted Enterprise IdP<a href="#appendix-A.3.7-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.3.7-5">SaaS Authorization Server validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP<a href="#appendix-A.3.7-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.3.7-6">
 <pre>
 HTTP/1.1 200 OK
@@ -2547,6 +2597,15 @@ Content-Type: application/json
 </li>
         <li class="normal" id="appendix-C-3.3">
           <p id="appendix-C-3.3.1">Added authentication claims from ID Token<a href="#appendix-C-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.4">
+          <p id="appendix-C-3.4.1">Adopted standard OAuth 2.0 role names instead of Resource App or Resource App's Authorization Server<a href="#appendix-C-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.5">
+          <p id="appendix-C-3.5.1">Updated sequence diagram<a href="#appendix-C-3.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.6">
+          <p id="appendix-C-3.6.1">Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"<a href="#appendix-C-3.6.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-C-4">-00<a href="#appendix-C-4" class="pilcrow">¶</a></p>
