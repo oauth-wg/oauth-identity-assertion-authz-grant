@@ -86,19 +86,20 @@ Table of Contents
      4.4.  Access Token Request
        4.4.1.  Processing Rules
        4.4.2.  Response
-       4.4.3.  Refresh Token
-   5.  Authorization Server (IdP) Metadata
-   6.  Security Considerations
-     6.1.  Client Authentication
-     6.2.  Step-Up Authentication
-     6.3.  Cross-Domain Use
-   7.  IANA Considerations
-     7.1.  Media Types
-     7.2.  OAuth URI Registration
-     7.3.  JSON Web Token Claims Registration
-   8.  References
-     8.1.  Normative References
-     8.2.  Informative References
+   5.  Cross-Domain Client ID Handling
+     5.1.  Refresh Token
+   6.  Authorization Server (IdP) Metadata
+   7.  Security Considerations
+     7.1.  Client Authentication
+     7.2.  Step-Up Authentication
+     7.3.  Cross-Domain Use
+   8.  IANA Considerations
+     8.1.  Media Types
+     8.2.  OAuth URI Registration
+     8.3.  JSON Web Token Claims Registration
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
    Appendix A.  Use Cases
      A.1.  Enterprise Deployment
        A.1.1.  Preconditions
@@ -231,7 +232,7 @@ Table of Contents
       behalf of the resource owner.  It MUST be recognized by the
       Resource Authorization Server.  For interoperability, the client
       identifier SHOULD be a client_id as defined in Section 4.3 of
-      [RFC8693].
+      [RFC8693].  See Section 5 for additional considerations.
 
    jti:  REQUIRED - Unique ID of this JWT as defined in Section 4.1.7 of
       [RFC7519]
@@ -661,7 +662,63 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
      "scope": "chat.read chat.history"
    }
 
-4.4.3.  Refresh Token
+5.  Cross-Domain Client ID Handling
+
+   There are three separate OAuth/OpenID Connect/SAML relationships
+   involved in this flow:
+
+   *  Client to IdP Authorization Server (OpenID Connect or SAML)
+
+   *  Client to Resource Authorization Server (OAuth)
+
+   *  Resource Authorization Server to IdP Authorization Server (OpenID
+      Connect or SAML)
+
+   Each relationship is typically represented by independent client
+   registrations between each party.  For example, the IdP Authorization
+   Server typically issues a Client ID for both the Client and Resource
+   Authorization Server to use for single sign-on with OpenID Connect as
+   a Relying Party.  Similarly, the Resource Authorization Server
+   typically issues a Client ID for the Client to use for API access to
+   the Resource Server.  The Client may choose to use different client
+   credentials with each registration.
+
+   In this flow, the IdP Authorization Server accepts a Token Exchange
+   request from the Client, and issues an ID-JAG that will be consumed
+   by the Resource Authorization Server.  This means the IdP
+   Authorization Server needs to know about the relationship between the
+   Client and the Resource Authorization Server, in order to include a
+   client_id claim in the ID-JAG that will be recognized by the Resource
+   Authorization Server.
+
+   This can be handled by the IdP Authorization Server maintaining a
+   record of each client_id used between Clients and Resource
+   Authorization Servers, which will need to be obtained by out-of-band
+   mechanisms.  The Client still needs to authenticate using its
+   registered credential with the Resource Authorization Server when
+   presenting the ID-JAG for the mapped client_id.  Requiring a
+   confidential client helps to prevent the IdP Authorization Server
+   from delegating access to any of the valid clients for the Resource
+   Authorization Server.
+
+   Note: The IdP Authorization Server is also responsible for mapping
+   subject identifiers across Clients and trust domains in the ID-JAG.
+   The same user may have a pair-wise subject identifier issued in an ID
+   Token for SSO to the Client and another with SSO to the Resource
+   Authorization Server as a Relying Party.  The Resource Authorization
+   Server needs consistent subject identifiers for account resolution
+   for both SSO and API access.  The IdP Authorization Server needs to
+   ensure that the subject identifier issued in the ID-JAG is the same
+   identifier for the user that it would have included in an ID Token
+   intended for the Resource Authorization Server.
+
+   Alternatively, if clients use "Client ID Metadata Document"
+   [I-D.ietf-oauth-client-id-metadata-document] as their client
+   identifiers, this acts as a shared global namespace of Client IDs and
+   removes the need for the IdP Authorization Server to maintain a
+   mapping of each client registration.
+
+5.1.  Refresh Token
 
    The Resource Authorization Server SHOULD NOT return a Refresh Token
    when an Identity Assertion JWT Authorization is exchanged for an
@@ -683,7 +740,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    new Identity Assertion with a Refresh Token then it SHOULD re-
    authenticate the user by redirecting to the IdP.
 
-5.  Authorization Server (IdP) Metadata
+6.  Authorization Server (IdP) Metadata
 
    An IdP can advertise its support for this profile in its OAuth
    Authorization Server Metadata [RFC8414].  Identity and Authorization
@@ -697,9 +754,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    urn:ietf:params:oauth:token-type:id-jag
 
-6.  Security Considerations
+7.  Security Considerations
 
-6.1.  Client Authentication
+7.1.  Client Authentication
 
    This specification SHOULD only be supported for confidential clients.
    Public clients SHOULD use the existing authorization code grant and
@@ -707,7 +764,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.0 Authorization Request where the user can interactively consent to
    the access delegation.
 
-6.2.  Step-Up Authentication
+7.2.  Step-Up Authentication
 
    In the initial token exchange request, the IdP may require step-up
    authentication for the subject if the authentication context in the
@@ -735,7 +792,7 @@ Cache-Control: no-store
    Connect for SSO when performing a step-up to skip the need for
    additional token exchange round-trip.
 
-6.3.  Cross-Domain Use
+7.3.  Cross-Domain Use
 
    This specification is intended for cross-domain uses where the
    Client, Resource App, and Identity Provider are all in different
@@ -743,16 +800,16 @@ Cache-Control: no-store
    access tokens in response to an ID-JAG it issued itself.  Doing so
    could lead to unintentional broadening of the scope of authorization.
 
-7.  IANA Considerations
+8.  IANA Considerations
 
-7.1.  Media Types
+8.1.  Media Types
 
    This section registers oauth-id-jag+jwt, a new media type [RFC2046]
    in the "Media Types" registry [IANA.media-types] in the manner
    described in [RFC6838].  It can be used to indicate that the content
    is an Identity Assertion JWT Authorization Grant.
 
-7.2.  OAuth URI Registration
+8.2.  OAuth URI Registration
 
    This section registers urn:ietf:params:oauth:token-type:id-jag in the
    "OAuth URI" subregistry of the "OAuth Parameters" registry
@@ -767,7 +824,7 @@ Cache-Control: no-store
 
    *  Specification Document: This document
 
-7.3.  JSON Web Token Claims Registration
+8.3.  JSON Web Token Claims Registration
 
    This section registers resource in the "JSON Web Token Claims"
    subregistry of the "JSON Web Token (JWT)" registry [IANA.jwt].  The
@@ -781,9 +838,9 @@ Cache-Control: no-store
 
    *  Specification Document(s): Section 3
 
-8.  References
+9.  References
 
-8.1.  Normative References
+9.1.  Normative References
 
    [I-D.ietf-oauth-identity-chaining]
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
@@ -872,7 +929,14 @@ Cache-Control: no-store
               DOI 10.17487/RFC8725, February 2020,
               <https://www.rfc-editor.org/rfc/rfc8725>.
 
-8.2.  Informative References
+9.2.  Informative References
+
+   [I-D.ietf-oauth-client-id-metadata-document]
+              Parecki, A. and E. Smith, "OAuth Client ID Metadata
+              Document", Work in Progress, Internet-Draft, draft-ietf-
+              oauth-client-id-metadata-document-00, 8 October 2025,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
+              client-id-metadata-document-00>.
 
    [RFC9470]  Bertocci, V. and B. Campbell, "OAuth 2.0 Step Up
               Authentication Challenge Protocol", RFC 9470,
@@ -1351,6 +1415,11 @@ Document History
    *  Updated section references with more specific links
 
    *  Added reference to scope parameter in ID-JAG processing rules
+
+   *  Added a section discussing client ID mapping and reference to
+      Client ID Metadata Document
+
+   *  Added recommendations for refresh tokens
 
    -00
 
