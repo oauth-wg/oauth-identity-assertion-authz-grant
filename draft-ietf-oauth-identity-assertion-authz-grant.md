@@ -478,7 +478,7 @@ There are three separate OAuth/OpenID Connect/SAML relationships involved in thi
 * Client to Resource Authorization Server (OAuth)
 * Resource Authorization Server to IdP Authorization Server (OpenID Connect or SAML)
 
-Each relationship is typically represented by independent registrations between each party. For example, the IdP Authorization Server typically issues a Client ID for the OpenID Connect Client to use for single sign-on. Similarly, the Resource Authorization Server typically issues a Client ID for the Client to use for API access to the Resource Server.
+Each relationship is typically represented by independent client registrations between each party. For example, the IdP Authorization Server typically issues a Client ID for both the Client and Resource Authorization Server to use for single sign-on with OpenID Connect as a Relying Party. Similarly, the Resource Authorization Server typically issues a Client ID for the Client to use for API access to the Resource Server.   The Client may choose to use different client credentials with each registration.
 
 In this flow, the IdP Authorization Server accepts a Token Exchange request from the Client, and issues an ID-JAG that will be consumed by the Resource Authorization Server. This means the IdP Authorization Server needs to know about the relationship between the Client and the Resource Authorization Server, in order to include a `client_id` claim in the ID-JAG that will be recognized by the Resource Authorization Server.
 
