@@ -694,7 +694,25 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    This can be handled by the IdP Authorization Server maintaining a
    record of each client_id used between Clients and Resource
    Authorization Servers, which will need to be obtained by out-of-band
-   mechanisms.
+   mechanisms.  The Client still needs to authenticate using its
+   registered credential with the Resource Authorization Server when
+   presenting the ID-JAG for the mapped client_id.  Requiring a
+   confidential client helps to prevent the IdP Authorization Server
+   from delegating access to any client that is valid for the Resource
+   Authorization Server.  It is still RECOMMENDED that the IdP
+   Authorization Server authorize and audit the Client to act as another
+   Client and not just rely on client authentication.
+
+   Note: The IdP Authorization Server is also responsible for mapping
+   subject identifiers across Clients and trust domains in the ID-JAG.
+   The same user may have a pair-wise subject identifier issued in an ID
+   Token for SSO to the Client and another with SSO to the Resource
+   Authorization Server as a Relying Party.  The Resource Authorization
+   Server needs consistent subject identifiers for account resolution
+   for both SSO and API access.  The IdP Authorization Server needs to
+   ensure that the subject identifier issued in the ID-JAG is the
+   correct identifier for the user for the Resource Authorization
+   Server.
 
    Alternatively, if clients use "Client ID Metadata Document"
    [I-D.ietf-oauth-client-id-metadata-document] as their client
