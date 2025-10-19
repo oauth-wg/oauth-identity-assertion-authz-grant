@@ -86,8 +86,8 @@ Table of Contents
      4.4.  Access Token Request
        4.4.1.  Processing Rules
        4.4.2.  Response
+       4.4.3.  Refresh Token
    5.  Cross-Domain Client ID Handling
-     5.1.  Refresh Token
    6.  Authorization Server (IdP) Metadata
    7.  Security Considerations
      7.1.  Client Authentication
@@ -662,6 +662,28 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
      "scope": "chat.read chat.history"
    }
 
+4.4.3.  Refresh Token
+
+   The Resource Authorization Server SHOULD NOT return a Refresh Token
+   when an Identity Assertion JWT Authorization is exchanged for an
+   Access Token per Section 5.2 of [I-D.ietf-oauth-identity-chaining].
+
+   When the access token has expired, clients SHOULD re-submit the
+   original Identity Assertion JWT Authorization Grant to obtain a new
+   Access Token.  The ID-JAG replaces the use Refresh Token for the
+   Resource Authorization Server.
+
+   If the ID-JAG has expired, the Client SHOULD request a new ID-JAG
+   from the IdP Authorization Server before presenting it to the
+   Resource Authorization Sever using the original Identity Assertion
+   from the IdP (e.g ID Token)
+
+   If the ID Token is expired, the Client MAY use the Refresh Token
+   obtained from the IdP during SSO to obtain a new ID Token which it
+   can exchange for a new ID-JAG.  If the Client is unable to obtain a
+   new Identity Assertion with a Refresh Token then it SHOULD re-
+   authenticate the user by redirecting to the IdP.
+
 5.  Cross-Domain Client ID Handling
 
    There are three separate OAuth/OpenID Connect/SAML relationships
@@ -717,28 +739,6 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    identifiers, this acts as a shared global namespace of Client IDs and
    removes the need for the IdP Authorization Server to maintain a
    mapping of each client registration.
-
-5.1.  Refresh Token
-
-   The Resource Authorization Server SHOULD NOT return a Refresh Token
-   when an Identity Assertion JWT Authorization is exchanged for an
-   Access Token per Section 5.2 of [I-D.ietf-oauth-identity-chaining].
-
-   When the access token has expired, clients SHOULD re-submit the
-   original Identity Assertion JWT Authorization Grant to obtain a new
-   Access Token.  The ID-JAG replaces the use Refresh Token for the
-   Resource Authorization Server.
-
-   If the ID-JAG has expired, the Client SHOULD request a new ID-JAG
-   from the IdP Authorization Server before presenting it to the
-   Resource Authorization Sever using the original Identity Assertion
-   from the IdP (e.g ID Token)
-
-   If the ID Token is expired, the Client MAY use the Refresh Token
-   obtained from the IdP during SSO to obtain a new ID Token which it
-   can exchange for a new ID-JAG.  If the Client is unable to obtain a
-   new Identity Assertion with a Refresh Token then it SHOULD re-
-   authenticate the user by redirecting to the IdP.
 
 6.  Authorization Server (IdP) Metadata
 
