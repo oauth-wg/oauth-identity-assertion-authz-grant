@@ -708,9 +708,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    Authorization Server as a Relying Party.  The Resource Authorization
    Server needs consistent subject identifiers for account resolution
    for both SSO and API access.  The IdP Authorization Server needs to
-   ensure that the subject identifier issued in the ID-JAG is the
-   correct identifier for the user for the Resource Authorization
-   Server.
+   ensure that the subject identifier issued in the ID-JAG is the same
+   identifier for the user that it would have included in an ID Token
+   intended for the Resource Authorization Server.
 
    Alternatively, if clients use "Client ID Metadata Document"
    [I-D.ietf-oauth-client-id-metadata-document] as their client
