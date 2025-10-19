@@ -109,13 +109,13 @@ This specification defines the additional details necessary to support interoper
 Client
 : The application that wants to obtain an OAuth 2.0 access token on behalf of a signed-in user to an external/3rd party application's API (Resource Server below). In {{I-D.ietf-oauth-identity-chaining}}, this is the Client in trust domain A.  The application has a direct relationship with the IdP Authorization Server for single sign-on as a Relying Party and another independent OAuth 2.0 client relationship with the Resource Authorization Server in trust domain B.
 
-IdP Authorization Server
+IdP Authorization Server (IdP)
 : A SAML 2.0 Identity Provider or OpenID Connect Provider (OP) {{OpenID.Core}} that issues identity assertions for single sign-on and cross-domain authorization grants {{id-jag}} for a set of trusted applications in an organization's application ecosystem.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.
 
-Resource Authorization Server
+Resource Authorization Server (AS)
 : Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain B, and trusts cross-domain authorization grants {{id-jag}} from the IdP Authorization Server.
 
-Resource Server
+Resource Server (RS)
 : Hosts protected resources and validates access tokens issued by the Resource Authorization Server.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Protected Resource in trust domain B.  The Resource Server has no direct trust relationship with the IdP Authorization Server. Instead, it validates access tokens issued by its trusted Resource Authorization Server to determine who should have access to resources.
 
 
@@ -219,49 +219,50 @@ The example flow is for an enterprise `acme`, which uses a multi-tenant wiki app
 
 Sequence Diagram
 
-    +---------+      +---------------+   +---------------+  +----------+
-    |         |      |      IdP      |   |   Resource    |  | Resource |
-    | Client  |      | Authorization |   | Authorization |  |  Server  |
-    |         |      |    Server     |   |    Server     |  |          |
-    +----+----+      +-------+-------+   +-------+-------+  +-----+----+
-         |                   |                   |                 |
-         |                   |                   |                 |
-         |  -------------->  |                   |                 |
-         |   1 User SSO      |                   |                 |
-         |                   |                   |                 |
-         |     ID Token      |                   |                 |
-         |  <- - - - - - - - |                   |                 |
-         |                   |                   |                 |
-         |                   |                   |                 |
-         |                   |                   |                 |
-         | 2 Token Exchange  |                   |                 |
-         | ----------------> |                   |                 |
-         |                   |                   |                 |
-         |   ID-JAG          |                   |                 |
-         | <- - - - - - - -  |                   |                 |
-         |                   |                   |                 |
-         |                   |                   |                 |
-         |                   |                   |                 |
-         | 3 Present ID-JAG  |                   |                 |
-         | ------------------+-----------------> |                 |
-         |                   |                   |                 |
-         |    Access Token   |                   |                 |
+    +---------+       +---------------+  +---------------+  +----------+
+    |         |       |      IdP      |  |   Resource    |  | Resource |
+    | Client  |       | Authorization |  | Authorization |  |  Server  |
+    |         |       |    Server     |  |    Server     |  |          |
+    +----+----+       +-------+-------+  +-------+-------+  +-----+----+
+         |                    |                  |                 |
+         |                    |                  |                 |
+         | -----------------> |                  |                 |
+         |   1 User SSO       |                  |                 |
+         |                    |                  |                 |
+         |     ID Token &     |                  |                 |
+         | Refresh Token (Opt)|                  |                 |
+         | <- - - - - - - - - |                  |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
+         | 2 Token Exchange   |                  |                 |
+         | ---------------->  |                  |                 |
+         |                    |                  |                 |
+         |   ID-JAG           |                  |                 |
+         | <- - - - - - - -   |                  |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
+         | 3 Present ID-JAG   |                  |                 |
+         | -------------------+----------------> |                 |
+         |                    |                  |                 |
+         |    Access Token    |                  |                 |
          | <- - - - - - - - - - - - - - - - - - -|                 |
-         |                   |                   |                 |
-         |                   |                   |                 |
-         |                   |                   |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
          | 4 Resource Request with Access Token  |                 |
          | ------------------------------------------------------> |
-         |                   |                   |                 |
-         |                   |                   |                 |
-         |                   |                   |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
+         |                    |                  |                 |
 
-1. User logs in to the Client, the Client obtains the Identity Assertion (e.g. OpenID Connect ID Token or SAML assertion)
-2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP
+1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in
+2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server
 3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
-4. Client makes an API request with the Access Token
+4. Client makes an API request to the Resource Server with the Access Token
 
-This specification is constrained to deployments where all Resource Authorization Servers are leveraging the same IdP Authorization Server for Single-Sign-On (SSO) and session management services. The IdP provides a consistent trust boundary enabling the set of Resource Authorization Server Authorization Servers to honor the JWT Authorization Grant (ID-JAG) issued by the IdP. This specification also assumes that the Resource Authorization Servers delegate user authorization authority to the IdP (e.g. the IdP is trusted to ensure the scopes identified in the ID-JAG have been correctly authorized before issuing the ID-JAG token).
+This specification is constrained to deployments where a set of Resource Authorization Servers for applications used by an organization are trusting the same IdP Authorization Server for Single Sign-On (SSO). The IdP Authorization Server provides a consistent trust boundary and user identity for the set of Resource Authorization Servers to honor the ID-JAG issued by the IdP.  The Resource Authorization Server not only delegates user authentication but also delegates user authorization authority to the IdP Authorization Server for the scopes and resource specified in the ID-JAG and does not need obtain user consent directly from the resource owner.
 
 
 ## User Authentication
@@ -271,11 +272,11 @@ The Client initiates an authentication request with the IdP using OpenID Connect
 The following is an example using OpenID Connect
 
     302 Redirect
-    Location: https://acme.idp.example/authorize?response_type=code&scope=openid&client_id=...
+    Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20offline_access&client_id=...
 
-The user authenticates with the IdP, and is redirected back to the Client with an authorization code, which it can then exchange for an ID Token.
+The user authenticates with the IdP, and is redirected back to the Client with an authorization code, which it can then exchange for an ID Token and optionally a Refresh Token when `offline_access` scope is requested per {{OpenID.Core}}.
 
-Note: The Enterprise IdP may enforce security controls such as multi-factor authentication before granting the user access to the Client.
+Note: The IdP Authorization Server may enforce security controls such as multi-factor authentication before granting the user access to the Client.
 
     POST /token HTTP/1.1
     Host: acme.idp.example
@@ -291,7 +292,8 @@ Note: The Enterprise IdP may enforce security controls such as multi-factor auth
       "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
       "token_type": "Bearer",
       "access_token": "7SliwCQP1brGdjBtsaMnXo",
-      "scope": "openid"
+      "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA"
+      "scope": "openid offline_access"
     }
 
 
@@ -486,6 +488,15 @@ This can be handled by the IdP Authorization Server maintaining a record of each
 
 Alternatively, if clients use "Client ID Metadata Document" {{I-D.ietf-oauth-client-id-metadata-document}} as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.
 
+### Refresh Token
+
+The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
+
+When the access token has expired, clients SHOULD re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.
+
+If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g ID Token)
+
+If the ID Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
 # Authorization Server (IdP) Metadata {#idp-metadata}
 
@@ -888,6 +899,7 @@ The authors would like to thank the following people for their contributions and
 * Updated section references with more specific links
 * Added reference to scope parameter in ID-JAG processing rules
 * Added a section discussing client ID mapping and reference to Client ID Metadata Document
+* Added recommendations for refresh tokens
 
 -00
 
