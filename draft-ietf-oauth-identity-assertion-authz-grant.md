@@ -256,7 +256,7 @@ Sequence Diagram
          |                    |                  |                 |
          |                    |                  |                 |
 
-1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 assertion) for the user and optionally a Refresh Token (OpenID Connect) and signs the user in
+1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in
 2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server
 3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
 4. Client makes an API request to the Resource Server with the Access Token
