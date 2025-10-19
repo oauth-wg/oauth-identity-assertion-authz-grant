@@ -698,10 +698,8 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    registered credential with the Resource Authorization Server when
    presenting the ID-JAG for the mapped client_id.  Requiring a
    confidential client helps to prevent the IdP Authorization Server
-   from delegating access to any client that is valid for the Resource
-   Authorization Server.  It is still RECOMMENDED that the IdP
-   Authorization Server authorize and audit the Client to act as another
-   Client and not just rely on client authentication.
+   from delegating access to any of the valid clients for the Resource
+   Authorization Server.
 
    Note: The IdP Authorization Server is also responsible for mapping
    subject identifiers across Clients and trust domains in the ID-JAG.
