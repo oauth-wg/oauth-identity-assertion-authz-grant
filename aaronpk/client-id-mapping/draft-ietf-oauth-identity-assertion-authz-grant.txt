@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 21 April 2026                                       Independent
+Expires: 22 April 2026                                       Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         18 October 2025
+                                                         19 October 2025
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 April 2026.
+   This Internet-Draft will expire on 22 April 2026.
 
 Copyright Notice
 
@@ -665,12 +665,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    *  Resource Authorization Server to IdP Authorization Server (OpenID
       Connect or SAML)
 
-   Each relationship is typically represented by independent
+   Each relationship is typically represented by independent client
    registrations between each party.  For example, the IdP Authorization
-   Server typically issues a Client ID for the OpenID Connect Client to
-   use for single sign-on.  Similarly, the Resource Authorization Server
+   Server typically issues a Client ID for both the Client and Resource
+   Authorization Server to use for single sign-on with OpenID Connect as
+   a Relying Party.  Similarly, the Resource Authorization Server
    typically issues a Client ID for the Client to use for API access to
-   the Resource Server.
+   the Resource Server.  The Client may choose to use different client
+   credentials with each registration.
 
    In this flow, the IdP Authorization Server accepts a Token Exchange
    request from the Client, and issues an ID-JAG that will be consumed
