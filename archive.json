@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-19T00:03:44.686508+00:00",
+  "timestamp": "2025-10-21T00:02:47.072095+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -325,15 +325,15 @@
       "id": "I_kwDOKv5r-s6MkdcS",
       "title": "Discuss the need for client_id mapping",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/14",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "randomstuff",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Section 5.3 [Identity Assertion Authorization Grant JWT](https://datatracker.ietf.org/doc/html/draft-parecki-oauth-identity-assertion-authz-grant#name-identity-assertion-authoriz) says that the IdP should generate a Identity Assertion Authorization Grant JWT with:\r\n\r\n> client_id - Client ID as registered with the Resource Application's authorization server\r\n\r\nThis means that the IdP must use a mapping between the `client_id` at the IdP and the `client_id` at the AS. I don't believe this requirement is explicitly mentioned. Maybe this should be discussed.",
       "createdAt": "2024-06-17T22:19:13Z",
-      "updatedAt": "2025-10-18T15:07:29Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-19T19:33:15Z",
+      "closedAt": "2025-10-19T19:33:15Z",
       "comments": [
         {
           "author": "kamronbatman",
@@ -394,15 +394,15 @@
       "id": "I_kwDOKv5r-s60RMm7",
       "title": "Client ID Registration",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/17",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "PieterKas",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "\"client_id: : REQUIRED - An identifier of the client that this JWT was issued to, which MUST be recognized by the Resource Application's authorization server. For interoperability, the client identifier SHOULD be a client_id as defined in Section 4.3 {{RFC8693}}.\"\n\nIs the expectation for this draft that the same client_id is used and registered with different authorisation servers in different domains (in this case the IdP and Resource Application Authorization Server? This might get unwieldy at scale, especially in a world where a client may have to register with multiple authorisation servers.\n\nAs an alternative, some allowance for supporting multiple client_ids might be needed. This may be either through some kind of static mapping (also hard to maintain), or by allowing the client to specify additional client_ids for which the assertion may be used. \n\nAn additional point to clarify may be that the Resource Appliction's Authorization Server MUST verifiy that the client_id in the assertion match the client_id of the client presenting the assertion.",
       "createdAt": "2025-04-28T10:02:31Z",
-      "updatedAt": "2025-10-18T15:07:29Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-20T14:28:15Z",
+      "closedAt": "2025-10-20T14:28:15Z",
       "comments": [
         {
           "author": "aaronpk",
@@ -704,7 +704,7 @@
       "labels": [],
       "body": "The spec currently isn't clear how a client should meet proof-of-possesion requirements such as DPOP for an ID-JAG for Resource App's Authorization Server token request or the issued token from a Resource App's Authorization Server for a Resource App's Resource Server\n\nOAuth Identity and Authorization Chaining Across Domains has a section on [Delegated Key Binding](https://drafts.oauth.net/oauth-identity-chaining/draft-ietf-oauth-identity-chaining.html#name-delegated-key-binding)\n\nID Assertions currently don't support proof-of-possesion although some folks [have found workarounds](https://github.com/openpubkey/openpubkey)\n\nSince `actor_token` is not used by this profile, we currently don't flow any `cnf` claims into the ID-JAG.  \n\n- Should the client just send a DPoP proof JWT in a DPoP header when making an access token request to the Resource App's Authorization Server?   \n  - A client is currently free to use a different key with each Resource App Authorization Server as there is not binding back to the ID-JAG\n- Should we also support a DPoP proof with ID-JAG? \n  - A client can pass the proof on the token exchange request and we could flow to the ID-JAG and the Resource App Authorization Server could verify the proof. \n\n\n\nI think it should be possible to bind a ID-JAG to a key\n\n\n",
       "createdAt": "2025-06-27T05:18:48Z",
-      "updatedAt": "2025-10-18T16:26:39Z",
+      "updatedAt": "2025-10-19T19:12:42Z",
       "closedAt": null,
       "comments": [
         {
@@ -901,15 +901,15 @@
       "id": "I_kwDOKv5r-s7BYYz-",
       "title": "Refresh tokens",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/35",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "There are two places where refresh tokens might come into the picture:\n\n* The Token Exchange request (use an ID Token to get an ID-JAG)\n* The Access Token request (use an ID-JAG to get an access token)\n\nWe should have some guidance or security considerations around the implications of returning refresh tokens for both of these.\n\n## IDP refresh tokens\n\nThe implication of returning a refresh token along with the ID-JAG is that the requesting application could use the refresh token in place of the ID token in future requests. This could allow the IDP to return new ID-JAGs without a new ID token having been requested.\n\n## Resource App refresh tokens\n\nThe resource app could return a refresh token along with the access token. This pattern should be discouraged, as this enables the client to request access tokens in the future which the IDP wouldn't know about.\n",
       "createdAt": "2025-07-18T21:19:21Z",
-      "updatedAt": "2025-10-18T15:09:31Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-19T19:12:14Z",
+      "closedAt": "2025-10-19T19:12:14Z",
       "comments": [
         {
           "author": "joshcanhelp",
@@ -1170,15 +1170,15 @@
       "id": "I_kwDOKv5r-s7KogEj",
       "title": "Clarify that IdP client can be mapped via ID-JAG to AS specific client",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/45",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The document doesn't make clear than the IdP can map requesting client for the Token Exchange at the IdP to a different client that is specific to the Resource App's Authorization Server in the issue ID-JAG.  \n\nIt might also make sense to flow the original client as an actor claim\n\n```\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"U019488227\",\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"client1234@acme.chat.example\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"scope\": \"chat.read chat.history\",\n  \"act\":\n     {\n       \"iss\":  \"https://acme.idp.example\"\n       \"client_id\": \"f53f191f9311af35\"\n     }\n}\n```",
       "createdAt": "2025-09-09T19:07:23Z",
-      "updatedAt": "2025-10-18T15:08:52Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-19T19:33:41Z",
+      "closedAt": "2025-10-19T19:33:41Z",
       "comments": [
         {
           "author": "sdesen",
@@ -1533,6 +1533,22 @@
           "updatedAt": "2025-10-14T03:31:45Z"
         }
       ]
+    },
+    {
+      "number": 58,
+      "id": "I_kwDOKv5r-s7Sbmjq",
+      "title": "Add Token Exchange support for refresh token instead of id token for ID-JAG",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/58",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Since Refresh Tokens should not be returned when exchanging ID-JAG for an Access Token with the Resource Authorization Server, the Client will need to make an extra round-trip to the IDP Authorization Server to renew an ID Token using the IDP's Refresh Token so it can obtain a fresh ID-JAG with the new ID Token.   See https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#name-refresh-token\n\nAdding support for `urn:ietf:params:oauth:token-type:refresh_token` as the `subject_token` in the ID-JAG Token Exchange request would eliminate the round-trip needed to obtain the ID Token first as the IdP Authorization Server can dereference the refresh token to obtain the same claims that would be present in the ID Token.\n\nWe should also consider recommending that the IdP Authorization Server MAY return a `refresh_token` when exchanging a `urn:ietf:params:oauth:token-type:saml2` token as the `subject_token` for an ID-JAG.  This would enable a Client that uses SAML for SSO to obtain a refresh token that they can use to renew ID-JAGs without having to switch to OIDC or redirect the user over the front channel. ",
+      "createdAt": "2025-10-19T21:12:58Z",
+      "updatedAt": "2025-10-19T21:12:58Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -2650,24 +2666,26 @@
       "id": "PR_kwDOKv5r-s6udE_M",
       "title": "Added a section discussing client ID mapping",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/56",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
-      "body": "Closes #14 and #17",
+      "body": "Closes #14 and #17 and #45",
       "createdAt": "2025-10-18T15:03:42Z",
-      "updatedAt": "2025-10-18T18:08:34Z",
+      "updatedAt": "2025-10-19T19:33:17Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "733b4a02b33b8c961d72f6f9140b37b8589023f8",
+      "baseRefOid": "2d67c64d7a2935366d8dad8e600e6c91067399bc",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "aaronpk/client-id-mapping",
-      "headRefOid": "d254bfec449f4f0d95bc82927edfd96fe18dc644",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "b4df1e7d3a74ce31a097e0b45ee0e00e2629bd13",
+      "closedAt": "2025-10-19T19:33:14Z",
+      "mergedAt": "2025-10-19T19:33:14Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "a895f525714598ee4391c3ef4405c09d34f03632"
+      },
       "comments": [],
       "reviews": [
         {
@@ -2693,6 +2711,168 @@
               "body": "```suggestion\r\nThis can be handled by the IdP Authorization Server maintaining a record of each `client_id` used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.  The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG for the mapped `client_id`.  Requiring a confidential client helps to prevent the IdP Authorization Server from delegating access to any client that is valid for the Resource Authorization Server.  It is still RECOMMENDED that the IdP Authorization Server authorize and audit the Client to act as another Client and not just rely on client authentication.\r\n\r\nNote:  The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG.  The same user may have a pair-wise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party.  The Resource Authorization Server needs consistent subject identifiers for account resolution for both SSO and API access.   The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the correct identifier for the user for the Resource Authorization Server.\r\n```",
               "createdAt": "2025-10-18T17:53:33Z",
               "updatedAt": "2025-10-18T18:08:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7H87sM",
+          "commit": {
+            "abbreviatedOid": "d254bfe"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-19T19:19:20Z",
+          "updatedAt": "2025-10-19T19:19:20Z",
+          "comments": [
+            {
+              "originalPosition": 33,
+              "body": "I'm not sure I understand the \"act as another client\" language, but otherwise this looks good.",
+              "createdAt": "2025-10-19T19:19:20Z",
+              "updatedAt": "2025-10-19T19:19:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7H88ef",
+          "commit": {
+            "abbreviatedOid": "abed8b2"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-19T19:30:49Z",
+          "updatedAt": "2025-10-19T19:30:49Z",
+          "comments": [
+            {
+              "originalPosition": 33,
+              "body": "```suggestion\nThis can be handled by the IdP Authorization Server maintaining a record of each `client_id` used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.  The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG for the mapped `client_id`. Requiring a confidential client helps to prevent the IdP Authorization Server from delegating access to any of the valid clients for the Resource Authorization Server.\n```",
+              "createdAt": "2025-10-19T19:30:49Z",
+              "updatedAt": "2025-10-19T19:30:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7H88mt",
+          "commit": {
+            "abbreviatedOid": "7ed8089"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-19T19:32:44Z",
+          "updatedAt": "2025-10-19T19:32:44Z",
+          "comments": [
+            {
+              "originalPosition": 35,
+              "body": "```suggestion\nNote:  The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG.  The same user may have a pair-wise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party.  The Resource Authorization Server needs consistent subject identifiers for account resolution for both SSO and API access.   The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the same identifier for the user that it would have included in an ID Token intended for the Resource Authorization Server.\n```",
+              "createdAt": "2025-10-19T19:32:44Z",
+              "updatedAt": "2025-10-19T19:32:44Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 57,
+      "id": "PR_kwDOKv5r-s6uhTSu",
+      "title": "Reworked example overview and clarified use of refresh tokens",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/57",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-10-19T17:58:17Z",
+      "updatedAt": "2025-10-19T19:34:36Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "733b4a02b33b8c961d72f6f9140b37b8589023f8",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "refresh-token-update",
+      "headRefOid": "bbeb0632a3946978908777ee08bb371f909ac814",
+      "closedAt": "2025-10-19T19:12:13Z",
+      "mergedAt": "2025-10-19T19:12:13Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "2d67c64d7a2935366d8dad8e600e6c91067399bc"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7H865P",
+          "commit": {
+            "abbreviatedOid": "2c4999f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-19T19:08:07Z",
+          "updatedAt": "2025-10-19T19:08:07Z",
+          "comments": [
+            {
+              "originalPosition": 94,
+              "body": "```suggestion\n1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in\n```",
+              "createdAt": "2025-10-19T19:08:07Z",
+              "updatedAt": "2025-10-19T19:08:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7H87GO",
+          "commit": {
+            "abbreviatedOid": "2c4999f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-19T19:10:33Z",
+          "updatedAt": "2025-10-19T19:10:33Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "I think this is fine for now, but it does beg the question of whether we should add a new Token Exchange request that takes a refresh token instead of ID token to skip the extra step here.",
+              "createdAt": "2025-10-19T19:10:33Z",
+              "updatedAt": "2025-10-19T19:10:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7H87HE",
+          "commit": {
+            "abbreviatedOid": "bbeb063"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-19T19:10:45Z",
+          "updatedAt": "2025-10-19T19:10:45Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7H88ud",
+          "commit": {
+            "abbreviatedOid": "2c4999f"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-19T19:34:36Z",
+          "updatedAt": "2025-10-19T19:34:36Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "yep was thinking the same and was going to open an issue ",
+              "createdAt": "2025-10-19T19:34:36Z",
+              "updatedAt": "2025-10-19T19:34:36Z"
             }
           ]
         }
