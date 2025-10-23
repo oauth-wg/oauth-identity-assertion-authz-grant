@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-21T00:02:47.072095+00:00",
+  "timestamp": "2025-10-23T00:02:44.546092+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1177,7 +1177,7 @@
       "labels": [],
       "body": "The document doesn't make clear than the IdP can map requesting client for the Token Exchange at the IdP to a different client that is specific to the Resource App's Authorization Server in the issue ID-JAG.  \n\nIt might also make sense to flow the original client as an actor claim\n\n```\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"U019488227\",\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"client1234@acme.chat.example\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"scope\": \"chat.read chat.history\",\n  \"act\":\n     {\n       \"iss\":  \"https://acme.idp.example\"\n       \"client_id\": \"f53f191f9311af35\"\n     }\n}\n```",
       "createdAt": "2025-09-09T19:07:23Z",
-      "updatedAt": "2025-10-19T19:33:41Z",
+      "updatedAt": "2025-10-21T15:57:35Z",
       "closedAt": "2025-10-19T19:33:41Z",
       "comments": [
         {
@@ -1235,6 +1235,13 @@
           "body": "I added a section discussing client ID mapping, as well as a reference to the potential use of Client ID Metadata Documents to simplify this. Preview of the rendered text here: https://drafts.oauth.net/oauth-identity-assertion-authz-grant/aaronpk/client-id-mapping/draft-ietf-oauth-identity-assertion-authz-grant.html#section-5\n\nDoes this clarify things?",
           "createdAt": "2025-10-18T15:08:52Z",
           "updatedAt": "2025-10-18T15:08:52Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "> https://drafts.oauth.net/oauth-identity-assertion-authz-grant/aaronpk/client-id-mapping/draft-ietf-oauth-identity-assertion-authz-grant.html#section-5\n\nI think this section is helpful but a little dense with information and should have an example/diagram to clarify the different client ids. ",
+          "createdAt": "2025-10-21T15:57:35Z",
+          "updatedAt": "2025-10-21T15:57:35Z"
         }
       ]
     },
@@ -1320,7 +1327,7 @@
       "labels": [],
       "body": "**Summary**\nThis proposal considers a protocol-level solution for scenarios where a user needs to connect to a specific instance (e.g., tenant, organziation, workspace) of a Resource App, particularly when these multiple instances share a common issuer URL. The goal is to create a mechanism that allows a Requesting App to specify the target instance and ensures this choice is communicated end-to-end, so it can be correctly interpreted by both the IdP and the Resource App's authorization server.\n\n**Problem**\nIn many enterprise environments, a single application may offer multiple distinct instances. For example, consider an observability platform with separate instances for `development` and `production` logs. Often, these instances share a single `audience` (i.e., issuer URL) and `resource` identifier for their APIs. In these cases, access to the Resource App's API is managed by a custom claim injected into the `access_token` after the user authenticates with a specific instance.\n\nThe current Identity Assertion Authorization Grant does not define a standard way for a Requesting App to specify a target instance under these conditions. This ambiguity prevents a seamless user experience, which should ideally mirror selecting an application from an SSO dashboard and being directed to the correct instance.\n\nThis overall challenge can be broken down into two parts:\n\n**1. The Discovery Problem** \nBefore a user can make a choice, the Requesting App must first know what choices are available. How can the Requesting App learn which Resource Apps, and their specific instances, the logged-in user is permitted to connect to?\n\nWhile solving discovery is critical for the end-to-end experience, it is handled separately in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/52. For this issue, we will assume the Requesting App has a method to determine which instance the user wants to access.\n\n**2. The Request Problem** \nThis is the focus of the proposal. Once the user has selected an instance, how does the Requesting App communicate this choice to the IdP? The current protocol lacks a standard parameter to differentiate the target instance when it shares an `audience`/issuer URL with others.\n\n**Proposal**\n**We propose using the `client_id` of the target Resource App instance within the IdP** as the unique identifier. This `client_id` would be included in the initial Token Exchange request and the resulting Identity Assertion (ID-JAG).\n\nRationale:\n- Uniqueness & Existing Trust: Each Resource App instance registered with the IdP for SSO already has a unique `client_id`. This identifier is known and trusted by both the IdP and the Resource App.\n- IdP Policy Enforcement: The IdP can use the provided `client_id` to locate and apply the specific authorization policies associated with that instance.\n- Resource App Tenant Mapping: The Resource App's Authorization Server already relies on this `client_id` for its OIDC federation with the IdP. It can therefore use the `client_id` from the assertion to unambiguously map the request to the correct internal tenant, organization, or workspace.\n",
       "createdAt": "2025-10-10T09:15:21Z",
-      "updatedAt": "2025-10-17T01:16:04Z",
+      "updatedAt": "2025-10-22T20:20:32Z",
       "closedAt": null,
       "comments": [
         {
@@ -1455,6 +1462,20 @@
           "body": "Ok so we need both a solution for the Token Exchange request and a claim in the ID-JAG for the Access Token request.\n\n* Token Exchange request: Is the `audience` trick you mentioned sufficient here?\n* ID-JAG claim: I don't see a problem defining a new claim here because this is the main thing this draft defines.",
           "createdAt": "2025-10-17T01:16:04Z",
           "updatedAt": "2025-10-17T01:16:04Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "@aaronpk \n\nYes, we need booth.\n\nNote the `client_id` that travels in the ID-JAG actually maps to the Requesting App at the Resource App AS. It identifies the Requesting App. Instead, we need a way to convey the Resource App instance and for that the proposal is to use a `qualifier` object that can provide hints on how to determine the local user account / tenant to use.",
+          "createdAt": "2025-10-22T16:54:50Z",
+          "updatedAt": "2025-10-22T16:55:24Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I can get a PR out with the proposed changes.  We just need consensus on the claim. \n\nThe more I think about it, I think the best route is to adopt a Complex Subject Member from https://openid.net/specs/openid-sharedsignals-framework-1_0-ID3.html#section-3.3\n\nIf we have a single string claim like `sub_qualifier` then the Resource AS would need custom processing logic to understand what type of value was passed and how it should use it. Is it a tenant identifier, a client identifier, something else?   Since this value isn't passed in the ID Token there isn't a clear interop story here and it would be deployment specific.\n\nAdopting Complex Subject would be more explicit and extensible such as \n\n```\n\"sub_id\": {\n  \"format\": \"complex\",\n  \"user\" : {\n    \"format\": \"email\",\n    \"email\": \"bar@example.com\"\n  },\n  \"tenant\" : {\n    \"format\": \"iss_sub\",\n    \"iss\" : \"https://example.com/idp1\",\n    \"sub\" : \"1234\"\n  }\n}\n```\n\n```\n\"sub_id\": {\n  \"format\": \"complex\",\n  \"user\" : {\n    \"format\": \"email\",\n    \"email\": \"bar@example.com\"\n  },\n  \"client\" : {\n    \"format\": \"client\",\n    \"client_id\": \"1234\"\n  }\n}\n```\n\n\n",
+          "createdAt": "2025-10-22T20:20:32Z",
+          "updatedAt": "2025-10-22T20:20:32Z"
         }
       ]
     },
@@ -1546,9 +1567,31 @@
       "labels": [],
       "body": "Since Refresh Tokens should not be returned when exchanging ID-JAG for an Access Token with the Resource Authorization Server, the Client will need to make an extra round-trip to the IDP Authorization Server to renew an ID Token using the IDP's Refresh Token so it can obtain a fresh ID-JAG with the new ID Token.   See https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#name-refresh-token\n\nAdding support for `urn:ietf:params:oauth:token-type:refresh_token` as the `subject_token` in the ID-JAG Token Exchange request would eliminate the round-trip needed to obtain the ID Token first as the IdP Authorization Server can dereference the refresh token to obtain the same claims that would be present in the ID Token.\n\nWe should also consider recommending that the IdP Authorization Server MAY return a `refresh_token` when exchanging a `urn:ietf:params:oauth:token-type:saml2` token as the `subject_token` for an ID-JAG.  This would enable a Client that uses SAML for SSO to obtain a refresh token that they can use to renew ID-JAGs without having to switch to OIDC or redirect the user over the front channel. ",
       "createdAt": "2025-10-19T21:12:58Z",
-      "updatedAt": "2025-10-19T21:12:58Z",
+      "updatedAt": "2025-10-22T19:57:47Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "Does this mean `offline_access` scope will be recommended when requesting `id_token`",
+          "createdAt": "2025-10-22T18:46:29Z",
+          "updatedAt": "2025-10-22T18:46:29Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "> This would enable a Client that uses SAML for SSO to obtain a refresh token that they can use to renew ID-JAGs without having to switch to OIDC or redirect the user over the front channel.\n\napologies if off topic to this GitHub issue, but what is your opinion on using saml2-bearer to exchange assertion for an id_token, and proceeding with the id-jag flow from there.",
+          "createdAt": "2025-10-22T18:47:42Z",
+          "updatedAt": "2025-10-22T18:47:42Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I initially considered that flow but the  IdP would still need to issue a Refresh Token for the Client to obtain new ID Tokens after the SAML Assertion expires.   I suspect the need for a refresh token would be more common than just a single access token (SAML2->ID Token->ID-JAG->Access Token).  Since the goal is the ID-JAG and not the ID Token and there needs to be a way to obtain new ID-JAGs from the IdP, the optimized flow was to just add support for Refresh Token as the input vs RT->ID Token, ID-Token->ID-JAG, ID-JAG->Access Token.  It felt like the complexity still remains in the IdP and not the Client or the Resource AS which was our design goal and the IdP already understands its own refresh tokens.\n\nOpen to feedback here.\n\n> Does this mean offline_access scope will be recommended when requesting id_token\n\nYes, if the client wants to obtain new Access Tokens when they expire for the Resource Server.\n\n\n",
+          "createdAt": "2025-10-22T19:57:30Z",
+          "updatedAt": "2025-10-22T19:57:47Z"
+        }
+      ]
     }
   ],
   "pulls": [
