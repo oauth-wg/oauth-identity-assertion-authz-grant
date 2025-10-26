@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-23T00:02:44.546092+00:00",
+  "timestamp": "2025-10-26T00:03:37.270577+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -853,16 +853,24 @@
       "id": "I_kwDOKv5r-s6-jn_h",
       "title": "Burst requests",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/31",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "sdesen",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Is there a concern about the bursts of requests, for apps with many integrations, needed to obtain id-jag and their refresh tokens within the lifetime of the id_token? \nAnother option is to use the `offline_access` scope in the OIDC AuthN request, to allow for refreshing of id_tokens, should this spec recommend `offline_access` ?",
       "createdAt": "2025-07-02T19:48:32Z",
-      "updatedAt": "2025-07-02T19:48:32Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-10-24T17:01:02Z",
+      "closedAt": "2025-10-24T17:01:01Z",
+      "comments": [
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "This is not distinct from access token request usage patterns except that it must be executed within the lifetime of the id assertsion, which is being handled by other issues. So will close this.",
+          "createdAt": "2025-10-24T17:01:02Z",
+          "updatedAt": "2025-10-24T17:01:02Z"
+        }
+      ]
     },
     {
       "number": 33,
@@ -876,9 +884,17 @@
       "labels": [],
       "body": "Once an app is connected through this mechanism, an admin might want to _prevent_ users from going through an interactive OAuth flow entirely.",
       "createdAt": "2025-07-16T18:56:11Z",
-      "updatedAt": "2025-07-18T20:30:03Z",
+      "updatedAt": "2025-10-24T17:36:36Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Is this the IdP or the Resource AS returning this error?  If the IdP returned this error on Token Exchange, what would prevent a client from initiating an authorization code flow for the Resource AS ?  The Resource AS would need to reject the grant which is already supported  I thought with `unauthorized_client`. ",
+          "createdAt": "2025-10-24T17:36:36Z",
+          "updatedAt": "2025-10-24T17:36:36Z"
+        }
+      ]
     },
     {
       "number": 34,
@@ -1024,7 +1040,7 @@
       "labels": [],
       "body": "We currently have the following note about tenants in https://drafts.oauth.net/oauth-identity-assertion-authz-grant/draft-ietf-oauth-identity-assertion-authz-grant.html#section-5.3\n\n> If the IdP is multi-tenant and uses the same issuer for all tenants, the Resource Application will already have IdP-specific logic to determine the tenant from the OpenID Connect ID Token (e.g. a custom hd claim in Google) or SAML assertion, and will need to use that if the IdP also has only one client registration for the Resource Application\n\nWe should consider adopting the `tenant` claim defined in [OpenID Enterprise Extensions](https://openid.net/specs/openid-connect-enterprise-extensions-1_0.html#name-tenant-2) to standardize how the ID-JAG conveys tenant information to a downstream Authorization Server.  This will simplify processing for Resource Application Authorization Servers.\n\n\n",
       "createdAt": "2025-09-08T23:25:28Z",
-      "updatedAt": "2025-10-17T22:30:35Z",
+      "updatedAt": "2025-10-24T17:31:20Z",
       "closedAt": "2025-10-17T22:30:35Z",
       "comments": [
         {
@@ -1068,6 +1084,20 @@
           "body": "Done in #54 ",
           "createdAt": "2025-10-17T22:30:35Z",
           "updatedAt": "2025-10-17T22:30:35Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "> client_id would be tenant specific.\n\nRe: @kamronbatman 's question. Is it assumed that `client_id`s could possibly be reused across tenants?",
+          "createdAt": "2025-10-24T17:10:07Z",
+          "updatedAt": "2025-10-24T17:10:07Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes, its possible for `client_id` to be reused across tenants.  Google is example, as an ISV I register once with Google platform and can connect to any tenant.  There are multi-tenant issuers, multi-tenant authorization servers (audience), and multi-tenant clients.   The issuer identifier and the audience identifier may not have a tenant in the identifier.  This was the discussion on https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51.  The Resource AS may not be able resolve the tenant based on the `iss` + sub`+ `tenant` alone.  ",
+          "createdAt": "2025-10-24T17:31:20Z",
+          "updatedAt": "2025-10-24T17:31:20Z"
         }
       ]
     },
@@ -1567,7 +1597,7 @@
       "labels": [],
       "body": "Since Refresh Tokens should not be returned when exchanging ID-JAG for an Access Token with the Resource Authorization Server, the Client will need to make an extra round-trip to the IDP Authorization Server to renew an ID Token using the IDP's Refresh Token so it can obtain a fresh ID-JAG with the new ID Token.   See https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#name-refresh-token\n\nAdding support for `urn:ietf:params:oauth:token-type:refresh_token` as the `subject_token` in the ID-JAG Token Exchange request would eliminate the round-trip needed to obtain the ID Token first as the IdP Authorization Server can dereference the refresh token to obtain the same claims that would be present in the ID Token.\n\nWe should also consider recommending that the IdP Authorization Server MAY return a `refresh_token` when exchanging a `urn:ietf:params:oauth:token-type:saml2` token as the `subject_token` for an ID-JAG.  This would enable a Client that uses SAML for SSO to obtain a refresh token that they can use to renew ID-JAGs without having to switch to OIDC or redirect the user over the front channel. ",
       "createdAt": "2025-10-19T21:12:58Z",
-      "updatedAt": "2025-10-22T19:57:47Z",
+      "updatedAt": "2025-10-23T04:44:39Z",
       "closedAt": null,
       "comments": [
         {
@@ -1590,6 +1620,58 @@
           "body": "I initially considered that flow but the  IdP would still need to issue a Refresh Token for the Client to obtain new ID Tokens after the SAML Assertion expires.   I suspect the need for a refresh token would be more common than just a single access token (SAML2->ID Token->ID-JAG->Access Token).  Since the goal is the ID-JAG and not the ID Token and there needs to be a way to obtain new ID-JAGs from the IdP, the optimized flow was to just add support for Refresh Token as the input vs RT->ID Token, ID-Token->ID-JAG, ID-JAG->Access Token.  It felt like the complexity still remains in the IdP and not the Client or the Resource AS which was our design goal and the IdP already understands its own refresh tokens.\n\nOpen to feedback here.\n\n> Does this mean offline_access scope will be recommended when requesting id_token\n\nYes, if the client wants to obtain new Access Tokens when they expire for the Resource Server.\n\n\n",
           "createdAt": "2025-10-22T19:57:30Z",
           "updatedAt": "2025-10-22T19:57:47Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "> Yes, if the client wants to obtain new Access Tokens when they expire for the Resource Server.\n\nI was thinking more if the id_token expires before the client requests an id-jag\n",
+          "createdAt": "2025-10-23T01:50:39Z",
+          "updatedAt": "2025-10-23T01:50:46Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "> It felt like the complexity still remains in the IdP and not the Client or the Resource AS which was our design goal and the IdP already understands its own refresh tokens.\n\nInteresting, makes sense. \ud83e\udd14 ",
+          "createdAt": "2025-10-23T01:51:34Z",
+          "updatedAt": "2025-10-23T01:51:34Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I was thinking more if the id_token expires before the client requests an id-jag\n\nWe might be saying similar things so hear is my summary\n\n1) IdP MUST support at least 1 Identity Assertion type when requesting an ID-JAG\n\n`grant_type=urn:ietf:params:oauth:grant-type:token-exchange`\n`&subject_token_type=urn:ietf:params:oauth:token-type:saml2`\nOR\n`&subject_token_type=urn:ietf:params:oauth:token-type:id_token`\n`&requested_token_type=urn:ietf:params:oauth:token-type:id-jag`\n\n2) IdP MAY support exchanging a SAML2 Identity Assertion for an ID Token.  \nIt MAY issue a Refresh Token as well in the response in this special case which is discouraged by Token Exchange (note: offline_access scope was requested).  \n\nThis is something that this is unique to this profile and needs security considerations/etc but is needed for the existing SAML world to support renewing ID-JAGs when the SAML Assertion is expired.  It keeps the protocol simple with min surface area.  \n\n```\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\nsubject_token_type=urn:ietf:params:oauth:token-type:saml2\n&subject_token=PHNhbWxwOl...[base64url-encoded SAML2 Assertion]...\n&requested_token_type=urn:ietf:params:oauth:token-type:id_token\n&scope=openid%20offline_access\n```\n\n```\n {\n  \"access_token\":\"eyJhbGciOiJFUzI1NiIsImtpZCI6IjllciJ9.eyJhdWQiOiJo\n    dHRwczovL2JhY2tlbmQuZXhhbXBsZS5jb20iLCJpc3MiOiJodHRwczovL2FzLmV\n    4YW1wbGUuY29tIiwiZXhwIjoxNDQxOTE3NTkzLCJpYXQiOjE0NDE5MTc1MzMsIn\n    N1YiI6ImJkY0BleGFtcGxlLmNvbSIsInNjb3BlIjoiYXBpIn0.40y3ZgQedw6rx\n    f59WlwHDD9jryFOr0_Wh3CGozQBihNBhnXEQgU85AI9x3KmsPottVMLPIWvmDCM\n    y5-kdXjwhw\",\n  \"issued_token_type\":\n      \"urn:ietf:params:oauth:token-type:id_token\",\n  \"token_type\":\"N/A\",\n  \"expires_in\":60,\n  \"refresh_token\": \"xOTE3NTkzLCJpYXQiOjE0N...\"  // This is only for SAML and up to \n }\n```\n\n3) IdP MAY support exchanging a Refresh Token for an ID-JAG\n\n```\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&subject_token_type=urn:ietf:params:oauth:token-type:refresh_token\n&subject_token=xOTE3NTkzLCJpYXQiOjE0N...\n&requested_token_type=urn:ietf:params:oauth:token-type:id-jag\n```\n\nThis would enable an optimized refresh for when ID-JAG + ID Assertion expire as well as allow a SAML RP to convert to OAuth/OIDC so it can support refreshes.  If the IdP doesn't support `urn:ietf:params:oauth:token-type:refresh_token` the the Client just needs to make the extra round-trip request to exchange the Refresh Token for an ID Token then exchange the ID Token for a new ID-JAG.  \n\n",
+          "createdAt": "2025-10-23T04:40:10Z",
+          "updatedAt": "2025-10-23T04:44:39Z"
+        }
+      ]
+    },
+    {
+      "number": 59,
+      "id": "I_kwDOKv5r-s7TlRXX",
+      "title": "Clarify subject identifier in ID-JAG",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/59",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#section-3\n\nSome people have been confused about the `sub` ID, I think the language \u201cat the resource authorization server\u201d is not explicit enough. We should clarify that this is the same value that the IdP would have sent in the ID Token for regular SSO.",
+      "createdAt": "2025-10-24T14:27:03Z",
+      "updatedAt": "2025-10-24T14:58:51Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I attempted to clarify this in https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#name-cross-domain-client-id-hand\n\n> Note: The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG. The same user may have a pair-wise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party. The Resource Authorization Server needs consistent subject identifiers for account resolution for both SSO and API access. The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the same identifier for the user that it would have included in an ID Token intended for the Resource Authorization Server.\n\nAgree it should be clearer when reading `sub` claim definition",
+          "createdAt": "2025-10-24T14:54:15Z",
+          "updatedAt": "2025-10-24T14:54:15Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Yeah that definitely helps. Maybe just a link from the sub definition down to that section ",
+          "createdAt": "2025-10-24T14:58:51Z",
+          "updatedAt": "2025-10-24T14:58:51Z"
         }
       ]
     }
