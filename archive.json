@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-26T00:03:37.270577+00:00",
+  "timestamp": "2025-10-28T00:02:39.989096+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3002,6 +3002,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 60,
+      "id": "PR_kwDOKv5r-s6vtevC",
+      "title": "ID-JAG Claim Description Updates",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/60",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "- Made capitalization of key terms Identity Provider,  End-User, Assertion,  Identity Assertion consistent\r\n- Update claim descriptions of `sub` & `client_id` to make clear relationship to SSO \r\n- Updated guidance on providing claims for account resolution & JIT\r\n",
+      "createdAt": "2025-10-26T03:23:50Z",
+      "updatedAt": "2025-10-26T03:23:50Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "housekeeping",
+      "headRefOid": "76fb84a9d7f6f4f0e82bc2a48eee7cfdad6f4465",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
