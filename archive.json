@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-28T00:02:39.989096+00:00",
+  "timestamp": "2025-10-30T00:02:52.053910+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1521,7 +1521,7 @@
       "labels": [],
       "body": "As raised in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51, a seamless user experience requires that Requesting Apps have a way to discover which applications, and their specific instances, a user is allowed to access. This would allow mirroring the experience of SSO dashboards, where users can simply select the app instance they want to use.\n\nThis raises several questions:\n- Should the IdP expose an \"Accessible Resources API\" to list the available Resource Apps and their instances for an authenticated user?\n- How should such an API structure its data to clearly differentiate between multiple instances of the same application?\n- **Should this API be standardized?**",
       "createdAt": "2025-10-10T09:22:45Z",
-      "updatedAt": "2025-10-14T02:55:15Z",
+      "updatedAt": "2025-10-29T22:55:06Z",
       "closedAt": null,
       "comments": [
         {
@@ -1558,6 +1558,13 @@
           "body": "My thoughts for SAML was that it would solve a lot of problems and simplify things if the requesting app converted the SAML Assertion to a Refresh Token and obtained an `id_token` and `access_token` (see https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/48#issuecomment-3399917001).  \n\nThe client could then use the access token to discover OAuth/OIDC OP metadata such as the example above.",
           "createdAt": "2025-10-13T17:46:56Z",
           "updatedAt": "2025-10-14T02:55:15Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "> converted the SAML Assertion to a Refresh Token\n\nSimilarly, can a SAML assertion be converted to an id_token using `saml2-bearer`? \n\nAlso, related to the trusted clients/accessible resources endpoint, I think what @mcguinness showed as example responses were what we were thinking. The `client_id` + `sub` from the token passed in the Authorization header will be important context for the endpoint. We discussed the authentication fro that endpoint actually including the id_token instead of the access_token, and I think the only thing it would include over the access token is the session_id. If its not needed, the id_token doesnt need to be send in the request \ud83e\udd14 \n",
+          "createdAt": "2025-10-29T22:55:06Z",
+          "updatedAt": "2025-10-29T22:55:06Z"
         }
       ]
     },
@@ -1672,6 +1679,30 @@
           "body": "Yeah that definitely helps. Maybe just a link from the sub definition down to that section ",
           "createdAt": "2025-10-24T14:58:51Z",
           "updatedAt": "2025-10-24T14:58:51Z"
+        }
+      ]
+    },
+    {
+      "number": 61,
+      "id": "I_kwDOKv5r-s7Up3_L",
+      "title": "Security recommendations for IdPs",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/61",
+      "state": "OPEN",
+      "author": "sdesen",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Related to #14 , the Idp will somehow map or discover client IDs to issuer url.\n\nwhen it comes to the Idp itself adding an issuerUrl (audience) to the minted id-jag token, should there be recommendations or mentions of the Idps responsibility to somehow trust those mappings which are stored or discovered?",
+      "createdAt": "2025-10-29T20:28:19Z",
+      "updatedAt": "2025-10-29T22:44:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "I can also phrase it this way - https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/59#issuecomment-3443591751\n\nIn this addition\n> Note: The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG.\n\nIs this responsibility core to the trust relationships of the flow, or an implementation/operational requirement. If the former, let's specify.",
+          "createdAt": "2025-10-29T22:44:17Z",
+          "updatedAt": "2025-10-29T22:44:17Z"
         }
       ]
     }
@@ -3015,7 +3046,7 @@
       "labels": [],
       "body": "- Made capitalization of key terms Identity Provider,  End-User, Assertion,  Identity Assertion consistent\r\n- Update claim descriptions of `sub` & `client_id` to make clear relationship to SSO \r\n- Updated guidance on providing claims for account resolution & JIT\r\n",
       "createdAt": "2025-10-26T03:23:50Z",
-      "updatedAt": "2025-10-26T03:23:50Z",
+      "updatedAt": "2025-10-28T16:27:51Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
