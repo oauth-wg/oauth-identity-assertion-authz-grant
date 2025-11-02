@@ -169,7 +169,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : OPTIONAL -  Identifiers for authentication methods used when authenticating the End-User as defined in {{OpenID.Core}}.
 
 `aud_sub`:
-: OPTIONAL - Resource Authorization Server identifier for the subject as defined in {{OpenID.Enterprise}}.
+: OPTIONAL - The Resource Authorization Server's identifier for the End-User as defined in {{OpenID.Enterprise}}.
 
 `email`:
 :OPTIONAL - End-User's e-mail address as defined in {{Section 5.1 of OpenID.Core}}.
