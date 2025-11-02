@@ -172,7 +172,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : OPTIONAL - The Resource Authorization Server's identifier for the End-User as defined in {{OpenID.Enterprise}}.
 
 `email`:
-:OPTIONAL - End-User's e-mail address as defined in {{Section 5.1 of OpenID.Core}}.
+:OPTIONAL - End-User's e-mail address as defined in Section 5.1 of {{OpenID.Core}}.
 
 The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices ({{Section 3.11 of RFC8725}}).
 
