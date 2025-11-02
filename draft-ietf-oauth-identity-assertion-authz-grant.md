@@ -133,7 +133,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the IdP Authorization Server as defined in {{RFC8414}}.
 
 `sub`:
-: REQUIRED - The subject identifier (e.g. user ID) of the resource owner at the Resource Authorization Server as defined in {{OpenID.Core}}. The identifier MUST be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for SSO.  A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
+: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The identifier MUST be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for SSO.  A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
 
 `aud`:
 : REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}.
