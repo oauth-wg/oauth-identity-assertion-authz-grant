@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-30T00:02:52.053910+00:00",
+  "timestamp": "2025-11-02T00:03:30.814173+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1521,7 +1521,7 @@
       "labels": [],
       "body": "As raised in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51, a seamless user experience requires that Requesting Apps have a way to discover which applications, and their specific instances, a user is allowed to access. This would allow mirroring the experience of SSO dashboards, where users can simply select the app instance they want to use.\n\nThis raises several questions:\n- Should the IdP expose an \"Accessible Resources API\" to list the available Resource Apps and their instances for an authenticated user?\n- How should such an API structure its data to clearly differentiate between multiple instances of the same application?\n- **Should this API be standardized?**",
       "createdAt": "2025-10-10T09:22:45Z",
-      "updatedAt": "2025-10-29T22:55:06Z",
+      "updatedAt": "2025-10-30T01:24:28Z",
       "closedAt": null,
       "comments": [
         {
@@ -1565,6 +1565,13 @@
           "body": "> converted the SAML Assertion to a Refresh Token\n\nSimilarly, can a SAML assertion be converted to an id_token using `saml2-bearer`? \n\nAlso, related to the trusted clients/accessible resources endpoint, I think what @mcguinness showed as example responses were what we were thinking. The `client_id` + `sub` from the token passed in the Authorization header will be important context for the endpoint. We discussed the authentication fro that endpoint actually including the id_token instead of the access_token, and I think the only thing it would include over the access token is the session_id. If its not needed, the id_token doesnt need to be send in the request \ud83e\udd14 \n",
           "createdAt": "2025-10-29T22:55:06Z",
           "updatedAt": "2025-10-29T22:55:06Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I don\u2019t recommend using https://www.rfc-editor.org/rfc/rfc7522 to obtain an ID Token. The assertion is intended to only be used to obtain an access token only and interoperability only defines how delegated authorization should work cross domain.  There is also very limited use of this grant in the wild today. ",
+          "createdAt": "2025-10-30T01:24:27Z",
+          "updatedAt": "2025-10-30T01:24:27Z"
         }
       ]
     },
@@ -2944,7 +2951,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-10-19T17:58:17Z",
-      "updatedAt": "2025-10-19T19:34:36Z",
+      "updatedAt": "2025-10-30T17:21:03Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "733b4a02b33b8c961d72f6f9140b37b8589023f8",
@@ -3031,6 +3038,46 @@
               "updatedAt": "2025-10-19T19:34:36Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Kskzl",
+          "commit": {
+            "abbreviatedOid": "bbeb063"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-30T16:58:29Z",
+          "updatedAt": "2025-10-30T16:58:29Z",
+          "comments": [
+            {
+              "originalPosition": 138,
+              "body": "@mcguinness what was your thinking here, isn't it the case that the ID-JAG will always be shorter lived than the access token? This paragraph opens the possibility of issuing long-lived ID-JAGs which I thought we didn't want to encourage.",
+              "createdAt": "2025-10-30T16:58:29Z",
+              "updatedAt": "2025-10-30T16:58:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Ks72U",
+          "commit": {
+            "abbreviatedOid": "bbeb063"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-30T17:21:02Z",
+          "updatedAt": "2025-10-30T17:21:03Z",
+          "comments": [
+            {
+              "originalPosition": 138,
+              "body": "I was aligning with https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-05#section-5.4 and allowing lifetime to be something that is up to policy based on risk & target resource.  Once we add support for DPOP to the ID-JAG then its lifetime could be longer than an Access Token (e.g 1 hour for ID-jAG, with AT for 5 mins).",
+              "createdAt": "2025-10-30T17:21:02Z",
+              "updatedAt": "2025-10-30T17:21:03Z"
+            }
+          ]
         }
       ]
     },
@@ -3046,7 +3093,7 @@
       "labels": [],
       "body": "- Made capitalization of key terms Identity Provider,  End-User, Assertion,  Identity Assertion consistent\r\n- Update claim descriptions of `sub` & `client_id` to make clear relationship to SSO \r\n- Updated guidance on providing claims for account resolution & JIT\r\n",
       "createdAt": "2025-10-26T03:23:50Z",
-      "updatedAt": "2025-10-28T16:27:51Z",
+      "updatedAt": "2025-11-01T21:35:55Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
@@ -3054,6 +3101,295 @@
       "headRefName": "housekeeping",
       "headRefOid": "76fb84a9d7f6f4f0e82bc2a48eee7cfdad6f4465",
       "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "I'd like to merge the editorial changes in this separately from adding the `aud_sub` claim. Can we do that in a different PR?",
+          "createdAt": "2025-11-01T20:36:48Z",
+          "updatedAt": "2025-11-01T20:36:48Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7LHYfH",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T20:33:11Z",
+          "updatedAt": "2025-11-01T20:33:11Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "How is this different from the definition of the `sub` claim above?\n\n> The subject identifier (e.g. user ID) of the resource owner at the Resource Authorization Server\n\nvs \n\n> Resource Authorization Server identifier for the subject",
+              "createdAt": "2025-11-01T20:33:11Z",
+              "updatedAt": "2025-11-01T20:33:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHYp0",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T20:36:04Z",
+          "updatedAt": "2025-11-01T20:36:04Z",
+          "comments": [
+            {
+              "originalPosition": 99,
+              "body": "What was the justification for changing this to be about a Resource Authorization Server that doesn't have an SSO relationship vs about just the user not having been seen before? I feel like there's a lot more we are going to have to cover to handle the case where there is no prior SSO relationship.",
+              "createdAt": "2025-11-01T20:36:04Z",
+              "updatedAt": "2025-11-01T20:36:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHbS9",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T20:57:00Z",
+          "updatedAt": "2025-11-01T20:57:00Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "`sub` claim is the OP identifier for the RP. The RP needs to have linked this previously for the Resource AS. \r\n\r\n`aud_sub` is the local identifier for an AS account. The IdP would need to have imported this somehow (eg SCIM)",
+              "createdAt": "2025-11-01T20:57:00Z",
+              "updatedAt": "2025-11-01T20:57:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHbai",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T20:59:11Z",
+          "updatedAt": "2025-11-01T20:59:11Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "oh right. well in that case both of these definitions need some work \ud83d\ude43 ",
+              "createdAt": "2025-11-01T20:59:11Z",
+              "updatedAt": "2025-11-01T20:59:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHbfX",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T21:00:38Z",
+          "updatedAt": "2025-11-01T21:00:39Z",
+          "comments": [
+            {
+              "originalPosition": 99,
+              "body": "The scenario was the user hasn\u2019t SSO to the app yet not that that the trust relationship doesn\u2019t exist.  A user may SSO the client as RP but not yet the Resource AS as RP. The Resource AS may not have a link yet for the `sub` until they SSO to the Resource AS.  ",
+              "createdAt": "2025-11-01T21:00:39Z",
+              "updatedAt": "2025-11-01T21:00:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHbpl",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T21:03:10Z",
+          "updatedAt": "2025-11-01T21:03:10Z",
+          "comments": [
+            {
+              "originalPosition": 99,
+              "body": "Ok but the SSO relationship with the IdP already exists in that case, it's just that the particular user doesn't exist in the Resource AS?",
+              "createdAt": "2025-11-01T21:03:10Z",
+              "updatedAt": "2025-11-01T21:03:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHciA",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T21:07:26Z",
+          "updatedAt": "2025-11-01T21:07:27Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "will try another pass. any suggestions?",
+              "createdAt": "2025-11-01T21:07:26Z",
+              "updatedAt": "2025-11-01T21:07:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHgLT",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T21:19:21Z",
+          "updatedAt": "2025-11-01T21:19:21Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "Let's just use the text from OpenID for sub:\r\n\r\n`sub`: REQUIRED - Subject Identifier. An identifier within the Issuer for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}.\r\n\r\nFor `aud_sub`:\r\n\r\n`aud_sub`: OPTIONAL - The Resource Authorization Server's identifier for the End-User as defined in {{OpenID.Enterprise}}.\r\n\r\nIs that more clear?",
+              "createdAt": "2025-11-01T21:19:21Z",
+              "updatedAt": "2025-11-01T21:19:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHgah",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T21:21:43Z",
+          "updatedAt": "2025-11-01T21:21:43Z",
+          "comments": [
+            {
+              "originalPosition": 99,
+              "body": "```suggestion\nIt is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim.  The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation, for example when the user has not yet SSO'd into the Resource Authorization Server.  Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.\n```",
+              "createdAt": "2025-11-01T21:21:43Z",
+              "updatedAt": "2025-11-01T21:21:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHgiE",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T21:23:19Z",
+          "updatedAt": "2025-11-01T21:23:19Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "It\u2019s an improvement.  I think i will need to add a new section of user id mapping and claims and pull the note out from client id mapping in a different PR. There is a lot of nuance here. ",
+              "createdAt": "2025-11-01T21:23:19Z",
+              "updatedAt": "2025-11-01T21:23:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LHht9",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-01T21:35:55Z",
+          "updatedAt": "2025-11-01T21:35:55Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "ok, let's just start with these changes in this PR and get this merged then do a larger refactor with the client ID and user ID mappings",
+              "createdAt": "2025-11-01T21:35:55Z",
+              "updatedAt": "2025-11-01T21:35:56Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 62,
+      "id": "PR_kwDOKv5r-s6wqteE",
+      "title": "Change refresh token langugae that implies id-jags should be long lives",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/62",
+      "state": "OPEN",
+      "author": "sdesen",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Id-jag tokens should be encouraged to be short lived, single use artifacts. This language conflicts with that assumption and implies that id-jags may be longer lived than access tokens. We could optionally remove this paragrah",
+      "createdAt": "2025-10-30T17:02:48Z",
+      "updatedAt": "2025-10-30T18:57:39Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
+      "headRepository": "sdesen/draft-parecki-oauth-identity-assertion-authz-grant",
+      "headRefName": "refresh-token-language",
+      "headRefOid": "bb423f012b29a2ec44467b6da8a9fd2cfa806519",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "See https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/57#discussion_r2478922635\r\n\r\nI think it should be possible to have an ID-JAG with a lifetime that is longer than an Access Token.   Access Token lifetimes are managing performance/scale/security tradeoffs and specific to the Resource AS-RS implementation.  ID-JAG can be sender-constrained and also have client authentication.  It don't think it needs to have single use processing semantics.  The ID-JAG lifetime should serialize an access delegation that meets the attenuation requirements of the IDP policy that could have shared signals/etc with the Resource AS.   I don't see an issue with an ID-JAG with a lifetime in hours not minutes for example.  I wouldn't expect days.  Its not a refresh token.\r\n",
+          "createdAt": "2025-10-30T18:57:39Z",
+          "updatedAt": "2025-10-30T18:57:39Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 63,
+      "id": "PR_kwDOKv5r-s6wq37e",
+      "title": "Update refresh token language which implies id-jags are long lived",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/63",
+      "state": "CLOSED",
+      "author": "sdesen",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-10-30T17:15:34Z",
+      "updatedAt": "2025-10-30T17:15:44Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
+      "headRepository": "sdesen/draft-parecki-oauth-identity-assertion-authz-grant",
+      "headRefName": "refresh-token-lang-fix",
+      "headRefOid": "fce287ca65f6c66ef176798ec833ed0f37873db3",
+      "closedAt": "2025-10-30T17:15:44Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
