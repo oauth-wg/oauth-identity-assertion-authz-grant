@@ -479,7 +479,7 @@ The Resource Authorization Server's token endpoint responds with an OAuth 2.0 To
 
 The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
 
-When the access token has expired, clients SHOULD re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.
+When the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.
 
 If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g ID Token)
 
