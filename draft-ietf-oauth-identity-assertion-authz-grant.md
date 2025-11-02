@@ -97,7 +97,7 @@ This specification enables this kind of "Cross App Access" to be managed by the 
 
 The draft specification Identity Chaining Across Trust Domains {{I-D.ietf-oauth-identity-chaining}} defines how to request a JWT authorization grant from an Authorization Server and exchange it for an Access Token at another Authorization Server in a different trust domain. The specification combines OAuth 2.0 Token Exchange {{RFC8693}} and JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}}. The draft supports multiple different use cases by leaving many details of the token exchange request and JWT authorization grant unspecified.
 
-This specification defines the additional details necessary to support interoperable implementations in enterprise scenarios when two applications are configured for single sign-on to the same enterprise identity provider. In particular, this specification uses identity assertions as the input to the token exchange request. This way, the same enterprise identity provider that is trusted by applications for single sign-on can be extended to broker access to APIs.
+This specification defines the additional details necessary to support interoperable implementations in enterprise scenarios when two applications are configured for single sign-on to the same enterprise identity provider. In particular, this specification uses an Identity Assertion as the input to the token exchange request. This way, the same enterprise Identity Provider that is trusted by applications for single sign-on can be extended to broker access to APIs.
 
 
 # Conventions and Definitions
@@ -110,7 +110,7 @@ Client
 : The application that wants to obtain an OAuth 2.0 access token on behalf of a signed-in user to an external/3rd party application's API (Resource Server below). In {{I-D.ietf-oauth-identity-chaining}}, this is the Client in trust domain A.  The application has a direct relationship with the IdP Authorization Server for single sign-on as a Relying Party and another independent OAuth 2.0 client relationship with the Resource Authorization Server in trust domain B.
 
 IdP Authorization Server (IdP)
-: A SAML 2.0 Identity Provider or OpenID Connect Provider (OP) {{OpenID.Core}} that issues identity assertions for single sign-on and cross-domain authorization grants {{id-jag}} for a set of trusted applications in an organization's application ecosystem.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.
+: A SAML 2.0 Identity Provider or OpenID Connect Provider (OP) {{OpenID.Core}} that issues Identity Assertions for single sign-on and cross-domain authorization grants {{id-jag}} for a set of trusted applications in an organization's application ecosystem.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.
 
 Resource Authorization Server (AS)
 : Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain B, and trusts cross-domain authorization grants {{id-jag}} from the IdP Authorization Server.
@@ -123,50 +123,56 @@ Resource Server (RS)
 
 The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server.
 
-An Identity Assertion JWT Authorization Grant is issued and signed by an IdP similar to an ID Token {{OpenID.Core}}, and contains claims about an end-user. Instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain. It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP which is trusted by the Authorization Server to delegate access to the client.
+An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.
 
 As described in {{OpenID.Core}}, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.
 
 The following claims are used within the Identity Assertion JWT Authorization Grant:
 
 `iss`:
-: REQUIRED - The issuer identifier of the IdP authorization server as defined in {{RFC8414}}
+: REQUIRED - The issuer identifier of the IdP Authorization Server as defined in {{RFC8414}}.
 
 `sub`:
-: REQUIRED - The subject identifier (e.g. user ID) of the resource owner at the Resource Authorization Server as defined in {{OpenID.Core}}
+: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The identifier MUST be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for SSO.  A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
 
 `aud`:
-: REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}
+: REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}.
 
 `client_id`:
-: REQUIRED - An identifier of the client that will act on behalf of the resource owner. It MUST be recognized by the Resource Authorization Server. For interoperability, the client identifier SHOULD be a `client_id` as defined in {{Section 4.3 of RFC8693}}. See {{client-id-mapping}} for additional considerations.
+: REQUIRED - The client identifier of the OAuth 2.0 {{RFC6749}} client at the Resource Authorization Server that will act on behalf of the resource owner (`sub`).  This identifier MAY be different that client identifier of the OAuth 2.0 client requesting an ID-JAG from the IdP {{Section 4.3 of RFC8693}} as it represents and independent client relationship to another Authorization Server in a different trust domain.  See {{client-id-mapping}} for additional considerations.
 
 `jti`:
-: REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}
+: REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}.
 
 `exp`:
-: REQUIRED - as defined in {{Section 4.1.4 of RFC7519}}
+: REQUIRED - as defined in {{Section 4.1.4 of RFC7519}}.
 
 `iat`:
-: REQUIRED - as defined in {{Section 4.1.6 of RFC7519}}
+: REQUIRED - as defined in {{Section 4.1.6 of RFC7519}}.
 
 `resource`:
-: OPTIONAL - The Resource Identifier ({{Section 2 of RFC8707}}) of the Resource Server (either a single URI or an array of URIs)
+: OPTIONAL - The Resource Identifier ({{Section 2 of RFC8707}}) of the Resource Server (either a single URI or an array of URIs).
 
 `scope`:
-: OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}
+: OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}.
 
 `tenant`:
 : OPTIONAL - JSON string that represents the tenant identifier for a multi-tenant issuer as defined in {{OpenID.Enterprise}}
 
 `auth_time`:
-: OPTIONAL - Time when end-user authenticated to the client as defined in {{OpenID.Core}}
+: OPTIONAL - Time when End-User authenticated as defined in {{OpenID.Core}}.
 
 `acr`:
-: OPTIONAL -  Authentication Context Class Reference that was satisfied when authenticating the end-user as defined in {{OpenID.Core}}
+: OPTIONAL -  Authentication Context Class Reference that was satisfied when authenticating the End-User as defined in {{OpenID.Core}}.
 
 `amr`:
-: OPTIONAL -  Identifiers for authentication methods used when authenticating the end-user as defined in {{OpenID.Core}}
+: OPTIONAL -  Identifiers for authentication methods used when authenticating the End-User as defined in {{OpenID.Core}}.
+
+`aud_sub`:
+: OPTIONAL - The Resource Authorization Server's identifier for the End-User as defined in {{OpenID.Enterprise}}.
+
+`email`:
+:OPTIONAL - End-User's e-mail address as defined in Section 5.1 of {{OpenID.Core}}.
 
 The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices ({{Section 3.11 of RFC8725}}).
 
@@ -197,12 +203,9 @@ A non-normative example JWT with expanded header and payload claims is below:
     .
     signature
 
-The Identity Assertion JWT Authorization Grant may contain additional Authentication, Identity, or Authorization claims that are valid for an ID Token as the grant functions as an identity assertion for the Resource App.
+The ID-JAG may contain additional authentication, identity, or authorization claims that are valid for an ID Token {{OpenID.Core}} as the grant functions as both an Identity Assertion and authorization delegation for the Resource Authorization Server.
 
-
-Implementation notes:
-
-* `sub` should be an opaque ID, as `iss`+`sub` is unique. The IdP might want to also include the user's email here, which it should do as a new `email` claim. This would let the app dedupe existing users who may have an account with an email address but have not done SSO yet.
+It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim.  The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation, for example when the user has not yet SSO'd into the Resource Authorization Server.  Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.
 
 # Cross-Domain Access
 
@@ -257,7 +260,7 @@ Sequence Diagram
          |                    |                  |                 |
          |                    |                  |                 |
 
-1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in
+1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in
 2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server
 3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
 4. Client makes an API request to the Resource Server with the Access Token
@@ -267,7 +270,7 @@ This specification is constrained to deployments where a set of Resource Authori
 
 ## User Authentication
 
-The Client initiates an authentication request with the IdP using OpenID Connect or SAML.
+The Client initiates an authentication request with the IdP Authorization Server using OpenID Connect or SAML.
 
 The following is an example using OpenID Connect
 
@@ -299,13 +302,13 @@ Note: The IdP Authorization Server may enforce security controls such as multi-f
 
 ## Token Exchange
 
-The Client makes a Token Exchange {{RFC8693}} request to the IdP's Token Endpoint with the following parameters:
+The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization Server's Token Endpoint with the following parameters:
 
 `requested_token_type`:
-: REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an ID Assertion JWT is being requested.
+: REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an Identity Assertion JWT Authorization Grant is being requested.
 
 `audience`:
-: REQUIRED - The Issuer URL of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}.
+: REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}.
 
 `resource`:
 : OPTIONAL - The Resource Identifier of the Resource Server as defined in {{Section 2 of RFC8707}}.
@@ -314,14 +317,14 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP's Token Endpoin
 : OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
 
 `subject_token`:
-: REQUIRED - The identity assertion (e.g. the OpenID Connect ID Token or SAML assertion) for the target end-user.
+: REQUIRED - The Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner.
 
 `subject_token_type`:
-: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, or for a SAML assertion: `urn:ietf:params:oauth:token-type:saml2`.
+: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, or for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`.
 
 The additional parameters defined in {{Section 2.1 of RFC8693}} `actor_token` and `actor_token_type` are not used in this specification.
 
-Client authentication to the authorization server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
+Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
 The example below uses an ID Token as the Identity Assertion, and uses a JWT Bearer Assertion {{RFC7523}} as the client authentication method, (tokens truncated for brevity):
 
@@ -596,7 +599,7 @@ Email clients can be used with arbitrary email servers, and cannot require pre-e
 
 When the email client needs access to a separate API, such as a third-party calendaring application, traditionally this would require that the email client go through another web-based OAuth redirect flow to obtain authorization and ultimately an access token.
 
-To streamline the user experience, this specification can be used to enable the email client to use the identity assertion to obtain an access token for the third-party calendaring application without any user interaction.
+To streamline the user experience, this specification can be used to enable the email client to use the Identity Assertion to obtain an access token for the third-party calendaring application without any user interaction.
 
 ### Preconditions
 
