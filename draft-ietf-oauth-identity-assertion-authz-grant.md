@@ -205,7 +205,7 @@ A non-normative example JWT with expanded header and payload claims is below:
 
 The ID-JAG may contain additional authentication, identity, or authorization claims that are valid for an ID Token {{OpenID.Core}} as the grant functions as both an Identity Assertion and authorization delegation for the Resource Authorization Server.
 
-It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} or `aud_sub` {{OpenID.Enterprise}} claim when issued for Resource Authorization Server that hasn't established a prior SSO relationship with the IdP.  The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation.  Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.
+It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim.  The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation, for example when the user has not yet SSO'd into the Resource Authorization Server.  Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.
 
 # Cross-Domain Access
 
