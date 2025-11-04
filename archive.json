@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-02T00:03:30.814173+00:00",
+  "timestamp": "2025-11-04T00:02:33.214667+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1357,7 +1357,7 @@
       "labels": [],
       "body": "**Summary**\nThis proposal considers a protocol-level solution for scenarios where a user needs to connect to a specific instance (e.g., tenant, organziation, workspace) of a Resource App, particularly when these multiple instances share a common issuer URL. The goal is to create a mechanism that allows a Requesting App to specify the target instance and ensures this choice is communicated end-to-end, so it can be correctly interpreted by both the IdP and the Resource App's authorization server.\n\n**Problem**\nIn many enterprise environments, a single application may offer multiple distinct instances. For example, consider an observability platform with separate instances for `development` and `production` logs. Often, these instances share a single `audience` (i.e., issuer URL) and `resource` identifier for their APIs. In these cases, access to the Resource App's API is managed by a custom claim injected into the `access_token` after the user authenticates with a specific instance.\n\nThe current Identity Assertion Authorization Grant does not define a standard way for a Requesting App to specify a target instance under these conditions. This ambiguity prevents a seamless user experience, which should ideally mirror selecting an application from an SSO dashboard and being directed to the correct instance.\n\nThis overall challenge can be broken down into two parts:\n\n**1. The Discovery Problem** \nBefore a user can make a choice, the Requesting App must first know what choices are available. How can the Requesting App learn which Resource Apps, and their specific instances, the logged-in user is permitted to connect to?\n\nWhile solving discovery is critical for the end-to-end experience, it is handled separately in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/52. For this issue, we will assume the Requesting App has a method to determine which instance the user wants to access.\n\n**2. The Request Problem** \nThis is the focus of the proposal. Once the user has selected an instance, how does the Requesting App communicate this choice to the IdP? The current protocol lacks a standard parameter to differentiate the target instance when it shares an `audience`/issuer URL with others.\n\n**Proposal**\n**We propose using the `client_id` of the target Resource App instance within the IdP** as the unique identifier. This `client_id` would be included in the initial Token Exchange request and the resulting Identity Assertion (ID-JAG).\n\nRationale:\n- Uniqueness & Existing Trust: Each Resource App instance registered with the IdP for SSO already has a unique `client_id`. This identifier is known and trusted by both the IdP and the Resource App.\n- IdP Policy Enforcement: The IdP can use the provided `client_id` to locate and apply the specific authorization policies associated with that instance.\n- Resource App Tenant Mapping: The Resource App's Authorization Server already relies on this `client_id` for its OIDC federation with the IdP. It can therefore use the `client_id` from the assertion to unambiguously map the request to the correct internal tenant, organization, or workspace.\n",
       "createdAt": "2025-10-10T09:15:21Z",
-      "updatedAt": "2025-10-22T20:20:32Z",
+      "updatedAt": "2025-11-02T21:24:59Z",
       "closedAt": null,
       "comments": [
         {
@@ -1506,6 +1506,20 @@
           "body": "I can get a PR out with the proposed changes.  We just need consensus on the claim. \n\nThe more I think about it, I think the best route is to adopt a Complex Subject Member from https://openid.net/specs/openid-sharedsignals-framework-1_0-ID3.html#section-3.3\n\nIf we have a single string claim like `sub_qualifier` then the Resource AS would need custom processing logic to understand what type of value was passed and how it should use it. Is it a tenant identifier, a client identifier, something else?   Since this value isn't passed in the ID Token there isn't a clear interop story here and it would be deployment specific.\n\nAdopting Complex Subject would be more explicit and extensible such as \n\n```\n\"sub_id\": {\n  \"format\": \"complex\",\n  \"user\" : {\n    \"format\": \"email\",\n    \"email\": \"bar@example.com\"\n  },\n  \"tenant\" : {\n    \"format\": \"iss_sub\",\n    \"iss\" : \"https://example.com/idp1\",\n    \"sub\" : \"1234\"\n  }\n}\n```\n\n```\n\"sub_id\": {\n  \"format\": \"complex\",\n  \"user\" : {\n    \"format\": \"email\",\n    \"email\": \"bar@example.com\"\n  },\n  \"client\" : {\n    \"format\": \"client\",\n    \"client_id\": \"1234\"\n  }\n}\n```\n\n\n",
           "createdAt": "2025-10-22T20:20:32Z",
           "updatedAt": "2025-10-22T20:20:32Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "I tried to make a picture illustrating the problem\n\n<img width=\"1133\" height=\"663\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/4f915730-de49-47dc-b7f0-13a3cf5c0508\" />",
+          "createdAt": "2025-11-02T20:20:40Z",
+          "updatedAt": "2025-11-02T20:20:40Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Correct, Eng Chat and Mktg Chat have different `client_id` for their RP relationship with the IdP but the Client (Wiki) has a multi-tenant client registration (e.g. `wiki.app`) with the multi-tenant Resource Authorization Server (eg. `https://as.chat.com`)",
+          "createdAt": "2025-11-02T21:24:58Z",
+          "updatedAt": "2025-11-02T21:24:58Z"
         }
       ]
     },
@@ -1611,7 +1625,7 @@
       "labels": [],
       "body": "Since Refresh Tokens should not be returned when exchanging ID-JAG for an Access Token with the Resource Authorization Server, the Client will need to make an extra round-trip to the IDP Authorization Server to renew an ID Token using the IDP's Refresh Token so it can obtain a fresh ID-JAG with the new ID Token.   See https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#name-refresh-token\n\nAdding support for `urn:ietf:params:oauth:token-type:refresh_token` as the `subject_token` in the ID-JAG Token Exchange request would eliminate the round-trip needed to obtain the ID Token first as the IdP Authorization Server can dereference the refresh token to obtain the same claims that would be present in the ID Token.\n\nWe should also consider recommending that the IdP Authorization Server MAY return a `refresh_token` when exchanging a `urn:ietf:params:oauth:token-type:saml2` token as the `subject_token` for an ID-JAG.  This would enable a Client that uses SAML for SSO to obtain a refresh token that they can use to renew ID-JAGs without having to switch to OIDC or redirect the user over the front channel. ",
       "createdAt": "2025-10-19T21:12:58Z",
-      "updatedAt": "2025-10-23T04:44:39Z",
+      "updatedAt": "2025-11-02T02:34:40Z",
       "closedAt": null,
       "comments": [
         {
@@ -1663,15 +1677,15 @@
       "id": "I_kwDOKv5r-s7TlRXX",
       "title": "Clarify subject identifier in ID-JAG",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/59",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#section-3\n\nSome people have been confused about the `sub` ID, I think the language \u201cat the resource authorization server\u201d is not explicit enough. We should clarify that this is the same value that the IdP would have sent in the ID Token for regular SSO.",
       "createdAt": "2025-10-24T14:27:03Z",
-      "updatedAt": "2025-10-24T14:58:51Z",
-      "closedAt": null,
+      "updatedAt": "2025-11-02T02:34:26Z",
+      "closedAt": "2025-11-02T02:34:26Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3086,31 +3100,33 @@
       "id": "PR_kwDOKv5r-s6vtevC",
       "title": "ID-JAG Claim Description Updates",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/60",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "- Made capitalization of key terms Identity Provider,  End-User, Assertion,  Identity Assertion consistent\r\n- Update claim descriptions of `sub` & `client_id` to make clear relationship to SSO \r\n- Updated guidance on providing claims for account resolution & JIT\r\n",
       "createdAt": "2025-10-26T03:23:50Z",
-      "updatedAt": "2025-11-01T21:35:55Z",
+      "updatedAt": "2025-11-02T02:34:06Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "housekeeping",
-      "headRefOid": "76fb84a9d7f6f4f0e82bc2a48eee7cfdad6f4465",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "1ae7f94faa9e6865cba1c3cbe0f6138b8c3c82ea",
+      "closedAt": "2025-11-02T02:34:03Z",
+      "mergedAt": "2025-11-02T02:34:03Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137"
+      },
       "comments": [
         {
           "author": "aaronpk",
           "authorAssociation": "MEMBER",
-          "body": "I'd like to merge the editorial changes in this separately from adding the `aud_sub` claim. Can we do that in a different PR?",
-          "createdAt": "2025-11-01T20:36:48Z",
-          "updatedAt": "2025-11-01T20:36:48Z"
+          "body": "This addresses #59 ",
+          "createdAt": "2025-11-02T02:33:39Z",
+          "updatedAt": "2025-11-02T02:33:39Z"
         }
       ],
       "reviews": [
@@ -3331,6 +3347,66 @@
               "body": "ok, let's just start with these changes in this PR and get this merged then do a larger refactor with the client ID and user ID mappings",
               "createdAt": "2025-11-01T21:35:55Z",
               "updatedAt": "2025-11-01T21:35:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LIc2S",
+          "commit": {
+            "abbreviatedOid": "76fb84a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-02T02:28:48Z",
+          "updatedAt": "2025-11-02T02:28:48Z",
+          "comments": [
+            {
+              "originalPosition": 35,
+              "body": "```suggestion\n: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The identifier MUST be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for SSO.  A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.\n```",
+              "createdAt": "2025-11-02T02:28:48Z",
+              "updatedAt": "2025-11-02T02:28:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LIc82",
+          "commit": {
+            "abbreviatedOid": "be30b33"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-02T02:29:17Z",
+          "updatedAt": "2025-11-02T02:29:17Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "```suggestion\n: OPTIONAL - The Resource Authorization Server's identifier for the End-User as defined in {{OpenID.Enterprise}}.\n```",
+              "createdAt": "2025-11-02T02:29:17Z",
+              "updatedAt": "2025-11-02T02:29:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7LIdcF",
+          "commit": {
+            "abbreviatedOid": "978d26f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-02T02:32:08Z",
+          "updatedAt": "2025-11-02T02:32:09Z",
+          "comments": [
+            {
+              "originalPosition": 84,
+              "body": "```suggestion\n:OPTIONAL - End-User's e-mail address as defined in Section 5.1 of {{OpenID.Core}}.\n```",
+              "createdAt": "2025-11-02T02:32:08Z",
+              "updatedAt": "2025-11-02T02:32:09Z"
             }
           ]
         }
