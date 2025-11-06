@@ -221,7 +221,7 @@ The example flow is for an enterprise `acme`, which uses a multi-tenant wiki app
 | Client | `https://wiki.example` | `https://acme.wiki.example` | Wiki app that embeds content from one or more resource servers |
 | Resource Authorization Server   | `https://chat.example` | `https://acme.chat.example` | Authorization Server for an chat and communication app |
 | Identity Provider | `https://idp.example`   | `https://acme.idp.example` | Enterprise Identity Provider
-| Identity Provider Authorization Server | `https://as.idp.example`   | `https://acme.as.idp.example` | Enterprise Authorization Server
+| Enterprise Authorization Server | `https://eas.idp.example`   | `https://acme.eas.idp.example` | Enterprise Authorization Server
 | Resource Server | `https://api.chat.example`   | `https://api.chat.example` |  Public API for the chat and communications app
 
 Sequence Diagram
