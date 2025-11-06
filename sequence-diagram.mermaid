@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant C as Client
+    box Domain A
+    participant IdP as Identity<br>Provider<br>(IdP)
+    participant IdPAS as IdP<br>Authorization<br>Server
+    end
+    box Domain B
+    participant AS as Authorization<br>Server
+    participant RS as Resource<br>Server
+    end
+
+    C->>IdP: 1. User SSO
+    IdP-->>C: ID Token &<br>Refresh Token (opt)
+
+    note over C: User is logged<br/>in to Client.
+
+    C->>IdPAS: 2. Exchange ID Token for ID-JAG
+    note over IdPAS: Evaluate Policy
+    IdPAS-->>C: Responds with ID-JAG
+    C->>AS: 3. Token Request with ID-JAG
+    note over AS: Validate ID-JAG
+    AS-->>C: Access Token
+
+    loop
+    C->>RS: 4. Call API with Access Token
+    RS-->>C: API Response with Data
+    end
