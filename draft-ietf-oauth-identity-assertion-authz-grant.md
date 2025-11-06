@@ -231,8 +231,8 @@ Sequence Diagram
 ~~~
 {: #fig-sequence-diagram title="Identity Assertion JWT Authorization Grant Sequence" }
 
-1. User authenticates with the IdP, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in
-2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the Enterprise Authorization Server
+1. User authenticates with the IdP, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user, an Access Token, and optionally a Refresh Token (when using OpenID Connect) and signs the user in
+2. Client uses the Access Token or Refresh Token to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the Enterprise Authorization Server
 3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
 4. Client makes an API request to the Resource Server with the Access Token
 
@@ -248,7 +248,7 @@ The following is an example using OpenID Connect
     302 Redirect
     Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20offline_access&client_id=...
 
-The user authenticates with the IdP, and is redirected back to the Client with an authorization code, which it can then exchange for an ID Token and optionally a Refresh Token when `offline_access` scope is requested per {{OpenID.Core}}.
+The user authenticates with the IdP, and is redirected back to the Client with an authorization code, which it can then exchange for an ID Token, Access Token, and optionally a Refresh Token when `offline_access` scope is requested per {{OpenID.Core}}.
 
 Note: The IdP may enforce security controls such as multi-factor authentication before granting the user access to the Client.
 
@@ -288,16 +288,16 @@ The Client makes a Token Exchange {{RFC8693}} request to the Enterprise Authoriz
 : OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
 
 `subject_token`:
-: REQUIRED - The Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner.
+: REQUIRED - The Access Token or Refresh Token for the target resource owner.
 
 `subject_token_type`:
-: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, or for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`.
+: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OAuth Access Token: `urn:ietf:params:oauth:token-type:access_token`, or for an OAuth Refresh Token: `urn:ietf:params:oauth:token-type:refresh_token`.
 
 The additional parameters defined in {{Section 2.1 of RFC8693}} `actor_token` and `actor_token_type` are not used in this specification.
 
 Client authentication to the Enterprise Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
-The example below uses an ID Token as the Identity Assertion, and uses a JWT Bearer Assertion {{RFC7523}} as the client authentication method, (tokens truncated for brevity):
+The example below uses an Access Token as the Identity Assertion, and uses a JWT Bearer Assertion {{RFC7523}} as the client authentication method, (tokens truncated for brevity):
 
     POST /oauth2/token HTTP/1.1
     Host: acme.idp.example
@@ -308,14 +308,14 @@ The example below uses an ID Token as the Identity Assertion, and uses a JWT Bea
     &audience=https://acme.chat.example/
     &resource=https://api.chat.example/
     &scope=chat.read+chat.history
-    &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
-    &subject_token_type=urn:ietf:params:oauth:token-type:id_token
+    &subject_token=7SliwCQP1brGdjBtsaMnXo...
+    &subject_token_type=urn:ietf:params:oauth:token-type:access_token
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
 ### Processing Rules
 
-The Enterprise Authorization Server MUST validate the subject token, and MUST validate that the audience of the Subject Token (e.g. the `aud` claim of the ID Token) matches the `client_id` of the client authentication of the request.
+The Enterprise Authorization Server MUST validate the subject token, and MUST validate that the audience of the Subject Token (e.g. the `aud` claim of the Access Token) matches the `client_id` of the client authentication of the request.
 
 The Enterprise Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience and scopes.
 
@@ -450,11 +450,11 @@ The Resource Authorization Server's token endpoint responds with an OAuth 2.0 To
 
 The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
 
-When the access token has expired, clients SHOULD re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.
+When the Access Token has expired, clients SHOULD re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.
 
-If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the Enterprise Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g ID Token)
+If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the Enterprise Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g Access Token or Refresh Token)
 
-If the ID Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
+If the Access Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new Access Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Access Token with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
 
 # Cross-Domain Client ID Handling {#client-id-mapping}
@@ -483,14 +483,6 @@ An Enterprise Authorization Server can advertise its support for this profile in
 To advertise support for the Identity Assertion JWT Authorization Grant, the authorization server SHOULD include the following value in the `identity_chaining_requested_token_types_supported` property:
 
 `urn:ietf:params:oauth:token-type:id-jag`
-
-# Resource Authorization Server Metadata {#rs-as-metadata}
-
-A Resource Authorization Server can advertise in its OAuth Authorization Server Metadata {{RFC8414}} its support for this profile, as well as the location of the Enterprise Authorization Server Token Endpoint that issues ID-JAG tokens it accepts.
-
-The following authorization server metadata parameter is defined by this specification and is (TBD) registered in the "OAuth Authorization Server Metadata" registry established in "OAuth 2.0 Authorization Server Metadata" {{RFC8414}}.
-
-`identity_assertion_token_endpoint`
 
 
 # Security Considerations
