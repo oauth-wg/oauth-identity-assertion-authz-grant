@@ -337,35 +337,34 @@ Table of Contents
    integrated into the enterprise's multi-tenant Identity Provider using
    OpenID Connect.
 
-   +=============+========================+===========================+==============+
-   |Role         |App URL                 |Tenant URL                 |Description   |
-   +=============+========================+===========================+==============+
-   |Client       |https://wiki.example    |https://acme.wiki.example  |Wiki app that |
-   |             |                        |                           |embeds content|
-   |             |                        |                           |from one or   |
-   |             |                        |                           |more resource |
-   |             |                        |                           |servers       |
-   +-------------+------------------------+---------------------------+--------------+
-   |Resource     |https://chat.example    |https://acme.chat.example  |Authorization |
-   |Authorization|                        |                           |Server for an |
-   |Server       |                        |                           |chat and      |
-   |             |                        |                           |communication |
-   |             |                        |                           |app           |
-   +-------------+------------------------+---------------------------+--------------+
-   |Identity     |https://idp.example     |https://acme.idp.example   |Enterprise    |
-   |Provider     |                        |                           |Identity      |
-   |             |                        |                           |Provider      |
-   +-------------+------------------------+---------------------------+--------------+
-   |Identity     |https://as.idp.example  |https://acme.as.idp.example|Enterprise    |
-   |Provider     |                        |                           |Authorization |
-   |Authorization|                        |                           |Server        |
-   |Server       |                        |                           |              |
-   +-------------+------------------------+---------------------------+--------------+
-   |Resource     |https://api.chat.example|https://api.chat.example   |Public API for|
-   |Server       |                        |                           |the chat and  |
-   |             |                        |                           |communications|
-   |             |                        |                           |app           |
-   +-------------+------------------------+---------------------------+--------------+
+   +=============+========================+============================+==============+
+   |Role         |App URL                 |Tenant URL                  |Description   |
+   +=============+========================+============================+==============+
+   |Client       |https://wiki.example    |https://acme.wiki.example   |Wiki app that |
+   |             |                        |                            |embeds content|
+   |             |                        |                            |from one or   |
+   |             |                        |                            |more resource |
+   |             |                        |                            |servers       |
+   +-------------+------------------------+----------------------------+--------------+
+   |Resource     |https://chat.example    |https://acme.chat.example   |Authorization |
+   |Authorization|                        |                            |Server for an |
+   |Server       |                        |                            |chat and      |
+   |             |                        |                            |communication |
+   |             |                        |                            |app           |
+   +-------------+------------------------+----------------------------+--------------+
+   |Identity     |https://idp.example     |https://acme.idp.example    |Enterprise    |
+   |Provider     |                        |                            |Identity      |
+   |             |                        |                            |Provider      |
+   +-------------+------------------------+----------------------------+--------------+
+   |Enterprise   |https://eas.idp.example |https://acme.eas.idp.example|Enterprise    |
+   |Authorization|                        |                            |Authorization |
+   |Server       |                        |                            |Server        |
+   +-------------+------------------------+----------------------------+--------------+
+   |Resource     |https://api.chat.example|https://api.chat.example    |Public API for|
+   |Server       |                        |                            |the chat and  |
+   |             |                        |                            |communications|
+   |             |                        |                            |app           |
+   +-------------+------------------------+----------------------------+--------------+
 
                                   Table 1
 
