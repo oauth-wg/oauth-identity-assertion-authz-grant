@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-04T00:02:33.214667+00:00",
+  "timestamp": "2025-11-06T00:02:54.668729+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1024,9 +1024,17 @@
       "labels": [],
       "body": "In addition to the new `identity-chaining-requested-token-types-supported` in well-known metadata response, shouldn't the `grant-types-supported` also include `token-exchange`, because that is needed in IdP to support id-token to id-jag token exchange. So, I think support for this grant-type should also be indicated in the IdP metadata.",
       "createdAt": "2025-09-08T17:36:36Z",
-      "updatedAt": "2025-09-08T17:38:26Z",
+      "updatedAt": "2025-11-05T17:14:54Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "@aaronpk @mcguinness for visibility.",
+          "createdAt": "2025-11-05T17:14:54Z",
+          "updatedAt": "2025-11-05T17:14:54Z"
+        }
+      ]
     },
     {
       "number": 39,
@@ -1287,9 +1295,24 @@
       "labels": [],
       "body": "We should add protected resource metadata recommendation and examples/best practices for resource servers.\nAnd particularly emphasize the value of up-to-date `scopes_supported` object in the `.well-known/oauth-protected-resource` response. This can then power the discovery of scopes for IdPs and requesting parties implementing `id-jag`.",
       "createdAt": "2025-09-10T15:58:00Z",
-      "updatedAt": "2025-09-10T15:59:08Z",
+      "updatedAt": "2025-11-05T17:45:14Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "@aaronpk @mcguinness has there been any discussion on proposing id-jag related metadata for protected-resource and authorization-server well-known metadata endpoints.",
+          "createdAt": "2025-11-05T17:13:32Z",
+          "updatedAt": "2025-11-05T17:13:32Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I wouldn\u2019t expect any new metadata on PRM. https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/34#issue-3244315923 is tracking the AS metadata gap for the Resource Authorization Server. ",
+          "createdAt": "2025-11-05T17:45:14Z",
+          "updatedAt": "2025-11-05T17:45:14Z"
+        }
+      ]
     },
     {
       "number": 48,
@@ -1625,7 +1648,7 @@
       "labels": [],
       "body": "Since Refresh Tokens should not be returned when exchanging ID-JAG for an Access Token with the Resource Authorization Server, the Client will need to make an extra round-trip to the IDP Authorization Server to renew an ID Token using the IDP's Refresh Token so it can obtain a fresh ID-JAG with the new ID Token.   See https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#name-refresh-token\n\nAdding support for `urn:ietf:params:oauth:token-type:refresh_token` as the `subject_token` in the ID-JAG Token Exchange request would eliminate the round-trip needed to obtain the ID Token first as the IdP Authorization Server can dereference the refresh token to obtain the same claims that would be present in the ID Token.\n\nWe should also consider recommending that the IdP Authorization Server MAY return a `refresh_token` when exchanging a `urn:ietf:params:oauth:token-type:saml2` token as the `subject_token` for an ID-JAG.  This would enable a Client that uses SAML for SSO to obtain a refresh token that they can use to renew ID-JAGs without having to switch to OIDC or redirect the user over the front channel. ",
       "createdAt": "2025-10-19T21:12:58Z",
-      "updatedAt": "2025-11-02T02:34:40Z",
+      "updatedAt": "2025-11-05T17:06:02Z",
       "closedAt": null,
       "comments": [
         {
@@ -1669,6 +1692,13 @@
           "body": "> I was thinking more if the id_token expires before the client requests an id-jag\n\nWe might be saying similar things so hear is my summary\n\n1) IdP MUST support at least 1 Identity Assertion type when requesting an ID-JAG\n\n`grant_type=urn:ietf:params:oauth:grant-type:token-exchange`\n`&subject_token_type=urn:ietf:params:oauth:token-type:saml2`\nOR\n`&subject_token_type=urn:ietf:params:oauth:token-type:id_token`\n`&requested_token_type=urn:ietf:params:oauth:token-type:id-jag`\n\n2) IdP MAY support exchanging a SAML2 Identity Assertion for an ID Token.  \nIt MAY issue a Refresh Token as well in the response in this special case which is discouraged by Token Exchange (note: offline_access scope was requested).  \n\nThis is something that this is unique to this profile and needs security considerations/etc but is needed for the existing SAML world to support renewing ID-JAGs when the SAML Assertion is expired.  It keeps the protocol simple with min surface area.  \n\n```\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\nsubject_token_type=urn:ietf:params:oauth:token-type:saml2\n&subject_token=PHNhbWxwOl...[base64url-encoded SAML2 Assertion]...\n&requested_token_type=urn:ietf:params:oauth:token-type:id_token\n&scope=openid%20offline_access\n```\n\n```\n {\n  \"access_token\":\"eyJhbGciOiJFUzI1NiIsImtpZCI6IjllciJ9.eyJhdWQiOiJo\n    dHRwczovL2JhY2tlbmQuZXhhbXBsZS5jb20iLCJpc3MiOiJodHRwczovL2FzLmV\n    4YW1wbGUuY29tIiwiZXhwIjoxNDQxOTE3NTkzLCJpYXQiOjE0NDE5MTc1MzMsIn\n    N1YiI6ImJkY0BleGFtcGxlLmNvbSIsInNjb3BlIjoiYXBpIn0.40y3ZgQedw6rx\n    f59WlwHDD9jryFOr0_Wh3CGozQBihNBhnXEQgU85AI9x3KmsPottVMLPIWvmDCM\n    y5-kdXjwhw\",\n  \"issued_token_type\":\n      \"urn:ietf:params:oauth:token-type:id_token\",\n  \"token_type\":\"N/A\",\n  \"expires_in\":60,\n  \"refresh_token\": \"xOTE3NTkzLCJpYXQiOjE0N...\"  // This is only for SAML and up to \n }\n```\n\n3) IdP MAY support exchanging a Refresh Token for an ID-JAG\n\n```\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&subject_token_type=urn:ietf:params:oauth:token-type:refresh_token\n&subject_token=xOTE3NTkzLCJpYXQiOjE0N...\n&requested_token_type=urn:ietf:params:oauth:token-type:id-jag\n```\n\nThis would enable an optimized refresh for when ID-JAG + ID Assertion expire as well as allow a SAML RP to convert to OAuth/OIDC so it can support refreshes.  If the IdP doesn't support `urn:ietf:params:oauth:token-type:refresh_token` the the Client just needs to make the extra round-trip request to exchange the Refresh Token for an ID Token then exchange the ID Token for a new ID-JAG.  \n\n",
           "createdAt": "2025-10-23T04:40:10Z",
           "updatedAt": "2025-10-23T04:44:39Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "This proposal addresses id_token and id-jag expiry as well as saml->id-jag, and will be a good addition to the spec. I like that it leaves refresh_token->id-jag as optional for the IdP.\n",
+          "createdAt": "2025-11-05T17:06:02Z",
+          "updatedAt": "2025-11-05T17:06:02Z"
         }
       ]
     },
@@ -3424,7 +3454,7 @@
       "labels": [],
       "body": "Id-jag tokens should be encouraged to be short lived, single use artifacts. This language conflicts with that assumption and implies that id-jags may be longer lived than access tokens. We could optionally remove this paragrah",
       "createdAt": "2025-10-30T17:02:48Z",
-      "updatedAt": "2025-10-30T18:57:39Z",
+      "updatedAt": "2025-11-05T16:48:37Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
@@ -3444,7 +3474,28 @@
           "updatedAt": "2025-10-30T18:57:39Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7MCm6E",
+          "commit": {
+            "abbreviatedOid": "bb423f0"
+          },
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-05T16:48:37Z",
+          "updatedAt": "2025-11-05T16:48:37Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "nit: typo\r\n> The ID-JAG replaces the use `of` Refresh Token for the Resource Authorization Server.\r\nOr alternate rephrasing.\r\n",
+              "createdAt": "2025-11-05T16:48:37Z",
+              "updatedAt": "2025-11-05T16:48:37Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 63,
