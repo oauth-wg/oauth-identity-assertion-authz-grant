@@ -454,7 +454,7 @@ When Access Token for the Resource Server has expired, clients SHOULD re-submit 
 
 If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the Enterprise Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g Access Token or Refresh Token)
 
-If the Access Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new Access Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Access Token with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
+If the Access Token for the EAS is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new Access Token from the IdP, which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Access Token with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
 
 # Cross-Domain Client ID Handling {#client-id-mapping}
