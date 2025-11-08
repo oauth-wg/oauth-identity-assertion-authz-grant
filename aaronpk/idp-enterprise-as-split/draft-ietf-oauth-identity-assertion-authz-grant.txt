@@ -675,11 +675,11 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    Resource Authorization Sever using the original Identity Assertion
    from the IdP (e.g Access Token or Refresh Token)
 
-   If the Access Token is expired, the Client MAY use the Refresh Token
-   obtained from the IdP during SSO to obtain a new Access Token which
-   it can exchange for a new ID-JAG.  If the Client is unable to obtain
-   a new Access Token with a Refresh Token then it SHOULD re-
-   authenticate the user by redirecting to the IdP.
+   If the Access Token for the EAS is expired, the Client MAY use the
+   Refresh Token obtained from the IdP during SSO to obtain a new Access
+   Token from the IdP, which it can exchange for a new ID-JAG.  If the
+   Client is unable to obtain a new Access Token with a Refresh Token
+   then it SHOULD re-authenticate the user by redirecting to the IdP.
 
 5.  Cross-Domain Client ID Handling
 
