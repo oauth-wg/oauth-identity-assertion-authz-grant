@@ -695,8 +695,8 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    *  Client to Resource Authorization Server for API access (OAuth)
 
-   *  Resource Authorization Server to IdP Authorization Server (OpenID
-      Connect or SAML)
+   *  Resource Authorization Server to IdP Authorization Server for SSO
+      (OpenID Connect or SAML)
 
    Each relationship is typically represented by independent client
    registrations between each party.  For example, the IdP Server
