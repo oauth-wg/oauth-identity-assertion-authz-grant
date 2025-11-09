@@ -690,7 +690,8 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    *  Client to IdP for SSO (OpenID Connect or SAML)
 
-   *  Client to Enterprise Authorization Server (OAuth)
+   *  Client to Enterprise Authorization Server (OAuth, defined in this
+      draft)
 
    *  Client to Resource Authorization Server (OAuth)
 
