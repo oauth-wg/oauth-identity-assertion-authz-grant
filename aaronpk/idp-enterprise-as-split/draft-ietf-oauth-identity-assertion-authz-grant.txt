@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 12 May 2026                                         Independent
+Expires: 13 May 2026                                         Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         8 November 2025
+                                                         9 November 2025
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 May 2026.
+   This Internet-Draft will expire on 13 May 2026.
 
 Copyright Notice
 
@@ -378,8 +378,10 @@ Table of Contents
 
    1.  User authenticates with the IdP, the Client obtains an Identity
        Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion)
-       for the user, an Access Token, and optionally a Refresh Token
-       (when using OpenID Connect) and signs the user in
+       for the user, an Access Token for the Enterprise Authorization
+       Server (indicated using scope as defined in Section 3.3 of
+       [RFC6749] or Resource Indicators [RFC8707]), and optionally a
+       Refresh Token (when using OpenID Connect) and signs the user in
 
    2.  Client uses the Access Token or Refresh Token to request an
        Identity Assertion JWT Authorization Grant for the Resource
