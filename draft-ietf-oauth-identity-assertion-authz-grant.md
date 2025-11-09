@@ -464,7 +464,7 @@ There are four separate OAuth/OpenID Connect/SAML relationships involved in this
 * Client to IdP for SSO (OpenID Connect or SAML)
 * Client to Enterprise Authorization Server (OAuth, defined in this draft)
 * Client to Resource Authorization Server for API access (OAuth)
-* Resource Authorization Server to IdP Authorization Server for SSO (OpenID Connect or SAML)
+* Resource Authorization Server to IdP for SSO (OpenID Connect or SAML)
 
 Each relationship is typically represented by independent client registrations between each party. For example, the IdP Server typically issues a Client ID for both the Client and Resource Authorization Server to use for single sign-on with OpenID Connect as a Relying Party. Similarly, the Resource Authorization Server typically issues a Client ID for the Client to use for API access to the Resource Server.   The Client may choose to use different client credentials with each registration.
 
