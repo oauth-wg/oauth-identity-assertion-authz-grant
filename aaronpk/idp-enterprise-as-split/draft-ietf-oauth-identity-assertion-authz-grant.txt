@@ -688,7 +688,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    There are four separate OAuth/OpenID Connect/SAML relationships
    involved in this flow:
 
-   *  Client to IdP (OpenID Connect or SAML)
+   *  Client to IdP for SSO (OpenID Connect or SAML)
 
    *  Client to Enterprise Authorization Server (OAuth)
 
