@@ -693,7 +693,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    *  Client to Enterprise Authorization Server (OAuth, defined in this
       draft)
 
-   *  Client to Resource Authorization Server (OAuth)
+   *  Client to Resource Authorization Server for API access (OAuth)
 
    *  Resource Authorization Server to IdP Authorization Server (OpenID
       Connect or SAML)
