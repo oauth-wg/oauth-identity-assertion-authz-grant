@@ -231,7 +231,7 @@ Sequence Diagram
 ~~~
 {: #fig-sequence-diagram title="Identity Assertion JWT Authorization Grant Sequence" }
 
-1. User authenticates with the IdP, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user, an Access Token, and optionally a Refresh Token (when using OpenID Connect) and signs the user in
+1. User authenticates with the IdP, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user, an Access Token for the Enterprise Authorization Server (indicated using scope as defined in {{Section 3.3 of RFC6749}} or Resource Indicators {{RFC8707}}), and optionally a Refresh Token (when using OpenID Connect) and signs the user in
 2. Client uses the Access Token or Refresh Token to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the Enterprise Authorization Server
 3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
 4. Client makes an API request to the Resource Server with the Access Token
