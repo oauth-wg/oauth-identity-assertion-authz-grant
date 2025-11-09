@@ -461,7 +461,7 @@ If the Access Token for the EAS is expired, the Client MAY use the Refresh Token
 
 There are four separate OAuth/OpenID Connect/SAML relationships involved in this flow:
 
-* Client to IdP (OpenID Connect or SAML)
+* Client to IdP for SSO (OpenID Connect or SAML)
 * Client to Enterprise Authorization Server (OAuth)
 * Client to Resource Authorization Server (OAuth)
 * Resource Authorization Server to IdP Authorization Server (OpenID Connect or SAML)
