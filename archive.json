@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-06T00:02:54.668729+00:00",
+  "timestamp": "2025-11-09T00:03:26.550242+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3522,6 +3522,437 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 64,
+      "id": "PR_kwDOKv5r-s6yBBii",
+      "title": "Split IdP and Enterprise Authorization Server roles",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/64",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "This is a possible resolution to the suggestion from on the [email thread](https://mailarchive.ietf.org/arch/msg/oauth/u0Jvvwsci099ygK3I0l3IlZpdmQ/) after the presentation at IETF 124.\r\n\r\n* Splits out Enterprise Authorization Server from IdP as a deployment option (can still be combined into one system)\r\n* Use Access Token + Refresh Token as the input Token Exchange token type\r\n\r\n(The sequence diagram isn't working in the built draft, so a copy is provided below.)\r\n\r\n<img width=\"769\" height=\"610\" alt=\"image\" src=\"https://github.com/user-attachments/assets/d5d81566-edeb-48e4-b270-73b023349e54\" />\r\n\r\nYou can preview the compiled version here: https://drafts.oauth.net/oauth-identity-assertion-authz-grant/aaronpk/idp-enterprise-as-split/draft-ietf-oauth-identity-assertion-authz-grant.html\r\n\r\n",
+      "createdAt": "2025-11-06T23:28:29Z",
+      "updatedAt": "2025-11-08T23:30:51Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "aaronpk/idp-enterprise-as-split",
+      "headRefOid": "c44463fd49227225fdc63bc1aadd077db301d1cb",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "For completeness sake, here is a diagram showing how this would look when the IdP and EAS are combined, we get to use the refresh token as an optimization.\r\n\r\n<img width=\"753\" height=\"608\" alt=\"image\" src=\"https://github.com/user-attachments/assets/ef281b1a-0043-4770-b0ae-39cdc6929aa1\" />\r\n\r\nAnd here is the version where the client first does SAML for SSO. It needs to first exchange the SAML assertion for an Access Token.\r\n\r\n<img width=\"761\" height=\"605\" alt=\"image\" src=\"https://github.com/user-attachments/assets/a9b04496-e1cb-48dd-89ef-cab265287ee4\" />\r\n\r\n",
+          "createdAt": "2025-11-07T02:17:24Z",
+          "updatedAt": "2025-11-07T02:17:24Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7MiDSx",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "We should define the pros and cons of this approach.  Here are some I can think of\r\n\r\nPro\r\n- IdP doesn't have to natively support ID-JAG enabling adoption  of ID-JAG outside of IdP as the Resource AS can trust different issuers\r\n- Another enterprise system can provide an authorization capability enabling best of breed for enterprise\r\n- Resource AS could trust multiple ID-JAG issuers for the Enterprise without complicating or changing IdP configuration for SSO\r\n\r\nCon\r\n- Introduces need to explain and manage/control how both issuers are part of the same trust domain and this doesn't introduce a 3rd trust domain for identity chaining.  The EAS can effectively perform an on-behalf-of for an IdP identity for a downstream resource without the IdP knowing what resource (no constrained delegation).\r\n- More complicated discovery for Client to know how to get an ID-JAG\r\n- Resource AS may need to support more complex claims mapping that could add more security surface area to attack.  It can't assume its the IdP and keep same account resolution logic used for SSO (e.g different issuers for example).\r\n- More ambiguity on how this is different than Vanilla JWT Authorization Grant\r\n- Exchanging an Access Token for an ID-JAG that looks like an Access Token just with different type for yet another Access Token adds cognitive overhead and will create confusion on why not just use the original Access Token as grant and bypass all the additional layers of abstraction.  The audience of an access token for a resource indicator request could be the EAS or the Resource AS for example.\r\n- Introduces need to profile the Access Token for Token Exchange interoperability with Enterprise AS\r\n- Access Token for Token Exchange may not contain necessary authentication context to make an authorization decision (e.g zero-trust) that was previously in IdP\r\n\r\n\r\n\r\n",
+          "createdAt": "2025-11-07T03:44:28Z",
+          "updatedAt": "2025-11-07T04:36:21Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Might be useful to describe how IdP and Enterprise Authorization Server are in the same trust domain even though they *could* be different issuers such as components of the enterprise's identity management infrastructure provided by different vendors or systems",
+              "createdAt": "2025-11-07T03:44:28Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            },
+            {
+              "originalPosition": 26,
+              "body": "Enterprise Authorization Server doesn't issue an ID Token. This needs to be modified for the split role as it no longer is constrained the same entity that issues an ID Token.  ",
+              "createdAt": "2025-11-07T03:46:01Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            },
+            {
+              "originalPosition": 38,
+              "body": "We will need to refresh this to explain how a different issuer can have the same identifier as an ID Token when ID Token guidance is `iss`+ `sub` for account resolution. ",
+              "createdAt": "2025-11-07T03:47:46Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            },
+            {
+              "originalPosition": 105,
+              "body": "Should indicate that the access token should be requested for Enterprise AS resource using resource indicator.  It may be indicated by a scope as well (e.g. Entra)",
+              "createdAt": "2025-11-07T03:49:47Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            },
+            {
+              "originalPosition": 111,
+              "body": "\"same IdP for Single Sign-On (SSO), and the same Enterprise Authorization Server for authorization\" doesn't make sense as worded with split roles",
+              "createdAt": "2025-11-07T03:50:44Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            },
+            {
+              "originalPosition": 125,
+              "body": "See comment above about access token needed to be requested for a different resource than the IdP.  This may cause challenges if RPs want to also use the access token to access UserInfo or other protected resources at the IdP (e.g. Graph API or some other discovery resource).  \r\n\r\nWe also need to make some statement about scopes for the access token.  Are we going to leave this to be implementation specific (e.g. Enterprise AS can trust whatever scopes it wants and the Client needs to know what magic scope to request) or scope standardized by this spec or there is a discovery mechanism for the Client to know what scope to request",
+              "createdAt": "2025-11-07T03:54:49Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            },
+            {
+              "originalPosition": 173,
+              "body": "We will need to refresh the processing rules for an Access Token.  We currently don't prescribe it must be a JWT or whether is must conform to the JWT Access Token profile.  \r\n\r\nThe ID-JAG may contain authentication  claims as it previously was exchanged from an ID Token.  Authentication context now must travel via the Access Token.",
+              "createdAt": "2025-11-07T03:58:25Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            },
+            {
+              "originalPosition": 137,
+              "body": "How does the Client know about this endpoint?  There currently isn't any metadata to discover it. ",
+              "createdAt": "2025-11-07T03:59:31Z",
+              "updatedAt": "2025-11-07T04:17:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Mvz1O",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-07T16:35:32Z",
+          "updatedAt": "2025-11-07T16:35:32Z",
+          "comments": [
+            {
+              "originalPosition": 263,
+              "body": "Isn't this example where IdP and EAS are co-located?",
+              "createdAt": "2025-11-07T16:35:32Z",
+              "updatedAt": "2025-11-07T16:35:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Mv2aZ",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-07T16:37:21Z",
+          "updatedAt": "2025-11-07T16:37:21Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Does it make sense to still call this an IdP Authorization Server as it still needs to support OAuth2 token issuance for the access token to the EAS resource?  Its not just vanilla OP or SAML IdP",
+              "createdAt": "2025-11-07T16:37:21Z",
+              "updatedAt": "2025-11-07T16:37:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-TOo",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T22:15:18Z",
+          "updatedAt": "2025-11-08T22:56:20Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "That is true (EAS doesn't issue ID-Tokens), but the ID-JAG still has commonalities with the ID-Token, so I guess this text is OK.",
+              "createdAt": "2025-11-08T22:15:18Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 38,
+              "body": "We can just leave it unspecified, or say something like \"the semantics of how an EAS issues the same identifiers as the IdP is outside the scope of this specification\".",
+              "createdAt": "2025-11-08T22:16:42Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 111,
+              "body": "Perhaps restate as: \"Trusting an IdP for SSO and an EAS for ID-JAG issuance in the same trust domain. It is also possible for the EAS to be built into the IdP itself.\"",
+              "createdAt": "2025-11-08T22:29:34Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 125,
+              "body": "Agree with the `aud` concern in the Access Token. \n\nIt might be good to specify the scope that enables the EAS to issue ID-JAGs, but on the other hand, it could be left as an implementation concern.",
+              "createdAt": "2025-11-08T22:37:15Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 137,
+              "body": "It should be possible to include a field in the OPRM of the Resource Server that points to the token endpoint for the ID-JAG. This could either be the EAS, or it could be the IdP, depending upon the implementation. Alternatively, the OPRM of the Resource Server will point to the Resource Authorization Server, and the OPRM of that server  (since it is acting as the resource that requires the ID-JAG for access) will point to the EAS? We probably need to specify this. ",
+              "createdAt": "2025-11-08T22:42:57Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 173,
+              "body": "I agree, a JWT format access token should be prescribed (but not required).",
+              "createdAt": "2025-11-08T22:45:29Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 211,
+              "body": "Since there are two access tokens here, one for the Resource Server, and one for the EAS, should we differentiate the two in the text?",
+              "createdAt": "2025-11-08T22:47:22Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 226,
+              "body": "In the revised picture, could the EAS issue the Client ID for the RAS? I suppose we should also mention this possibility?",
+              "createdAt": "2025-11-08T22:50:27Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            },
+            {
+              "originalPosition": 223,
+              "body": "Change this line from IdP AS (OIDC or SAML) to Enterprise AS (ID-JAG) ? This isn't really vanilla OAuth or OIDC, right?",
+              "createdAt": "2025-11-08T22:53:28Z",
+              "updatedAt": "2025-11-08T22:56:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-sms",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:02:00Z",
+          "updatedAt": "2025-11-08T23:02:01Z",
+          "comments": [
+            {
+              "originalPosition": 137,
+              "body": "No, this is not possible. The Protected Resource Metadata of the RS is a static file, but there may be multiple accepted ID-JAG issuers depending on the tenant. This would be like saying there is only one enterprise IdP tenant supported for the app for SSO.",
+              "createdAt": "2025-11-08T23:02:00Z",
+              "updatedAt": "2025-11-08T23:04:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-tVr",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:06:24Z",
+          "updatedAt": "2025-11-08T23:06:24Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "I don't see anything in this text that implies the ID token is issued by the Enterprise Authorization Server. \"Similar to\" just refers to the shape of an ID token.",
+              "createdAt": "2025-11-08T23:06:24Z",
+              "updatedAt": "2025-11-08T23:06:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-tnj",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:08:06Z",
+          "updatedAt": "2025-11-08T23:08:06Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "Yeah in general I'd like to keep the EAS<->IdP communication and links out of scope. This is analogous to how the AS<->RS link is out of scope in core OAuth.",
+              "createdAt": "2025-11-08T23:08:06Z",
+              "updatedAt": "2025-11-08T23:08:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-uBE",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:10:26Z",
+          "updatedAt": "2025-11-08T23:10:26Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "```suggestion\n1. User authenticates with the IdP, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user, an Access Token for the Enterprise Authorization Server (indicated using scope as defined in {{Section 3.3 of RFC6749}} or Resource Indicators {{RFC8707}}), and optionally a Refresh Token (when using OpenID Connect) and signs the user in\n```",
+              "createdAt": "2025-11-08T23:10:26Z",
+              "updatedAt": "2025-11-08T23:10:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-uba",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:12:40Z",
+          "updatedAt": "2025-11-08T23:12:40Z",
+          "comments": [
+            {
+              "originalPosition": 111,
+              "body": "I think the original text does actually make sense. This only works if all the resource apps do SSO to the IdP and process ID-JAGs from the same EASs.",
+              "createdAt": "2025-11-08T23:12:40Z",
+              "updatedAt": "2025-11-08T23:12:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-va9",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:17:12Z",
+          "updatedAt": "2025-11-08T23:17:12Z",
+          "comments": [
+            {
+              "originalPosition": 125,
+              "body": "Given that OpenID Connect defines scopes used for SSO, it probably does make sense to define scopes for this.\n\nIt's actually the default to have [multiple values](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3) in the `aud` claim, and I don't see anything wrong with issuing an access token that is accepted by the IdP for the userinfo endpoint and accepted by the EAS for this use.",
+              "createdAt": "2025-11-08T23:17:12Z",
+              "updatedAt": "2025-11-08T23:17:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-vnr",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:18:11Z",
+          "updatedAt": "2025-11-08T23:18:11Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "I'd say a strong reference to RFC9068 would be useful but by no means would I want to require that.",
+              "createdAt": "2025-11-08T23:18:11Z",
+              "updatedAt": "2025-11-08T23:18:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-vqd",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:18:44Z",
+          "updatedAt": "2025-11-08T23:18:44Z",
+          "comments": [
+            {
+              "originalPosition": 211,
+              "body": "Yes good call, will update.",
+              "createdAt": "2025-11-08T23:18:44Z",
+              "updatedAt": "2025-11-08T23:18:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-vwM",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:19:06Z",
+          "updatedAt": "2025-11-08T23:19:07Z",
+          "comments": [
+            {
+              "originalPosition": 205,
+              "body": "```suggestion\nWhen Access Token for the Resource Server has expired, clients SHOULD re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.\n```",
+              "createdAt": "2025-11-08T23:19:07Z",
+              "updatedAt": "2025-11-08T23:19:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-v2r",
+          "commit": {
+            "abbreviatedOid": "967de5f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:19:43Z",
+          "updatedAt": "2025-11-08T23:19:44Z",
+          "comments": [
+            {
+              "originalPosition": 211,
+              "body": "```suggestion\nIf the Access Token for the EAS is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new Access Token from the IdP, which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Access Token with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.\n```",
+              "createdAt": "2025-11-08T23:19:44Z",
+              "updatedAt": "2025-11-08T23:19:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7M-xNv",
+          "commit": {
+            "abbreviatedOid": "c44463f"
+          },
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-08T23:27:28Z",
+          "updatedAt": "2025-11-08T23:30:51Z",
+          "comments": [
+            {
+              "originalPosition": 111,
+              "body": "I'm OK with the PR text.",
+              "createdAt": "2025-11-08T23:27:28Z",
+              "updatedAt": "2025-11-08T23:30:51Z"
+            },
+            {
+              "originalPosition": 173,
+              "body": "true. Did you mean \"strong reference\" or \"strong preference\"?",
+              "createdAt": "2025-11-08T23:30:38Z",
+              "updatedAt": "2025-11-08T23:30:51Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
