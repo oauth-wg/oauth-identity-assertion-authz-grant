@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-11T00:02:48.291075+00:00",
+  "timestamp": "2025-11-13T00:02:55.267861+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3535,7 +3535,7 @@
       "labels": [],
       "body": "This is a possible resolution to the suggestion from on the [email thread](https://mailarchive.ietf.org/arch/msg/oauth/u0Jvvwsci099ygK3I0l3IlZpdmQ/) after the presentation at IETF 124.\r\n\r\n* Splits out Enterprise Authorization Server from IdP as a deployment option (can still be combined into one system)\r\n* Use Access Token + Refresh Token as the input Token Exchange token type\r\n\r\n(The sequence diagram isn't working in the built draft, so a copy is provided below.)\r\n\r\n<img width=\"769\" height=\"610\" alt=\"image\" src=\"https://github.com/user-attachments/assets/d5d81566-edeb-48e4-b270-73b023349e54\" />\r\n\r\nYou can preview the compiled version here: https://drafts.oauth.net/oauth-identity-assertion-authz-grant/aaronpk/idp-enterprise-as-split/draft-ietf-oauth-identity-assertion-authz-grant.html\r\n\r\n",
       "createdAt": "2025-11-06T23:28:29Z",
-      "updatedAt": "2025-11-10T19:48:33Z",
+      "updatedAt": "2025-11-11T17:41:59Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
@@ -4262,6 +4262,72 @@
               "body": "1) We would need a well known scope to request to add the EAS audience for the access token as the Client didn't ask the `resource` explicitly along with https://www.ietf.org/archive/id/draft-mcguinness-oauth-resource-token-resp-00.html.  This doesn't address the problem in 2  as it just says you have access to the EAS not what trusted RAS resources. \r\n2) Discovery of what Resource Authorization Servers are trusted by an IdP is tracked in https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/52.  Discovery of whether a RAS accepts an ID-JAG was covered by https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/34.  The Client knew a user's IdP so could discover connected resources from the IdP just like SSO.  I think the delta here was the assumption that resource owner for the RAS only belonged to as single IdP (e.g. `iss`+`sub`) so if the RAS supported ID-JAG via metadata and the IdP support ID-JAG via metadata then the Client could attempt to obtain an ID-JAG from the IDP.  They may not be authorized or the RAS not trusted which would be a runtime error hence need for a discovery call to enumerate whats allowed.\r\n\r\nDiscovery of what issuers a RAS trust would more than likely need to be an authenticated call (e.g. client assertion)",
               "createdAt": "2025-11-10T19:03:30Z",
               "updatedAt": "2025-11-10T19:06:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7NgnPl",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-11T12:38:21Z",
+          "updatedAt": "2025-11-11T12:38:22Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Authorization Server doesn't have to mean an OAuth Authorization Server, so I think the terminology makes sense even though the EAS isn't issuing access tokens.",
+              "createdAt": "2025-11-11T12:38:21Z",
+              "updatedAt": "2025-11-11T12:38:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7NgpEq",
+          "commit": {
+            "abbreviatedOid": "5511751"
+          },
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-11T12:40:31Z",
+          "updatedAt": "2025-11-11T12:43:34Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "The RAS can do a mapping based on the issuer of the EAS `iss` claim and the IDP's original `iss` claim.",
+              "createdAt": "2025-11-11T12:40:31Z",
+              "updatedAt": "2025-11-11T12:43:34Z"
+            },
+            {
+              "originalPosition": 137,
+              "body": "I agree we need a well known scope that permits the issuance of ID-JAGs by the EAS.\n\nI think the discovery question is separate from the issue being discussed in this PR (whether the IdP and ID-JAG issuer are the same), so we can discuss that separately. ",
+              "createdAt": "2025-11-11T12:43:08Z",
+              "updatedAt": "2025-11-11T12:43:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Nllr4",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-11T17:41:59Z",
+          "updatedAt": "2025-11-11T17:41:59Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "The feedback we got from the first draft was introducing new roles that are different than the roles defined in OAuth 2.0 is confusing to the reader.  This is an OAuth extension so should build on existing body of work and not redefine.  We updated the spec to reflect this feedback.  I am not keen on \"Authorization Server doesn't have to mean an OAuth Authorization Server\" for an OAuth spec.",
+              "createdAt": "2025-11-11T17:41:59Z",
+              "updatedAt": "2025-11-11T17:41:59Z"
             }
           ]
         }
