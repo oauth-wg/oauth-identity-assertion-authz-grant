@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-13T00:02:55.267861+00:00",
+  "timestamp": "2025-11-16T00:03:31.349076+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3535,7 +3535,7 @@
       "labels": [],
       "body": "This is a possible resolution to the suggestion from on the [email thread](https://mailarchive.ietf.org/arch/msg/oauth/u0Jvvwsci099ygK3I0l3IlZpdmQ/) after the presentation at IETF 124.\r\n\r\n* Splits out Enterprise Authorization Server from IdP as a deployment option (can still be combined into one system)\r\n* Use Access Token + Refresh Token as the input Token Exchange token type\r\n\r\n(The sequence diagram isn't working in the built draft, so a copy is provided below.)\r\n\r\n<img width=\"769\" height=\"610\" alt=\"image\" src=\"https://github.com/user-attachments/assets/d5d81566-edeb-48e4-b270-73b023349e54\" />\r\n\r\nYou can preview the compiled version here: https://drafts.oauth.net/oauth-identity-assertion-authz-grant/aaronpk/idp-enterprise-as-split/draft-ietf-oauth-identity-assertion-authz-grant.html\r\n\r\n",
       "createdAt": "2025-11-06T23:28:29Z",
-      "updatedAt": "2025-11-11T17:41:59Z",
+      "updatedAt": "2025-11-14T20:54:57Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
@@ -3560,6 +3560,13 @@
           "body": "> * Resource AS may need to support more complex claims mapping that could add more security surface area to attack.  It can't assume its the IdP and keep same account resolution logic used for SSO (e.g different issuers for example).\r\n\r\nNot sure I understand this comment from Karl. Why does this matter to the RAS? If the EAS applies any business logic, it should be no different than what an IdP might do.  Ideally, the EAS should be making it easier for the RAS to understand the ID-JAG, just like the an IdP would.",
           "createdAt": "2025-11-10T19:48:33Z",
           "updatedAt": "2025-11-10T19:48:33Z"
+        },
+        {
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "body": "> I do think there's merit in exploring AT and/or RT as additional or replacement option(s) for the input token. But I don't think splitting the IDP is directionally correct for this work.\r\n\r\nI think your concern is that the user identity data required to populate the ID-JAG is typically in the IDP's directory. I think that data can be propagated to other places, or in case the directory source is elsewhere, the same can be used in the Enterprise Authorization Server, so I feel having the ID-JAG issuer as being decoupled from the IdP is a valid use case. The authorization data (i.e. what resources the user is permitted to access and with what scopes) is an authorization concern, which could be decoupled from the IdP, although I agree that today it is common for that information to also be with the IdP.",
+          "createdAt": "2025-11-14T20:54:56Z",
+          "updatedAt": "2025-11-14T20:54:56Z"
         }
       ],
       "reviews": [
@@ -4330,6 +4337,119 @@
               "updatedAt": "2025-11-11T17:41:59Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7OUgoo",
+          "commit": {
+            "abbreviatedOid": "5511751"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-13T20:03:30Z",
+          "updatedAt": "2025-11-13T20:03:30Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "In my conceptualization of things, that second sentence, \"In {{I-D.ietf-oauth-identity-chaining}}, this is the out-of-scope token issuer that issued the token used as the input to the Token Exchange request as described in Section 2.1.\" is not a correct framing.  ",
+              "createdAt": "2025-11-13T20:03:30Z",
+              "updatedAt": "2025-11-13T20:03:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7OUlRe",
+          "commit": {
+            "abbreviatedOid": "5511751"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-13T20:09:16Z",
+          "updatedAt": "2025-11-13T20:09:16Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "That was a reference to this section: https://www.ietf.org/archive/id/draft-ietf-oauth-identity-chaining-06.html#section-2.1\r\n\r\n> In this flow, the client is in possession of a token that an authorization server will accept...\r\n\r\nThe Identity Chaining draft doesn't specify what occurred that caused the input token to be issued.",
+              "createdAt": "2025-11-13T20:09:16Z",
+              "updatedAt": "2025-11-13T20:09:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Oiz_m",
+          "commit": {
+            "abbreviatedOid": "5511751"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-14T14:33:23Z",
+          "updatedAt": "2025-11-14T14:33:23Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "Yeah, you are right, of course, that Identity Chaining draft doesn't specify how the input token was issued or who issued it. But much of that draft pretty strongly implies that it's likely an access token issued by the domain A AS. So I guess it's not wrong but the framing/phrasing is, to me, somewhat jarring and unnecessarily confusing. \n\nAnd I think somewhat jarring and unnecessarily confusing is kinda apt for the whole split envisioned by this PR and the impetus behind it. ",
+              "createdAt": "2025-11-14T14:33:23Z",
+              "updatedAt": "2025-11-14T14:37:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Om6PA",
+          "commit": {
+            "abbreviatedOid": "5511751"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-14T18:44:06Z",
+          "updatedAt": "2025-11-14T18:44:06Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "The \"similar to\" in \"ID-JAG is issued and signed by an Enterprise Authorization Server similar to an ID Token\" reads more like it's about issuance rather than the shape. And contrasting bits like \"Instead of being issued for a client\" are more of a stretch because the \"instead of\" is relative to an ID token that's not issued by this EAP. ",
+              "createdAt": "2025-11-14T18:44:06Z",
+              "updatedAt": "2025-11-14T18:44:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7OoJks",
+          "commit": {
+            "abbreviatedOid": "5511751"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-14T20:07:27Z",
+          "updatedAt": "2025-11-14T20:07:28Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "I think maybe the point that @mcguinness is driving at here is that in the model currently in the draft that is \"[coordinating through a common enterprise identity provider](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-assertion-authz-grant-01#section-abstract-1)\" allows for some meaningful constraints and expectations on the content of the ID-JAG. And that those are lost when splitting the IDP into different things. ",
+              "createdAt": "2025-11-14T20:07:28Z",
+              "updatedAt": "2025-11-14T20:07:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7OofxR",
+          "commit": {
+            "abbreviatedOid": "5511751"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I do think there's merit in exploring AT and/or RT as additional or replacement option(s) for the input token. But I don't think splitting the IDP is directionally correct for this work. ",
+          "createdAt": "2025-11-14T20:33:50Z",
+          "updatedAt": "2025-11-14T20:33:50Z",
+          "comments": []
         }
       ]
     }
