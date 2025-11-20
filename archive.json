@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-16T00:03:31.349076+00:00",
+  "timestamp": "2025-11-20T00:02:43.349634+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3535,7 +3535,7 @@
       "labels": [],
       "body": "This is a possible resolution to the suggestion from on the [email thread](https://mailarchive.ietf.org/arch/msg/oauth/u0Jvvwsci099ygK3I0l3IlZpdmQ/) after the presentation at IETF 124.\r\n\r\n* Splits out Enterprise Authorization Server from IdP as a deployment option (can still be combined into one system)\r\n* Use Access Token + Refresh Token as the input Token Exchange token type\r\n\r\n(The sequence diagram isn't working in the built draft, so a copy is provided below.)\r\n\r\n<img width=\"769\" height=\"610\" alt=\"image\" src=\"https://github.com/user-attachments/assets/d5d81566-edeb-48e4-b270-73b023349e54\" />\r\n\r\nYou can preview the compiled version here: https://drafts.oauth.net/oauth-identity-assertion-authz-grant/aaronpk/idp-enterprise-as-split/draft-ietf-oauth-identity-assertion-authz-grant.html\r\n\r\n",
       "createdAt": "2025-11-06T23:28:29Z",
-      "updatedAt": "2025-11-14T20:54:57Z",
+      "updatedAt": "2025-11-19T04:20:42Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
@@ -3567,6 +3567,76 @@
           "body": "> I do think there's merit in exploring AT and/or RT as additional or replacement option(s) for the input token. But I don't think splitting the IDP is directionally correct for this work.\r\n\r\nI think your concern is that the user identity data required to populate the ID-JAG is typically in the IDP's directory. I think that data can be propagated to other places, or in case the directory source is elsewhere, the same can be used in the Enterprise Authorization Server, so I feel having the ID-JAG issuer as being decoupled from the IdP is a valid use case. The authorization data (i.e. what resources the user is permitted to access and with what scopes) is an authorization concern, which could be decoupled from the IdP, although I agree that today it is common for that information to also be with the IdP.",
           "createdAt": "2025-11-14T20:54:56Z",
           "updatedAt": "2025-11-14T20:54:56Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "Should there be a comment on the security concerns or some explicit guardrails about the enterprise authorization server's trust of the Idps, and its possibility to map identities across Idps? The operational benefit of using a single Idp comes from convenience of relying on the same SSO behavior across apps, which may be mentioned?",
+          "createdAt": "2025-11-18T19:10:54Z",
+          "updatedAt": "2025-11-18T19:10:54Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "I think @mcguinness 's con for access token:\r\n\r\n> Access Token for Token Exchange may not contain necessary authentication context to make an authorization decision (e.g zero-trust) that was previously in IdP\r\n\r\nis the core to address here",
+          "createdAt": "2025-11-18T19:11:42Z",
+          "updatedAt": "2025-11-18T19:11:42Z"
+        },
+        {
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "body": "> I think @mcguinness 's con for access token:\r\n> \r\n> > Access Token for Token Exchange may not contain necessary authentication context to make an authorization decision (e.g zero-trust) that was previously in IdP\r\n> \r\n> is the core to address here\r\n\r\nIt's great that we agree that context is required to make the authorization decision and decide the contents of the ID-JAG. I believe much of the context won't be with the IdP, and an Enterprise Authorization Server can leverage such dynamic context in order to determine the content and the decision to issue the ID-JAG.",
+          "createdAt": "2025-11-18T19:51:59Z",
+          "updatedAt": "2025-11-18T19:51:59Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> It's great that we agree that context is required to make the authorization decision and decide the contents of the ID-JAG. I believe much of the context won't be with the IdP, and an Enterprise Authorization Server can leverage such dynamic context in order to determine the content and the decision to issue the ID-JAG.\r\n\r\nThe concern I attempted to articulate is with identity chaining.   Using an access token as a way to chain an interactive session from the IdP issuer to the EAS  issuer is lossy that wasn't there when the IdP was providing the EAS role .  Its 3 different trust domains instead of 2.  The access token from the IdP to the EAS has no resource context as the IdP only knows a client is requesting an Access Token  to the EAS but nothing else.  It can't enforce its part of the zero-trust policy  (e.g A client can only act as an enterprise user to a managed resource if only the user signed-in in from a managed device to a managed app with phishing resistant mfa).  \r\n\r\nIdPs MAY implement Authorization in addition to Authentication concerns, IdPs MAY have shared signals, identify fabric integrations, and device trust context, and IdPs MAY even leverage an external authorization policy decision point.   The argument I was highlighting is that customers will already need to solve these integration challenges (IGA, PAM, ISPM, Externalized Policy, Device Trust, Shared Signals, etc) with best of breed components with their IdP.  The IdP doesn't need to own all the roles but these other roles don't need to be the identity issuer for a federated OAuth 2.0 authorization grant to achieve the outcome.   \r\n\r\nIf we want to remove all the constraints of identity chaining the original draft imposed and solve for BYO OAuth 2.0 Authorization Server as the EAS then I think the simpler solution is to just allow the Resource Authorization Server to accept a JWT Access Token issued by any trusted Authorization Server just as long as the audience of token is the Resource AS issuer or token endpoint and stop trying to leverage a special profile of JWT Authorization Grant.  \r\n\r\n ",
+          "createdAt": "2025-11-18T20:30:32Z",
+          "updatedAt": "2025-11-18T20:30:32Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "The more I think about this, it's specifically the coupling of the ID Token Issuer and ID-JAG issuer that make this draft unique and make it interoperable. \r\n\r\nPrior to this extension, we've had the \"Identity and Authorization Chaining\" draft in the OAuth working group for 2 years. That draft doesn't prescribe whether the input token is an ID token or access token (though kind of assumes it will be an access token), and also doesn't prescribe any relationship between the issuer of the input token and the issuer of the cross-domain token.\r\n\r\nIn other words, you can already do this with the \"Identity and Authorization Chaining\" draft today, or you can do this by just configuring the resource AS to trust an arbitrary JWT issuer like Karl described. You don't need this draft in order to do that.\r\n\r\nThis draft is useful specifically or the case where ID tokens are used, and where the ID token issuer *is* where the policies for cross-app access live.",
+          "createdAt": "2025-11-18T22:46:32Z",
+          "updatedAt": "2025-11-18T22:46:32Z"
+        },
+        {
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "body": "> The more I think about this, it's specifically the coupling of the ID Token Issuer and ID-JAG issuer that make this draft unique and make it interoperable.\r\nThat is one of the things. The other thing is the specification of the ID-JAG.\r\n\r\n> ...\r\n> \r\n> In other words, you can already do this with the \"Identity and Authorization Chaining\" draft today, or you can do this by just configuring the resource AS to trust an arbitrary JWT issuer like Karl described. You don't need this draft in order to do that.\r\n\r\nI disagree. I think having the ID-JAG format is an important development, and perhaps the core of this draft is to define how an ID-JAG can be exchanged for an access token for the resource server. How one obtains the ID-JAG could be left completely undefined, or you could specify that it can be done using token exchange. The input token for this token exchange could be an ID Token, or it could be an access token. This will naturally decouple the issuance of the ID Token from the issuance of the ID-JAG, which will make this draft more generally applicable, than only to IdPs.\r\n\r\n> \r\n> This draft is useful specifically or the case where ID tokens are used, and where the ID token issuer _is_ where the policies for cross-app access live.\r\nThat is a limitation of this draft that I would like to see addressed, as you have done in this PR.\r\n\r\n",
+          "createdAt": "2025-11-19T01:08:42Z",
+          "updatedAt": "2025-11-19T01:08:42Z"
+        },
+        {
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "body": "> > It's great that we agree that context is required to make the authorization decision and decide the contents of the ID-JAG. I believe much of the context won't be with the IdP, and an Enterprise Authorization Server can leverage such dynamic context in order to determine the content and the decision to issue the ID-JAG.\r\n> \r\n> The concern I attempted to articulate is with identity chaining. Using an access token as a way to chain an interactive session from the IdP issuer to the EAS issuer is lossy that wasn't there when the IdP was providing the EAS role . Its 3 different trust domains instead of 2. The access token from the IdP to the EAS has no resource context as the IdP only knows a client is requesting an Access Token to the EAS but nothing else. It can't enforce its part of the zero-trust policy (e.g A client can only act as an enterprise user to a managed resource if only the user signed-in in from a managed device to a managed app with phishing resistant mfa).\r\n\r\nI am not suggesting that we force a third entity (the EAS) in the middle. I would like that to be an option though. Even if we had that option, there is no reason why an IdP cannot be both the EAS as well as the IdP.\r\n\r\n> \r\n> IdPs MAY implement Authorization in addition to Authentication concerns, IdPs MAY have shared signals, identify fabric integrations, and device trust context, and IdPs MAY even leverage an external authorization policy decision point. The argument I was highlighting is that customers will already need to solve these integration challenges (IGA, PAM, ISPM, Externalized Policy, Device Trust, Shared Signals, etc) with best of breed components with their IdP. The IdP doesn't need to own all the roles but these other roles don't need to be the identity issuer for a federated OAuth 2.0 authorization grant to achieve the outcome.\r\n\r\nIf we agree that there are components other than the IdP involved in the authorization decisions, why not make it possible for them to issue the ID-JAGs? Why have a spec that specifically disallows that?\r\n\r\n> \r\n> If we want to remove all the constraints of identity chaining the original draft imposed and solve for BYO OAuth 2.0 Authorization Server as the EAS then I think the simpler solution is to just allow the Resource Authorization Server to accept a JWT Access Token issued by any trusted Authorization Server just as long as the audience of token is the Resource AS issuer or token endpoint and stop trying to leverage a special profile of JWT Authorization Grant.\r\n\r\nI think that will be a loss, because the ID-JAG format is important, and a well defined flow for how to obtain the ID-JAG is also important.\r\n\r\n",
+          "createdAt": "2025-11-19T01:12:45Z",
+          "updatedAt": "2025-11-19T01:12:45Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "> That is a limitation of this draft that I would like to see addressed, as you have done in this PR.\r\n\r\nThe parent draft already provides the functionality without the limitation/feature of them being coupled.\r\n\r\n> I think having the ID-JAG format is an important development, and perhaps the core of this draft is to define how an ID-JAG can be exchanged for an access token for the resource server\r\n\r\nI agree that defining the ID-JAG claims is what helps make this use case interoperable. Maybe the solution is to pull out the definition of an ID-JAG into a separate draft? I don't *love* the idea of splitting this apart, since it just means more work for everyone, but we did already take a step in that direction in the last update where we pulled the ID-JAG definition into a top-level heading in the document.",
+          "createdAt": "2025-11-19T01:12:51Z",
+          "updatedAt": "2025-11-19T01:12:51Z"
+        },
+        {
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "body": "> > That is a limitation of this draft that I would like to see addressed, as you have done in this PR.\r\n> \r\n> The parent draft already provides the functionality without the limitation/feature of them being coupled.\r\n> \r\n> > I think having the ID-JAG format is an important development, and perhaps the core of this draft is to define how an ID-JAG can be exchanged for an access token for the resource server\r\n> \r\n> I agree that defining the ID-JAG claims is what helps make this use case interoperable. Maybe the solution is to pull out the definition of an ID-JAG into a separate draft? I don't _love_ the idea of splitting this apart, since it just means more work for everyone, but we did already take a step in that direction in the last update where we pulled the ID-JAG definition into a top-level heading in the document.\r\n\r\nIf you are open to just defining the format, then why not just provide two ways to issue the ID-JAG, one with the ID-Token (and the IdP), and one with an access token?\r\n",
+          "createdAt": "2025-11-19T01:23:08Z",
+          "updatedAt": "2025-11-19T01:23:08Z"
+        },
+        {
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > I don't think splitting the IDP is directionally correct for this work.\r\n> \r\n> I think your concern is that the user identity data required to populate the ID-JAG is typically in the IDP's directory.\r\n\r\nNo. I concur with @aaronpk's observation that \"the coupling of the ID Token Issuer and ID-JAG issuer that make this draft unique and ... interoperable\" and my concern is that the split proposed here would undermine the core value propitiation of the work. ",
+          "createdAt": "2025-11-19T02:24:12Z",
+          "updatedAt": "2025-11-19T02:24:12Z"
         }
       ],
       "reviews": [
@@ -4450,6 +4520,46 @@
           "createdAt": "2025-11-14T20:33:50Z",
           "updatedAt": "2025-11-14T20:33:50Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7PYojW",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-18T19:08:02Z",
+          "updatedAt": "2025-11-18T19:08:02Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "> allows for some meaningful constraints and expectations on the content of the ID-JAG\r\n\r\nYes but also confidence that the user identity is consistent across tokens and that doesnt need to be verified...how is the user identity correlated across Idps? ",
+              "createdAt": "2025-11-18T19:08:02Z",
+              "updatedAt": "2025-11-18T19:08:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7Pd_Hn",
+          "commit": {
+            "abbreviatedOid": "404ce5d"
+          },
+          "author": "jaredhanson",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-19T04:20:42Z",
+          "updatedAt": "2025-11-19T04:20:42Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "My understanding of what @mcguinness is pointing out here, is that there are now two different issuers issuing tokens for \"federation\" into domain B.   For example, if SSO is being performed from domain A to domain B, an ID token would be issued such as:\r\n\r\n```\r\n{\r\n   iss: \"idp.a.example\"\r\n   sub: \"501\"\r\n   aud: \"client-domain-b\"\r\n}\r\n```\r\n\r\nDomain B consumes this ID token, creating a user record associated with `iss+sub`.\r\n\r\nNow, with the split proposed here, domain B may receive an ID-JAG as follows:\r\n\r\n```\r\n{\r\n  iss: \"eas.a.example\"\r\n  sub: \"501\"\r\n  aud: \"as.b.example\"\r\n}\r\n```\r\n\r\nThe intent here is that the same user (ID: 501) is being asserted.   However, the `iss+sub` is _different_ because the issuer is now different.  In order to safely map the user to the same account, domain B would have to have some out-of-band knowledge that the IDP and EAS represent the same domain, despite being separate issuers.",
+              "createdAt": "2025-11-19T04:20:42Z",
+              "updatedAt": "2025-11-19T04:20:42Z"
+            }
+          ]
         }
       ]
     }
