@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-20T00:02:43.349634+00:00",
+  "timestamp": "2025-11-23T00:03:49.494147+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1380,7 +1380,7 @@
       "labels": [],
       "body": "**Summary**\nThis proposal considers a protocol-level solution for scenarios where a user needs to connect to a specific instance (e.g., tenant, organziation, workspace) of a Resource App, particularly when these multiple instances share a common issuer URL. The goal is to create a mechanism that allows a Requesting App to specify the target instance and ensures this choice is communicated end-to-end, so it can be correctly interpreted by both the IdP and the Resource App's authorization server.\n\n**Problem**\nIn many enterprise environments, a single application may offer multiple distinct instances. For example, consider an observability platform with separate instances for `development` and `production` logs. Often, these instances share a single `audience` (i.e., issuer URL) and `resource` identifier for their APIs. In these cases, access to the Resource App's API is managed by a custom claim injected into the `access_token` after the user authenticates with a specific instance.\n\nThe current Identity Assertion Authorization Grant does not define a standard way for a Requesting App to specify a target instance under these conditions. This ambiguity prevents a seamless user experience, which should ideally mirror selecting an application from an SSO dashboard and being directed to the correct instance.\n\nThis overall challenge can be broken down into two parts:\n\n**1. The Discovery Problem** \nBefore a user can make a choice, the Requesting App must first know what choices are available. How can the Requesting App learn which Resource Apps, and their specific instances, the logged-in user is permitted to connect to?\n\nWhile solving discovery is critical for the end-to-end experience, it is handled separately in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/52. For this issue, we will assume the Requesting App has a method to determine which instance the user wants to access.\n\n**2. The Request Problem** \nThis is the focus of the proposal. Once the user has selected an instance, how does the Requesting App communicate this choice to the IdP? The current protocol lacks a standard parameter to differentiate the target instance when it shares an `audience`/issuer URL with others.\n\n**Proposal**\n**We propose using the `client_id` of the target Resource App instance within the IdP** as the unique identifier. This `client_id` would be included in the initial Token Exchange request and the resulting Identity Assertion (ID-JAG).\n\nRationale:\n- Uniqueness & Existing Trust: Each Resource App instance registered with the IdP for SSO already has a unique `client_id`. This identifier is known and trusted by both the IdP and the Resource App.\n- IdP Policy Enforcement: The IdP can use the provided `client_id` to locate and apply the specific authorization policies associated with that instance.\n- Resource App Tenant Mapping: The Resource App's Authorization Server already relies on this `client_id` for its OIDC federation with the IdP. It can therefore use the `client_id` from the assertion to unambiguously map the request to the correct internal tenant, organization, or workspace.\n",
       "createdAt": "2025-10-10T09:15:21Z",
-      "updatedAt": "2025-11-02T21:24:59Z",
+      "updatedAt": "2025-11-20T21:40:15Z",
       "closedAt": null,
       "comments": [
         {
@@ -1543,6 +1543,13 @@
           "body": "Correct, Eng Chat and Mktg Chat have different `client_id` for their RP relationship with the IdP but the Client (Wiki) has a multi-tenant client registration (e.g. `wiki.app`) with the multi-tenant Resource Authorization Server (eg. `https://as.chat.com`)",
           "createdAt": "2025-11-02T21:24:58Z",
           "updatedAt": "2025-11-02T21:24:58Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "What are the next steps for this issue?",
+          "createdAt": "2025-11-20T21:40:15Z",
+          "updatedAt": "2025-11-20T21:40:15Z"
         }
       ]
     },
@@ -3528,21 +3535,21 @@
       "id": "PR_kwDOKv5r-s6yBBii",
       "title": "Split IdP and Enterprise Authorization Server roles",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/64",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "This is a possible resolution to the suggestion from on the [email thread](https://mailarchive.ietf.org/arch/msg/oauth/u0Jvvwsci099ygK3I0l3IlZpdmQ/) after the presentation at IETF 124.\r\n\r\n* Splits out Enterprise Authorization Server from IdP as a deployment option (can still be combined into one system)\r\n* Use Access Token + Refresh Token as the input Token Exchange token type\r\n\r\n(The sequence diagram isn't working in the built draft, so a copy is provided below.)\r\n\r\n<img width=\"769\" height=\"610\" alt=\"image\" src=\"https://github.com/user-attachments/assets/d5d81566-edeb-48e4-b270-73b023349e54\" />\r\n\r\nYou can preview the compiled version here: https://drafts.oauth.net/oauth-identity-assertion-authz-grant/aaronpk/idp-enterprise-as-split/draft-ietf-oauth-identity-assertion-authz-grant.html\r\n\r\n",
       "createdAt": "2025-11-06T23:28:29Z",
-      "updatedAt": "2025-11-19T04:20:42Z",
+      "updatedAt": "2025-11-21T01:52:32Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "aaronpk/idp-enterprise-as-split",
       "headRefOid": "5511751b6d6ce2d63f1f37a0daa97e158936e940",
-      "closedAt": null,
+      "closedAt": "2025-11-21T01:52:32Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -3637,6 +3644,27 @@
           "body": "> > I don't think splitting the IDP is directionally correct for this work.\r\n> \r\n> I think your concern is that the user identity data required to populate the ID-JAG is typically in the IDP's directory.\r\n\r\nNo. I concur with @aaronpk's observation that \"the coupling of the ID Token Issuer and ID-JAG issuer that make this draft unique and ... interoperable\" and my concern is that the split proposed here would undermine the core value propitiation of the work. ",
           "createdAt": "2025-11-19T02:24:12Z",
           "updatedAt": "2025-11-19T02:24:12Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "> here would undermine the core value propitiation of the work\r\n\r\nI agree, the main value prop is based on the precondition that the SSO policies for two sub-issuerUrls are held by the same IdP. I view the id-jag essentially as proof from a single source of truth (IdP) that the same identity is involved in two distinct SSO events.\r\n\r\nI really like the idea that the enterprise authorization server is considered a separate entity here, because technically its true, an IdP can have several first party Authz servers, or some others it trusts for example. However, I think the distinction is not relevant to the this particular protocols original conceit which is that it seeks to build further security and convenience based that aforementioned precondition.",
+          "createdAt": "2025-11-20T02:06:13Z",
+          "updatedAt": "2025-11-20T02:06:13Z"
+        },
+        {
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "body": "> > here would undermine the core value propitiation of the work\r\n> \r\n> I agree, the main value prop is based on the precondition that the SSO policies for two sub-issuerUrls are held by the same IdP. I view the id-jag essentially as proof from a single source of truth (IdP) that the same identity is involved in two distinct SSO events.\r\n\r\nAlthough this is a popular pattern in the past, this doesn't necessarily have to be so, as many enterprises have adopted enterprise authorization servers to serve as a source of truth for authorization purposes, which includes identity data.\r\n\r\n> \r\n> I really like the idea that the enterprise authorization server is considered a separate entity here, because technically its true, an IdP can have several first party Authz servers, or some others it trusts for example. However, I think the distinction is not relevant to the this particular protocols original conceit which is that it seeks to build further security and convenience based that aforementioned precondition.\r\n\r\nInstead of the IdP having to call out to the EAS as proposed in one of the comments, I feel it is better for the ID-JAG issuer to be whatever the enterprise wants it to be, it could be the IdP or it could be an Enterprise Authorization Service.\r\n\r\n",
+          "createdAt": "2025-11-21T00:43:48Z",
+          "updatedAt": "2025-11-21T00:43:48Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Atul and Karl and I just chatted and came up with a better plan. What we actually need is to define the [JWT Authorization Grant](https://datatracker.ietf.org/doc/html/rfc7523) as an MCP extension. That would enable any JWT issuer to be able to be used at an MCP authorization server to issue access tokens. That way any system, whether or not it is the IdP, can be configured as the trust root for issuing access tokens for MCP. We're going to work on an MCP proposal to add this as an MCP extension.",
+          "createdAt": "2025-11-21T01:52:32Z",
+          "updatedAt": "2025-11-21T01:52:32Z"
         }
       ],
       "reviews": [
