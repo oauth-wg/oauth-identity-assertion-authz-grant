@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-23T00:03:49.494147+00:00",
+  "timestamp": "2025-12-02T00:02:51.161970+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -908,9 +908,17 @@
       "labels": [],
       "body": "A given client currently as no mechanism to discover whether an AS supports `oauth-id-jag+jwt` JWT as a valid JWT bearer grant type (`urn:ietf:params:oauth:grant-type:jwt-bearer`)\n\n(This was split off from #16 to focus on only the Resource App discovery question)",
       "createdAt": "2025-07-18T20:32:39Z",
-      "updatedAt": "2025-07-18T20:32:39Z",
+      "updatedAt": "2025-12-01T20:49:30Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "Additionally, it would be helpful if an AS supporting the JWT bearer grant type would publish **which JAG issuers** it supports.",
+          "createdAt": "2025-12-01T20:49:30Z",
+          "updatedAt": "2025-12-01T20:49:30Z"
+        }
+      ]
     },
     {
       "number": 35,
