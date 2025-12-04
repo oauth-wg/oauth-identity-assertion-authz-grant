@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-02T00:02:51.161970+00:00",
+  "timestamp": "2025-12-04T00:02:51.674878+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -908,7 +908,7 @@
       "labels": [],
       "body": "A given client currently as no mechanism to discover whether an AS supports `oauth-id-jag+jwt` JWT as a valid JWT bearer grant type (`urn:ietf:params:oauth:grant-type:jwt-bearer`)\n\n(This was split off from #16 to focus on only the Resource App discovery question)",
       "createdAt": "2025-07-18T20:32:39Z",
-      "updatedAt": "2025-12-01T20:49:30Z",
+      "updatedAt": "2025-12-02T05:49:06Z",
       "closedAt": null,
       "comments": [
         {
@@ -917,6 +917,13 @@
           "body": "Additionally, it would be helpful if an AS supporting the JWT bearer grant type would publish **which JAG issuers** it supports.",
           "createdAt": "2025-12-01T20:49:30Z",
           "updatedAt": "2025-12-01T20:49:30Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Additionally, it would be helpful if an AS supporting the JWT bearer grant type would publish **which JAG issuers** it supports.\n\nA couple of challenges we have seen and don't have consensus yet on are:\n\n- The list of trusted issuers for multi-tenant Resource Authorization Server (e.g `https://as.saas.com`)  is quite large and needs a way to scope the resolution for it to be meaningful.  For SSO this is solved with IdP discovery (e.g identifier first) or some apps may have a dedicated tenant URL for just SSO but share a common namespace for API Access. \n- Just like IdP discovery this could be considered information disclosure and enables an attacker to learn what issuers to attack next\n\nUnclear is requiring client authentication to discover trusted issuers would address any concerns as clients could also be multi-tenant but may be useful in helping with abuse",
+          "createdAt": "2025-12-02T05:49:06Z",
+          "updatedAt": "2025-12-02T05:49:06Z"
         }
       ]
     },
