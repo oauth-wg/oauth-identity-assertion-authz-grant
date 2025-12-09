@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-07T00:03:43.038367+00:00",
+  "timestamp": "2025-12-09T00:03:05.427707+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1646,15 +1646,15 @@
       "id": "I_kwDOKv5r-s7RR_2f",
       "title": "recommendation on https for audience param?",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/53",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "sdesen",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Is there a spec-level recommendation to _enforce_ `https` for the `audience` which represents the Resource App Authz Issuerurl?\n\nThe Idp will authorize ID-JAGs to be used at this endpoint, so with the exception of localhost, etc, perhaps this should be a security recommendation if not already via Oauth.\n\nPerhaps this is a few layers deep in RFCs. cc @meghnadubey",
       "createdAt": "2025-10-13T19:02:38Z",
-      "updatedAt": "2025-10-14T03:31:45Z",
-      "closedAt": null,
+      "updatedAt": "2025-12-08T18:12:38Z",
+      "closedAt": "2025-12-08T18:12:38Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -1798,9 +1798,17 @@
       "labels": [],
       "body": "While the use of `authorization_details` with ID-JAG is implicit as Section 3 of RAR says \"The authorization_details authorization request parameter can be used to specify authorization requirements in all places where the scope parameter is used for the same purpose\" https://datatracker.ietf.org/doc/html/rfc9396#section-3, we should make this explicit so readers can more easily understand that RAR scenarios are supported with ID-JAG.  \n\nOptionally we can include a non-normative example.\n\n\n\n",
       "createdAt": "2025-12-05T17:15:24Z",
-      "updatedAt": "2025-12-05T17:15:24Z",
+      "updatedAt": "2025-12-08T18:15:01Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "This may address https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51 ",
+          "createdAt": "2025-12-08T18:15:01Z",
+          "updatedAt": "2025-12-08T18:15:01Z"
+        }
+      ]
     }
   ],
   "pulls": [
