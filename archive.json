@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-09T00:03:05.427707+00:00",
+  "timestamp": "2025-12-11T00:03:00.956672+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1587,7 +1587,7 @@
       "labels": [],
       "body": "As raised in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51, a seamless user experience requires that Requesting Apps have a way to discover which applications, and their specific instances, a user is allowed to access. This would allow mirroring the experience of SSO dashboards, where users can simply select the app instance they want to use.\n\nThis raises several questions:\n- Should the IdP expose an \"Accessible Resources API\" to list the available Resource Apps and their instances for an authenticated user?\n- How should such an API structure its data to clearly differentiate between multiple instances of the same application?\n- **Should this API be standardized?**",
       "createdAt": "2025-10-10T09:22:45Z",
-      "updatedAt": "2025-10-30T01:24:28Z",
+      "updatedAt": "2025-12-10T20:03:46Z",
       "closedAt": null,
       "comments": [
         {
@@ -1638,6 +1638,69 @@
           "body": "I don\u2019t recommend using https://www.rfc-editor.org/rfc/rfc7522 to obtain an ID Token. The assertion is intended to only be used to obtain an access token only and interoperability only defines how delegated authorization should work cross domain.  There is also very limited use of this grant in the wild today. ",
           "createdAt": "2025-10-30T01:24:27Z",
           "updatedAt": "2025-10-30T01:24:27Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "This is what I am thinking for the new endpoint.\n\nThe input to the request is the client authentication and the user's subject token.\n\nThe response is the information needed to use in a Token Exchange request: `audience` and `resource`.\n\n```\nPOST /xaa/configured_resources\nHost: idp.example\nAuthorization: <HTTP Basic Auth or PKJWT> [Client's Authentication]\n\nsubject_token=User's ID Token that would have been sent to the Token Exchange request\n\n\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n[\n  {\n      \"audience\": \"https://resource-as-issuer-url\", (REQUIRED),\n      \"resource\": \"123\", (OPTIONAL),\n      \"scope\": \"read write\", (OPTIONAL)\n  }\n]\n```",
+          "createdAt": "2025-12-09T21:19:07Z",
+          "updatedAt": "2025-12-09T21:19:07Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "This is a good starting point for a standard endpoint, not specific to internal IdP implementation. The json keys are also the same as in id-jag request and jwt, making these unambiguous. ",
+          "createdAt": "2025-12-09T21:35:30Z",
+          "updatedAt": "2025-12-10T17:59:02Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@aaronpk suggestion fits a more IETF style endpoint that complements ID-JAG and Token Exchange.  I would expect this endpoint to be a IETF draft as it would work with any subject token type (needs `subject_token_type` as input param) just like revocation endpoint or token exchange endpoint.\n\nThe other approach is to follow UserInfo as a protected resource in OIDC which would use an access token and a scope which https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/52#issuecomment-3398452236 was suggesting.  This would be more IdP centric and could provide other SSO resources such as App Links.\n\nWhich path do we want? \n\n\n\n",
+          "createdAt": "2025-12-10T17:31:20Z",
+          "updatedAt": "2025-12-10T17:31:20Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "My thought was to not introduce a new token, and just leverage the existing artifacts we already have. (Since access tokens are not currently used in the Cross App Access exchange)\n\nGoing the \u201cUserinfo\u201d route we would need to also ensure the IdP returns an access token during SSO that can be used for this. This also implies there should be a scope defined for the client to request the ability to make this query. ",
+          "createdAt": "2025-12-10T17:46:00Z",
+          "updatedAt": "2025-12-10T17:46:00Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I was making assumption that majority of real world scenarios will need a Refresh Token so obtaining an Access Token for the IdP wouldn't be a challenge but I see value in a minimum surface area endpoint.  Happy to spec the IETF style endpoint in a new draft.",
+          "createdAt": "2025-12-10T17:49:55Z",
+          "updatedAt": "2025-12-10T17:49:55Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "~Should `issuer` as the authz issuer that is trusted not be included in each resource object?~\nEdit: ah, i see this is the `audience` in aarons proposal.",
+          "createdAt": "2025-12-10T19:40:10Z",
+          "updatedAt": "2025-12-10T19:47:26Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "as well as subject token type in the request",
+          "createdAt": "2025-12-10T19:40:17Z",
+          "updatedAt": "2025-12-10T19:40:17Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "Also, I feel the IDP client ID can be added here as a `client_id` param, and maybe client ID url....",
+          "createdAt": "2025-12-10T19:46:55Z",
+          "updatedAt": "2025-12-10T19:47:59Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I created https://github.com/mcguinness/draft-mcguinness-token-exchange-target-service-discovery for a new draft.  This is just initial chatgpt assisted draft and needs a lot of help.  ",
+          "createdAt": "2025-12-10T20:03:46Z",
+          "updatedAt": "2025-12-10T20:03:46Z"
         }
       ]
     },
