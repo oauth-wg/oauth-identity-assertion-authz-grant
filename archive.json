@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-11T00:03:00.956672+00:00",
+  "timestamp": "2025-12-14T00:03:41.902311+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1587,7 +1587,7 @@
       "labels": [],
       "body": "As raised in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51, a seamless user experience requires that Requesting Apps have a way to discover which applications, and their specific instances, a user is allowed to access. This would allow mirroring the experience of SSO dashboards, where users can simply select the app instance they want to use.\n\nThis raises several questions:\n- Should the IdP expose an \"Accessible Resources API\" to list the available Resource Apps and their instances for an authenticated user?\n- How should such an API structure its data to clearly differentiate between multiple instances of the same application?\n- **Should this API be standardized?**",
       "createdAt": "2025-10-10T09:22:45Z",
-      "updatedAt": "2025-12-10T20:03:46Z",
+      "updatedAt": "2025-12-13T15:31:09Z",
       "closedAt": null,
       "comments": [
         {
@@ -1701,6 +1701,34 @@
           "body": "I created https://github.com/mcguinness/draft-mcguinness-token-exchange-target-service-discovery for a new draft.  This is just initial chatgpt assisted draft and needs a lot of help.  ",
           "createdAt": "2025-12-10T20:03:46Z",
           "updatedAt": "2025-12-10T20:03:46Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Also, I feel the IDP client ID can be added here as a `client_id` param, and maybe client ID url....\n\nThis feels like maybe it should be a output param from token exchange response vs a discovery response param.  A client should only need to care about what client_id is in the issued token so it can know what credentials to use when presenting the token.  This is similar to https://datatracker.ietf.org/doc/html/draft-mcguinness-oauth-resource-token-resp-00.  I think audience, resource, client_id, and scope all make sense as token response params to be agnostic to token format (having to crack open the issued token and assume its JWT to parse out values).   ",
+          "createdAt": "2025-12-11T22:25:57Z",
+          "updatedAt": "2025-12-11T22:25:57Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "I think being a discovery API, it should present standard metadata, which is at a bird's eye or top-level but still comprehensive. This metadata should be similar to the well-known metadata for authorization server and protected resource, but filtered by user and client access policy, resulting in specific consolidated info for the client/subject. Hence, we should look to the two standard metadata and other id-jag related drafts in progress to see if there is other relevant info for id-jag token-exchange. For example: adding supported grant-type(token-exchange), or supported protocol(introduce CAA as a standard protocol for this API), adding generated token-type, or jwt-profile for id-jag and so on.",
+          "createdAt": "2025-12-13T06:32:51Z",
+          "updatedAt": "2025-12-13T06:33:29Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@meghnadubey I don't fully understand your comment.  Do you have any specific feedback on https://mcguinness.github.io/draft-mcguinness-token-exchange-target-service-discovery/draft-mcguinness-token-exchange-target-service-discovery.html?  ",
+          "createdAt": "2025-12-13T06:36:47Z",
+          "updatedAt": "2025-12-13T06:36:47Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "@mcguinness I suggest adding 'supported_grant_type' of 'token-exchange', since it is the central mechanism.\nI also wanted an indicator for generated token-type, but that is now added as jwt-bearer, so that's good. \nOpened an issue on the new spec, https://github.com/mcguinness/draft-mcguinness-token-exchange-target-service-discovery/issues/1",
+          "createdAt": "2025-12-13T15:12:24Z",
+          "updatedAt": "2025-12-13T15:31:09Z"
         }
       ]
     },
