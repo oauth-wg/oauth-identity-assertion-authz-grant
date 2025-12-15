@@ -47,6 +47,8 @@ normative:
   RFC8693:
   RFC8707:
   RFC8725:
+  RFC7800:
+  RFC9449:
   I-D.ietf-oauth-identity-chaining:
   IANA.media-types:
   IANA.oauth-parameters:
@@ -79,6 +81,7 @@ informative:
   RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
+  I-D.parecki-oauth-jwt-dpop-grant:
 
 --- abstract
 
@@ -542,6 +545,153 @@ TBD: It may make more sense to request the Identity Assertion JWT Authorization 
 ## Cross-Domain Use
 
 This specification is intended for cross-domain uses where the Client, Resource App, and Identity Provider are all in different trust domains. In particular, the Identity Provider MUST NOT issue access tokens in response to an ID-JAG it issued itself. Doing so could lead to unintentional broadening of the scope of authorization.
+
+## Sender Constraining Tokens
+
+### Proof-of-Possession
+
+Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 4 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key, preventing reuse by parties that do not have access to the private key.
+
+Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in {{RFC9449}}) in a `DPoP` HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.
+
+The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jwk` property, it indicates that the ID-JAG is bound to that specific public key, and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
+
+The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
+
+#### Proof-of-Possession During Token Exchange
+
+When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange, the client MAY include a DPoP proof in the request. This demonstrates possession of a key that can be bound to the ID-JAG.
+
+The client generates a key pair and includes a DPoP proof JWT in the `DPoP` header of the Token Exchange request:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+    DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+    &audience=https://acme.chat.example/
+    &resource=https://api.chat.example/
+    &scope=chat.read+chat.history
+    &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
+    &subject_token_type=urn:ietf:params:oauth:token-type:id_token
+
+The IdP Authorization Server processes the request as follows:
+
+1. If a DPoP proof is present, the IdP MUST validate it according to {{Section 4 of RFC9449}}. The `htm` claim MUST be `POST`, and the `htu` claim MUST match the token endpoint URL.
+
+2. If the DPoP proof is valid, the IdP MAY include a `cnf` claim in the issued ID-JAG containing the public key from the DPoP proof's `jwk` header parameter. The `cnf` claim format follows {{RFC7800}}:
+
+    {
+      "jti": "9e43f81b64a33f20116179",
+      "iss": "https://acme.idp.example",
+      "sub": "U019488227",
+      "aud": "https://acme.chat.example/",
+      "client_id": "f53f191f9311af35",
+      "exp": 1311281970,
+      "iat": 1311280970,
+      "resource": "https://api.chat.example/",
+      "scope": "chat.read chat.history",
+      "cnf": {
+        "jwk": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+          "y": "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0"
+        }
+      }
+    }
+
+3. The token exchange response does not indicate whether key binding was performed (since `token_type` is fixed to `N_A`). The client must inspect the ID-JAG to determine if a `cnf` claim is present.
+
+4. If no DPoP proof is presented, the IdP issues an ID-JAG without a `cnf` claim.
+
+#### Proof-of-Possession During ID-JAG Exchange
+
+When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a `cnf` claim and whether the client presents a DPoP proof.
+
+##### ID-JAG Contains `cnf` Claim and DPoP Proof is Presented
+
+If the ID-JAG contains a `cnf` claim and the client presents a DPoP proof, the Resource Authorization Server MUST:
+
+1. Validate the DPoP proof according to {{Section 4 of RFC9449}}.
+
+2. Extract the public key from the `jwk` header parameter of the DPoP proof.
+
+3. Extract the public key from the `jwk` property of the `cnf` claim in the ID-JAG.
+
+4. Compare the two public keys. They MUST match exactly. If they do not match, the request MUST fail with an `invalid_grant` error.
+
+5. If the keys match, the Resource Authorization Server MAY issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration. The issued access token SHOULD be bound to the same key.
+
+Example request:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.chat.example
+    Content-Type: application/x-www-form-urlencoded
+    DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
+
+    grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
+    &assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+
+Example successful response with DPoP-bound token:
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json;charset=UTF-8
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "token_type": "DPoP",
+      "access_token": "2YotnFZFEjr1zCsicMWpAA",
+      "expires_in": 86400,
+      "scope": "chat.read chat.history"
+    }
+
+##### ID-JAG Contains `cnf` Claim but DPoP Proof is Not Presented
+
+If the ID-JAG contains a `cnf` claim but the client does not present a DPoP proof, the Resource Authorization Server MUST reject the request with an `invalid_grant` error, as the ID-JAG requires proof of possession.
+
+Example error response:
+
+    HTTP/1.1 400 Bad Request
+    Content-Type: application/json
+    Cache-Control: no-store
+
+    {
+      "error": "invalid_grant",
+      "error_description": "Proof of possession required for this authorization grant"
+    }
+
+##### ID-JAG Does Not Contain `cnf` Claim and DPoP Proof is Presented
+
+If the ID-JAG does not contain a `cnf` claim but the client presents a DPoP proof, the Resource Authorization Server:
+
+1. MUST validate the DPoP proof according to {{Section 4 of RFC9449}}.
+
+2. MAY issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration at the Authorization Server, binding the access token to the key demonstrated in the DPoP proof.
+
+3. The access token response will indicate the token type (e.g., `DPoP` for DPoP-bound tokens, or `Bearer` for unconstrained tokens).
+
+##### ID-JAG Does Not Contain `cnf` Claim and DPoP Proof is Not Presented
+
+If the ID-JAG does not contain a `cnf` claim and the client does not present a DPoP proof:
+
+1. The Resource Authorization Server MAY issue an unconstrained Bearer token.
+
+2. However, if the Resource Server configuration at the Authorization Server requires constrained tokens for that Resource Server, the request MUST fail with an `invalid_grant` error.
+
+Example error response when constrained tokens are required:
+
+    HTTP/1.1 400 Bad Request
+    Content-Type: application/json
+    Cache-Control: no-store
+
+    {
+      "error": "invalid_grant",
+      "error_description": "Sender-constrained tokens required for this resource server"
+    }
 
 
 # IANA Considerations
