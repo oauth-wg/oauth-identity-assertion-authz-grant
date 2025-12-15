@@ -239,6 +239,8 @@ Sequence Diagram
          |                    |                  |                 |
          |                    |                  |                 |
          | 2 Token Exchange   |                  |                 |
+         | (Identity Assertion|                  |                 |
+         |  or Refresh Token) |                  |                 |
          | ---------------->  |                  |                 |
          |                    |                  |                 |
          |   ID-JAG           |                  |                 |
@@ -261,12 +263,11 @@ Sequence Diagram
          |                    |                  |                 |
 
 1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in
-2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server
+2. Client uses the Identity Assertion or a previously issued Refresh Token from the IdP to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server
 3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
 4. Client makes an API request to the Resource Server with the Access Token
 
 This specification is constrained to deployments where a set of Resource Authorization Servers for applications used by an organization are trusting the same IdP Authorization Server for Single Sign-On (SSO). The IdP Authorization Server provides a consistent trust boundary and user identity for the set of Resource Authorization Servers to honor the ID-JAG issued by the IdP.  The Resource Authorization Server not only delegates user authentication but also delegates user authorization authority to the IdP Authorization Server for the scopes and resource specified in the ID-JAG and does not need obtain user consent directly from the resource owner.
-
 
 ## User Authentication
 
@@ -299,7 +300,6 @@ Note: The IdP Authorization Server may enforce security controls such as multi-f
       "scope": "openid offline_access"
     }
 
-
 ## Token Exchange
 
 The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization Server's Token Endpoint with the following parameters:
@@ -317,16 +317,20 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
 
 `subject_token`:
-: REQUIRED - The Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner.
+: REQUIRED - Either the Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner, or a Refresh Token previously issued by the IdP Authorization Server for that resource owner. Implementations of this specification MUST accept Identity Assertions. They MAY additionally accept Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.
 
 `subject_token_type`:
-: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, or for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`.
+: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`, and for a Refresh Token (when supported): `urn:ietf:params:oauth:token-type:refresh_token`.
+
+When a Refresh Token is used as the subject token, the client still requests `requested_token_type=urn:ietf:params:oauth:token-type:id-jag`; this allows the client to refresh an Identity Assertion JWT Authorization Grant without fetching a new Identity Assertion from the user-facing SSO flow.
 
 The additional parameters defined in {{Section 2.1 of RFC8693}} `actor_token` and `actor_token_type` are not used in this specification.
 
 Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
-The example below uses an ID Token as the Identity Assertion, and uses a JWT Bearer Assertion {{RFC7523}} as the client authentication method, (tokens truncated for brevity):
+#### Example: Token Exchange using ID Token {#token-exchange-id-token-example}
+
+This example uses an ID Token as the `subject_token` and a JWT Bearer Assertion {{RFC7523}} for client authentication (tokens truncated for brevity):
 
     POST /oauth2/token HTTP/1.1
     Host: acme.idp.example
@@ -342,9 +346,31 @@ The example below uses an ID Token as the Identity Assertion, and uses a JWT Bea
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
+#### Example: Token Exchange using Refresh Token {#token-exchange-refresh-token-example}
+
+This non-normative example shows using a Refresh Token as the `subject_token` (when supported by the IdP Authorization Server) to obtain an ID-JAG without acquiring a new Identity Assertion:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+    &audience=https://acme.chat.example/
+    &resource=https://api.chat.example/
+    &scope=chat.read+chat.history
+    &subject_token=tGzv3JOkF0XG5Qx2TlKWIA
+    &subject_token_type=urn:ietf:params:oauth:token-type:refresh_token
+    &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+
 ### Processing Rules
 
-The IdP MUST validate the subject token, and MUST validate that the audience of the Subject Token (e.g. the `aud` claim of the ID Token) matches the `client_id` of the client authentication of the request.
+The IdP MUST validate the subject token:
+
+* If the subject token is an Identity Assertion, the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g. the `aud` claim of the ID Token or SAML Audience) matches the `client_id` of the client authentication of the request.
+* If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
+* If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
 
 The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience and scopes.
 
@@ -485,6 +511,76 @@ If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the IdP A
 
 If the ID Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
+If the IdP Authorization Server supports Refresh Tokens as a `subject_token` in Token Exchange, the client can skip renewing the Identity Assertion and directly request a new ID-JAG by presenting the Refresh Token (see {{token-exchange-refresh-token-example}}).
+
+## SAML 2.0 Identity Assertion Interopability
+
+Clients using SAML 2.0 for SSO with the IdP Authorization Server can obtain an ID-JAG without changing their SSO protocol to OpenID Connect by first exchanging the SAML 2.0 assertion for a Refresh Token using Token Exchange. This enables protocol transition to OAuth and allows the client to later use the Refresh Token as a `subject_token` to obtain an ID-JAG without prompting the user for a new Identity Assertion.
+
+OpenID Connect efined scopes of `openid offline_access` SHOULD be requested (additional scopes are allowed) when requesting a Refresh Token from the IdP Authorization Server.
+
+The IdP Authorization Server MUST map the SAML Audience to a Client ID and ensure the client's authentication matches that mapping before issuing the Refresh Token.
+
+The following non-normative example shows a SAML 2.0 assertion where the `Audience` value (from `AudienceRestriction`) corresponds to the Service Provider Entity ID (`SPAuthority` / `SPEntityID`) and MUST be mapped to the OAuth client_id that the IdP Authorization Server associates with that SAML SP registration.
+
+    <saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+        ID="_123456789" IssueInstant="2025-03-01T12:34:56Z" Version="2.0">
+      <saml2:Issuer>https://idp.example.com/</saml2:Issuer>
+      <saml2:Subject>
+        <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">
+          alice@example.com
+        </saml2:NameID>
+        <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+          <saml2:SubjectConfirmationData
+              NotOnOrAfter="2025-03-01T12:39:56Z"
+              Recipient="https://client.example.com/assertion-consumer"/>
+        </saml2:SubjectConfirmation>
+      </saml2:Subject>
+      <saml2:Conditions NotBefore="2025-03-01T12:34:56Z" NotOnOrAfter="2025-03-01T13:34:56Z">
+        <saml2:AudienceRestriction>
+          <saml2:Audience>https://client.example.com/sp-entity-id</saml2:Audience>
+        </saml2:AudienceRestriction>
+      </saml2:Conditions>
+      <saml2:AttributeStatement>
+        <saml2:Attribute Name="given_name">
+          <saml2:AttributeValue>Alice</saml2:AttributeValue>
+        </saml2:Attribute>
+      </saml2:AttributeStatement>
+      <saml2:AuthnStatement AuthnInstant="2025-03-01T12:30:00Z">
+        <saml2:AuthnContext>
+          <saml2:AuthnContextClassRef>
+            urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
+          </saml2:AuthnContextClassRef>
+        </saml2:AuthnContext>
+      </saml2:AuthnStatement>
+    </saml2:Assertion>
+
+When this assertion is used as the `subject_token` in Token Exchange, the IdP Authorization Server MUST verify that the `Audience` / `SPEntityID` maps to the OAuth client_id that is authenticated for the token request. This prevents a client from presenting an assertion issued for a different SAML SP.
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:refresh_token
+    &scope=openid+offline_access+email
+    &subject_token=PHNhbWxwOkFzc2VydGlvbiB4bWxuczp...c2FtbDppc3N1ZXI+PC9zYW1sOkFzc2VydGlvbj4=
+    &subject_token_type=urn:ietf:params:oauth:token-type:saml2
+    &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "issued_token_type": "urn:ietf:params:oauth:token-type:refresh_token",
+      "access_token": "vF9dft4qmTcXkZ26zL8b6u",
+      "token_type": "N_A",
+      "scope": "openid offline_access email",
+      "expires_in": 1209600
+    }
 
 # Cross-Domain Client ID Handling {#client-id-mapping}
 
