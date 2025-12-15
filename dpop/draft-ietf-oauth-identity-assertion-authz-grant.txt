@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 22 April 2026                                       Independent
+Expires: 18 June 2026                                        Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         19 October 2025
+                                                        15 December 2025
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 April 2026.
+   This Internet-Draft will expire on 18 June 2026.
 
 Copyright Notice
 
@@ -87,18 +87,21 @@ Table of Contents
        4.4.1.  Processing Rules
        4.4.2.  Response
        4.4.3.  Refresh Token
-   5.  Authorization Server (IdP) Metadata
-   6.  Security Considerations
-     6.1.  Client Authentication
-     6.2.  Step-Up Authentication
-     6.3.  Cross-Domain Use
-   7.  IANA Considerations
-     7.1.  Media Types
-     7.2.  OAuth URI Registration
-     7.3.  JSON Web Token Claims Registration
-   8.  References
-     8.1.  Normative References
-     8.2.  Informative References
+   5.  Cross-Domain Client ID Handling
+   6.  Authorization Server (IdP) Metadata
+   7.  Security Considerations
+     7.1.  Client Authentication
+     7.2.  Step-Up Authentication
+     7.3.  Cross-Domain Use
+     7.4.  Sender Constraining Tokens
+       7.4.1.  Proof-of-Possession
+   8.  IANA Considerations
+     8.1.  Media Types
+     8.2.  OAuth URI Registration
+     8.3.  JSON Web Token Claims Registration
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
    Appendix A.  Use Cases
      A.1.  Enterprise Deployment
        A.1.1.  Preconditions
@@ -144,8 +147,8 @@ Table of Contents
    support interoperable implementations in enterprise scenarios when
    two applications are configured for single sign-on to the same
    enterprise identity provider.  In particular, this specification uses
-   identity assertions as the input to the token exchange request.  This
-   way, the same enterprise identity provider that is trusted by
+   an Identity Assertion as the input to the token exchange request.
+   This way, the same enterprise Identity Provider that is trusted by
    applications for single sign-on can be extended to broker access to
    APIs.
 
@@ -169,8 +172,8 @@ Table of Contents
       Resource Authorization Server in trust domain B.
 
    IdP Authorization Server (IdP)  A SAML 2.0 Identity Provider or
-      OpenID Connect Provider (OP) [OpenID.Core] that issues identity
-      assertions for single sign-on and cross-domain authorization
+      OpenID Connect Provider (OP) [OpenID.Core] that issues Identity
+      Assertions for single sign-on and cross-domain authorization
       grants Section 3 for a set of trusted applications in an
       organization's application ecosystem.  In
       [I-D.ietf-oauth-identity-chaining], this is the Authorization
@@ -199,15 +202,16 @@ Table of Contents
    delegated access to a resource in another trust domain on behalf of a
    user without a direct user-approval step at the authorization server.
 
-   An Identity Assertion JWT Authorization Grant is issued and signed by
-   an IdP similar to an ID Token [OpenID.Core], and contains claims
-   about an end-user.  Instead of being issued for a client (Relying
-   Party in [OpenID.Core]) as the intended audience for the assertion,
-   it is instead issued with an audience of an Authorization Server in
-   another trust domain.  It replaces the need for the client to obtain
-   an authorization code from the Resource Authorization Server to
-   delegate access to the client, and instead uses the IdP which is
-   trusted by the Authorization Server to delegate access to the client.
+   An ID-JAG is issued and signed by an IdP Authorization Server similar
+   to an ID Token [OpenID.Core], and contains claims about an End-User.
+   Instead of being issued for a client (Relying Party in [OpenID.Core])
+   as the intended audience for the assertion, it is instead issued with
+   an audience of an Authorization Server in another trust domain
+   (Resource Authorization Server).  It replaces the need for the client
+   to obtain an authorization code from the Resource Authorization
+   Server to delegate access to the client, and instead uses the IdP
+   Authorization Server which is trusted by the Resource Authorization
+   Server to delegate access to the client.
 
    As described in [OpenID.Core], ID Tokens are only intended to be
    processed by the Relying Party (indicated by the ID Token audience)
@@ -217,49 +221,65 @@ Table of Contents
    The following claims are used within the Identity Assertion JWT
    Authorization Grant:
 
-   iss:  REQUIRED - The issuer identifier of the IdP authorization
-      server as defined in [RFC8414]
+   iss:  REQUIRED - The issuer identifier of the IdP Authorization
+      Server as defined in [RFC8414].
 
-   sub:  REQUIRED - The subject identifier (e.g. user ID) of the
-      resource owner at the Resource Authorization Server as defined in
-      [OpenID.Core]
+   sub:  REQUIRED - Subject Identifier.  An identifier within the IdP
+      Authorization Server for the End-User, which is intended to be
+      consumed by the Client as defined in [OpenID.Core].  The
+      identifier MUST be the same as the subject identifier used in an
+      Identity Assertion for the Resource Authorization Server as a
+      Relying Party for SSO.  A public subject identifier MUST be unique
+      when scoped with issuer (iss+sub) for a single-tenant issuer and
+      MUST be unique when scoped with issuer and tenant (iss+tenant+sub)
+      for multi-tenant issuer.  See Section 5 for additional
+      considerations.
 
    aud:  REQUIRED - The issuer identifier of the Resource Authorization
-      Server as defined in [RFC8414]
+      Server as defined in [RFC8414].
 
-   client_id:  REQUIRED - An identifier of the client that will act on
-      behalf of the resource owner.  It MUST be recognized by the
-      Resource Authorization Server.  For interoperability, the client
-      identifier SHOULD be a client_id as defined in Section 4.3 of
-      [RFC8693].
+   client_id:  REQUIRED - The client identifier of the OAuth 2.0
+      [RFC6749] client at the Resource Authorization Server that will
+      act on behalf of the resource owner (sub).  This identifier MAY be
+      different that client identifier of the OAuth 2.0 client
+      requesting an ID-JAG from the IdP Section 4.3 of [RFC8693] as it
+      represents and independent client relationship to another
+      Authorization Server in a different trust domain.  See Section 5
+      for additional considerations.
 
    jti:  REQUIRED - Unique ID of this JWT as defined in Section 4.1.7 of
-      [RFC7519]
+      [RFC7519].
 
-   exp:  REQUIRED - as defined in Section 4.1.4 of [RFC7519]
+   exp:  REQUIRED - as defined in Section 4.1.4 of [RFC7519].
 
-   iat:  REQUIRED - as defined in Section 4.1.6 of [RFC7519]
+   iat:  REQUIRED - as defined in Section 4.1.6 of [RFC7519].
 
    resource:  OPTIONAL - The Resource Identifier (Section 2 of
       [RFC8707]) of the Resource Server (either a single URI or an array
-      of URIs)
+      of URIs).
 
    scope:  OPTIONAL - a JSON string containing a space-separated list of
       scopes associated with the token, in the format described in
-      Section 3.3 of [RFC6749]
+      Section 3.3 of [RFC6749].
 
    tenant:  OPTIONAL - JSON string that represents the tenant identifier
       for a multi-tenant issuer as defined in [OpenID.Enterprise]
 
-   auth_time:  OPTIONAL - Time when end-user authenticated to the client
-      as defined in [OpenID.Core]
+   auth_time:  OPTIONAL - Time when End-User authenticated as defined in
+      [OpenID.Core].
 
    acr:  OPTIONAL - Authentication Context Class Reference that was
-      satisfied when authenticating the end-user as defined in
-      [OpenID.Core]
+      satisfied when authenticating the End-User as defined in
+      [OpenID.Core].
 
    amr:  OPTIONAL - Identifiers for authentication methods used when
-      authenticating the end-user as defined in [OpenID.Core]
+      authenticating the End-User as defined in [OpenID.Core].
+
+   aud_sub:  OPTIONAL - The Resource Authorization Server's identifier
+      for the End-User as defined in [OpenID.Enterprise].
+
+   email: :OPTIONAL - End-User's e-mail address as defined in
+   Section 5.1 of [OpenID.Core].
 
    The typ of the JWT indicated in the JWT header MUST be oauth-id-
    jag+jwt.  Using typed JWTs is a recommendation of the JSON Web Token
@@ -293,18 +313,18 @@ Table of Contents
    .
    signature
 
-   The Identity Assertion JWT Authorization Grant may contain additional
-   Authentication, Identity, or Authorization claims that are valid for
-   an ID Token as the grant functions as an identity assertion for the
-   Resource App.
+   The ID-JAG may contain additional authentication, identity, or
+   authorization claims that are valid for an ID Token [OpenID.Core] as
+   the grant functions as both an Identity Assertion and authorization
+   delegation for the Resource Authorization Server.
 
-   Implementation notes:
-
-   *  sub should be an opaque ID, as iss+sub is unique.  The IdP might
-      want to also include the user's email here, which it should do as
-      a new email claim.  This would let the app dedupe existing users
-      who may have an account with an email address but have not done
-      SSO yet.
+   It is RECOMMENDED that the ID-JAG contain an email [OpenID.Core] and/
+   or aud_sub [OpenID.Enterprise] claim.  The Resource Authorization
+   Server MAY use these claims for account resolution or just-in-time
+   (JIT) account creation, for example when the user has not yet SSO'd
+   into the Resource Authorization Server.  Additional Resource
+   Authorization Server specific identity claims MAY be needed for
+   account resolution or JIT account creation.
 
 4.  Cross-Domain Access
 
@@ -385,7 +405,7 @@ Table of Contents
 
    1.  User authenticates with the IdP Authorization Server, the Client
        obtains an Identity Assertion (e.g. OpenID Connect ID Token or
-       SAML 2.0 assertion) for the user and optionally a Refresh Token
+       SAML 2.0 Assertion) for the user and optionally a Refresh Token
        (when using OpenID Connect) and signs the user in
 
    2.  Client uses the Identity Assertion to request an Identity
@@ -413,8 +433,8 @@ Table of Contents
 
 4.2.  User Authentication
 
-   The Client initiates an authentication request with the IdP using
-   OpenID Connect or SAML.
+   The Client initiates an authentication request with the IdP
+   Authorization Server using OpenID Connect or SAML.
 
    The following is an example using OpenID Connect
 
@@ -450,15 +470,15 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
 
 4.3.  Token Exchange
 
-   The Client makes a Token Exchange [RFC8693] request to the IdP's
-   Token Endpoint with the following parameters:
+   The Client makes a Token Exchange [RFC8693] request to the IdP
+   Authorization Server's Token Endpoint with the following parameters:
 
    requested_token_type:  REQUIRED - The value
-      urn:ietf:params:oauth:token-type:id-jag indicates that an ID
-      Assertion JWT is being requested.
+      urn:ietf:params:oauth:token-type:id-jag indicates that an Identity
+      Assertion JWT Authorization Grant is being requested.
 
-   audience:  REQUIRED - The Issuer URL of the Resource Authorization
-      Server as defined in Section 2 of [RFC8414].
+   audience:  REQUIRED - The issuer identifier of the Resource
+      Authorization Server as defined in Section 2 of [RFC8414].
 
    resource:  OPTIONAL - The Resource Identifier of the Resource Server
       as defined in Section 2 of [RFC8707].
@@ -466,21 +486,22 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
    scope:  OPTIONAL - The space-separated list of scopes at the Resource
       Server that is being requested.
 
-   subject_token:  REQUIRED - The identity assertion (e.g. the OpenID
-      Connect ID Token or SAML assertion) for the target end-user.
+   subject_token:  REQUIRED - The Identity Assertion (e.g. the OpenID
+      Connect ID Token or SAML 2.0 Assertion) for the target resource
+      owner.
 
    subject_token_type:  REQUIRED - An identifier, as described in
       Section 3 of [RFC8693], that indicates the type of the security
       token in the subject_token parameter.  For an OpenID Connect ID
       Token: urn:ietf:params:oauth:token-type:id_token, or for a SAML
-      assertion: urn:ietf:params:oauth:token-type:saml2.
+      2.0 Assertion: urn:ietf:params:oauth:token-type:saml2.
 
    The additional parameters defined in Section 2.1 of [RFC8693]
    actor_token and actor_token_type are not used in this specification.
 
-   Client authentication to the authorization server is done using the
-   standard mechanisms provided by OAuth 2.0.  Section 2.3.1 of
-   [RFC6749] defines password-based authentication of the client
+   Client authentication to the Resource Authorization Server is done
+   using the standard mechanisms provided by OAuth 2.0.  Section 2.3.1
+   of [RFC6749] defines password-based authentication of the client
    (client_id and client_secret), however, client authentication is
    extensible and other mechanisms are possible.  For example, [RFC7523]
    defines client authentication using bearer JSON Web Tokens using
@@ -683,7 +704,63 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    new Identity Assertion with a Refresh Token then it SHOULD re-
    authenticate the user by redirecting to the IdP.
 
-5.  Authorization Server (IdP) Metadata
+5.  Cross-Domain Client ID Handling
+
+   There are three separate OAuth/OpenID Connect/SAML relationships
+   involved in this flow:
+
+   *  Client to IdP Authorization Server (OpenID Connect or SAML)
+
+   *  Client to Resource Authorization Server (OAuth)
+
+   *  Resource Authorization Server to IdP Authorization Server (OpenID
+      Connect or SAML)
+
+   Each relationship is typically represented by independent client
+   registrations between each party.  For example, the IdP Authorization
+   Server typically issues a Client ID for both the Client and Resource
+   Authorization Server to use for single sign-on with OpenID Connect as
+   a Relying Party.  Similarly, the Resource Authorization Server
+   typically issues a Client ID for the Client to use for API access to
+   the Resource Server.  The Client may choose to use different client
+   credentials with each registration.
+
+   In this flow, the IdP Authorization Server accepts a Token Exchange
+   request from the Client, and issues an ID-JAG that will be consumed
+   by the Resource Authorization Server.  This means the IdP
+   Authorization Server needs to know about the relationship between the
+   Client and the Resource Authorization Server, in order to include a
+   client_id claim in the ID-JAG that will be recognized by the Resource
+   Authorization Server.
+
+   This can be handled by the IdP Authorization Server maintaining a
+   record of each client_id used between Clients and Resource
+   Authorization Servers, which will need to be obtained by out-of-band
+   mechanisms.  The Client still needs to authenticate using its
+   registered credential with the Resource Authorization Server when
+   presenting the ID-JAG for the mapped client_id.  Requiring a
+   confidential client helps to prevent the IdP Authorization Server
+   from delegating access to any of the valid clients for the Resource
+   Authorization Server.
+
+   Note: The IdP Authorization Server is also responsible for mapping
+   subject identifiers across Clients and trust domains in the ID-JAG.
+   The same user may have a pair-wise subject identifier issued in an ID
+   Token for SSO to the Client and another with SSO to the Resource
+   Authorization Server as a Relying Party.  The Resource Authorization
+   Server needs consistent subject identifiers for account resolution
+   for both SSO and API access.  The IdP Authorization Server needs to
+   ensure that the subject identifier issued in the ID-JAG is the same
+   identifier for the user that it would have included in an ID Token
+   intended for the Resource Authorization Server.
+
+   Alternatively, if clients use "Client ID Metadata Document"
+   [I-D.ietf-oauth-client-id-metadata-document] as their client
+   identifiers, this acts as a shared global namespace of Client IDs and
+   removes the need for the IdP Authorization Server to maintain a
+   mapping of each client registration.
+
+6.  Authorization Server (IdP) Metadata
 
    An IdP can advertise its support for this profile in its OAuth
    Authorization Server Metadata [RFC8414].  Identity and Authorization
@@ -697,9 +774,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    urn:ietf:params:oauth:token-type:id-jag
 
-6.  Security Considerations
+7.  Security Considerations
 
-6.1.  Client Authentication
+7.1.  Client Authentication
 
    This specification SHOULD only be supported for confidential clients.
    Public clients SHOULD use the existing authorization code grant and
@@ -707,7 +784,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.0 Authorization Request where the user can interactively consent to
    the access delegation.
 
-6.2.  Step-Up Authentication
+7.2.  Step-Up Authentication
 
    In the initial token exchange request, the IdP may require step-up
    authentication for the subject if the authentication context in the
@@ -735,7 +812,7 @@ Cache-Control: no-store
    Connect for SSO when performing a step-up to skip the need for
    additional token exchange round-trip.
 
-6.3.  Cross-Domain Use
+7.3.  Cross-Domain Use
 
    This specification is intended for cross-domain uses where the
    Client, Resource App, and Identity Provider are all in different
@@ -743,16 +820,207 @@ Cache-Control: no-store
    access tokens in response to an ID-JAG it issued itself.  Doing so
    could lead to unintentional broadening of the scope of authorization.
 
-7.  IANA Considerations
+7.4.  Sender Constraining Tokens
 
-7.1.  Media Types
+7.4.1.  Proof-of-Possession
+
+   Identity Assertion JWT Authorization Grant may support key binding to
+   enable sender-constrained tokens as described in Section 4 of
+   [I-D.ietf-oauth-identity-chaining] and
+   [I-D.parecki-oauth-jwt-dpop-grant].  This provides additional
+   security by binding tokens to a specific cryptographic key,
+   preventing reuse by parties that do not have access to the private
+   key.
+
+   Proof-of-possession is demonstrated by the client presenting a DPoP
+   proof JWT (as defined in [RFC9449]) in a DPoP HTTP header.  The DPoP
+   proof demonstrates that the client possesses the private key
+   corresponding to a public key.  This public key can be bound to
+   tokens, ensuring that only the holder of the private key can use
+   those tokens.
+
+   The cnf (confirmation) claim, as defined in [RFC7800], is used to
+   bind a public key to a JWT.  When an ID-JAG contains a cnf claim with
+   a jwk property, it indicates that the ID-JAG is bound to that
+   specific public key, and proof of possession of the corresponding
+   private key MUST be demonstrated when using the ID-JAG.
+
+   The following sections describe the processing rules for proof-of-
+   possession at two stages: during the Token Exchange (when requesting
+   an ID-JAG from the IdP) and during the ID-JAG exchange (when
+   exchanging the ID-JAG for an access token at the Resource
+   Authorization Server).
+
+7.4.1.1.  Proof-of-Possession During Token Exchange
+
+   When a client requests an ID-JAG from the IdP Authorization Server
+   via Token Exchange, the client MAY include a DPoP proof in the
+   request.  This demonstrates possession of a key that can be bound to
+   the ID-JAG.
+
+   The client generates a key pair and includes a DPoP proof JWT in the
+   DPoP header of the Token Exchange request:
+
+POST /oauth2/token HTTP/1.1
+Host: acme.idp.example
+Content-Type: application/x-www-form-urlencoded
+DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
+
+grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+&requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+&audience=https://acme.chat.example/
+&resource=https://api.chat.example/
+&scope=chat.read+chat.history
+&subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
+&subject_token_type=urn:ietf:params:oauth:token-type:id_token
+
+   The IdP Authorization Server processes the request as follows:
+
+   1.  If a DPoP proof is present, the IdP MUST validate it according to
+       Section 4 of [RFC9449].  The htm claim MUST be POST, and the htu
+       claim MUST match the token endpoint URL.
+
+   2.  If the DPoP proof is valid, the IdP MAY include a cnf claim in
+       the issued ID-JAG containing the public key from the DPoP proof's
+       jwk header parameter.  The cnf claim format follows [RFC7800]:
+
+       { "jti": "9e43f81b64a33f20116179", "iss":
+       "https://acme.idp.example", "sub": "U019488227", "aud":
+       "https://acme.chat.example/", "client_id": "f53f191f9311af35",
+       "exp": 1311281970, "iat": 1311280970, "resource":
+       "https://api.chat.example/", "scope": "chat.read chat.history",
+       "cnf": { "jwk": { "kty": "EC", "crv": "P-256", "x":
+       "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU", "y":
+       "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0" } } }
+
+   3.  The token exchange response does not indicate whether key binding
+       was performed (since token_type is fixed to N_A).  The client
+       must inspect the ID-JAG to determine if a cnf claim is present.
+
+   4.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
+       cnf claim.
+
+7.4.1.2.  Proof-of-Possession During ID-JAG Exchange
+
+   When a client exchanges an ID-JAG for an access token at the Resource
+   Authorization Server, the processing rules depend on whether the ID-
+   JAG contains a cnf claim and whether the client presents a DPoP
+   proof.
+
+7.4.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
+
+   If the ID-JAG contains a cnf claim and the client presents a DPoP
+   proof, the Resource Authorization Server MUST:
+
+   1.  Validate the DPoP proof according to Section 4 of [RFC9449].
+
+   2.  Extract the public key from the jwk header parameter of the DPoP
+       proof.
+
+   3.  Extract the public key from the jwk property of the cnf claim in
+       the ID-JAG.
+
+   4.  Compare the two public keys.  They MUST match exactly.  If they
+       do not match, the request MUST fail with an invalid_grant error.
+
+   5.  If the keys match, the Resource Authorization Server MAY issue a
+       sender-constrained access token (e.g., a DPoP-bound token) per
+       the Resource Server configuration.  The issued access token
+       SHOULD be bound to the same key.
+
+   Example request:
+
+POST /oauth2/token HTTP/1.1
+Host: acme.chat.example
+Content-Type: application/x-www-form-urlencoded
+DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
+&assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+
+   Example successful response with DPoP-bound token:
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json;charset=UTF-8
+   Cache-Control: no-store
+   Pragma: no-cache
+
+   {
+     "token_type": "DPoP",
+     "access_token": "2YotnFZFEjr1zCsicMWpAA",
+     "expires_in": 86400,
+     "scope": "chat.read chat.history"
+   }
+
+7.4.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
+
+   If the ID-JAG contains a cnf claim but the client does not present a
+   DPoP proof, the Resource Authorization Server MUST reject the request
+   with an invalid_grant error, as the ID-JAG requires proof of
+   possession.
+
+   Example error response:
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+  "error": "invalid_grant",
+  "error_description": "Proof of possession required for this authorization grant"
+}
+
+7.4.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
+            Presented
+
+   If the ID-JAG does not contain a cnf claim but the client presents a
+   DPoP proof, the Resource Authorization Server:
+
+   1.  MUST validate the DPoP proof according to Section 4 of [RFC9449].
+
+   2.  MAY issue a sender-constrained access token (e.g., a DPoP-bound
+       token) per the Resource Server configuration at the Authorization
+       Server, binding the access token to the key demonstrated in the
+       DPoP proof.
+
+   3.  The access token response will indicate the token type (e.g.,
+       DPoP for DPoP-bound tokens, or Bearer for unconstrained tokens).
+
+7.4.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
+            Presented
+
+   If the ID-JAG does not contain a cnf claim and the client does not
+   present a DPoP proof:
+
+   1.  The Resource Authorization Server MAY issue an unconstrained
+       Bearer token.
+
+   2.  However, if the Resource Server configuration at the
+       Authorization Server requires constrained tokens for that
+       Resource Server, the request MUST fail with an invalid_grant
+       error.
+
+   Example error response when constrained tokens are required:
+
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Cache-Control: no-store
+
+{
+  "error": "invalid_grant",
+  "error_description": "Sender-constrained tokens required for this resource server"
+}
+
+8.  IANA Considerations
+
+8.1.  Media Types
 
    This section registers oauth-id-jag+jwt, a new media type [RFC2046]
    in the "Media Types" registry [IANA.media-types] in the manner
    described in [RFC6838].  It can be used to indicate that the content
    is an Identity Assertion JWT Authorization Grant.
 
-7.2.  OAuth URI Registration
+8.2.  OAuth URI Registration
 
    This section registers urn:ietf:params:oauth:token-type:id-jag in the
    "OAuth URI" subregistry of the "OAuth Parameters" registry
@@ -767,7 +1035,7 @@ Cache-Control: no-store
 
    *  Specification Document: This document
 
-7.3.  JSON Web Token Claims Registration
+8.3.  JSON Web Token Claims Registration
 
    This section registers resource in the "JSON Web Token Claims"
    subregistry of the "JSON Web Token (JWT)" registry [IANA.jwt].  The
@@ -781,9 +1049,9 @@ Cache-Control: no-store
 
    *  Specification Document(s): Section 3
 
-8.  References
+9.  References
 
-8.1.  Normative References
+9.1.  Normative References
 
    [I-D.ietf-oauth-identity-chaining]
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
@@ -849,6 +1117,11 @@ Cache-Control: no-store
               Authorization Grants", RFC 7523, DOI 10.17487/RFC7523, May
               2015, <https://www.rfc-editor.org/rfc/rfc7523>.
 
+   [RFC7800]  Jones, M., Bradley, J., and H. Tschofenig, "Proof-of-
+              Possession Key Semantics for JSON Web Tokens (JWTs)",
+              RFC 7800, DOI 10.17487/RFC7800, April 2016,
+              <https://www.rfc-editor.org/rfc/rfc7800>.
+
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
@@ -872,7 +1145,26 @@ Cache-Control: no-store
               DOI 10.17487/RFC8725, February 2020,
               <https://www.rfc-editor.org/rfc/rfc8725>.
 
-8.2.  Informative References
+   [RFC9449]  Fett, D., Campbell, B., Bradley, J., Lodderstedt, T.,
+              Jones, M., and D. Waite, "OAuth 2.0 Demonstrating Proof of
+              Possession (DPoP)", RFC 9449, DOI 10.17487/RFC9449,
+              September 2023, <https://www.rfc-editor.org/rfc/rfc9449>.
+
+9.2.  Informative References
+
+   [I-D.ietf-oauth-client-id-metadata-document]
+              Parecki, A. and E. Smith, "OAuth Client ID Metadata
+              Document", Work in Progress, Internet-Draft, draft-ietf-
+              oauth-client-id-metadata-document-00, 8 October 2025,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
+              client-id-metadata-document-00>.
+
+   [I-D.parecki-oauth-jwt-dpop-grant]
+              Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP
+              Binding", Work in Progress, Internet-Draft, draft-parecki-
+              oauth-jwt-dpop-grant-00, 18 October 2025,
+              <https://datatracker.ietf.org/doc/html/draft-parecki-
+              oauth-jwt-dpop-grant-00>.
 
    [RFC9470]  Bertocci, V. and B. Campbell, "OAuth 2.0 Step Up
               Authentication Challenge Protocol", RFC 9470,
@@ -954,7 +1246,7 @@ A.2.  Email and Calendaring Applications
    flow to obtain authorization and ultimately an access token.
 
    To streamline the user experience, this specification can be used to
-   enable the email client to use the identity assertion to obtain an
+   enable the email client to use the Identity Assertion to obtain an
    access token for the third-party calendaring application without any
    user interaction.
 
@@ -1351,6 +1643,11 @@ Document History
    *  Updated section references with more specific links
 
    *  Added reference to scope parameter in ID-JAG processing rules
+
+   *  Added a section discussing client ID mapping and reference to
+      Client ID Metadata Document
+
+   *  Added recommendations for refresh tokens
 
    -00
 
