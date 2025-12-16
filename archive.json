@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-14T00:03:41.902311+00:00",
+  "timestamp": "2025-12-16T00:03:16.700527+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1900,6 +1900,38 @@
           "updatedAt": "2025-12-08T18:15:01Z"
         }
       ]
+    },
+    {
+      "number": 66,
+      "id": "I_kwDOKv5r-s7eIh43",
+      "title": "Add the new token exchange discovery endpoint object to the idp-metadata section",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/66",
+      "state": "OPEN",
+      "author": "meghnadubey",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The new endpoint for discovery should be added to the IdP(auth server) metadata section in this spec. \nhttps://github.com/mcguinness/draft-mcguinness-token-exchange-target-service-discovery",
+      "createdAt": "2025-12-14T05:13:30Z",
+      "updatedAt": "2025-12-14T05:13:30Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 69,
+      "id": "I_kwDOKv5r-s7ec87q",
+      "title": "Audience vs Resource Clarity",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/69",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We made the choice to require `audience` to be the Resource AS identifier and `resource` to be the protected resource for the Resource AS in this spec for interoperability.  While this approach seems allowed from how the Token Exchange spec is written, it isn't obvious to some readers who are familiar with Token Exchange.  We are effective profiling `audience` as the trust domain identifier vs defining a new param.  We don't need to change our decision but I think it may help to better state why we made this choice and provide some examples of multi-tenant resource authorization servers to help the reader understand how this profile is using audience and resource. Note that audience vs resource is a historically confusing problem across the specs. ",
+      "createdAt": "2025-12-15T21:10:07Z",
+      "updatedAt": "2025-12-15T21:10:07Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -4727,6 +4759,125 @@
           ]
         }
       ]
+    },
+    {
+      "number": 67,
+      "id": "PR_kwDOKv5r-s641kgh",
+      "title": "initial attempt to add DPoP support for ID-JAG",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/67",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR attempts to resolve #28 by adding processing rules for DPoP to security considerations",
+      "createdAt": "2025-12-15T05:38:24Z",
+      "updatedAt": "2025-12-15T21:13:27Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "dpop",
+      "headRefOid": "417135f9e70a013802a57acbf2e8831afdb571b1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7VXqlK",
+          "commit": {
+            "abbreviatedOid": "417135f"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-15T19:18:35Z",
+          "updatedAt": "2025-12-15T19:18:35Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Open question is whether we should register a new response parameter to indicate to client whether the issued token was a bearer or DPoP?  I don't like having the client cracking open the issued token to know this.  Since an Authorization Server may ignore the DPoP proof header, I don't think we can leverage an error code.  ",
+              "createdAt": "2025-12-15T19:18:35Z",
+              "updatedAt": "2025-12-15T19:18:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7VZSzI",
+          "commit": {
+            "abbreviatedOid": "417135f"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-15T21:13:27Z",
+          "updatedAt": "2025-12-15T21:13:27Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Alternatively we can revisit whether `N/A` was the right choice and have this apply to the `issued_token_type` even though its not strictly an access token but has the same use case of indicating to the client how the token should be used.",
+              "createdAt": "2025-12-15T21:13:27Z",
+              "updatedAt": "2025-12-15T21:13:27Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 68,
+      "id": "PR_kwDOKv5r-s642Euy",
+      "title": "Support for Refresh Token as Subject_Token & SAML 2.0 Interop",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/68",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Resolves #58 & #44 ",
+      "createdAt": "2025-12-15T06:30:08Z",
+      "updatedAt": "2025-12-15T06:30:12Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "refresh-token",
+      "headRefOid": "191656fe26f233e72715127174c2e433a705957f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 70,
+      "id": "PR_kwDOKv5r-s65BNr7",
+      "title": "added RAR support and updated processing rules for Token Exchange and ID-JAG",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/70",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Resolves #65 ",
+      "createdAt": "2025-12-15T21:40:30Z",
+      "updatedAt": "2025-12-15T21:40:30Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "authorization_details",
+      "headRefOid": "9e62afbf878815e78ff48a6e54296d0263a038ca",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
