@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-16T00:03:16.700527+00:00",
+  "timestamp": "2025-12-18T00:02:52.594850+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1587,7 +1587,7 @@
       "labels": [],
       "body": "As raised in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51, a seamless user experience requires that Requesting Apps have a way to discover which applications, and their specific instances, a user is allowed to access. This would allow mirroring the experience of SSO dashboards, where users can simply select the app instance they want to use.\n\nThis raises several questions:\n- Should the IdP expose an \"Accessible Resources API\" to list the available Resource Apps and their instances for an authenticated user?\n- How should such an API structure its data to clearly differentiate between multiple instances of the same application?\n- **Should this API be standardized?**",
       "createdAt": "2025-10-10T09:22:45Z",
-      "updatedAt": "2025-12-13T15:31:09Z",
+      "updatedAt": "2025-12-16T22:57:43Z",
       "closedAt": null,
       "comments": [
         {
@@ -1729,6 +1729,13 @@
           "body": "@mcguinness I suggest adding 'supported_grant_type' of 'token-exchange', since it is the central mechanism.\nI also wanted an indicator for generated token-type, but that is now added as jwt-bearer, so that's good. \nOpened an issue on the new spec, https://github.com/mcguinness/draft-mcguinness-token-exchange-target-service-discovery/issues/1",
           "createdAt": "2025-12-13T15:12:24Z",
           "updatedAt": "2025-12-13T15:31:09Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Published as IETF ID https://datatracker.ietf.org/doc/html/draft-mcguinness-token-xchg-target-svc-disco",
+          "createdAt": "2025-12-16T22:57:43Z",
+          "updatedAt": "2025-12-16T22:57:43Z"
         }
       ]
     },
@@ -4772,7 +4779,7 @@
       "labels": [],
       "body": "This PR attempts to resolve #28 by adding processing rules for DPoP to security considerations",
       "createdAt": "2025-12-15T05:38:24Z",
-      "updatedAt": "2025-12-15T21:13:27Z",
+      "updatedAt": "2025-12-16T11:25:19Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
@@ -4783,7 +4790,36 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "panva",
+          "authorAssociation": "MEMBER",
+          "body": "@mcguinness can you shed some light into the decision process for using `cnf.jwk` instead of e.g. `cnf.jkt`?",
+          "createdAt": "2025-12-16T10:07:12Z",
+          "updatedAt": "2025-12-16T10:07:12Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> @mcguinness can you shed some light into the decision process for using `cnf.jwk` instead of e.g. `cnf.jkt`?\r\n\r\nBased it on https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-00.  I can make that clearer that this it inheriting the processing rules. I know you raised this question on the mailing list and was going to use whatever approach had consensus. ",
+          "createdAt": "2025-12-16T10:45:33Z",
+          "updatedAt": "2025-12-16T10:45:33Z"
+        },
+        {
+          "author": "panva",
+          "authorAssociation": "MEMBER",
+          "body": "Ah, I still need to write up my feedback for that particular draft then. Thanks. ",
+          "createdAt": "2025-12-16T10:58:26Z",
+          "updatedAt": "2025-12-16T10:58:26Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@panva Should this draft accept either jwk or jwt in the proof with the Token Exchange request? @aaronpk draft only specifies ID-JAG processing part of the flow for the Resource AS.  The IdP Authorization Server would need to convert a jkt to jwk confirmation.  \r\n\r\nThe Token Exchange processing rules will also get more complicated when I add support for https://openid.net/specs/openid-connect-key-binding-1_0-00.html. I was hoping to break that into its own PR after we got this merged. ",
+          "createdAt": "2025-12-16T11:25:18Z",
+          "updatedAt": "2025-12-16T11:25:18Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOKv5r-s7VXqlK",
