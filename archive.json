@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-18T00:02:52.594850+00:00",
+  "timestamp": "2026-01-08T00:03:37.696483+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1937,6 +1937,22 @@
       "body": "We made the choice to require `audience` to be the Resource AS identifier and `resource` to be the protected resource for the Resource AS in this spec for interoperability.  While this approach seems allowed from how the Token Exchange spec is written, it isn't obvious to some readers who are familiar with Token Exchange.  We are effective profiling `audience` as the trust domain identifier vs defining a new param.  We don't need to change our decision but I think it may help to better state why we made this choice and provide some examples of multi-tenant resource authorization servers to help the reader understand how this profile is using audience and resource. Note that audience vs resource is a historically confusing problem across the specs. ",
       "createdAt": "2025-12-15T21:10:07Z",
       "updatedAt": "2025-12-15T21:10:07Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 71,
+      "id": "I_kwDOKv5r-s7hgLYw",
+      "title": "Add recommendations/considerations for user provisioning",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/71",
+      "state": "OPEN",
+      "author": "vsinghania-stytch",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In the flow proposed by this draft, it is possible for a client to send a token exchange request concerning a user that the resource authorization server has never seen before, e.g. (using the terminology in 4.1) if I try to connect the chat app to the wiki app using my enterprise IdP without ever having created a chat app account.\n\nWhat should happen in this scenario? I see a few options:\n1. The chat app should take the ID-JAG token subject to the IdP and JIT provision a user based on the IdP's response. I think this would lead to a somewhat meaningless grant -- if I don't have a chat app account, what exactly would the wiki app gain from this anyway? Also, depending on the chat app's UX, this might spring a whole user onboarding flow on the user in the middle of the authz request.\n2. The chat app should return a user not found error to the wiki app. I think this makes the most sense.\n3. The IdP should not even issue an ID-JAG if it knows the user doesn't have a chat app account. This relies on the IdP always knowing whether the account exists, with high confidence, so I'm not sure it's a viable option.\n\nIn any case, I think it'd be helpful for the draft to address this scenario.",
+      "createdAt": "2026-01-06T00:39:24Z",
+      "updatedAt": "2026-01-06T00:39:24Z",
       "closedAt": null,
       "comments": []
     }
