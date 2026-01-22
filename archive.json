@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-11T00:03:45.815153+00:00",
+  "timestamp": "2026-01-22T00:04:05.714750+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1959,9 +1959,55 @@
       "labels": [],
       "body": "In the flow proposed by this draft, it is possible for a client to send a token exchange request concerning a user that the resource authorization server has never seen before, e.g. (using the terminology in 4.1) if I try to connect the chat app to the wiki app using my enterprise IdP without ever having created a chat app account.\n\nWhat should happen in this scenario? I see a few options:\n1. The chat app should take the ID-JAG token subject to the IdP and JIT provision a user based on the IdP's response. I think this would lead to a somewhat meaningless grant -- if I don't have a chat app account, what exactly would the wiki app gain from this anyway? Also, depending on the chat app's UX, this might spring a whole user onboarding flow on the user in the middle of the authz request.\n2. The chat app should return a user not found error to the wiki app. I think this makes the most sense.\n3. The IdP should not even issue an ID-JAG if it knows the user doesn't have a chat app account. This relies on the IdP always knowing whether the account exists, with high confidence, so I'm not sure it's a viable option.\n\nIn any case, I think it'd be helpful for the draft to address this scenario.",
       "createdAt": "2026-01-06T00:39:24Z",
-      "updatedAt": "2026-01-06T00:39:24Z",
+      "updatedAt": "2026-01-21T19:16:30Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This is currently an app & deployment-specific behavior.  \n\n- A resource authorization server MAY choose to JIT provision an account using claims in the ID-JAG similar to JIT from ID Token or it MAY choose to reject the token request with an Oauth error response if an account is not successfully resolved.   \n- Enterprises may use an external IGA system or workflow for account provisioning which the IdP Authorization Server may not have knowledge of.\n- A provisioned account may not have a valid subscription/license or the correct entitlements for the scopes in the ID-JAG.\n\nA client should not assume that obtaining the ID-JAG from the IdP is a guarantee that the ID-JAG is valid for the Resource AS and needs to handle OAuth error responses from the ID-JAG token request.  \n\nIts not clear that a client needs a specific error code to handle the scenario where it Resource Authorization Server is unable to JIT provision an account for an unknown resource owner vs the currently defined generic `invalid_grant` error.  ",
+          "createdAt": "2026-01-20T23:48:12Z",
+          "updatedAt": "2026-01-20T23:48:12Z"
+        },
+        {
+          "author": "vsinghania-stytch",
+          "authorAssociation": "NONE",
+          "body": "It seems reasonable to leave JIT provisioning as an optional feature. Curious if you think it'd be useful to include verbiage similar to your first point in the draft, e.g. under 4.4? I suspect a lot of resource AS implementations will wonder if JIT provisioning is allowed.",
+          "createdAt": "2026-01-21T19:16:30Z",
+          "updatedAt": "2026-01-21T19:16:30Z"
+        }
+      ]
+    },
+    {
+      "number": 72,
+      "id": "I_kwDOKv5r-s7klfrb",
+      "title": "Identifying the ID-JAG tenant in multi-tenant resource authorization servers",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/72",
+      "state": "CLOSED",
+      "author": "vsinghania-stytch",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "When a resource authorization server (_not_ the enterprise IdP) is multi-tenanted, the AS needs to be able to uniquely identify the user _and_ the tenant that the ID-JAG is referring to. If the enterprise IdP doesn't use [pairwise identifiers](https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg), it is not possible to identify the tenant using the required claims. If the IdP does use pairwise identifiers, the tenant can be identified _if_ the user + tenant combination has already been provisioned at the AS (or if SCIM is enabled).\n\nWe think this problem can be solved using the optional `tenant` claim in the draft. The resource AS can pre-register the value when the OIDC connection is configured, and the IdP can attach it to ID-JAGs.\n\nA couple of questions about this:\n1. Is this an intended/appropriate use of the `tenant` field?\n2. The draft refers to the [OpenID.Enterprise definition of `tenant`](https://openid.net/specs/openid-connect-enterprise-extensions-1_0.html#section-2.2). This definition feels a bit confusing in the ID-JAG context -- why would the field ever have the value `organization`?\n3. Is this worth calling out as a consideration?",
+      "createdAt": "2026-01-20T19:01:56Z",
+      "updatedAt": "2026-01-21T19:04:05Z",
+      "closedAt": "2026-01-21T19:04:05Z",
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The `tenant` claim identifies the IdP tenant (issuer) and not the Resource Authorization Server tenant.  The intention of the ID-JAG is to mirror the same identity claims that the Resource Authorization Server obtains via an ID Token for uniquely identifying users via iss+tenant+sub.  This simplifies account resolution as the same logic can be applied for SSO and ID-JAG processing.  It doesn't address multi-tenant resource authorization servers that share the same authorization server identifier + client_id for a given IdP iss+tenant+sub.  This issue is discussed in  #51 .  \n",
+          "createdAt": "2026-01-20T19:16:57Z",
+          "updatedAt": "2026-01-20T19:16:57Z"
+        },
+        {
+          "author": "vsinghania-stytch",
+          "authorAssociation": "NONE",
+          "body": "Gotcha, that makes sense. I'll follow along + jump in on the linked issue. Closing this one \u2013 thanks!",
+          "createdAt": "2026-01-21T19:04:05Z",
+          "updatedAt": "2026-01-21T19:04:05Z"
+        }
+      ]
     }
   ],
   "pulls": [
