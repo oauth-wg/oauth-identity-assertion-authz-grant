@@ -581,7 +581,7 @@ The IdP Authorization Server processes the request as follows:
 
 1. If a DPoP proof is present, the IdP MUST validate it according to {{Section 4 of RFC9449}}. The `htm` claim MUST be `POST`, and the `htu` claim MUST match the token endpoint URL.
 
-2. If the DPoP proof is valid, the IdP MAY include a `cnf` claim in the issued ID-JAG containing the public key from the DPoP proof's `jwk` header parameter. The `cnf` claim format follows {{RFC7800}}:
+2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing the public key from the DPoP proof's `jwk` header parameter. The `cnf` claim format follows {{RFC7800}}:
 
     {
       "jti": "9e43f81b64a33f20116179",
@@ -603,7 +603,7 @@ The IdP Authorization Server processes the request as follows:
       }
     }
 
-3. The token exchange response does not indicate whether key binding was performed (since `token_type` is fixed to `N_A`). The client must inspect the ID-JAG to determine if a `cnf` claim is present.
+3. The token exchange response does not indicate whether key binding was performed (since `token_type` is fixed to `N_A`). The client MUST inspect the ID-JAG to determine if a `cnf` claim is present.
 
 4. If no DPoP proof is presented, the IdP issues an ID-JAG without a `cnf` claim.
 
