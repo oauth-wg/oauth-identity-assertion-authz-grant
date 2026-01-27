@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 18 June 2026                                        Independent
+Expires: 31 July 2026                                        Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                        15 December 2025
+                                                         27 January 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,11 +55,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 June 2026.
+   This Internet-Draft will expire on 31 July 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -773,9 +773,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    subject_token to obtain an ID-JAG without prompting the user for a
    new Identity Assertion.
 
-   OpenID Connect efined scopes of openid offline_access SHOULD be
-   requested (additional scopes are allowed) when requesting a Refresh
-   Token from the IdP Authorization Server.
+   The OpenID Connect scopes openid offline_access SHOULD be requested
+   (additional scopes are allowed) when requesting a Refresh Token from
+   the IdP Authorization Server.
 
    The IdP Authorization Server MUST map the SAML Audience to a Client
    ID and ensure the client's authentication matches that mapping before
@@ -784,7 +784,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    The following non-normative example shows a SAML 2.0 assertion where
    the Audience value (from AudienceRestriction) corresponds to the
    Service Provider Entity ID (SPAuthority / SPEntityID) and MUST be
-   mapped to the OAuth client_id that the IdP Authorization Server
+   mapped to the OAuth Client ID that the IdP Authorization Server
    associates with that SAML SP registration.
 
 <saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
@@ -821,7 +821,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    When this assertion is used as the subject_token in Token Exchange,
    the IdP Authorization Server MUST verify that the Audience /
-   SPEntityID maps to the OAuth client_id that is authenticated for the
+   SPEntityID maps to the OAuth Client ID that is authenticated for the
    token request.  This prevents a client from presenting an assertion
    issued for a different SAML SP.
 
