@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 18 June 2026                                        Independent
+Expires: 31 July 2026                                        Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                        15 December 2025
+                                                         27 January 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,11 +55,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 June 2026.
+   This Internet-Draft will expire on 31 July 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -199,10 +199,10 @@ Table of Contents
    of the JWT Authorization Grant [RFC7523] that grants a client
    delegated access to a resource in another trust domain on behalf of a
    user without a direct user-approval step at the authorization server.
-   This specification supports Rich Authorization Requests (RAR)
-   [RFC9396], allowing clients to request authorization using structured
-   authorization details in addition to traditional scope-based
-   authorization.
+   In addition to traditional OAuth scope-based authorization, this
+   specification supports Rich Authorization Requests (RAR) [RFC9396],
+   allowing clients to request limited authorization using structured
+   authorization details.
 
    An ID-JAG is issued and signed by an IdP Authorization Server similar
    to an ID Token [OpenID.Core], and contains claims about an End-User.
@@ -630,8 +630,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       parameter MUST be included if the client requested authorization
       details and the IdP granted authorization details that differ from
       what was requested, or if the IdP modified the authorization
-      details.  If the authorization details in the issued ID-JAG are
-      identical to what was requested, this parameter MAY be omitted.
+      details.
 
    expires_in:  RECOMMENDED - The lifetime in seconds of the
       authorization grant.
@@ -1105,9 +1104,9 @@ Cache-Control: no-store
               "Updates to OAuth 2.0 JSON Web Token (JWT) Client
               Authentication and Assertion-Based Authorization Grants",
               Work in Progress, Internet-Draft, draft-ietf-oauth-
-              rfc7523bis-03, 7 October 2025,
+              rfc7523bis-05, 12 January 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              rfc7523bis-03>.
+              rfc7523bis-05>.
 
    [IANA.jwt] IANA, "JSON Web Token (JWT)",
               <https://www.iana.org/assignments/jwt>.
