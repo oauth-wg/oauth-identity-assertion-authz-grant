@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 18 June 2026                                        Independent
+Expires: 31 July 2026                                        Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                        15 December 2025
+                                                         27 January 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,11 +55,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 June 2026.
+   This Internet-Draft will expire on 31 July 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -880,7 +880,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
        Section 4 of [RFC9449].  The htm claim MUST be POST, and the htu
        claim MUST match the token endpoint URL.
 
-   2.  If the DPoP proof is valid, the IdP MAY include a cnf claim in
+   2.  If the DPoP proof is valid, the IdP MUST include a cnf claim in
        the issued ID-JAG containing the public key from the DPoP proof's
        jwk header parameter.  The cnf claim format follows [RFC7800]:
 
@@ -895,7 +895,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    3.  The token exchange response does not indicate whether key binding
        was performed (since token_type is fixed to N_A).  The client
-       must inspect the ID-JAG to determine if a cnf claim is present.
+       MUST inspect the ID-JAG to determine if a cnf claim is present.
 
    4.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
        cnf claim.
