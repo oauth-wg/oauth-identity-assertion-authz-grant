@@ -517,11 +517,11 @@ If the IdP Authorization Server supports Refresh Tokens as a `subject_token` in 
 
 Clients using SAML 2.0 for SSO with the IdP Authorization Server can obtain an ID-JAG without changing their SSO protocol to OpenID Connect by first exchanging the SAML 2.0 assertion for a Refresh Token using Token Exchange. This enables protocol transition to OAuth and allows the client to later use the Refresh Token as a `subject_token` to obtain an ID-JAG without prompting the user for a new Identity Assertion.
 
-OpenID Connect efined scopes of `openid offline_access` SHOULD be requested (additional scopes are allowed) when requesting a Refresh Token from the IdP Authorization Server.
+The OpenID Connect scopes `openid offline_access` SHOULD be requested (additional scopes are allowed) when requesting a Refresh Token from the IdP Authorization Server.
 
 The IdP Authorization Server MUST map the SAML Audience to a Client ID and ensure the client's authentication matches that mapping before issuing the Refresh Token.
 
-The following non-normative example shows a SAML 2.0 assertion where the `Audience` value (from `AudienceRestriction`) corresponds to the Service Provider Entity ID (`SPAuthority` / `SPEntityID`) and MUST be mapped to the OAuth client_id that the IdP Authorization Server associates with that SAML SP registration.
+The following non-normative example shows a SAML 2.0 assertion where the `Audience` value (from `AudienceRestriction`) corresponds to the Service Provider Entity ID (`SPAuthority` / `SPEntityID`) and MUST be mapped to the OAuth Client ID that the IdP Authorization Server associates with that SAML SP registration.
 
     <saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
         ID="_123456789" IssueInstant="2025-03-01T12:34:56Z" Version="2.0">
@@ -555,7 +555,7 @@ The following non-normative example shows a SAML 2.0 assertion where the `Audien
       </saml2:AuthnStatement>
     </saml2:Assertion>
 
-When this assertion is used as the `subject_token` in Token Exchange, the IdP Authorization Server MUST verify that the `Audience` / `SPEntityID` maps to the OAuth client_id that is authenticated for the token request. This prevents a client from presenting an assertion issued for a different SAML SP.
+When this assertion is used as the `subject_token` in Token Exchange, the IdP Authorization Server MUST verify that the `Audience` / `SPEntityID` maps to the OAuth Client ID that is authenticated for the token request. This prevents a client from presenting an assertion issued for a different SAML SP.
 
     POST /oauth2/token HTTP/1.1
     Host: acme.idp.example
