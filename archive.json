@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-22T00:04:05.714750+00:00",
+  "timestamp": "2026-01-29T00:04:14.273226+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -4848,13 +4848,13 @@
       "labels": [],
       "body": "This PR attempts to resolve #28 by adding processing rules for DPoP to security considerations",
       "createdAt": "2025-12-15T05:38:24Z",
-      "updatedAt": "2025-12-16T11:25:19Z",
+      "updatedAt": "2026-01-27T05:51:21Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "dpop",
-      "headRefOid": "417135f9e70a013802a57acbf2e8831afdb571b1",
+      "headRefOid": "cf28a75a2d125f5f0fa11d9be792b8df9e0c3794",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -4929,6 +4929,186 @@
               "updatedAt": "2025-12-15T21:13:27Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFXnC",
+          "commit": {
+            "abbreviatedOid": "417135f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:23:28Z",
+          "updatedAt": "2026-01-27T05:23:28Z",
+          "comments": [
+            {
+              "originalPosition": 56,
+              "body": "```suggestion\n2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing the public key from the DPoP proof's `jwk` header parameter. The `cnf` claim format follows {{RFC7800}}:\n```\n",
+              "createdAt": "2026-01-27T05:23:28Z",
+              "updatedAt": "2026-01-27T05:23:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFYhM",
+          "commit": {
+            "abbreviatedOid": "417135f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:25:17Z",
+          "updatedAt": "2026-01-27T05:25:17Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "```suggestion\n3. The token exchange response does not indicate whether key binding was performed (since `token_type` is fixed to `N_A`). The client MUST inspect the ID-JAG to determine if a `cnf` claim is present.\n```\n\nWhat does the client have to do differently depending on whether the ID-JAG has a `cnf` claim? ",
+              "createdAt": "2026-01-27T05:25:17Z",
+              "updatedAt": "2026-01-27T05:25:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFZD8",
+          "commit": {
+            "abbreviatedOid": "417135f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:26:13Z",
+          "updatedAt": "2026-01-27T05:26:13Z",
+          "comments": [
+            {
+              "originalPosition": 98,
+              "body": "This one makes sense to me as a MAY, because there is value in the previous steps being DPoP-bound even if the final access token is not.",
+              "createdAt": "2026-01-27T05:26:13Z",
+              "updatedAt": "2026-01-27T05:26:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFaaf",
+          "commit": {
+            "abbreviatedOid": "cf28a75"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:28:54Z",
+          "updatedAt": "2026-01-27T05:28:54Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "What does the client have to do differently here depending on whether the ID-JAG has a `cnf` claim?\n\nIt seems like either the client is going to do DPoP at the IdP AS or Resource AS or not, but I can't think of a reason why that would change based on whether the ID-JAG was DPoP-bound.",
+              "createdAt": "2026-01-27T05:28:54Z",
+              "updatedAt": "2026-01-27T05:28:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFeNw",
+          "commit": {
+            "abbreviatedOid": "cf28a75"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:34:38Z",
+          "updatedAt": "2026-01-27T05:34:38Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "The IdP can silently ignore the DPOP proof in the request and the client wouldn't know if the issued token was key bound or bearer.  This is a client validation step to ensure that the issued token is correct and not a downgrade attack or something. ",
+              "createdAt": "2026-01-27T05:34:38Z",
+              "updatedAt": "2026-01-27T05:34:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFfmY",
+          "commit": {
+            "abbreviatedOid": "cf28a75"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:36:49Z",
+          "updatedAt": "2026-01-27T05:36:49Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "But I mean literally what should the client do differently? Should the client to abort if it sends a DPoP proof to the IdP and doesn't get back a DPoP-bound ID-JAG? If not, then it doesn't really matter whether the client knows if the ID-JAG is DPoP-bound.",
+              "createdAt": "2026-01-27T05:36:49Z",
+              "updatedAt": "2026-01-27T05:36:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFis5",
+          "commit": {
+            "abbreviatedOid": "cf28a75"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:41:45Z",
+          "updatedAt": "2026-01-27T05:41:45Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "This would depend on the policy/configuration for a client.  I could see some deployments mandate DPOP and want clients to fail when tokens issued by an AS is not bound when requested.  Same would be for a regular access token.  Defense in depth when you can't always enforce policy on all the resource servers and only control the client (e.g resource servers are in a different domain).  ",
+              "createdAt": "2026-01-27T05:41:45Z",
+              "updatedAt": "2026-01-27T05:43:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFlfk",
+          "commit": {
+            "abbreviatedOid": "cf28a75"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:46:43Z",
+          "updatedAt": "2026-01-27T05:46:43Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Ok, worth calling that out then, otherwise it's kind of a dangling requirement to inspect the ID-JAG. It's also the only place where the client is expected to inspect the contents of the ID-JAG right now which is why it stood out to me.",
+              "createdAt": "2026-01-27T05:46:43Z",
+              "updatedAt": "2026-01-27T05:46:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFpAI",
+          "commit": {
+            "abbreviatedOid": "cf28a75"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:51:21Z",
+          "updatedAt": "2026-01-27T05:51:21Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "This was my question I posted https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/67#discussion_r2620544532\n\nDoes it make sense to revisit `N_A` as the token_type when the issued token is an authorization grant and not an access token.  I don't like introspecting the token but think it should be possible to confirm the result of the token exchange request with respect to key binding.",
+              "createdAt": "2026-01-27T05:51:21Z",
+              "updatedAt": "2026-01-27T05:51:22Z"
+            }
+          ]
         }
       ]
     },
@@ -4944,19 +5124,93 @@
       "labels": [],
       "body": "Resolves #58 & #44 ",
       "createdAt": "2025-12-15T06:30:08Z",
-      "updatedAt": "2025-12-15T06:30:12Z",
+      "updatedAt": "2026-01-27T05:30:59Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "refresh-token",
-      "headRefOid": "191656fe26f233e72715127174c2e433a705957f",
+      "headRefOid": "b55390a3948181d71520a9213ace5fb2f36e41c2",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7dFTlG",
+          "commit": {
+            "abbreviatedOid": "191656f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:15:02Z",
+          "updatedAt": "2026-01-27T05:15:03Z",
+          "comments": [
+            {
+              "originalPosition": 99,
+              "body": "```suggestion\nThe OpenID Connect scopes `openid offline_access` SHOULD be requested (additional scopes are allowed) when requesting a Refresh Token from the IdP Authorization Server.\n```",
+              "createdAt": "2026-01-27T05:15:02Z",
+              "updatedAt": "2026-01-27T05:15:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFUAZ",
+          "commit": {
+            "abbreviatedOid": "191656f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:15:59Z",
+          "updatedAt": "2026-01-27T05:15:59Z",
+          "comments": [
+            {
+              "originalPosition": 103,
+              "body": "```suggestion\nThe following non-normative example shows a SAML 2.0 assertion where the `Audience` value (from `AudienceRestriction`) corresponds to the Service Provider Entity ID (`SPAuthority` / `SPEntityID`) and MUST be mapped to the OAuth Client ID that the IdP Authorization Server associates with that SAML SP registration.\n```",
+              "createdAt": "2026-01-27T05:15:59Z",
+              "updatedAt": "2026-01-27T05:16:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFUNK",
+          "commit": {
+            "abbreviatedOid": "191656f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:16:23Z",
+          "updatedAt": "2026-01-27T05:16:23Z",
+          "comments": [
+            {
+              "originalPosition": 137,
+              "body": "```suggestion\nWhen this assertion is used as the `subject_token` in Token Exchange, the IdP Authorization Server MUST verify that the `Audience` / `SPEntityID` maps to the OAuth Client ID that is authenticated for the token request. This prevents a client from presenting an assertion issued for a different SAML SP.\n```",
+              "createdAt": "2026-01-27T05:16:23Z",
+              "updatedAt": "2026-01-27T05:16:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFbzC",
+          "commit": {
+            "abbreviatedOid": "b55390a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-27T05:30:59Z",
+          "updatedAt": "2026-01-27T05:30:59Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 70,
@@ -4970,19 +5224,113 @@
       "labels": [],
       "body": "Resolves #65 ",
       "createdAt": "2025-12-15T21:40:30Z",
-      "updatedAt": "2025-12-15T21:40:30Z",
+      "updatedAt": "2026-01-27T05:30:29Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "authorization_details",
-      "headRefOid": "9e62afbf878815e78ff48a6e54296d0263a038ca",
+      "headRefOid": "250b0afb5802e2352031a5b887231fb50bf23b4b",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7dFMUk",
+          "commit": {
+            "abbreviatedOid": "9e62afb"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:01:25Z",
+          "updatedAt": "2026-01-27T05:01:25Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "```suggestion\nThe Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification supports Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.\n```",
+              "createdAt": "2026-01-27T05:01:25Z",
+              "updatedAt": "2026-01-27T05:01:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFOal",
+          "commit": {
+            "abbreviatedOid": "9e62afb"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:06:10Z",
+          "updatedAt": "2026-01-27T05:06:10Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "> If the authorization details in the issued ID-JAG are identical to what was requested, this parameter MAY be omitted.\n\nDoesn't this need to always be included, because otherwise the Resource AS doesn't know what the IdP granted? ",
+              "createdAt": "2026-01-27T05:06:10Z",
+              "updatedAt": "2026-01-27T05:06:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFU3s",
+          "commit": {
+            "abbreviatedOid": "9e62afb"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:17:44Z",
+          "updatedAt": "2026-01-27T05:17:44Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "Good catch, i think i might have copied that from another spec. We should kill that. ",
+              "createdAt": "2026-01-27T05:17:44Z",
+              "updatedAt": "2026-01-27T05:17:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFVkT",
+          "commit": {
+            "abbreviatedOid": "9e62afb"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-27T05:19:10Z",
+          "updatedAt": "2026-01-27T05:19:10Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "```suggestion\n: OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2.2 of RFC9396}}. This parameter MUST be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.\n```",
+              "createdAt": "2026-01-27T05:19:10Z",
+              "updatedAt": "2026-01-27T05:19:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7dFbWQ",
+          "commit": {
+            "abbreviatedOid": "250b0af"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-27T05:30:29Z",
+          "updatedAt": "2026-01-27T05:30:29Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
