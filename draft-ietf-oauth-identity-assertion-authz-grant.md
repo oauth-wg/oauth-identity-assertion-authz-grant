@@ -48,6 +48,7 @@ normative:
   RFC8707:
   RFC8725:
   RFC7800:
+  RFC7638:
   RFC9449:
   RFC9396:
   I-D.ietf-oauth-identity-chaining:
