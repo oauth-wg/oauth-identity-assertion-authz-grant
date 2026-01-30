@@ -603,7 +603,7 @@ The IdP Authorization Server processes the request as follows:
       }
     }
 
-3. The token exchange response does not indicate whether key binding was performed (since `token_type` is fixed to `N_A`). The client MUST inspect the ID-JAG to determine if a `cnf` claim is present.
+3. The token exchange response does not explicitly indicate whether key binding was successfully performed by the IdP.  The `token_type` response parameter for an ID-JAG is always `N_A` per {{Section 2.2.1 of RFC 8693}}. The client SHOULD inspect the ID-JAG to determine if a `cnf` claim is present and whether it represents the same key as the DPoP proof.  This enables the client to detect if the IdP successfully processed the DPoP proof in the token exchange request and bound the issued ID-JAG, preventing the IdP from silently ignoring the DPoP proof and mitigating downgrade attacks.
 
 4. If no DPoP proof is presented, the IdP issues an ID-JAG without a `cnf` claim.
 
