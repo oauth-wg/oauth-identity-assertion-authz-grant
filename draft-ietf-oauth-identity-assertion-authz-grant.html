@@ -1186,10 +1186,13 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-token-exchange" class="internal xref">Token Exchange</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.1">
-                    <p id="section-toc.1-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="auto internal xref">4.3.1</a>.  <a href="#name-processing-rules" class="internal xref">Processing Rules</a></p>
+                    <p id="section-toc.1-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="auto internal xref">4.3.1</a>.  <a href="#name-example-token-exchange-usin" class="internal xref">Example: Token Exchange using ID Token</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.2">
-                    <p id="section-toc.1-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="auto internal xref">4.3.2</a>.  <a href="#name-response" class="internal xref">Response</a></p>
+                    <p id="section-toc.1-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="auto internal xref">4.3.2</a>.  <a href="#name-processing-rules" class="internal xref">Processing Rules</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.3">
+                    <p id="section-toc.1-1.4.2.3.2.3.1"><a href="#section-4.3.3" class="auto internal xref">4.3.3</a>.  <a href="#name-response" class="internal xref">Response</a></p>
 </li>
                 </ul>
 </li>
@@ -1206,6 +1209,9 @@ svg :is([fill="white"], [fill^="#fff"]) {
                     <p id="section-toc.1-1.4.2.4.2.3.1"><a href="#section-4.4.3" class="auto internal xref">4.4.3</a>.  <a href="#name-refresh-token" class="internal xref">Refresh Token</a></p>
 </li>
                 </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.5">
+                <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-saml-20-identity-assertion-" class="internal xref">SAML 2.0 Identity Assertion Interopability</a></p>
 </li>
             </ul>
 </li>
@@ -1572,6 +1578,8 @@ signature
      |                    |                  |                 |
      |                    |                  |                 |
      | 2 Token Exchange   |                  |                 |
+     | (Identity Assertion|                  |                 |
+     |  or Refresh Token) |                  |                 |
      | ----------------&gt;  |                  |                 |
      |                    |                  |                 |
      |   ID-JAG           |                  |                 |
@@ -1599,7 +1607,7 @@ signature
             <p id="section-4.1-5.1.1">User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in<a href="#section-4.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.1-5.2">
-            <p id="section-4.1-5.2.1">Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server<a href="#section-4.1-5.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.1-5.2.1">Client uses the Identity Assertion or a previously issued Refresh Token from the IdP to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server<a href="#section-4.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.1-5.3">
             <p id="section-4.1-5.3.1">Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint<a href="#section-4.1-5.3.1" class="pilcrow">¶</a></p>
@@ -1689,20 +1697,26 @@ Content-Type: application/json
 <dt id="section-4.3-2.11">
 <code>subject_token</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.12">
-            <p id="section-4.3-2.12.1"><span class="bcp14">REQUIRED</span> - The Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner.<a href="#section-4.3-2.12.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.12.1"><span class="bcp14">REQUIRED</span> - Either the Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner, or a Refresh Token previously issued by the IdP Authorization Server for that resource owner. Implementations of this specification <span class="bcp14">MUST</span> accept Identity Assertions. They <span class="bcp14">MAY</span> additionally accept Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.<a href="#section-4.3-2.12.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.3-2.13">
 <code>subject_token_type</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.14">
-            <p id="section-4.3-2.14.1"><span class="bcp14">REQUIRED</span> - An identifier, as described in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-3" class="relref">Section 3</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>, that indicates the type of the security token in the <code>subject_token</code> parameter. For an OpenID Connect ID Token: <code>urn:ietf:params:oauth:token-type:id_token</code>, or for a SAML 2.0 Assertion: <code>urn:ietf:params:oauth:token-type:saml2</code>.<a href="#section-4.3-2.14.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.14.1"><span class="bcp14">REQUIRED</span> - An identifier, as described in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-3" class="relref">Section 3</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>, that indicates the type of the security token in the <code>subject_token</code> parameter. For an OpenID Connect ID Token: <code>urn:ietf:params:oauth:token-type:id_token</code>, for a SAML 2.0 Assertion: <code>urn:ietf:params:oauth:token-type:saml2</code>, and for a Refresh Token (when supported): <code>urn:ietf:params:oauth:token-type:refresh_token</code>.<a href="#section-4.3-2.14.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
-<p id="section-4.3-3">The additional parameters defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> <code>actor_token</code> and <code>actor_token_type</code> are not used in this specification.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
-<p id="section-4.3-4">Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. <span><a href="https://rfc-editor.org/rfc/rfc6749#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> defines password-based authentication of the client (<code>client_id</code> and <code>client_secret</code>), however, client authentication is extensible and other mechanisms are possible. For example, <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> defines client authentication using bearer JSON Web Tokens using <code>client_assertion</code> and <code>client_assertion_type</code>.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
-<p id="section-4.3-5">The example below uses an ID Token as the Identity Assertion, and uses a JWT Bearer Assertion <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> as the client authentication method, (tokens truncated for brevity):<a href="#section-4.3-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3-6">
+<p id="section-4.3-3">When a Refresh Token is used as the subject token, the client still requests <code>requested_token_type=urn:ietf:params:oauth:token-type:id-jag</code>; this allows the client to refresh an Identity Assertion JWT Authorization Grant without fetching a new Identity Assertion from the user-facing SSO flow.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4">The additional parameters defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> <code>actor_token</code> and <code>actor_token_type</code> are not used in this specification.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.3-5">Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. <span><a href="https://rfc-editor.org/rfc/rfc6749#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> defines password-based authentication of the client (<code>client_id</code> and <code>client_secret</code>), however, client authentication is extensible and other mechanisms are possible. For example, <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> defines client authentication using bearer JSON Web Tokens using <code>client_assertion</code> and <code>client_assertion_type</code>.<a href="#section-4.3-5" class="pilcrow">¶</a></p>
+<div id="token-exchange-id-token-example">
+<section id="section-4.3.1">
+          <h4 id="name-example-token-exchange-usin">
+<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-example-token-exchange-usin" class="section-name selfRef">Example: Token Exchange using ID Token</a>
+          </h4>
+<p id="section-4.3.1-1">This example uses an ID Token as the <code>subject_token</code> and a JWT Bearer Assertion <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> for client authentication (tokens truncated for brevity):<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.1-2">
 <pre>
 POST /oauth2/token HTTP/1.1
 Host: acme.idp.example
@@ -1717,46 +1731,84 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;subject_token_type=urn:ietf:params:oauth:token-type:id_token
 &amp;client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
 &amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
-</pre><a href="#section-4.3-6" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.1-2" class="pilcrow">¶</a>
+</div>
+<div id="token-exchange-refresh-token-example">
+<section id="section-4.3.1.1">
+            <h5 id="name-example-token-exchange-using">
+<a href="#section-4.3.1.1" class="section-number selfRef">4.3.1.1. </a><a href="#name-example-token-exchange-using" class="section-name selfRef">Example: Token Exchange using Refresh Token</a>
+            </h5>
+<p id="section-4.3.1.1-1">This non-normative example shows using a Refresh Token as the <code>subject_token</code> (when supported by the IdP Authorization Server) to obtain an ID-JAG without acquiring a new Identity Assertion:<a href="#section-4.3.1.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.1.1-2">
+<pre>
+POST /oauth2/token HTTP/1.1
+Host: acme.idp.example
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+&amp;requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+&amp;audience=https://acme.chat.example/
+&amp;resource=https://api.chat.example/
+&amp;scope=chat.read+chat.history
+&amp;subject_token=tGzv3JOkF0XG5Qx2TlKWIA
+&amp;subject_token_type=urn:ietf:params:oauth:token-type:refresh_token
+&amp;client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+&amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+</pre><a href="#section-4.3.1.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
 </div>
 <div id="processing-rules">
-<section id="section-4.3.1">
+<section id="section-4.3.2">
           <h4 id="name-processing-rules">
-<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-processing-rules" class="section-name selfRef">Processing Rules</a>
+<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-processing-rules" class="section-name selfRef">Processing Rules</a>
           </h4>
-<p id="section-4.3.1-1">The IdP <span class="bcp14">MUST</span> validate the subject token, and <span class="bcp14">MUST</span> validate that the audience of the Subject Token (e.g. the <code>aud</code> claim of the ID Token) matches the <code>client_id</code> of the client authentication of the request.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.1-2">The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.<a href="#section-4.3.1-2" class="pilcrow">¶</a></p>
-<p id="section-4.3.1-3">When processing the request:<a href="#section-4.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-1">The IdP <span class="bcp14">MUST</span> validate the subject token:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.3.1-4.1">
-              <p id="section-4.3.1-4.1.1">If <code>resource</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span> and evaluate policy to determine the granted resources. The granted resources <span class="bcp14">MAY</span> be a subset of the requested resources based on policy.<a href="#section-4.3.1-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-4.3.2-2.1">
+              <p id="section-4.3.2-2.1.1">If the subject token is an Identity Assertion, the IdP <span class="bcp14">MUST</span> validate the assertion and <span class="bcp14">MUST</span> validate that the audience of the assertion (e.g. the <code>aud</code> claim of the ID Token or SAML Audience) matches the <code>client_id</code> of the client authentication of the request.<a href="#section-4.3.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.3.1-4.2">
-              <p id="section-4.3.1-4.2.1">If <code>scope</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc6749#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> and evaluate policy to determine the granted scopes. The granted scopes <span class="bcp14">MAY</span> be a subset of the requested scopes based on policy.<a href="#section-4.3.1-4.2.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.3.2-2.2">
+              <p id="section-4.3.2-2.2.1">If the subject token is a Refresh Token, the IdP <span class="bcp14">MUST</span> validate it the same way it would for a standard <code>refresh_token</code> grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.<a href="#section-4.3.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.3.1-4.3">
-              <p id="section-4.3.1-4.3.1">If <code>authorization_details</code> is present, the IdP <span class="bcp14">MUST</span> parse it as a JSON array and process each authorization detail object according to <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. The IdP evaluates policy for each authorization detail and determines which authorization details to include in the issued ID-JAG. The IdP <span class="bcp14">MAY</span> modify, filter, or omit authorization details based on policy.<a href="#section-4.3.1-4.3.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-4.3.1-4.4">
-              <p id="section-4.3.1-4.4.1">If both <code>resource</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the resource identifiers and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive resource identifiers from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.1-4.4.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-4.3.1-4.5">
-              <p id="section-4.3.1-4.5.1">If both <code>scope</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive scopes from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.1-4.5.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-4.3.1-4.6">
-              <p id="section-4.3.1-4.6.1">The IdP <span class="bcp14">MUST</span> include the granted <code>resource</code> (if any), <code>scope</code> (if any), and <code>authorization_details</code> (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it <span class="bcp14">MUST</span> reflect the granted values in the ID-JAG.<a href="#section-4.3.1-4.6.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.3.2-2.3">
+              <p id="section-4.3.2-2.3.1">If the subject token is a Refresh Token, the IdP Authorization Server <span class="bcp14">SHOULD</span> retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.<a href="#section-4.3.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-4.3.1-5">The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.<a href="#section-4.3.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-3">The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.<a href="#section-4.3.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-4">When processing the request:<a href="#section-4.3.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.2-5.1">
+              <p id="section-4.3.2-5.1.1">If <code>resource</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span> and evaluate policy to determine the granted resources. The granted resources <span class="bcp14">MAY</span> be a subset of the requested resources based on policy.<a href="#section-4.3.2-5.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-5.2">
+              <p id="section-4.3.2-5.2.1">If <code>scope</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc6749#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> and evaluate policy to determine the granted scopes. The granted scopes <span class="bcp14">MAY</span> be a subset of the requested scopes based on policy.<a href="#section-4.3.2-5.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-5.3">
+              <p id="section-4.3.2-5.3.1">If <code>authorization_details</code> is present, the IdP <span class="bcp14">MUST</span> parse it as a JSON array and process each authorization detail object according to <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. The IdP evaluates policy for each authorization detail and determines which authorization details to include in the issued ID-JAG. The IdP <span class="bcp14">MAY</span> modify, filter, or omit authorization details based on policy.<a href="#section-4.3.2-5.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-5.4">
+              <p id="section-4.3.2-5.4.1">If both <code>resource</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the resource identifiers and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive resource identifiers from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.2-5.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-5.5">
+              <p id="section-4.3.2-5.5.1">If both <code>scope</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive scopes from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.2-5.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-4.3.2-5.6">
+              <p id="section-4.3.2-5.6.1">The IdP <span class="bcp14">MUST</span> include the granted <code>resource</code> (if any), <code>scope</code> (if any), and <code>authorization_details</code> (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it <span class="bcp14">MUST</span> reflect the granted values in the ID-JAG.<a href="#section-4.3.2-5.6.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-4.3.2-6">The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.<a href="#section-4.3.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="response">
-<section id="section-4.3.2">
+<section id="section-4.3.3">
           <h4 id="name-response">
-<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-response" class="section-name selfRef">Response</a>
+<a href="#section-4.3.3" class="section-number selfRef">4.3.3. </a><a href="#name-response" class="section-name selfRef">Response</a>
           </h4>
-<p id="section-4.3.2-1">If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>) and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2-2">
+<p id="section-4.3.3-1">If access is granted, the IdP creates a signed Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>) and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3-2">
 <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -1770,59 +1822,59 @@ Pragma: no-cache
   "scope": "chat.read chat.history",
   "expires_in": 300
 }
-</pre><a href="#section-4.3.2-2" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3-2" class="pilcrow">¶</a>
 </div>
-<span class="break"></span><dl class="dlParallel" id="section-4.3.2-3">
-            <dt id="section-4.3.2-3.1">
+<span class="break"></span><dl class="dlParallel" id="section-4.3.3-3">
+            <dt id="section-4.3.3-3.1">
 <code>issued_token_type</code>:</dt>
-            <dd style="margin-left: 1.5em" id="section-4.3.2-3.2">
-              <p id="section-4.3.2-3.2.1"><span class="bcp14">REQUIRED</span> - <code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-4.3.2-3.2.1" class="pilcrow">¶</a></p>
+            <dd style="margin-left: 1.5em" id="section-4.3.3-3.2">
+              <p id="section-4.3.3-3.2.1"><span class="bcp14">REQUIRED</span> - <code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-4.3.3-3.2.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
-<dt id="section-4.3.2-3.3">
+<dt id="section-4.3.3-3.3">
 <code>access_token</code>:</dt>
-            <dd style="margin-left: 1.5em" id="section-4.3.2-3.4">
-              <p id="section-4.3.2-3.4.1"><span class="bcp14">REQUIRED</span> - The Identity Assertion JWT Authorization Grant. (Note: Token Exchange requires the <code>access_token</code> response parameter for historical reasons, even though this is not an OAuth access token.)<a href="#section-4.3.2-3.4.1" class="pilcrow">¶</a></p>
+            <dd style="margin-left: 1.5em" id="section-4.3.3-3.4">
+              <p id="section-4.3.3-3.4.1"><span class="bcp14">REQUIRED</span> - The Identity Assertion JWT Authorization Grant. (Note: Token Exchange requires the <code>access_token</code> response parameter for historical reasons, even though this is not an OAuth access token.)<a href="#section-4.3.3-3.4.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
-<dt id="section-4.3.2-3.5">
+<dt id="section-4.3.3-3.5">
 <code>token_type</code>:</dt>
-            <dd style="margin-left: 1.5em" id="section-4.3.2-3.6">
-              <p id="section-4.3.2-3.6.1"><span class="bcp14">REQUIRED</span> - <code>N_A</code> (because this is not an OAuth access token.)<a href="#section-4.3.2-3.6.1" class="pilcrow">¶</a></p>
+            <dd style="margin-left: 1.5em" id="section-4.3.3-3.6">
+              <p id="section-4.3.3-3.6.1"><span class="bcp14">REQUIRED</span> - <code>N_A</code> (because this is not an OAuth access token.)<a href="#section-4.3.3-3.6.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
-<dt id="section-4.3.2-3.7">
+<dt id="section-4.3.3-3.7">
 <code>scope</code>:</dt>
-            <dd style="margin-left: 1.5em" id="section-4.3.2-3.8">
-              <p id="section-4.3.2-3.8.1"><span class="bcp14">OPTIONAL</span> if the scope of the issued token is identical to the scope requested by the client; otherwise, it is <span class="bcp14">REQUIRED</span>. Various policies in the IdP may result in different scopes being issued from the scopes the application requested.<a href="#section-4.3.2-3.8.1" class="pilcrow">¶</a></p>
+            <dd style="margin-left: 1.5em" id="section-4.3.3-3.8">
+              <p id="section-4.3.3-3.8.1"><span class="bcp14">OPTIONAL</span> if the scope of the issued token is identical to the scope requested by the client; otherwise, it is <span class="bcp14">REQUIRED</span>. Various policies in the IdP may result in different scopes being issued from the scopes the application requested.<a href="#section-4.3.3-3.8.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
-<dt id="section-4.3.2-3.9">
+<dt id="section-4.3.3-3.9">
 <code>authorization_details</code>:</dt>
-            <dd style="margin-left: 1.5em" id="section-4.3.2-3.10">
-              <p id="section-4.3.2-3.10.1"><span class="bcp14">OPTIONAL</span> - A JSON array of authorization detail objects as defined in <span><a href="https://rfc-editor.org/rfc/rfc9396#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. This parameter <span class="bcp14">MUST</span> be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.<a href="#section-4.3.2-3.10.1" class="pilcrow">¶</a></p>
+            <dd style="margin-left: 1.5em" id="section-4.3.3-3.10">
+              <p id="section-4.3.3-3.10.1"><span class="bcp14">OPTIONAL</span> - A JSON array of authorization detail objects as defined in <span><a href="https://rfc-editor.org/rfc/rfc9396#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. This parameter <span class="bcp14">MUST</span> be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.<a href="#section-4.3.3-3.10.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
-<dt id="section-4.3.2-3.11">
+<dt id="section-4.3.3-3.11">
 <code>expires_in</code>:</dt>
-            <dd style="margin-left: 1.5em" id="section-4.3.2-3.12">
-              <p id="section-4.3.2-3.12.1"><span class="bcp14">RECOMMENDED</span> - The lifetime in seconds of the authorization grant.<a href="#section-4.3.2-3.12.1" class="pilcrow">¶</a></p>
+            <dd style="margin-left: 1.5em" id="section-4.3.3-3.12">
+              <p id="section-4.3.3-3.12.1"><span class="bcp14">RECOMMENDED</span> - The lifetime in seconds of the authorization grant.<a href="#section-4.3.3-3.12.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
-<dt id="section-4.3.2-3.13">
+<dt id="section-4.3.3-3.13">
 <code>refresh_token</code>:</dt>
-            <dd style="margin-left: 1.5em" id="section-4.3.2-3.14">
-              <p id="section-4.3.2-3.14.1"><span class="bcp14">OPTIONAL</span> according to <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. In the context of this specification, this parameter <span class="bcp14">SHOULD NOT</span> be used.<a href="#section-4.3.2-3.14.1" class="pilcrow">¶</a></p>
+            <dd style="margin-left: 1.5em" id="section-4.3.3-3.14">
+              <p id="section-4.3.3-3.14.1"><span class="bcp14">OPTIONAL</span> according to <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. In the context of this specification, this parameter <span class="bcp14">SHOULD NOT</span> be used.<a href="#section-4.3.3-3.14.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>
 <div id="issued-identity-assertion-jwt-authorization-grant">
-<section id="section-4.3.2.1">
+<section id="section-4.3.3.1">
             <h5 id="name-issued-identity-assertion-j">
-<a href="#section-4.3.2.1" class="section-number selfRef">4.3.2.1. </a><a href="#name-issued-identity-assertion-j" class="section-name selfRef">Issued Identity Assertion JWT Authorization Grant</a>
+<a href="#section-4.3.3.1" class="section-number selfRef">4.3.3.1. </a><a href="#name-issued-identity-assertion-j" class="section-name selfRef">Issued Identity Assertion JWT Authorization Grant</a>
             </h5>
-<p id="section-4.3.2.1-1">The following is a non-normative example of the issued token<a href="#section-4.3.2.1-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2.1-2">
+<p id="section-4.3.3.1-1">The following is a non-normative example of the issued token<a href="#section-4.3.3.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3.1-2">
 <pre>
 {
   "typ": "oauth-id-jag+jwt"
@@ -1848,18 +1900,18 @@ Pragma: no-cache
 }
 .
 signature
-</pre><a href="#section-4.3.2.1-2" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3.1-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="example-with-rich-authorization-requests-rar">
-<section id="section-4.3.2.2">
+<section id="section-4.3.3.2">
             <h5 id="name-example-with-rich-authoriza">
-<a href="#section-4.3.2.2" class="section-number selfRef">4.3.2.2. </a><a href="#name-example-with-rich-authoriza" class="section-name selfRef">Example with Rich Authorization Requests (RAR)</a>
+<a href="#section-4.3.3.2" class="section-number selfRef">4.3.3.2. </a><a href="#name-example-with-rich-authoriza" class="section-name selfRef">Example with Rich Authorization Requests (RAR)</a>
             </h5>
-<p id="section-4.3.2.2-1">The following is a non-normative example demonstrating the use of Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span> with ID-JAG:<a href="#section-4.3.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-4.3.2.2-2">Token Exchange Request with authorization_details:<a href="#section-4.3.2.2-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2.2-3">
+<p id="section-4.3.3.2-1">The following is a non-normative example demonstrating the use of Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span> with ID-JAG:<a href="#section-4.3.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.3.2-2">Token Exchange Request with authorization_details:<a href="#section-4.3.3.2-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3.2-3">
 <pre>
 POST /oauth2/token HTTP/1.1
 Host: acme.idp.example
@@ -1873,10 +1925,10 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;subject_token_type=urn:ietf:params:oauth:token-type:id_token
 &amp;client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
 &amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
-</pre><a href="#section-4.3.2.2-3" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3.2-3" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.2.2-4">Token Exchange Response:<a href="#section-4.3.2.2-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2.2-5">
+<p id="section-4.3.3.2-4">Token Exchange Response:<a href="#section-4.3.3.2-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3.2-5">
 <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -1901,10 +1953,10 @@ Pragma: no-cache
   ],
   "expires_in": 300
 }
-</pre><a href="#section-4.3.2.2-5" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3.2-5" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.2.2-6">Issued Identity Assertion JWT Authorization Grant with authorization_details:<a href="#section-4.3.2.2-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2.2-7">
+<p id="section-4.3.3.2-6">Issued Identity Assertion JWT Authorization Grant with authorization_details:<a href="#section-4.3.3.2-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3.2-7">
 <pre>
 {
   "typ": "oauth-id-jag+jwt"
@@ -1934,10 +1986,10 @@ Pragma: no-cache
 }
 .
 signature
-</pre><a href="#section-4.3.2.2-7" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3.2-7" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.2.2-8">Access Token Request:<a href="#section-4.3.2.2-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2.2-9">
+<p id="section-4.3.3.2-8">Access Token Request:<a href="#section-4.3.3.2-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3.2-9">
 <pre>
 POST /oauth2/token HTTP/1.1
 Host: acme.chat.example
@@ -1945,10 +1997,10 @@ Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
 &amp;assertion=eyJhbGciOiJIUzI1NiIsI...
-</pre><a href="#section-4.3.2.2-9" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3.2-9" class="pilcrow">¶</a>
 </div>
-<p id="section-4.3.2.2-10">Access Token Response:<a href="#section-4.3.2.2-10" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2.2-11">
+<p id="section-4.3.3.2-10">Access Token Response:<a href="#section-4.3.3.2-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3.2-11">
 <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
@@ -1972,17 +2024,17 @@ Pragma: no-cache
     }
   ]
 }
-</pre><a href="#section-4.3.2.2-11" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3.2-11" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="error-response">
-<section id="section-4.3.2.3">
+<section id="section-4.3.3.3">
             <h5 id="name-error-response">
-<a href="#section-4.3.2.3" class="section-number selfRef">4.3.2.3. </a><a href="#name-error-response" class="section-name selfRef">Error Response</a>
+<a href="#section-4.3.3.3" class="section-number selfRef">4.3.3.3. </a><a href="#name-error-response" class="section-name selfRef">Error Response</a>
             </h5>
-<p id="section-4.3.2.3-1">On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, e.g:<a href="#section-4.3.2.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.2.3-2">
+<p id="section-4.3.3.3-1">On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, e.g:<a href="#section-4.3.3.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.3.3-2">
 <pre>
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
@@ -1992,7 +2044,7 @@ Cache-Control: no-store
   "error": "invalid_grant",
   "error_description": "Audience validation failed"
 }
-</pre><a href="#section-4.3.2.3-2" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.3.3-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -2104,7 +2156,83 @@ Pragma: no-cache
 <p id="section-4.4.3-2">When the access token has expired, clients <span class="bcp14">SHOULD</span> re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
 <p id="section-4.4.3-3">If the ID-JAG has expired, the Client <span class="bcp14">SHOULD</span> request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g ID Token)<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.4.3-4">If the ID Token is expired, the Client <span class="bcp14">MAY</span> use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it <span class="bcp14">SHOULD</span> re-authenticate the user by redirecting to the IdP.<a href="#section-4.4.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-5">If the IdP Authorization Server supports Refresh Tokens as a <code>subject_token</code> in Token Exchange, the client can skip renewing the Identity Assertion and directly request a new ID-JAG by presenting the Refresh Token (see <a href="#token-exchange-refresh-token-example" class="auto internal xref">Section 4.3.1.1</a>).<a href="#section-4.4.3-5" class="pilcrow">¶</a></p>
 </section>
+</div>
+</section>
+</div>
+<div id="saml-20-identity-assertion-interopability">
+<section id="section-4.5">
+        <h3 id="name-saml-20-identity-assertion-">
+<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-saml-20-identity-assertion-" class="section-name selfRef">SAML 2.0 Identity Assertion Interopability</a>
+        </h3>
+<p id="section-4.5-1">Clients using SAML 2.0 for SSO with the IdP Authorization Server can obtain an ID-JAG without changing their SSO protocol to OpenID Connect by first exchanging the SAML 2.0 assertion for a Refresh Token using Token Exchange. This enables protocol transition to OAuth and allows the client to later use the Refresh Token as a <code>subject_token</code> to obtain an ID-JAG without prompting the user for a new Identity Assertion.<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+<p id="section-4.5-2">The OpenID Connect scopes <code>openid offline_access</code> <span class="bcp14">SHOULD</span> be requested (additional scopes are allowed) when requesting a Refresh Token from the IdP Authorization Server.<a href="#section-4.5-2" class="pilcrow">¶</a></p>
+<p id="section-4.5-3">The IdP Authorization Server <span class="bcp14">MUST</span> map the SAML Audience to a Client ID and ensure the client's authentication matches that mapping before issuing the Refresh Token.<a href="#section-4.5-3" class="pilcrow">¶</a></p>
+<p id="section-4.5-4">The following non-normative example shows a SAML 2.0 assertion where the <code>Audience</code> value (from <code>AudienceRestriction</code>) corresponds to the Service Provider Entity ID (<code>SPAuthority</code> / <code>SPEntityID</code>) and <span class="bcp14">MUST</span> be mapped to the OAuth Client ID that the IdP Authorization Server associates with that SAML SP registration.<a href="#section-4.5-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.5-5">
+<pre>
+&lt;saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+    ID="_123456789" IssueInstant="2025-03-01T12:34:56Z" Version="2.0"&gt;
+  &lt;saml2:Issuer&gt;https://idp.example.com/&lt;/saml2:Issuer&gt;
+  &lt;saml2:Subject&gt;
+    &lt;saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"&gt;
+      alice@example.com
+    &lt;/saml2:NameID&gt;
+    &lt;saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"&gt;
+      &lt;saml2:SubjectConfirmationData
+          NotOnOrAfter="2025-03-01T12:39:56Z"
+          Recipient="https://client.example.com/assertion-consumer"/&gt;
+    &lt;/saml2:SubjectConfirmation&gt;
+  &lt;/saml2:Subject&gt;
+  &lt;saml2:Conditions NotBefore="2025-03-01T12:34:56Z" NotOnOrAfter="2025-03-01T13:34:56Z"&gt;
+    &lt;saml2:AudienceRestriction&gt;
+      &lt;saml2:Audience&gt;https://client.example.com/sp-entity-id&lt;/saml2:Audience&gt;
+    &lt;/saml2:AudienceRestriction&gt;
+  &lt;/saml2:Conditions&gt;
+  &lt;saml2:AttributeStatement&gt;
+    &lt;saml2:Attribute Name="given_name"&gt;
+      &lt;saml2:AttributeValue&gt;Alice&lt;/saml2:AttributeValue&gt;
+    &lt;/saml2:Attribute&gt;
+  &lt;/saml2:AttributeStatement&gt;
+  &lt;saml2:AuthnStatement AuthnInstant="2025-03-01T12:30:00Z"&gt;
+    &lt;saml2:AuthnContext&gt;
+      &lt;saml2:AuthnContextClassRef&gt;
+        urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
+      &lt;/saml2:AuthnContextClassRef&gt;
+    &lt;/saml2:AuthnContext&gt;
+  &lt;/saml2:AuthnStatement&gt;
+&lt;/saml2:Assertion&gt;
+</pre><a href="#section-4.5-5" class="pilcrow">¶</a>
+</div>
+<p id="section-4.5-6">When this assertion is used as the <code>subject_token</code> in Token Exchange, the IdP Authorization Server <span class="bcp14">MUST</span> verify that the <code>Audience</code> / <code>SPEntityID</code> maps to the OAuth Client ID that is authenticated for the token request. This prevents a client from presenting an assertion issued for a different SAML SP.<a href="#section-4.5-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.5-7">
+<pre>
+POST /oauth2/token HTTP/1.1
+Host: acme.idp.example
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+&amp;requested_token_type=urn:ietf:params:oauth:token-type:refresh_token
+&amp;scope=openid+offline_access+email
+&amp;subject_token=PHNhbWxwOkFzc2VydGlvbiB4bWxuczp...c2FtbDppc3N1ZXI+PC9zYW1sOkFzc2VydGlvbj4=
+&amp;subject_token_type=urn:ietf:params:oauth:token-type:saml2
+&amp;client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+&amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
+Pragma: no-cache
+
+{
+  "issued_token_type": "urn:ietf:params:oauth:token-type:refresh_token",
+  "access_token": "vF9dft4qmTcXkZ26zL8b6u",
+  "token_type": "N_A",
+  "scope": "openid offline_access email",
+  "expires_in": 1209600
+}
+</pre><a href="#section-4.5-7" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
