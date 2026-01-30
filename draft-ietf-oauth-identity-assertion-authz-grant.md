@@ -47,7 +47,9 @@ normative:
   RFC8693:
   RFC8707:
   RFC8725:
+  RFC9396:
   I-D.ietf-oauth-identity-chaining:
+  I-D.ietf-oauth-rfc7523bis:
   IANA.media-types:
   IANA.oauth-parameters:
   IANA.jwt:
@@ -121,7 +123,7 @@ Resource Server (RS)
 
 # Identity Assertion JWT Authorization Grant {#id-jag}
 
-The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server.
+The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification supports Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
 
 An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.
 
@@ -155,6 +157,9 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 
 `scope`:
 : OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}.
+
+`authorization_details`:
+: OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This claim enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
 
 `tenant`:
 : OPTIONAL - JSON string that represents the tenant identifier for a multi-tenant issuer as defined in {{OpenID.Enterprise}}
@@ -316,6 +321,9 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 `scope`:
 : OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
 
+`authorization_details`:
+: OPTIONAL - A JSON string containing a JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This parameter enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
+
 `subject_token`:
 : REQUIRED - The Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner.
 
@@ -346,7 +354,21 @@ The example below uses an ID Token as the Identity Assertion, and uses a JWT Bea
 
 The IdP MUST validate the subject token, and MUST validate that the audience of the Subject Token (e.g. the `aud` claim of the ID Token) matches the `client_id` of the client authentication of the request.
 
-The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience and scopes.
+The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.
+
+When processing the request:
+
+* If `resource` is present, the IdP MUST process it according to {{Section 2 of RFC8707}} and evaluate policy to determine the granted resources. The granted resources MAY be a subset of the requested resources based on policy.
+
+* If `scope` is present, the IdP MUST process it according to {{Section 3.3 of RFC6749}} and evaluate policy to determine the granted scopes. The granted scopes MAY be a subset of the requested scopes based on policy.
+
+* If `authorization_details` is present, the IdP MUST parse it as a JSON array and process each authorization detail object according to {{RFC9396}}. The IdP evaluates policy for each authorization detail and determines which authorization details to include in the issued ID-JAG. The IdP MAY modify, filter, or omit authorization details based on policy.
+
+* If both `resource` and `authorization_details` are present, the IdP MUST process both. The IdP SHOULD ensure consistency between the resource identifiers and authorization details, as they may represent overlapping authorization requests. The IdP MAY derive resource identifiers from authorization details or vice versa, or process them independently based on policy.
+
+* If both `scope` and `authorization_details` are present, the IdP MUST process both. The IdP SHOULD ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
+
+* The IdP MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it MUST reflect the granted values in the ID-JAG.
 
 The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.
 
@@ -378,6 +400,9 @@ If access is granted, the IdP creates a signed Identity Assertion JWT Authorizat
 
 `scope`:
 : OPTIONAL if the scope of the issued token is identical to the scope requested by the client; otherwise, it is REQUIRED. Various policies in the IdP may result in different scopes being issued from the scopes the application requested.
+
+`authorization_details`:
+: OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2.2 of RFC9396}}. This parameter MUST be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.
 
 `expires_in`:
 : RECOMMENDED - The lifetime in seconds of the authorization grant.
@@ -413,6 +438,116 @@ The following is a non-normative example of the issued token
     }
     .
     signature
+
+#### Example with Rich Authorization Requests (RAR)
+
+The following is a non-normative example demonstrating the use of Rich Authorization Requests (RAR) {{RFC9396}} with ID-JAG:
+
+Token Exchange Request with authorization_details:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+    &audience=https://acme.chat.example/
+    &authorization_details=[{"type":"chat_read","actions":["read"],"locations":["https://api.chat.example/channels"]},{"type":"chat_history","actions":["read"],"datatypes":["message"]}]
+    &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
+    &subject_token_type=urn:ietf:params:oauth:token-type:id_token
+    &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+
+Token Exchange Response:
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
+      "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+      "token_type": "N_A",
+      "authorization_details": [
+        {
+          "type": "chat_read",
+          "actions": ["read"],
+          "locations": ["https://api.chat.example/channels"]
+        },
+        {
+          "type": "chat_history",
+          "actions": ["read"],
+          "datatypes": ["message"]
+        }
+      ],
+      "expires_in": 300
+    }
+
+Issued Identity Assertion JWT Authorization Grant with authorization_details:
+
+    {
+      "typ": "oauth-id-jag+jwt"
+    }
+    .
+    {
+      "jti": "9e43f81b64a33f20116179",
+      "iss": "https://acme.idp.example/",
+      "sub": "U019488227",
+      "aud": "https://acme.chat.example/",
+      "client_id": "f53f191f9311af35",
+      "exp": 1311281970,
+      "iat": 1311280970,
+      "authorization_details": [
+        {
+          "type": "chat_read",
+          "actions": ["read"],
+          "locations": ["https://api.chat.example/channels"]
+        },
+        {
+          "type": "chat_history",
+          "actions": ["read"],
+          "datatypes": ["message"]
+        }
+      ],
+      "auth_time": 1311280970
+    }
+    .
+    signature
+
+Access Token Request:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.chat.example
+    Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+
+    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+    &assertion=eyJhbGciOiJIUzI1NiIsI...
+
+Access Token Response:
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json;charset=UTF-8
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "token_type": "Bearer",
+      "access_token": "2YotnFZFEjr1zCsicMWpAA",
+      "expires_in": 86400,
+      "authorization_details": [
+        {
+          "type": "chat_read",
+          "actions": ["read"],
+          "locations": ["https://api.chat.example/channels"]
+        },
+        {
+          "type": "chat_history",
+          "actions": ["read"],
+          "datatypes": ["message"]
+        }
+      ]
+    }
 
 #### Error Response
 
@@ -455,9 +590,24 @@ For example:
 All of {{Section 5.2 of RFC7521}} applies, in addition to the following processing rules:
 
 * Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{Section 3.11 of RFC8725}})
-* The `aud` claim MUST identify the Issuer URL of the Resource Authorization Server as the intended audience of the JWT.
-* The `client_id` claim MUST identify the same client as the client authentication in the request.
-* The Resource Authorization Server MUST follow {{Section 3.3 of RFC6749}} when processing the `scope` claim.
+
+* The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
+
+* The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error.
+
+When processing authorization information from the ID-JAG:
+
+* If the `resource` claim is present, the Resource Authorization Server MUST process it according to {{Section 2 of RFC8707}}. The Resource Authorization Server evaluates the resource identifiers and determines which resources to grant access to based on policy. The granted resources MAY be a subset of the resources in the ID-JAG issued by the IdP Authorization Server.
+
+* If the `scope` claim is present, the Resource Authorization Server MUST process it according to {{Section 3.3 of RFC6749}}. The Resource Authorization Server evaluates the scopes and determines which scopes to grant in the access token based on policy. The granted scopes MAY be a subset of the scopes in the ID-JAG issued by the IdP Authorization Server.
+
+* If the `authorization_details` claim is present, the Resource Authorization Server MUST parse it as a JSON array and process each authorization detail object according to {{RFC9396}}. The Resource Authorization Server evaluates policy for each authorization detail and determines which authorization details to grant. The Resource Authorization Server MAY modify, filter, or omit authorization details based on policy.
+
+* If both `resource` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the resource identifiers and authorization details when issuing the access token. The Resource Authorization Server MAY derive resource identifiers from authorization details or vice versa, or process them independently based on policy.
+
+* If both `scope` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the scopes and authorization details when issuing the access token. The Resource Authorization Server MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
+
+* The Resource Authorization Server MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the access token response. The response format follows {{Section 2 of RFC8707}} for resource, {{Section 5.1 of RFC6749}} for scope, and {{Section 2.2 of RFC9396}} for authorization_details.
 
 ### Response
 
