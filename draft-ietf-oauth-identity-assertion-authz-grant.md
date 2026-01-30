@@ -56,6 +56,7 @@ normative:
   RFC6838:
   RFC2046:
   RFC8414:
+  I-D.parecki-oauth-jwt-dpop-grant:
 
   OpenID.Core:
     title: OpenID Connect Core 1.0 incorporating errata set 2
@@ -76,12 +77,10 @@ normative:
       - ins: D. Hardt
       - ins: K. McGuinness
 
-
 informative:
   RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
-  I-D.parecki-oauth-jwt-dpop-grant:
 
 --- abstract
 
@@ -554,7 +553,7 @@ Identity Assertion JWT Authorization Grant may support key binding to enable sen
 
 Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in {{RFC9449}}) in a `DPoP` HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.
 
-The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jwk` property, it indicates that the ID-JAG is bound to that specific public key, and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
+The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jkt` property, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
 
 The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
 
@@ -579,9 +578,11 @@ The client generates a key pair and includes a DPoP proof JWT in the `DPoP` head
 
 The IdP Authorization Server processes the request as follows:
 
-1. If a DPoP proof is present, the IdP MUST validate it according to {{Section 4 of RFC9449}}. The `htm` claim MUST be `POST`, and the `htu` claim MUST match the token endpoint URL.
+1. If a DPoP proof is present, the IdP MUST validate it according to {{Section 4.3 of RFC9449}}. The `htm` claim MUST be `POST`, and the `htu` claim MUST match the token endpoint URL.
 
-2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing the public key from the DPoP proof's `jwk` header parameter. The `cnf` claim format follows {{RFC7800}}:
+2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing the JWK SHA-256 Thumbprint (using the `jkt` property) computed from the DPoP proof's `jwk` header parameter.  This enables the Resource Authorization Server to validate the key binding for the ID-JAG using simple string comparison of the JWK SHA-256 Thumbprint.
+
+The `cnf` claim format follows {{Section 6.1 from RFC9449}}:
 
     {
       "jti": "9e43f81b64a33f20116179",
@@ -594,12 +595,7 @@ The IdP Authorization Server processes the request as follows:
       "resource": "https://api.chat.example/",
       "scope": "chat.read chat.history",
       "cnf": {
-        "jwk": {
-          "kty": "EC",
-          "crv": "P-256",
-          "x": "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
-          "y": "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0"
-        }
+        "jkt":"0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I"
       }
     }
 
@@ -617,13 +613,13 @@ If the ID-JAG contains a `cnf` claim and the client presents a DPoP proof, the R
 
 1. Validate the DPoP proof according to {{Section 4 of RFC9449}}.
 
-2. Extract the public key from the `jwk` header parameter of the DPoP proof.
+2. Extract the JWK SHA-256 Thumbprint from the DPoP proof by computing the thumbprint of the `jwk` header parameter in the DPoP proof according to {{RFC7638}}.
 
-3. Extract the public key from the `jwk` property of the `cnf` claim in the ID-JAG.
+3. Extract the JWK SHA-256 Thumbprint from the `jkt` property of the `cnf` claim in the ID-JAG.
 
-4. Compare the two public keys. They MUST match exactly. If they do not match, the request MUST fail with an `invalid_grant` error.
+4. Compare the two thumbprints. They MUST match exactly. If they do not match, the request MUST fail with an `invalid_grant` error.
 
-5. If the keys match, the Resource Authorization Server MAY issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration. The issued access token SHOULD be bound to the same key.
+5. If the thumbprints match, the Resource Authorization Server MAY issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration. The issued access token SHOULD be bound to the same key.
 
 Example request:
 
