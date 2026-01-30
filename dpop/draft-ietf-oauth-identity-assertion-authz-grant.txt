@@ -2048,6 +2048,8 @@ Document History
    *  Added refresh token as an optional subject token input to the
       Token Exchange for SAML interop
 
+   *  Described how to use DPoP with the JD-JAG exchange
+
    -01
 
    *  Moved ID-JAG definition to document root instead of nested under
