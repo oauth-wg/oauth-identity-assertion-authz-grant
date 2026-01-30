@@ -49,7 +49,9 @@ normative:
   RFC8725:
   RFC7800:
   RFC9449:
+  RFC9396:
   I-D.ietf-oauth-identity-chaining:
+  I-D.ietf-oauth-rfc7523bis:
   IANA.media-types:
   IANA.oauth-parameters:
   IANA.jwt:
@@ -123,7 +125,7 @@ Resource Server (RS)
 
 # Identity Assertion JWT Authorization Grant {#id-jag}
 
-The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server.
+The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification supports Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
 
 An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.
 
@@ -157,6 +159,9 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 
 `scope`:
 : OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}.
+
+`authorization_details`:
+: OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This claim enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
 
 `tenant`:
 : OPTIONAL - JSON string that represents the tenant identifier for a multi-tenant issuer as defined in {{OpenID.Enterprise}}
@@ -241,6 +246,8 @@ Sequence Diagram
          |                    |                  |                 |
          |                    |                  |                 |
          | 2 Token Exchange   |                  |                 |
+         | (Identity Assertion|                  |                 |
+         |  or Refresh Token) |                  |                 |
          | ---------------->  |                  |                 |
          |                    |                  |                 |
          |   ID-JAG           |                  |                 |
@@ -263,12 +270,11 @@ Sequence Diagram
          |                    |                  |                 |
 
 1. User authenticates with the IdP Authorization Server, the Client obtains an Identity Assertion (e.g. OpenID Connect ID Token or SAML 2.0 Assertion) for the user and optionally a Refresh Token (when using OpenID Connect) and signs the user in
-2. Client uses the Identity Assertion to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server
+2. Client uses the Identity Assertion or a previously issued Refresh Token from the IdP to request an Identity Assertion JWT Authorization Grant for the Resource Authorization Server from the IdP Authorization Server
 3. Client exchanges the Identity Assertion JWT Authorization Grant for an Access Token at the Resource Authorization Server's token endpoint
 4. Client makes an API request to the Resource Server with the Access Token
 
 This specification is constrained to deployments where a set of Resource Authorization Servers for applications used by an organization are trusting the same IdP Authorization Server for Single Sign-On (SSO). The IdP Authorization Server provides a consistent trust boundary and user identity for the set of Resource Authorization Servers to honor the ID-JAG issued by the IdP.  The Resource Authorization Server not only delegates user authentication but also delegates user authorization authority to the IdP Authorization Server for the scopes and resource specified in the ID-JAG and does not need obtain user consent directly from the resource owner.
-
 
 ## User Authentication
 
@@ -301,7 +307,6 @@ Note: The IdP Authorization Server may enforce security controls such as multi-f
       "scope": "openid offline_access"
     }
 
-
 ## Token Exchange
 
 The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization Server's Token Endpoint with the following parameters:
@@ -318,17 +323,24 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 `scope`:
 : OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
 
+`authorization_details`:
+: OPTIONAL - A JSON string containing a JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This parameter enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
+
 `subject_token`:
-: REQUIRED - The Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner.
+: REQUIRED - Either the Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner, or a Refresh Token previously issued by the IdP Authorization Server for that resource owner. Implementations of this specification MUST accept Identity Assertions. They MAY additionally accept Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.
 
 `subject_token_type`:
-: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, or for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`.
+: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`, and for a Refresh Token (when supported): `urn:ietf:params:oauth:token-type:refresh_token`.
+
+When a Refresh Token is used as the subject token, the client still requests `requested_token_type=urn:ietf:params:oauth:token-type:id-jag`; this allows the client to refresh an Identity Assertion JWT Authorization Grant without fetching a new Identity Assertion from the user-facing SSO flow.
 
 The additional parameters defined in {{Section 2.1 of RFC8693}} `actor_token` and `actor_token_type` are not used in this specification.
 
 Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
-The example below uses an ID Token as the Identity Assertion, and uses a JWT Bearer Assertion {{RFC7523}} as the client authentication method, (tokens truncated for brevity):
+#### Example: Token Exchange using ID Token {#token-exchange-id-token-example}
+
+This example uses an ID Token as the `subject_token` and a JWT Bearer Assertion {{RFC7523}} for client authentication (tokens truncated for brevity):
 
     POST /oauth2/token HTTP/1.1
     Host: acme.idp.example
@@ -344,11 +356,47 @@ The example below uses an ID Token as the Identity Assertion, and uses a JWT Bea
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
+#### Example: Token Exchange using Refresh Token {#token-exchange-refresh-token-example}
+
+This non-normative example shows using a Refresh Token as the `subject_token` (when supported by the IdP Authorization Server) to obtain an ID-JAG without acquiring a new Identity Assertion:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+    &audience=https://acme.chat.example/
+    &resource=https://api.chat.example/
+    &scope=chat.read+chat.history
+    &subject_token=tGzv3JOkF0XG5Qx2TlKWIA
+    &subject_token_type=urn:ietf:params:oauth:token-type:refresh_token
+    &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+
 ### Processing Rules
 
-The IdP MUST validate the subject token, and MUST validate that the audience of the Subject Token (e.g. the `aud` claim of the ID Token) matches the `client_id` of the client authentication of the request.
+The IdP MUST validate the subject token:
 
-The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience and scopes.
+* If the subject token is an Identity Assertion, the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g. the `aud` claim of the ID Token or SAML Audience) matches the `client_id` of the client authentication of the request.
+* If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
+* If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
+
+The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.
+
+When processing the request:
+
+* If `resource` is present, the IdP MUST process it according to {{Section 2 of RFC8707}} and evaluate policy to determine the granted resources. The granted resources MAY be a subset of the requested resources based on policy.
+
+* If `scope` is present, the IdP MUST process it according to {{Section 3.3 of RFC6749}} and evaluate policy to determine the granted scopes. The granted scopes MAY be a subset of the requested scopes based on policy.
+
+* If `authorization_details` is present, the IdP MUST parse it as a JSON array and process each authorization detail object according to {{RFC9396}}. The IdP evaluates policy for each authorization detail and determines which authorization details to include in the issued ID-JAG. The IdP MAY modify, filter, or omit authorization details based on policy.
+
+* If both `resource` and `authorization_details` are present, the IdP MUST process both. The IdP SHOULD ensure consistency between the resource identifiers and authorization details, as they may represent overlapping authorization requests. The IdP MAY derive resource identifiers from authorization details or vice versa, or process them independently based on policy.
+
+* If both `scope` and `authorization_details` are present, the IdP MUST process both. The IdP SHOULD ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
+
+* The IdP MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it MUST reflect the granted values in the ID-JAG.
 
 The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.
 
@@ -380,6 +428,9 @@ If access is granted, the IdP creates a signed Identity Assertion JWT Authorizat
 
 `scope`:
 : OPTIONAL if the scope of the issued token is identical to the scope requested by the client; otherwise, it is REQUIRED. Various policies in the IdP may result in different scopes being issued from the scopes the application requested.
+
+`authorization_details`:
+: OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2.2 of RFC9396}}. This parameter MUST be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.
 
 `expires_in`:
 : RECOMMENDED - The lifetime in seconds of the authorization grant.
@@ -415,6 +466,116 @@ The following is a non-normative example of the issued token
     }
     .
     signature
+
+#### Example with Rich Authorization Requests (RAR)
+
+The following is a non-normative example demonstrating the use of Rich Authorization Requests (RAR) {{RFC9396}} with ID-JAG:
+
+Token Exchange Request with authorization_details:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+    &audience=https://acme.chat.example/
+    &authorization_details=[{"type":"chat_read","actions":["read"],"locations":["https://api.chat.example/channels"]},{"type":"chat_history","actions":["read"],"datatypes":["message"]}]
+    &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
+    &subject_token_type=urn:ietf:params:oauth:token-type:id_token
+    &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+
+Token Exchange Response:
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
+      "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+      "token_type": "N_A",
+      "authorization_details": [
+        {
+          "type": "chat_read",
+          "actions": ["read"],
+          "locations": ["https://api.chat.example/channels"]
+        },
+        {
+          "type": "chat_history",
+          "actions": ["read"],
+          "datatypes": ["message"]
+        }
+      ],
+      "expires_in": 300
+    }
+
+Issued Identity Assertion JWT Authorization Grant with authorization_details:
+
+    {
+      "typ": "oauth-id-jag+jwt"
+    }
+    .
+    {
+      "jti": "9e43f81b64a33f20116179",
+      "iss": "https://acme.idp.example/",
+      "sub": "U019488227",
+      "aud": "https://acme.chat.example/",
+      "client_id": "f53f191f9311af35",
+      "exp": 1311281970,
+      "iat": 1311280970,
+      "authorization_details": [
+        {
+          "type": "chat_read",
+          "actions": ["read"],
+          "locations": ["https://api.chat.example/channels"]
+        },
+        {
+          "type": "chat_history",
+          "actions": ["read"],
+          "datatypes": ["message"]
+        }
+      ],
+      "auth_time": 1311280970
+    }
+    .
+    signature
+
+Access Token Request:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.chat.example
+    Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+
+    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+    &assertion=eyJhbGciOiJIUzI1NiIsI...
+
+Access Token Response:
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json;charset=UTF-8
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "token_type": "Bearer",
+      "access_token": "2YotnFZFEjr1zCsicMWpAA",
+      "expires_in": 86400,
+      "authorization_details": [
+        {
+          "type": "chat_read",
+          "actions": ["read"],
+          "locations": ["https://api.chat.example/channels"]
+        },
+        {
+          "type": "chat_history",
+          "actions": ["read"],
+          "datatypes": ["message"]
+        }
+      ]
+    }
 
 #### Error Response
 
@@ -457,9 +618,24 @@ For example:
 All of {{Section 5.2 of RFC7521}} applies, in addition to the following processing rules:
 
 * Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{Section 3.11 of RFC8725}})
-* The `aud` claim MUST identify the Issuer URL of the Resource Authorization Server as the intended audience of the JWT.
-* The `client_id` claim MUST identify the same client as the client authentication in the request.
-* The Resource Authorization Server MUST follow {{Section 3.3 of RFC6749}} when processing the `scope` claim.
+
+* The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
+
+* The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error.
+
+When processing authorization information from the ID-JAG:
+
+* If the `resource` claim is present, the Resource Authorization Server MUST process it according to {{Section 2 of RFC8707}}. The Resource Authorization Server evaluates the resource identifiers and determines which resources to grant access to based on policy. The granted resources MAY be a subset of the resources in the ID-JAG issued by the IdP Authorization Server.
+
+* If the `scope` claim is present, the Resource Authorization Server MUST process it according to {{Section 3.3 of RFC6749}}. The Resource Authorization Server evaluates the scopes and determines which scopes to grant in the access token based on policy. The granted scopes MAY be a subset of the scopes in the ID-JAG issued by the IdP Authorization Server.
+
+* If the `authorization_details` claim is present, the Resource Authorization Server MUST parse it as a JSON array and process each authorization detail object according to {{RFC9396}}. The Resource Authorization Server evaluates policy for each authorization detail and determines which authorization details to grant. The Resource Authorization Server MAY modify, filter, or omit authorization details based on policy.
+
+* If both `resource` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the resource identifiers and authorization details when issuing the access token. The Resource Authorization Server MAY derive resource identifiers from authorization details or vice versa, or process them independently based on policy.
+
+* If both `scope` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the scopes and authorization details when issuing the access token. The Resource Authorization Server MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
+
+* The Resource Authorization Server MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the access token response. The response format follows {{Section 2 of RFC8707}} for resource, {{Section 5.1 of RFC6749}} for scope, and {{Section 2.2 of RFC9396}} for authorization_details.
 
 ### Response
 
@@ -487,6 +663,76 @@ If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the IdP A
 
 If the ID Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
+If the IdP Authorization Server supports Refresh Tokens as a `subject_token` in Token Exchange, the client can skip renewing the Identity Assertion and directly request a new ID-JAG by presenting the Refresh Token (see {{token-exchange-refresh-token-example}}).
+
+## SAML 2.0 Identity Assertion Interopability
+
+Clients using SAML 2.0 for SSO with the IdP Authorization Server can obtain an ID-JAG without changing their SSO protocol to OpenID Connect by first exchanging the SAML 2.0 assertion for a Refresh Token using Token Exchange. This enables protocol transition to OAuth and allows the client to later use the Refresh Token as a `subject_token` to obtain an ID-JAG without prompting the user for a new Identity Assertion.
+
+The OpenID Connect scopes `openid offline_access` SHOULD be requested (additional scopes are allowed) when requesting a Refresh Token from the IdP Authorization Server.
+
+The IdP Authorization Server MUST map the SAML Audience to a Client ID and ensure the client's authentication matches that mapping before issuing the Refresh Token.
+
+The following non-normative example shows a SAML 2.0 assertion where the `Audience` value (from `AudienceRestriction`) corresponds to the Service Provider Entity ID (`SPAuthority` / `SPEntityID`) and MUST be mapped to the OAuth Client ID that the IdP Authorization Server associates with that SAML SP registration.
+
+    <saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion"
+        ID="_123456789" IssueInstant="2025-03-01T12:34:56Z" Version="2.0">
+      <saml2:Issuer>https://idp.example.com/</saml2:Issuer>
+      <saml2:Subject>
+        <saml2:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">
+          alice@example.com
+        </saml2:NameID>
+        <saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
+          <saml2:SubjectConfirmationData
+              NotOnOrAfter="2025-03-01T12:39:56Z"
+              Recipient="https://client.example.com/assertion-consumer"/>
+        </saml2:SubjectConfirmation>
+      </saml2:Subject>
+      <saml2:Conditions NotBefore="2025-03-01T12:34:56Z" NotOnOrAfter="2025-03-01T13:34:56Z">
+        <saml2:AudienceRestriction>
+          <saml2:Audience>https://client.example.com/sp-entity-id</saml2:Audience>
+        </saml2:AudienceRestriction>
+      </saml2:Conditions>
+      <saml2:AttributeStatement>
+        <saml2:Attribute Name="given_name">
+          <saml2:AttributeValue>Alice</saml2:AttributeValue>
+        </saml2:Attribute>
+      </saml2:AttributeStatement>
+      <saml2:AuthnStatement AuthnInstant="2025-03-01T12:30:00Z">
+        <saml2:AuthnContext>
+          <saml2:AuthnContextClassRef>
+            urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport
+          </saml2:AuthnContextClassRef>
+        </saml2:AuthnContext>
+      </saml2:AuthnStatement>
+    </saml2:Assertion>
+
+When this assertion is used as the `subject_token` in Token Exchange, the IdP Authorization Server MUST verify that the `Audience` / `SPEntityID` maps to the OAuth Client ID that is authenticated for the token request. This prevents a client from presenting an assertion issued for a different SAML SP.
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:refresh_token
+    &scope=openid+offline_access+email
+    &subject_token=PHNhbWxwOkFzc2VydGlvbiB4bWxuczp...c2FtbDppc3N1ZXI+PC9zYW1sOkFzc2VydGlvbj4=
+    &subject_token_type=urn:ietf:params:oauth:token-type:saml2
+    &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
+    &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "issued_token_type": "urn:ietf:params:oauth:token-type:refresh_token",
+      "access_token": "vF9dft4qmTcXkZ26zL8b6u",
+      "token_type": "N_A",
+      "scope": "openid offline_access email",
+      "expires_in": 1209600
+    }
 
 # Cross-Domain Client ID Handling {#client-id-mapping}
 
@@ -1039,6 +1285,11 @@ The authors would like to thank the following people for their contributions and
 {:numbered="false"}
 
 \[\[ To be removed from the final specification ]]
+
+-02
+
+* Added reference and examples of a RAR `authorization_details` object in the Token Exchange and ID-JAG
+* Added refresh token as an optional subject token input to the Token Exchange for SAML interop
 
 -01
 
