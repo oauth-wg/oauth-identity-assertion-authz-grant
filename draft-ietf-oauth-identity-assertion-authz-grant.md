@@ -553,7 +553,7 @@ Identity Assertion JWT Authorization Grant may support key binding to enable sen
 
 Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in {{RFC9449}}) in a `DPoP` HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.
 
-The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jkt` property, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
+The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jkt` property as defined in {{RFC9449}}, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
 
 The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
 
