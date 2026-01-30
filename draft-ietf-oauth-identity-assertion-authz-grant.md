@@ -1044,6 +1044,10 @@ The authors would like to thank the following people for their contributions and
 
 \[\[ To be removed from the final specification ]]
 
+-02
+
+* Added reference and examples of a RAR `authorization_details` object in the Token Exchange and ID-JAG
+
 -01
 
 * Moved ID-JAG definition to document root instead of nested under Token Exchange
