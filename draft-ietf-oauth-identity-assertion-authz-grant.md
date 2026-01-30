@@ -1143,6 +1143,7 @@ The authors would like to thank the following people for their contributions and
 -02
 
 * Added reference and examples of a RAR `authorization_details` object in the Token Exchange and ID-JAG
+* Added refresh token as an optional subject token input to the Token Exchange for SAML interop
 
 -01
 
