@@ -829,7 +829,7 @@ The IdP Authorization Server processes the request as follows:
 
 2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing a `jkt` property with the JWK SHA-256 Thumbprint computed from the DPoP proof's `jwk` header parameter as defined in {{Section 6.1 of RFC9449}}.  This enables the Resource Authorization Server to validate the key binding for the ID-JAG using simple string comparison of the JWK SHA-256 Thumbprint.
 
-The `cnf` claim format follows {{Section 6.1 from RFC9449}}:
+The `cnf` claim format follows {{Section 6.1 of RFC9449}}:
 
     {
       "jti": "9e43f81b64a33f20116179",
