@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-29T00:04:14.273226+00:00",
+  "timestamp": "2026-02-01T00:04:25.564647+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -697,15 +697,15 @@
       "id": "I_kwDOKv5r-s69oEQA",
       "title": "Proof-of-Possession Token for Resource App",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/28",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The spec currently isn't clear how a client should meet proof-of-possesion requirements such as DPOP for an ID-JAG for Resource App's Authorization Server token request or the issued token from a Resource App's Authorization Server for a Resource App's Resource Server\n\nOAuth Identity and Authorization Chaining Across Domains has a section on [Delegated Key Binding](https://drafts.oauth.net/oauth-identity-chaining/draft-ietf-oauth-identity-chaining.html#name-delegated-key-binding)\n\nID Assertions currently don't support proof-of-possesion although some folks [have found workarounds](https://github.com/openpubkey/openpubkey)\n\nSince `actor_token` is not used by this profile, we currently don't flow any `cnf` claims into the ID-JAG.  \n\n- Should the client just send a DPoP proof JWT in a DPoP header when making an access token request to the Resource App's Authorization Server?   \n  - A client is currently free to use a different key with each Resource App Authorization Server as there is not binding back to the ID-JAG\n- Should we also support a DPoP proof with ID-JAG? \n  - A client can pass the proof on the token exchange request and we could flow to the ID-JAG and the Resource App Authorization Server could verify the proof. \n\n\n\nI think it should be possible to bind a ID-JAG to a key\n\n\n",
       "createdAt": "2025-06-27T05:18:48Z",
-      "updatedAt": "2025-10-19T19:12:42Z",
-      "closedAt": null,
+      "updatedAt": "2026-01-30T23:45:14Z",
+      "closedAt": "2026-01-30T23:45:14Z",
       "comments": [
         {
           "author": "panva",
@@ -1207,16 +1207,24 @@
       "id": "I_kwDOKv5r-s7Km-R9",
       "title": "SAML support is overly vague",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/44",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "sdesen",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "SAML implementations should include security best practices due to variable nature of NameID\n[Refresh tokens](https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/35) are related because SAML assertions are more short lived than id_tokens, commonly, causing the client to execute all id-jag requests within its lifetime.\nAdditionally it should be clear SAML can only be support for requesting apps, as the resource apps must implement Oauth (maybe that is overly obvious, though)",
       "createdAt": "2025-09-09T16:55:09Z",
-      "updatedAt": "2025-09-09T16:55:09Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2026-01-30T23:37:29Z",
+      "closedAt": "2026-01-30T23:37:29Z",
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Resolved with #68 ",
+          "createdAt": "2026-01-30T23:37:29Z",
+          "updatedAt": "2026-01-30T23:37:29Z"
+        }
+      ]
     },
     {
       "number": 45,
@@ -1775,15 +1783,15 @@
       "id": "I_kwDOKv5r-s7Sbmjq",
       "title": "Add Token Exchange support for refresh token instead of id token for ID-JAG",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/58",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Since Refresh Tokens should not be returned when exchanging ID-JAG for an Access Token with the Resource Authorization Server, the Client will need to make an extra round-trip to the IDP Authorization Server to renew an ID Token using the IDP's Refresh Token so it can obtain a fresh ID-JAG with the new ID Token.   See https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-01.html#name-refresh-token\n\nAdding support for `urn:ietf:params:oauth:token-type:refresh_token` as the `subject_token` in the ID-JAG Token Exchange request would eliminate the round-trip needed to obtain the ID Token first as the IdP Authorization Server can dereference the refresh token to obtain the same claims that would be present in the ID Token.\n\nWe should also consider recommending that the IdP Authorization Server MAY return a `refresh_token` when exchanging a `urn:ietf:params:oauth:token-type:saml2` token as the `subject_token` for an ID-JAG.  This would enable a Client that uses SAML for SSO to obtain a refresh token that they can use to renew ID-JAGs without having to switch to OIDC or redirect the user over the front channel. ",
       "createdAt": "2025-10-19T21:12:58Z",
-      "updatedAt": "2025-11-05T17:06:02Z",
-      "closedAt": null,
+      "updatedAt": "2026-01-30T22:39:23Z",
+      "closedAt": "2026-01-30T22:39:22Z",
       "comments": [
         {
           "author": "sdesen",
@@ -1896,15 +1904,15 @@
       "id": "I_kwDOKv5r-s7chWbg",
       "title": "Describe/define using the authorization_details claim in the ID-JAG similar to scope",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/65",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "While the use of `authorization_details` with ID-JAG is implicit as Section 3 of RAR says \"The authorization_details authorization request parameter can be used to specify authorization requirements in all places where the scope parameter is used for the same purpose\" https://datatracker.ietf.org/doc/html/rfc9396#section-3, we should make this explicit so readers can more easily understand that RAR scenarios are supported with ID-JAG.  \n\nOptionally we can include a non-normative example.\n\n\n\n",
       "createdAt": "2025-12-05T17:15:24Z",
-      "updatedAt": "2025-12-08T18:15:01Z",
-      "closedAt": null,
+      "updatedAt": "2026-01-30T22:36:10Z",
+      "closedAt": "2026-01-30T22:36:10Z",
       "comments": [
         {
           "author": "sdesen",
@@ -2008,6 +2016,22 @@
           "updatedAt": "2026-01-21T19:04:05Z"
         }
       ]
+    },
+    {
+      "number": 73,
+      "id": "I_kwDOKv5r-s7nP6c1",
+      "title": "Proposal: Workload/Agent Identity SSO and Explicit Delegated \u201cOn-Behalf-Of\u201d Access",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/73",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "# Proposal:  Workload /Agent Identity SSO and Explicit Delegated \u201cOn-Behalf-Of\u201d Access\n\n## Objective\n\nExtend the **OAuth Identity Assertion JWT Authorization Grant (ID-JAG)** specification so that:\n\n1. The **IdP Authorization Server (AS-A)** can, **by policy**, determine how identity and delegation are represented when minting an ID-JAG for a **Resource Authorization Server (AS-B)**.\n2. The **ID-JAG defines a common JWT assertion format used between authorization servers to convey identity and delegation context**, regardless of which identity or delegation model is used.\n\nThis proposal enables:\n\n- **Workload/Agent Identity SSO** \u2014 a service or autonomous agent authenticating as itself across authorization domains  \n- **Delegated \u201cOn-Behalf-Of\u201d Access** \u2014 a client, workload, or AI agent acting using a user\u2019s authority  \n- A **uniform JWT-based assertion format** between Resource Authorization Server and IdP Authorization Server that works across all models  \n\nThe extension:\n\n- **Preserves the existing OAuth user delegation model**\n- Makes delegation **explicit when supported**\n- Enables **workload identity** and future **actor chains**\n- Allows **backward compatibility** for Resource AS that only understand traditional user delegation assertions\n- Introduces **no new JWT claim registrations**\n- Normatively depends on [**OAuth Entity Profiles**](https://datatracker.ietf.org/doc/draft-mora-oauth-entity-profiles/)\n- Reuses the **RFC 8693 `act` claim** for explicit delegation\n- Supports [**IETF WIMSE Workload Identity Credentials**](https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/) as an input actor credential format\n\n## Identity & Delegation Models the IdP May Apply\n\nThe existing specification supports the widely deployed implicit delegation model of a client acting on behalf of a user. The `sub` claim of the ID-JAG always represents a user and the `client_id` is the application registered in the Resource Authorization Server that is acting on behalf of the user.\n\nThis extension does **not replace** that model but provides the following:\n\n- Preserves the implicit model for compatibility\n- Allows delegation to be made explicit using `act` claim\n- Adds support for workloads or AI agents acting independently\n\nWhen issuing an ID-JAG for a Resource Authorization Server, the IdP Authorization Server selects the delegation model and identity mapping based on what the client provided and IdP Authorization Server defined policy.\n\n| Model | Meaning | ID-JAG Representation | Resource Authorization Server Compatibility |\n|------|---------|-----------------------|---------------------------------------------|\n| **Client Acting as User (Existing OAuth Model)** | Client acts for user (implicit) | `sub = user` | Existing delegation model that is widely deployed today |\n| **Explicit User Delegation** | Client/workload explicitly shown as actor | `sub = user`, `act = client/workload` | Requires actor-aware Resource Authorization Server |\n| **Workload or Agent Acting as Itself (Workload SSO)** | No user involved | `sub = workload` or `sub = ai-agent` | Requires workload or AI-agent-aware Resource Authorization Server |\n| **Compatibility Mapping** | Workload translated to legacy identity | Policy-mapped identity | For legacy Resource Authorization Server only |\n\n## 1. ID-JAG as the Common JWT Assertion Between Authorization Servers\n\nID-JAG defines a **common JWT assertion format used between authorization servers to convey identity and delegation context**.\n\nRegardless of identity model:\n\n- Resource Authorization Server validates a **single JWT structure**\n- Identity semantics (user, workload, AI-agent, delegation) are conveyed **within the same assertion**\n- Resource Authorization Server relies on IdP Authorization Server policy for identity composition and delegation enforcement\n\nThis establishes a stable federation boundary while allowing identity semantics to evolve.\n\n## 2. Normative Dependencies\n\nThe draft adds normative references to:\n\n- [**OAuth Entity Profiles**](https://datatracker.ietf.org/doc/draft-mora-oauth-entity-profiles/)\n- [**IETF WIMSE Workload Identity Credentials**](https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/)\n\nID-JAG adds support for the following existing claims from Entity Profiles:\n\n- `sub_profile`\n- `client_profile`\n\nIdP Authorization Server publishes additional Authorization Server metadata:\n\n- `entity_profiles_supported`\n\nNo new claim registrations are introduced.\n\n## 3. IdP Policy Determines ID-JAG Structure\n\nDuring Token Exchange, IdP Authorization Server evaluates:\n\n- Target audience (`aud` = Resource Authorization Server) to determine the trust relationship, token requirements, and delegation model\n- Supplied credentials (user token, workload token, or both)\n- Delegation grants and enterprise policy\n- Resource Authorization Server capability profile\n\n### Support for WIMSE Workload Credentials\n\nWhen a workload presents an **actor credential** conforming to the WIMSE Workload Identity Credentials specification, the IdP Authorization Server:\n\n- MAY accept the WIMSE credential as an `actor_token` in a Token Exchange request\n- Validates the credential according to WIMSE processing rules and local trust policy\n- Derives the workload identity used in the `act` claim or `sub` claim (for workload SSO)\n\nThis enables interoperable workload identity federation using a standardized workload credential format.\n\nThe IdP Authorization Server then selects the appropriate identity model and issues an ID-JAG that reflects the selected delegation model and context.\n\n### A. Existing User Delegation (Implicit Model)\n\n```\nsub = user\nsub_profile = user\n(no act claim)\n```\n\nMaintains full backward compatibility.\n\n### B. Explicit Delegation (Modern On-Behalf-Of)\n\n```\nsub = user\nsub_profile = user\nact.sub = client/workload\nact.sub_profile includes \"service\" or \"ai-agent\" (if non-user)\n```\n\nMakes delegation visible and enforceable.\n\n### C. Workload Identity SSO (Acting as Self)\n\n```\nsub = workload\nsub_profile includes \"service\" or other non-user profile\n```\n\nEnables cross-domain workload SSO.\n\n### D. Agent Identity SSO (Acting as Self)\n\n```\nsub = ai-agent\nsub_profile includes \"ai-agent\"\n```\n\nEnables cross-domain AI agent SSO.\n\n### E. Compatibility Mapping\n\nIdP Authorization Server maps identities into a representation Resource Authorization Server understands when native workload, AI-agent, or actor support is absent.\n\nMapping is **policy-controlled**, not client-controlled.\n\n## 4. Resource AS Processing Rules\n\nResource Authorization Server processes the **same ID-JAG assertion format** in all cases.\n\n| Condition | Resource Authorization Server Behavior |\n|----------|-----------------------------------------|\n| `act` present | Perform dual-principal authorization |\n| No `act`, `sub_profile=user` | Standard user authorization |\n| No `act`, `sub_profile=service` | Workload acting as self |\n| No `act`, `sub_profile=ai-agent` | AI agent acting as self |\n| Compatibility mapping | Process as normal legacy identity |\n\n## 5. Access Token Issuance\n\nResource Authorization Server issues tokens preserving the identity model expressed in the ID-JAG.\n\nPermissions must be the **intersection** of:\n\n- User rights (if present)\n- Workload/Agent rights\n- Delegation grants\n- Requested scope/resource\n- Requested Authorization Details\n\n## 6. Sender-Constraining Guidance\n\n| Scenario | Recommendation |\n|----------|----------------|\n| Existing OAuth user model | Existing guidance applies |\n| Explicit delegation (`act`) | SHOULD use sender-constrained tokens |\n| Workload acting as self | SHOULD use sender-constrained tokens |\n| Compatibility mapping | SHOULD use sender-constraining if workload-originated |\n\n## 7. Metadata and Discovery\n\nNo new ID-JAG metadata is defined.\n\nAuthorization Servers supporting this extension **SHOULD** publish:\n\n```\nentity_profiles_supported\n```\n\nIdP Authorization Server maintains internal policy describing Resource Authorization Server capability levels.\n\n## 8. IANA Impact\n\nNone.\n\n- No new JWT claim registrations\n- No new registries\n- Reuses Entity Profiles and RFC 8693 `act`\n\n## Final Outcome\n\n| Goal | How It Is Achieved |\n|------|--------------------|\n| Preserve existing OAuth delegation | Keep implicit user model unchanged |\n| Support workload or AI Agent identity SSO | `sub_profile` indicates service or ai-agent |\n| Support delegated on-behalf-of access | `sub` = user + `act` = workload |\n| Provide common AS-to-AS assertion | ID-JAG JWT assertion format |\n| Support legacy systems | IdP compatibility mapping |\n| Enable future actor chains | Policy-driven evolution |\n| Keep single client interface | IdP decides representation per AS |\n| Avoid new claims | Reuse Entity Profiles + `act` |\n\nThis extension establishes ID-JAG as a **common JWT assertion format between authorization servers**, enabling both **workload identity SSO** and **delegated user access** while remaining fully backward compatible.\n",
+      "createdAt": "2026-01-31T18:02:48Z",
+      "updatedAt": "2026-01-31T18:09:27Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -4841,24 +4865,26 @@
       "id": "PR_kwDOKv5r-s641kgh",
       "title": "initial attempt to add DPoP support for ID-JAG",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/67",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This PR attempts to resolve #28 by adding processing rules for DPoP to security considerations",
       "createdAt": "2025-12-15T05:38:24Z",
-      "updatedAt": "2026-01-27T05:51:21Z",
+      "updatedAt": "2026-01-30T23:45:17Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
+      "baseRefOid": "5640b1b4be268f9728e380ad6ed94a097d093ce4",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "dpop",
-      "headRefOid": "cf28a75a2d125f5f0fa11d9be792b8df9e0c3794",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "3a5d257a6bdc6b09d382b90524199a95889bafdc",
+      "closedAt": "2026-01-30T23:45:13Z",
+      "mergedAt": "2026-01-30T23:45:13Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "a242d8dfcc80940c2ae1aab91ccc21a6e6bb61e6"
+      },
       "comments": [
         {
           "author": "panva",
@@ -5109,6 +5135,226 @@
               "updatedAt": "2026-01-27T05:51:22Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eHnrE",
+          "commit": {
+            "abbreviatedOid": "cf28a75"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T06:09:22Z",
+          "updatedAt": "2026-01-30T06:09:22Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Updated PR with additional context.  @aaronpk can you review and approve",
+              "createdAt": "2026-01-30T06:09:22Z",
+              "updatedAt": "2026-01-30T06:09:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eJN0j",
+          "commit": {
+            "abbreviatedOid": "0c649b3"
+          },
+          "author": "panva",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T08:22:42Z",
+          "updatedAt": "2026-01-30T08:22:43Z",
+          "comments": [
+            {
+              "originalPosition": 96,
+              "body": "Matching a JSON Object exactly is not a well defined term. Does it entail checking for having the same set of required and optional attributes? What about non-recognized attributes? Of the same values? What of attribute order? What about array member values? Just a couple questions an implementer may have off the top of my head...\r\n\r\nSince the ID-JAG and DPoP Proof come from different components it is likely that there may be differences in how they serialize keys, what properties they include, etc.\r\n\r\nIn existing DPoP use the only artefact where the JWK is present is the DPoP Proof, and when it comes to DPoP-bound artefacts they use the thumbprint of the JWK to sidestep this problem.\r\n\r\nI believe that either draft-parecki-oauth-jwt-dpop-grant-00 needs to use a thumbprint and then this draft can say the cnf.jkt must match exactly or this draft must define the comparison to account for differences in serialization (and probably resolve to calculating JWK thumbprints anyway)",
+              "createdAt": "2026-01-30T08:22:43Z",
+              "updatedAt": "2026-01-30T08:33:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eSYRM",
+          "commit": {
+            "abbreviatedOid": "0c649b3"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T16:44:30Z",
+          "updatedAt": "2026-01-30T16:44:30Z",
+          "comments": [
+            {
+              "originalPosition": 96,
+              "body": "this seems like a compelling argument for draft-parecki-oauth-jwt-dpop-grant-00 to adopt thumbprint @aaronpk ",
+              "createdAt": "2026-01-30T16:44:30Z",
+              "updatedAt": "2026-01-30T16:44:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eXu3k",
+          "commit": {
+            "abbreviatedOid": "0c649b3"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T22:42:45Z",
+          "updatedAt": "2026-01-30T22:42:46Z",
+          "comments": [
+            {
+              "originalPosition": 96,
+              "body": "I like that idea",
+              "createdAt": "2026-01-30T22:42:46Z",
+              "updatedAt": "2026-01-30T22:42:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eX8xP",
+          "commit": {
+            "abbreviatedOid": "0c649b3"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T22:56:39Z",
+          "updatedAt": "2026-01-30T22:56:39Z",
+          "comments": [
+            {
+              "originalPosition": 96,
+              "body": "I just pushed a change for that: https://github.com/aaronpk/oauth-jwt-dpop-grant/commit/ca4ddd3753ed69441c3874d252afea1f7f40bca6",
+              "createdAt": "2026-01-30T22:56:39Z",
+              "updatedAt": "2026-01-30T22:56:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eYS56",
+          "commit": {
+            "abbreviatedOid": "85cadc8"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T23:27:49Z",
+          "updatedAt": "2026-01-30T23:27:49Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "```suggestion\nThe `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jkt` property as defined in {{RFC9449}}, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.\n```",
+              "createdAt": "2026-01-30T23:27:49Z",
+              "updatedAt": "2026-01-30T23:27:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eYYAP",
+          "commit": {
+            "abbreviatedOid": "4458993"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T23:32:05Z",
+          "updatedAt": "2026-01-30T23:32:05Z",
+          "comments": [
+            {
+              "originalPosition": 64,
+              "body": "```suggestion\n2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing a `jkt` property with the JWK SHA-256 Thumbprint computed from the DPoP proof's `jwk` header parameter as defined in {{Section 6.1 of RFC9449}}.  This enables the Resource Authorization Server to validate the key binding for the ID-JAG using simple string comparison of the JWK SHA-256 Thumbprint.\n```",
+              "createdAt": "2026-01-30T23:32:05Z",
+              "updatedAt": "2026-01-30T23:32:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eYf2S",
+          "commit": {
+            "abbreviatedOid": "4780b4a"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T23:38:57Z",
+          "updatedAt": "2026-01-30T23:38:58Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "```suggestion\n3. The token exchange response does not explicitly indicate whether key binding was successfully performed by the IdP.  The `token_type` response parameter for an ID-JAG is always `N_A` per {{Section 2.2.1 of RFC8693}}. The client SHOULD inspect the ID-JAG to determine if a `cnf` claim is present and whether it represents the same key as the DPoP proof.  This enables the client to detect if the IdP successfully processed the DPoP proof in the token exchange request and bound the issued ID-JAG, preventing the IdP from silently ignoring the DPoP proof and mitigating downgrade attacks.\n```",
+              "createdAt": "2026-01-30T23:38:58Z",
+              "updatedAt": "2026-01-30T23:38:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eYggi",
+          "commit": {
+            "abbreviatedOid": "995d5ff"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T23:39:33Z",
+          "updatedAt": "2026-01-30T23:39:33Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "```suggestion\n  RFC7800:\n  RFC7638:\n```",
+              "createdAt": "2026-01-30T23:39:33Z",
+              "updatedAt": "2026-01-30T23:39:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eYg5e",
+          "commit": {
+            "abbreviatedOid": "b513e63"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T23:39:54Z",
+          "updatedAt": "2026-01-30T23:39:54Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "```suggestion\nThe `cnf` claim format follows {{Section 6.1 of RFC9449}}:\n```",
+              "createdAt": "2026-01-30T23:39:54Z",
+              "updatedAt": "2026-01-30T23:39:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7eYkKT",
+          "commit": {
+            "abbreviatedOid": "1c32957"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-30T23:42:57Z",
+          "updatedAt": "2026-01-30T23:42:57Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "```suggestion\n* Added refresh token as an optional subject token input to the Token Exchange for SAML interop\n* Described how to use DPoP with the JD-JAG exchange\n```",
+              "createdAt": "2026-01-30T23:42:57Z",
+              "updatedAt": "2026-01-30T23:42:57Z"
+            }
+          ]
         }
       ]
     },
@@ -5117,24 +5363,26 @@
       "id": "PR_kwDOKv5r-s642Euy",
       "title": "Support for Refresh Token as Subject_Token & SAML 2.0 Interop",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/68",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Resolves #58 & #44 ",
       "createdAt": "2025-12-15T06:30:08Z",
-      "updatedAt": "2026-01-27T05:30:59Z",
+      "updatedAt": "2026-01-30T22:39:22Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "refresh-token",
       "headRefOid": "b55390a3948181d71520a9213ace5fb2f36e41c2",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-01-30T22:39:21Z",
+      "mergedAt": "2026-01-30T22:39:21Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "a0daacff2ae521366c543854d7e385c54cc1cb09"
+      },
       "comments": [],
       "reviews": [
         {
@@ -5217,24 +5465,26 @@
       "id": "PR_kwDOKv5r-s65BNr7",
       "title": "added RAR support and updated processing rules for Token Exchange and ID-JAG",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/70",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Resolves #65 ",
       "createdAt": "2025-12-15T21:40:30Z",
-      "updatedAt": "2026-01-27T05:30:29Z",
+      "updatedAt": "2026-01-30T22:37:17Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "3bce7feed1e6ec38d9d07355c2a769aa4e6d5137",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "authorization_details",
       "headRefOid": "250b0afb5802e2352031a5b887231fb50bf23b4b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-01-30T22:36:09Z",
+      "mergedAt": "2026-01-30T22:36:08Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "b4c315764398e73f62612ae7bdf8f5792e424118"
+      },
       "comments": [],
       "reviews": [
         {
