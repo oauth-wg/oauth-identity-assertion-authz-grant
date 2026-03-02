@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 3 August 2026                                       Independent
+Expires: 3 September 2026                                    Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         30 January 2026
+                                                            2 March 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 August 2026.
+   This Internet-Draft will expire on 3 September 2026.
 
 Copyright Notice
 
@@ -90,20 +90,25 @@ Table of Contents
        4.4.3.  Refresh Token
      4.5.  SAML 2.0 Identity Assertion Interopability
    5.  Cross-Domain Client ID Handling
-   6.  Authorization Server (IdP) Metadata
-   7.  Security Considerations
-     7.1.  Client Authentication
-     7.2.  Step-Up Authentication
-     7.3.  Cross-Domain Use
-     7.4.  Sender Constraining Tokens
-       7.4.1.  Proof-of-Possession
-   8.  IANA Considerations
-     8.1.  Media Types
-     8.2.  OAuth URI Registration
-     8.3.  JSON Web Token Claims Registration
-   9.  References
-     9.1.  Normative References
-     9.2.  Informative References
+   6.  Tenant Relationships with Issuer and Client ID
+     6.1.  Issuer and Tenant Relationship
+     6.2.  Client ID and Tenant Relationship
+     6.3.  Subject Identifier Uniqueness with Tenants
+     6.4.  Tenant Context in Token Exchange
+   7.  Authorization Server (IdP) Metadata
+   8.  Security Considerations
+     8.1.  Client Authentication
+     8.2.  Step-Up Authentication
+     8.3.  Cross-Domain Use
+     8.4.  Sender Constraining Tokens
+       8.4.1.  Proof-of-Possession
+   9.  IANA Considerations
+     9.1.  Media Types
+     9.2.  OAuth URI Registration
+     9.3.  JSON Web Token Claims Registration
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
    Appendix A.  Use Cases
      A.1.  Enterprise Deployment
        A.1.1.  Preconditions
@@ -285,6 +290,16 @@ Table of Contents
 
    amr:  OPTIONAL - Identifiers for authentication methods used when
       authenticating the End-User as defined in [OpenID.Core].
+
+   aud_tenant:  OPTIONAL - A JSON string that represents a Resource
+      Authorization Server tenant identifier.  This claim is only
+      included when the Resource Authorization Server is multi-tenant
+      and the IdP knows the tenant identifier.  When aud_tenant is
+      present, the aud_sub claim represents the identifier the Resource
+      Authorization Server has for the account within the context of
+      that specific Resource Authorization Server tenant.  The
+      combination of aud + aud_tenant and aud_sub MUST be unique within
+      the Resource Authorization Server.
 
    aud_sub:  OPTIONAL - The Resource Authorization Server's identifier
       for the End-User as defined in [OpenID.Enterprise].
@@ -491,8 +506,16 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
       urn:ietf:params:oauth:token-type:id-jag indicates that an Identity
       Assertion JWT Authorization Grant is being requested.
 
-   audience:  REQUIRED - The issuer identifier of the Resource
-      Authorization Server as defined in Section 2 of [RFC8414].
+   audience:  REQUIRED - The identifier of the Resource Authorization
+      Server in another trust domain as the intended audience for the
+      ID-JAG.  IdP Authorization Servers MUST support the issuer
+      identifier of the Resource Authorization Server as defined in
+      Section 2 of [RFC8414].  IdP Authorization Servers MAY support
+      additional IdP-specific unique identifiers for Resource
+      Authorization Servers in other trust domains as an extension
+      point; when such identifiers are used, the IdP maps them to the
+      corresponding Resource Authorization Server audience for the
+      purposes of issuing the ID-JAG.
 
    resource:  OPTIONAL - The Resource Identifier of the Resource Server
       as defined in Section 2 of [RFC8707].
@@ -1139,7 +1162,97 @@ Pragma: no-cache
    removes the need for the IdP Authorization Server to maintain a
    mapping of each client registration.
 
-6.  Authorization Server (IdP) Metadata
+6.  Tenant Relationships with Issuer and Client ID
+
+   In multi-tenant deployments, the relationship between tenants,
+   issuers, and client identifiers is critical for proper identity and
+   authorization management.  This section explains how these components
+   relate to each other in the context of Identity Assertion JWT
+   Authorization Grants.
+
+6.1.  Issuer and Tenant Relationship
+
+   An Authorization Server may operate as either a single-tenant or
+   multi-tenant issuer:
+
+   *  *Single-tenant issuer*: The issuer identifier (iss) uniquely
+      identifies both the Authorization Server and the tenant.  All
+      clients and users belong to a single tenant context.  The issuer
+      identifier alone is sufficient to identify the tenant.
+
+   *  *Multi-tenant issuer*: The issuer identifier (iss) identifies the
+      Authorization Server, but multiple tenants may be hosted by the
+      same issuer.  In this case, the tenant identifier (tenant) claim
+      is used in conjunction with the issuer identifier to uniquely
+      identify the tenant context.  The combination of iss + tenant
+      uniquely identifies the tenant.
+
+   When an IdP Authorization Server issues an ID-JAG, it MUST include
+   the tenant claim if the issuer is multi-tenant and the tenant context
+   is relevant for the Resource Authorization Server.  The IdP MUST
+   determine the appropriate tenant identifier based on the subject's
+   tenant membership and the target Resource Authorization Server's
+   tenant requirements.
+
+6.2.  Client ID and Tenant Relationship
+
+   The relationship between client_id and tenant depends on the
+   deployment model:
+
+   *  *Tenant-scoped client identifiers*: In some deployments, the
+      client_id is unique only within a tenant context.  The same
+      client_id value may exist in different tenants, and the
+      combination of tenant + client_id (or iss + tenant + client_id for
+      multi-tenant issuers) uniquely identifies the client registration.
+
+   *  *Global client identifiers*: In other deployments, the client_id
+      is globally unique across all tenants.  The client_id alone
+      uniquely identifies the client, regardless of tenant context.
+
+   The IdP Authorization Server MUST understand the client identifier
+   model used by the Resource Authorization Server when including the
+   client_id claim in an ID-JAG.  For tenant-scoped client identifiers,
+   the IdP MUST ensure that the client_id included in the ID-JAG is
+   valid within the tenant context indicated by the tenant claim (if
+   present) or the issuer's tenant context.
+
+6.3.  Subject Identifier Uniqueness with Tenants
+
+   As specified in Section 3, subject identifiers (sub) have different
+   uniqueness requirements based on tenant configuration:
+
+   *  For single-tenant issuers: The subject identifier MUST be unique
+      when scoped with issuer (iss + sub).
+
+   *  For multi-tenant issuers: The subject identifier MUST be unique
+      when scoped with issuer and tenant (iss + tenant + sub).
+
+   The IdP Authorization Server MUST ensure that the sub claim in the
+   ID-JAG follows the appropriate uniqueness rules for the target
+   Resource Authorization Server.  When the Resource Authorization
+   Server is multi-tenant, the IdP MUST include the tenant claim in the
+   ID-JAG to ensure proper subject identifier scoping.
+
+6.4.  Tenant Context in Token Exchange
+
+   When a Client requests an ID-JAG via Token Exchange, the IdP
+   Authorization Server determines the tenant context from:
+
+   1.  The subject token (e.g., ID Token or SAML assertion) used in the
+       token exchange request, which may contain tenant information
+
+   2.  The authenticated client's tenant membership
+
+   3.  The target Resource Authorization Server's tenant requirements
+
+   The IdP MUST evaluate policy to determine if the requested audience
+   (Resource Authorization Server) requires tenant information, and if
+   so, which tenant identifier to include in the issued ID-JAG.  The
+   tenant identifier in the ID-JAG MUST match the tenant context that
+   the Resource Authorization Server expects for the specified client_id
+   and sub.
+
+7.  Authorization Server (IdP) Metadata
 
    An IdP can advertise its support for this profile in its OAuth
    Authorization Server Metadata [RFC8414].  Identity and Authorization
@@ -1153,9 +1266,9 @@ Pragma: no-cache
 
    urn:ietf:params:oauth:token-type:id-jag
 
-7.  Security Considerations
+8.  Security Considerations
 
-7.1.  Client Authentication
+8.1.  Client Authentication
 
    This specification SHOULD only be supported for confidential clients.
    Public clients SHOULD use the existing authorization code grant and
@@ -1163,7 +1276,7 @@ Pragma: no-cache
    2.0 Authorization Request where the user can interactively consent to
    the access delegation.
 
-7.2.  Step-Up Authentication
+8.2.  Step-Up Authentication
 
    In the initial token exchange request, the IdP may require step-up
    authentication for the subject if the authentication context in the
@@ -1191,7 +1304,7 @@ Cache-Control: no-store
    Connect for SSO when performing a step-up to skip the need for
    additional token exchange round-trip.
 
-7.3.  Cross-Domain Use
+8.3.  Cross-Domain Use
 
    This specification is intended for cross-domain uses where the
    Client, Resource App, and Identity Provider are all in different
@@ -1199,9 +1312,9 @@ Cache-Control: no-store
    access tokens in response to an ID-JAG it issued itself.  Doing so
    could lead to unintentional broadening of the scope of authorization.
 
-7.4.  Sender Constraining Tokens
+8.4.  Sender Constraining Tokens
 
-7.4.1.  Proof-of-Possession
+8.4.1.  Proof-of-Possession
 
    Identity Assertion JWT Authorization Grant may support key binding to
    enable sender-constrained tokens as described in Section 4 of
@@ -1231,7 +1344,7 @@ Cache-Control: no-store
    exchanging the ID-JAG for an access token at the Resource
    Authorization Server).
 
-7.4.1.1.  Proof-of-Possession During Token Exchange
+8.4.1.1.  Proof-of-Possession During Token Exchange
 
    When a client requests an ID-JAG from the IdP Authorization Server
    via Token Exchange, the client MAY include a DPoP proof in the
@@ -1298,14 +1411,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
        cnf claim.
 
-7.4.1.2.  Proof-of-Possession During ID-JAG Exchange
+8.4.1.2.  Proof-of-Possession During ID-JAG Exchange
 
    When a client exchanges an ID-JAG for an access token at the Resource
    Authorization Server, the processing rules depend on whether the ID-
    JAG contains a cnf claim and whether the client presents a DPoP
    proof.
 
-7.4.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
+8.4.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
 
    If the ID-JAG contains a cnf claim and the client presents a DPoP
    proof, the Resource Authorization Server MUST:
@@ -1351,7 +1464,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
      "scope": "chat.read chat.history"
    }
 
-7.4.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
+8.4.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
 
    If the ID-JAG contains a cnf claim but the client does not present a
    DPoP proof, the Resource Authorization Server MUST reject the request
@@ -1369,7 +1482,7 @@ Cache-Control: no-store
   "error_description": "Proof of possession required for this authorization grant"
 }
 
-7.4.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
+8.4.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
             Presented
 
    If the ID-JAG does not contain a cnf claim but the client presents a
@@ -1385,7 +1498,7 @@ Cache-Control: no-store
    3.  The access token response will indicate the token type (e.g.,
        DPoP for DPoP-bound tokens, or Bearer for unconstrained tokens).
 
-7.4.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
+8.4.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
             Presented
 
    If the ID-JAG does not contain a cnf claim and the client does not
@@ -1410,16 +1523,16 @@ Cache-Control: no-store
   "error_description": "Sender-constrained tokens required for this resource server"
 }
 
-8.  IANA Considerations
+9.  IANA Considerations
 
-8.1.  Media Types
+9.1.  Media Types
 
    This section registers oauth-id-jag+jwt, a new media type [RFC2046]
    in the "Media Types" registry [IANA.media-types] in the manner
    described in [RFC6838].  It can be used to indicate that the content
    is an Identity Assertion JWT Authorization Grant.
 
-8.2.  OAuth URI Registration
+9.2.  OAuth URI Registration
 
    This section registers urn:ietf:params:oauth:token-type:id-jag in the
    "OAuth URI" subregistry of the "OAuth Parameters" registry
@@ -1434,11 +1547,12 @@ Cache-Control: no-store
 
    *  Specification Document: This document
 
-8.3.  JSON Web Token Claims Registration
+9.3.  JSON Web Token Claims Registration
 
-   This section registers resource in the "JSON Web Token Claims"
-   subregistry of the "JSON Web Token (JWT)" registry [IANA.jwt].  The
-   "JSON Web Token Claims" subregistry was established by [RFC7519].
+   This section registers the following claims in the "JSON Web Token
+   Claims" subregistry of the "JSON Web Token (JWT)" registry
+   [IANA.jwt].  The "JSON Web Token Claims" subregistry was established
+   by [RFC7519].
 
    *  Claim Name: resource
 
@@ -1448,17 +1562,25 @@ Cache-Control: no-store
 
    *  Specification Document(s): Section 3
 
-9.  References
+   *  Claim Name: aud_tenant
 
-9.1.  Normative References
+   *  Claim Description: Resource Authorization Server tenant identifier
+
+   *  Change Controller: IETF
+
+   *  Specification Document(s): Section 3
+
+10.  References
+
+10.1.  Normative References
 
    [I-D.ietf-oauth-identity-chaining]
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
               M. J., and B. Campbell, "OAuth Identity and Authorization
               Chaining Across Domains", Work in Progress, Internet-
-              Draft, draft-ietf-oauth-identity-chaining-06, 12 September
-              2025, <https://datatracker.ietf.org/doc/html/draft-ietf-
-              oauth-identity-chaining-06>.
+              Draft, draft-ietf-oauth-identity-chaining-08, 9 February
+              2026, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              oauth-identity-chaining-08>.
 
    [I-D.ietf-oauth-rfc7523bis]
               Jones, M. B., Campbell, B., Mortimore, C., and F. Skokan,
@@ -1574,14 +1696,14 @@ Cache-Control: no-store
               Possession (DPoP)", RFC 9449, DOI 10.17487/RFC9449,
               September 2023, <https://www.rfc-editor.org/rfc/rfc9449>.
 
-9.2.  Informative References
+10.2.  Informative References
 
    [I-D.ietf-oauth-client-id-metadata-document]
               Parecki, A. and E. Smith, "OAuth Client ID Metadata
               Document", Work in Progress, Internet-Draft, draft-ietf-
-              oauth-client-id-metadata-document-00, 8 October 2025,
+              oauth-client-id-metadata-document-01, 1 March 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              client-id-metadata-document-00>.
+              client-id-metadata-document-01>.
 
    [RFC9470]  Bertocci, V. and B. Campbell, "OAuth 2.0 Step Up
               Authentication Challenge Protocol", RFC 9470,

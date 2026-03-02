@@ -171,7 +171,7 @@
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Oxygen Mono';
@@ -179,7 +179,8 @@
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 }
 
 @font-face {
@@ -1050,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">ID JWT Authz Grant</td>
-<td class="right">January 2026</td>
+<td class="right">March 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Parecki, et al.</td>
-<td class="center">Expires 3 August 2026</td>
+<td class="center">Expires 3 September 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-oauth-identity-assertion-authz-grant-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-01-30" class="published">30 January 2026</time>
+<time datetime="2026-03-02" class="published">2 March 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-08-03">3 August 2026</time></dd>
+<dd class="expires"><time datetime="2026-09-03">3 September 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1130,7 +1131,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 August 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1219,95 +1220,112 @@ svg :is([fill="white"], [fill^="#fff"]) {
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-cross-domain-client-id-hand" class="internal xref">Cross-Domain Client ID Handling</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-authorization-server-idp-me" class="internal xref">Authorization Server (IdP) Metadata</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-tenant-relationships-with-i" class="internal xref">Tenant Relationships with Issuer and Client ID</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
-                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-client-authentication" class="internal xref">Client Authentication</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-issuer-and-tenant-relations" class="internal xref">Issuer and Tenant Relationship</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
-                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-step-up-authentication" class="internal xref">Step-Up Authentication</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-client-id-and-tenant-relati" class="internal xref">Client ID and Tenant Relationship</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
-                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-cross-domain-use" class="internal xref">Cross-Domain Use</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-subject-identifier-uniquene" class="internal xref">Subject Identifier Uniqueness with Tenants</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
-                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-sender-constraining-tokens" class="internal xref">Sender Constraining Tokens</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.1">
-                    <p id="section-toc.1-1.7.2.4.2.1.1"><a href="#section-7.4.1" class="auto internal xref">7.4.1</a>.  <a href="#name-proof-of-possession" class="internal xref">Proof-of-Possession</a></p>
-</li>
-                </ul>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.4">
+                <p id="section-toc.1-1.6.2.4.1"><a href="#section-6.4" class="auto internal xref">6.4</a>.  <a href="#name-tenant-context-in-token-exc" class="internal xref">Tenant Context in Token Exchange</a></p>
 </li>
             </ul>
 </li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-authorization-server-idp-me" class="internal xref">Authorization Server (IdP) Metadata</a></p>
+</li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
-            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
-                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-media-types" class="internal xref">Media Types</a></p>
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-client-authentication" class="internal xref">Client Authentication</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
-                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-oauth-uri-registration" class="internal xref">OAuth URI Registration</a></p>
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-step-up-authentication" class="internal xref">Step-Up Authentication</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
-                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-json-web-token-claims-regis" class="internal xref">JSON Web Token Claims Registration</a></p>
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-cross-domain-use" class="internal xref">Cross-Domain Use</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-sender-constraining-tokens" class="internal xref">Sender Constraining Tokens</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4.2.1">
+                    <p id="section-toc.1-1.8.2.4.2.1.1"><a href="#section-8.4.1" class="auto internal xref">8.4.1</a>.  <a href="#name-proof-of-possession" class="internal xref">Proof-of-Possession</a></p>
+</li>
+                </ul>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
-                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-media-types" class="internal xref">Media Types</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
-                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-oauth-uri-registration" class="internal xref">OAuth URI Registration</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-json-web-token-claims-regis" class="internal xref">JSON Web Token Claims Registration</a></p>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-use-cases" class="internal xref">Use Cases</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-references" class="internal xref">References</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
-                <p id="section-toc.1-1.10.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-enterprise-deployment" class="internal xref">Enterprise Deployment</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1.2.1">
-                    <p id="section-toc.1-1.10.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-preconditions" class="internal xref">Preconditions</a></p>
-</li>
-                </ul>
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
-                <p id="section-toc.1-1.10.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-email-and-calendaring-appli" class="internal xref">Email and Calendaring Applications</a></p>
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-use-cases" class="internal xref">Use Cases</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2.2.1">
-                    <p id="section-toc.1-1.10.2.2.2.1.1"><a href="#appendix-A.2.1" class="auto internal xref">A.2.1</a>.  <a href="#name-preconditions-2" class="internal xref">Preconditions</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
+                <p id="section-toc.1-1.11.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-enterprise-deployment" class="internal xref">Enterprise Deployment</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1.2.1">
+                    <p id="section-toc.1-1.11.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-preconditions" class="internal xref">Preconditions</a></p>
 </li>
                 </ul>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
-                <p id="section-toc.1-1.10.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-llm-agent-using-enterprise-" class="internal xref">LLM Agent using Enterprise Tools</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
+                <p id="section-toc.1-1.11.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-email-and-calendaring-appli" class="internal xref">Email and Calendaring Applications</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3.2.1">
-                    <p id="section-toc.1-1.10.2.3.2.1.1"><a href="#appendix-A.3.1" class="auto internal xref">A.3.1</a>.  <a href="#name-preconditions-3" class="internal xref">Preconditions</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2.2.1">
+                    <p id="section-toc.1-1.11.2.2.2.1.1"><a href="#appendix-A.2.1" class="auto internal xref">A.2.1</a>.  <a href="#name-preconditions-2" class="internal xref">Preconditions</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3.2.2">
-                    <p id="section-toc.1-1.10.2.3.2.2.1"><a href="#appendix-A.3.2" class="auto internal xref">A.3.2</a>.  <a href="#name-example-sequence" class="internal xref">Example Sequence</a></p>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3">
+                <p id="section-toc.1-1.11.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-llm-agent-using-enterprise-" class="internal xref">LLM Agent using Enterprise Tools</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.1">
+                    <p id="section-toc.1-1.11.2.3.2.1.1"><a href="#appendix-A.3.1" class="auto internal xref">A.3.1</a>.  <a href="#name-preconditions-3" class="internal xref">Preconditions</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.2">
+                    <p id="section-toc.1-1.11.2.3.2.2.1"><a href="#appendix-A.3.2" class="auto internal xref">A.3.2</a>.  <a href="#name-example-sequence" class="internal xref">Example Sequence</a></p>
 </li>
                 </ul>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
-</li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-document-history" class="internal xref">Document History</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-document-history" class="internal xref">Document History</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1460,9 +1478,15 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 </dd>
         <dd class="break"></dd>
 <dt id="section-3-5.29">
-<code>aud_sub</code>:</dt>
+<code>aud_tenant</code>:</dt>
         <dd style="margin-left: 1.5em" id="section-3-5.30">
-          <p id="section-3-5.30.1"><span class="bcp14">OPTIONAL</span> - The Resource Authorization Server's identifier for the End-User as defined in <span>[<a href="#OpenID.Enterprise" class="cite xref">OpenID.Enterprise</a>]</span>.<a href="#section-3-5.30.1" class="pilcrow">¶</a></p>
+          <p id="section-3-5.30.1"><span class="bcp14">OPTIONAL</span> - A JSON string that represents a Resource Authorization Server tenant identifier. This claim is only included when the Resource Authorization Server is multi-tenant and the IdP knows the tenant identifier. When <code>aud_tenant</code> is present, the <code>aud_sub</code> claim represents the identifier the Resource Authorization Server has for the account within the context of that specific Resource Authorization Server tenant. The combination of <code>aud</code> + <code>aud_tenant</code> and <code>aud_sub</code> <span class="bcp14">MUST</span> be unique within the Resource Authorization Server.<a href="#section-3-5.30.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-5.31">
+<code>aud_sub</code>:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-5.32">
+          <p id="section-3-5.32.1"><span class="bcp14">OPTIONAL</span> - The Resource Authorization Server's identifier for the End-User as defined in <span>[<a href="#OpenID.Enterprise" class="cite xref">OpenID.Enterprise</a>]</span>.<a href="#section-3-5.32.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1681,7 +1705,7 @@ Content-Type: application/json
 <dt id="section-4.3-2.3">
 <code>audience</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.4">
-            <p id="section-4.3-2.4.1"><span class="bcp14">REQUIRED</span> - The issuer identifier of the Resource Authorization Server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-2" class="relref">Section 2</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.4.1"><span class="bcp14">REQUIRED</span> - The identifier of the Resource Authorization Server in another trust domain as the intended audience for the ID-JAG. IdP Authorization Servers <span class="bcp14">MUST</span> support the issuer identifier of the Resource Authorization Server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-2" class="relref">Section 2</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. IdP Authorization Servers <span class="bcp14">MAY</span> support additional IdP-specific unique identifiers for Resource Authorization Servers in other trust domains as an extension point; when such identifiers are used, the IdP maps them to the corresponding Resource Authorization Server audience for the purposes of issuing the ID-JAG.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.3-2.5">
@@ -2160,7 +2184,7 @@ Pragma: no-cache
           <h4 id="name-refresh-token">
 <a href="#section-4.4.3" class="section-number selfRef">4.4.3. </a><a href="#name-refresh-token" class="section-name selfRef">Refresh Token</a>
           </h4>
-<p id="section-4.4.3-1">The Resource Authorization Server <span class="bcp14">SHOULD NOT</span> return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-06#section-5.2" class="relref">Section 5.2</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>.<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-1">The Resource Authorization Server <span class="bcp14">SHOULD NOT</span> return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-08#section-5.2" class="relref">Section 5.2</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>.<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.4.3-2">When the access token has expired, clients <span class="bcp14">SHOULD</span> re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use Refresh Token for the Resource Authorization Server.<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
 <p id="section-4.4.3-3">If the ID-JAG has expired, the Client <span class="bcp14">SHOULD</span> request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g ID Token)<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
 <p id="section-4.4.3-4">If the ID Token is expired, the Client <span class="bcp14">MAY</span> use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it <span class="bcp14">SHOULD</span> re-authenticate the user by redirecting to the IdP.<a href="#section-4.4.3-4" class="pilcrow">¶</a></p>
@@ -2270,36 +2294,115 @@ Pragma: no-cache
 <p id="section-5-7">Alternatively, if clients use "Client ID Metadata Document" <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span> as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.<a href="#section-5-7" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="idp-metadata">
+<div id="tenant-relationships">
 <section id="section-6">
-      <h2 id="name-authorization-server-idp-me">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-authorization-server-idp-me" class="section-name selfRef">Authorization Server (IdP) Metadata</a>
+      <h2 id="name-tenant-relationships-with-i">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-tenant-relationships-with-i" class="section-name selfRef">Tenant Relationships with Issuer and Client ID</a>
       </h2>
-<p id="section-6-1">An IdP can advertise its support for this profile in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. Identity and Authorization Chaining Across Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines a new metadata property <code>identity_chaining_requested_token_types_supported</code> for this purpose.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">To advertise support for the Identity Assertion JWT Authorization Grant, the authorization server <span class="bcp14">SHOULD</span> include the following value in the <code>identity_chaining_requested_token_types_supported</code> property:<a href="#section-6-2" class="pilcrow">¶</a></p>
-<p id="section-6-3"><code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-6-3" class="pilcrow">¶</a></p>
+<p id="section-6-1">In multi-tenant deployments, the relationship between tenants, issuers, and client identifiers is critical for proper identity and authorization management. This section explains how these components relate to each other in the context of Identity Assertion JWT Authorization Grants.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="issuer-and-tenant-relationship">
+<section id="section-6.1">
+        <h3 id="name-issuer-and-tenant-relations">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-issuer-and-tenant-relations" class="section-name selfRef">Issuer and Tenant Relationship</a>
+        </h3>
+<p id="section-6.1-1">An Authorization Server may operate as either a single-tenant or multi-tenant issuer:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1-2.1">
+            <p id="section-6.1-2.1.1"><strong>Single-tenant issuer</strong>: The issuer identifier (<code>iss</code>) uniquely identifies both the Authorization Server and the tenant. All clients and users belong to a single tenant context. The issuer identifier alone is sufficient to identify the tenant.<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.1-2.2">
+            <p id="section-6.1-2.2.1"><strong>Multi-tenant issuer</strong>: The issuer identifier (<code>iss</code>) identifies the Authorization Server, but multiple tenants may be hosted by the same issuer. In this case, the tenant identifier (<code>tenant</code>) claim is used in conjunction with the issuer identifier to uniquely identify the tenant context. The combination of <code>iss</code> + <code>tenant</code> uniquely identifies the tenant.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.1-3">When an IdP Authorization Server issues an ID-JAG, it <span class="bcp14">MUST</span> include the <code>tenant</code> claim if the issuer is multi-tenant and the tenant context is relevant for the Resource Authorization Server. The IdP <span class="bcp14">MUST</span> determine the appropriate tenant identifier based on the subject's tenant membership and the target Resource Authorization Server's tenant requirements.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="client-id-and-tenant-relationship">
+<section id="section-6.2">
+        <h3 id="name-client-id-and-tenant-relati">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-client-id-and-tenant-relati" class="section-name selfRef">Client ID and Tenant Relationship</a>
+        </h3>
+<p id="section-6.2-1">The relationship between <code>client_id</code> and tenant depends on the deployment model:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.2-2.1">
+            <p id="section-6.2-2.1.1"><strong>Tenant-scoped client identifiers</strong>: In some deployments, the <code>client_id</code> is unique only within a tenant context. The same <code>client_id</code> value may exist in different tenants, and the combination of <code>tenant</code> + <code>client_id</code> (or <code>iss</code> + <code>tenant</code> + <code>client_id</code> for multi-tenant issuers) uniquely identifies the client registration.<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.2-2.2">
+            <p id="section-6.2-2.2.1"><strong>Global client identifiers</strong>: In other deployments, the <code>client_id</code> is globally unique across all tenants. The <code>client_id</code> alone uniquely identifies the client, regardless of tenant context.<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.2-3">The IdP Authorization Server <span class="bcp14">MUST</span> understand the client identifier model used by the Resource Authorization Server when including the <code>client_id</code> claim in an ID-JAG. For tenant-scoped client identifiers, the IdP <span class="bcp14">MUST</span> ensure that the <code>client_id</code> included in the ID-JAG is valid within the tenant context indicated by the <code>tenant</code> claim (if present) or the issuer's tenant context.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="subject-identifier-uniqueness-with-tenants">
+<section id="section-6.3">
+        <h3 id="name-subject-identifier-uniquene">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-subject-identifier-uniquene" class="section-name selfRef">Subject Identifier Uniqueness with Tenants</a>
+        </h3>
+<p id="section-6.3-1">As specified in <a href="#id-jag" class="auto internal xref">Section 3</a>, subject identifiers (<code>sub</code>) have different uniqueness requirements based on tenant configuration:<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.3-2.1">
+            <p id="section-6.3-2.1.1">For single-tenant issuers: The subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer (<code>iss</code> + <code>sub</code>).<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.3-2.2">
+            <p id="section-6.3-2.2.1">For multi-tenant issuers: The subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer and tenant (<code>iss</code> + <code>tenant</code> + <code>sub</code>).<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.3-3">The IdP Authorization Server <span class="bcp14">MUST</span> ensure that the <code>sub</code> claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server. When the Resource Authorization Server is multi-tenant, the IdP <span class="bcp14">MUST</span> include the <code>tenant</code> claim in the ID-JAG to ensure proper subject identifier scoping.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="tenant-context-in-token-exchange">
+<section id="section-6.4">
+        <h3 id="name-tenant-context-in-token-exc">
+<a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-tenant-context-in-token-exc" class="section-name selfRef">Tenant Context in Token Exchange</a>
+        </h3>
+<p id="section-6.4-1">When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Server determines the tenant context from:<a href="#section-6.4-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.4-2">
+<li id="section-6.4-2.1">
+            <p id="section-6.4-2.1.1">The subject token (e.g., ID Token or SAML assertion) used in the token exchange request, which may contain tenant information<a href="#section-6.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.4-2.2">
+            <p id="section-6.4-2.2.1">The authenticated client's tenant membership<a href="#section-6.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.4-2.3">
+            <p id="section-6.4-2.3.1">The target Resource Authorization Server's tenant requirements<a href="#section-6.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-6.4-3">The IdP <span class="bcp14">MUST</span> evaluate policy to determine if the requested <code>audience</code> (Resource Authorization Server) requires tenant information, and if so, which tenant identifier to include in the issued ID-JAG. The tenant identifier in the ID-JAG <span class="bcp14">MUST</span> match the tenant context that the Resource Authorization Server expects for the specified <code>client_id</code> and <code>sub</code>.<a href="#section-6.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="idp-metadata">
+<section id="section-7">
+      <h2 id="name-authorization-server-idp-me">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-authorization-server-idp-me" class="section-name selfRef">Authorization Server (IdP) Metadata</a>
+      </h2>
+<p id="section-7-1">An IdP can advertise its support for this profile in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. Identity and Authorization Chaining Across Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines a new metadata property <code>identity_chaining_requested_token_types_supported</code> for this purpose.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">To advertise support for the Identity Assertion JWT Authorization Grant, the authorization server <span class="bcp14">SHOULD</span> include the following value in the <code>identity_chaining_requested_token_types_supported</code> property:<a href="#section-7-2" class="pilcrow">¶</a></p>
+<p id="section-7-3"><code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-7-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
-<section id="section-7">
+<section id="section-8">
       <h2 id="name-security-considerations">
-<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
 <div id="client-authentication">
-<section id="section-7.1">
+<section id="section-8.1">
         <h3 id="name-client-authentication">
-<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-client-authentication" class="section-name selfRef">Client Authentication</a>
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-client-authentication" class="section-name selfRef">Client Authentication</a>
         </h3>
-<p id="section-7.1-1">This specification <span class="bcp14">SHOULD</span> only be supported for confidential clients.  Public clients <span class="bcp14">SHOULD</span> use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.1-1">This specification <span class="bcp14">SHOULD</span> only be supported for confidential clients.  Public clients <span class="bcp14">SHOULD</span> use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="step-up-authentication">
-<section id="section-7.2">
+<section id="section-8.2">
         <h3 id="name-step-up-authentication">
-<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-step-up-authentication" class="section-name selfRef">Step-Up Authentication</a>
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-step-up-authentication" class="section-name selfRef">Step-Up Authentication</a>
         </h3>
-<p id="section-7.2-1">In the initial token exchange request, the IdP may require step-up authentication for the subject if the authentication context in the subject's assertion does not meet policy requirements. An <code>insufficient_user_authentication</code> OAuth error response may be returned to convey the authentication requirements back to the client similar to OAuth 2.0 Step-up Authentication Challenge Protocol <span>[<a href="#RFC9470" class="cite xref">RFC9470</a>]</span>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.2-2">
+<p id="section-8.2-1">In the initial token exchange request, the IdP may require step-up authentication for the subject if the authentication context in the subject's assertion does not meet policy requirements. An <code>insufficient_user_authentication</code> OAuth error response may be returned to convey the authentication requirements back to the client similar to OAuth 2.0 Step-up Authentication Challenge Protocol <span>[<a href="#RFC9470" class="cite xref">RFC9470</a>]</span>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2-2">
 <pre>
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
@@ -2310,42 +2413,42 @@ Cache-Control: no-store
   "error_description": "Subject doesn't meet authentication requirements",
   "max_age": 5
 }
-</pre><a href="#section-7.2-2" class="pilcrow">¶</a>
+</pre><a href="#section-8.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-7.2-3">The Client would need to redirect the user back to the IdP to obtain a new assertion that meets the requirements and retry the token exchange.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.2-4">TBD: It may make more sense to request the Identity Assertion JWT Authorization Grant in the authorization request if using OpenID Connect for SSO when performing a step-up to skip the need for additional token exchange round-trip.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-8.2-3">The Client would need to redirect the user back to the IdP to obtain a new assertion that meets the requirements and retry the token exchange.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
+<p id="section-8.2-4">TBD: It may make more sense to request the Identity Assertion JWT Authorization Grant in the authorization request if using OpenID Connect for SSO when performing a step-up to skip the need for additional token exchange round-trip.<a href="#section-8.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="cross-domain-use">
-<section id="section-7.3">
+<section id="section-8.3">
         <h3 id="name-cross-domain-use">
-<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-cross-domain-use" class="section-name selfRef">Cross-Domain Use</a>
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-cross-domain-use" class="section-name selfRef">Cross-Domain Use</a>
         </h3>
-<p id="section-7.3-1">This specification is intended for cross-domain uses where the Client, Resource App, and Identity Provider are all in different trust domains. In particular, the Identity Provider <span class="bcp14">MUST NOT</span> issue access tokens in response to an ID-JAG it issued itself. Doing so could lead to unintentional broadening of the scope of authorization.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-1">This specification is intended for cross-domain uses where the Client, Resource App, and Identity Provider are all in different trust domains. In particular, the Identity Provider <span class="bcp14">MUST NOT</span> issue access tokens in response to an ID-JAG it issued itself. Doing so could lead to unintentional broadening of the scope of authorization.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sender-constraining-tokens">
-<section id="section-7.4">
+<section id="section-8.4">
         <h3 id="name-sender-constraining-tokens">
-<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-sender-constraining-tokens" class="section-name selfRef">Sender Constraining Tokens</a>
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-sender-constraining-tokens" class="section-name selfRef">Sender Constraining Tokens</a>
         </h3>
 <div id="proof-of-possession">
-<section id="section-7.4.1">
+<section id="section-8.4.1">
           <h4 id="name-proof-of-possession">
-<a href="#section-7.4.1" class="section-number selfRef">7.4.1. </a><a href="#name-proof-of-possession" class="section-name selfRef">Proof-of-Possession</a>
+<a href="#section-8.4.1" class="section-number selfRef">8.4.1. </a><a href="#name-proof-of-possession" class="section-name selfRef">Proof-of-Possession</a>
           </h4>
-<p id="section-7.4.1-1">Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-06#section-4" class="relref">Section 4</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> and <span>[<a href="#I-D.parecki-oauth-jwt-dpop-grant" class="cite xref">I-D.parecki-oauth-jwt-dpop-grant</a>]</span>. This provides additional security by binding tokens to a specific cryptographic key, preventing reuse by parties that do not have access to the private key.<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-2">Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>) in a <code>DPoP</code> HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-3">The <code>cnf</code> (confirmation) claim, as defined in <span>[<a href="#RFC7800" class="cite xref">RFC7800</a>]</span>, is used to bind a public key to a JWT. When an ID-JAG contains a <code>cnf</code> claim with a <code>jkt</code> property as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key <span class="bcp14">MUST</span> be demonstrated when using the ID-JAG.<a href="#section-7.4.1-3" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-4">The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).<a href="#section-7.4.1-4" class="pilcrow">¶</a></p>
+<p id="section-8.4.1-1">Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-08#section-4" class="relref">Section 4</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> and <span>[<a href="#I-D.parecki-oauth-jwt-dpop-grant" class="cite xref">I-D.parecki-oauth-jwt-dpop-grant</a>]</span>. This provides additional security by binding tokens to a specific cryptographic key, preventing reuse by parties that do not have access to the private key.<a href="#section-8.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1-2">Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>) in a <code>DPoP</code> HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.<a href="#section-8.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-8.4.1-3">The <code>cnf</code> (confirmation) claim, as defined in <span>[<a href="#RFC7800" class="cite xref">RFC7800</a>]</span>, is used to bind a public key to a JWT. When an ID-JAG contains a <code>cnf</code> claim with a <code>jkt</code> property as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key <span class="bcp14">MUST</span> be demonstrated when using the ID-JAG.<a href="#section-8.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.4.1-4">The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).<a href="#section-8.4.1-4" class="pilcrow">¶</a></p>
 <div id="proof-of-possession-during-token-exchange">
-<section id="section-7.4.1.1">
+<section id="section-8.4.1.1">
             <h5 id="name-proof-of-possession-during-">
-<a href="#section-7.4.1.1" class="section-number selfRef">7.4.1.1. </a><a href="#name-proof-of-possession-during-" class="section-name selfRef">Proof-of-Possession During Token Exchange</a>
+<a href="#section-8.4.1.1" class="section-number selfRef">8.4.1.1. </a><a href="#name-proof-of-possession-during-" class="section-name selfRef">Proof-of-Possession During Token Exchange</a>
             </h5>
-<p id="section-7.4.1.1-1">When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange, the client <span class="bcp14">MAY</span> include a DPoP proof in the request. This demonstrates possession of a key that can be bound to the ID-JAG.<a href="#section-7.4.1.1-1" class="pilcrow">¶</a></p>
-<p id="section-7.4.1.1-2">The client generates a key pair and includes a DPoP proof JWT in the <code>DPoP</code> header of the Token Exchange request:<a href="#section-7.4.1.1-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.1.1-3">
+<p id="section-8.4.1.1-1">When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange, the client <span class="bcp14">MAY</span> include a DPoP proof in the request. This demonstrates possession of a key that can be bound to the ID-JAG.<a href="#section-8.4.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1.1-2">The client generates a key pair and includes a DPoP proof JWT in the <code>DPoP</code> header of the Token Exchange request:<a href="#section-8.4.1.1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.4.1.1-3">
 <pre>
 POST /oauth2/token HTTP/1.1
 Host: acme.idp.example
@@ -2359,19 +2462,19 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;scope=chat.read+chat.history
 &amp;subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
 &amp;subject_token_type=urn:ietf:params:oauth:token-type:id_token
-</pre><a href="#section-7.4.1.1-3" class="pilcrow">¶</a>
+</pre><a href="#section-8.4.1.1-3" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.1.1-4">The IdP Authorization Server processes the request as follows:<a href="#section-7.4.1.1-4" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.4.1.1-5">
-<li id="section-7.4.1.1-5.1">
-                <p id="section-7.4.1.1-5.1.1">If a DPoP proof is present, the IdP <span class="bcp14">MUST</span> validate it according to <span><a href="https://rfc-editor.org/rfc/rfc9449#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>. The <code>htm</code> claim <span class="bcp14">MUST</span> be <code>POST</code>, and the <code>htu</code> claim <span class="bcp14">MUST</span> match the token endpoint URL.<a href="#section-7.4.1.1-5.1.1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1.1-4">The IdP Authorization Server processes the request as follows:<a href="#section-8.4.1.1-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.4.1.1-5">
+<li id="section-8.4.1.1-5.1">
+                <p id="section-8.4.1.1-5.1.1">If a DPoP proof is present, the IdP <span class="bcp14">MUST</span> validate it according to <span><a href="https://rfc-editor.org/rfc/rfc9449#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>. The <code>htm</code> claim <span class="bcp14">MUST</span> be <code>POST</code>, and the <code>htu</code> claim <span class="bcp14">MUST</span> match the token endpoint URL.<a href="#section-8.4.1.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.4.1.1-5.2">
-                <p id="section-7.4.1.1-5.2.1">If the DPoP proof is valid, the IdP <span class="bcp14">MUST</span> include a <code>cnf</code> claim in the issued ID-JAG containing a <code>jkt</code> property with the JWK SHA-256 Thumbprint computed from the DPoP proof's <code>jwk</code> header parameter as defined in <span><a href="https://rfc-editor.org/rfc/rfc9449#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>.  This enables the Resource Authorization Server to validate the key binding for the ID-JAG using simple string comparison of the JWK SHA-256 Thumbprint.<a href="#section-7.4.1.1-5.2.1" class="pilcrow">¶</a></p>
+              <li id="section-8.4.1.1-5.2">
+                <p id="section-8.4.1.1-5.2.1">If the DPoP proof is valid, the IdP <span class="bcp14">MUST</span> include a <code>cnf</code> claim in the issued ID-JAG containing a <code>jkt</code> property with the JWK SHA-256 Thumbprint computed from the DPoP proof's <code>jwk</code> header parameter as defined in <span><a href="https://rfc-editor.org/rfc/rfc9449#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>.  This enables the Resource Authorization Server to validate the key binding for the ID-JAG using simple string comparison of the JWK SHA-256 Thumbprint.<a href="#section-8.4.1.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
-<p id="section-7.4.1.1-6">The <code>cnf</code> claim format follows <span><a href="https://rfc-editor.org/rfc/rfc9449#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>:<a href="#section-7.4.1.1-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.1.1-7">
+<p id="section-8.4.1.1-6">The <code>cnf</code> claim format follows <span><a href="https://rfc-editor.org/rfc/rfc9449#section-6.1" class="relref">Section 6.1</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>:<a href="#section-8.4.1.1-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.4.1.1-7">
 <pre>
 {
   "jti": "9e43f81b64a33f20116179",
@@ -2387,49 +2490,49 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
     "jkt":"0ZcOCORZNYy-DWpqq30jZyJGHTN0d2HglBV3uiguA4I"
   }
 }
-</pre><a href="#section-7.4.1.1-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.4.1.1-7" class="pilcrow">¶</a>
 </div>
-<ol start="1" type="1" class="normal type-1" id="section-7.4.1.1-8">
-<li id="section-7.4.1.1-8.1">
-                <p id="section-7.4.1.1-8.1.1">The token exchange response does not explicitly indicate whether key binding was successfully performed by the IdP.  The <code>token_type</code> response parameter for an ID-JAG is always <code>N_A</code> per <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.1" class="relref">Section 2.2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. The client <span class="bcp14">SHOULD</span> inspect the ID-JAG to determine if a <code>cnf</code> claim is present and whether it represents the same key as the DPoP proof.  This enables the client to detect if the IdP successfully processed the DPoP proof in the token exchange request and bound the issued ID-JAG, preventing the IdP from silently ignoring the DPoP proof and mitigating downgrade attacks.<a href="#section-7.4.1.1-8.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.4.1.1-8">
+<li id="section-8.4.1.1-8.1">
+                <p id="section-8.4.1.1-8.1.1">The token exchange response does not explicitly indicate whether key binding was successfully performed by the IdP.  The <code>token_type</code> response parameter for an ID-JAG is always <code>N_A</code> per <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.1" class="relref">Section 2.2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. The client <span class="bcp14">SHOULD</span> inspect the ID-JAG to determine if a <code>cnf</code> claim is present and whether it represents the same key as the DPoP proof.  This enables the client to detect if the IdP successfully processed the DPoP proof in the token exchange request and bound the issued ID-JAG, preventing the IdP from silently ignoring the DPoP proof and mitigating downgrade attacks.<a href="#section-8.4.1.1-8.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.4.1.1-8.2">
-                <p id="section-7.4.1.1-8.2.1">If no DPoP proof is presented, the IdP issues an ID-JAG without a <code>cnf</code> claim.<a href="#section-7.4.1.1-8.2.1" class="pilcrow">¶</a></p>
+              <li id="section-8.4.1.1-8.2">
+                <p id="section-8.4.1.1-8.2.1">If no DPoP proof is presented, the IdP issues an ID-JAG without a <code>cnf</code> claim.<a href="#section-8.4.1.1-8.2.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
 </section>
 </div>
 <div id="proof-of-possession-during-id-jag-exchange">
-<section id="section-7.4.1.2">
+<section id="section-8.4.1.2">
             <h5 id="name-proof-of-possession-during-i">
-<a href="#section-7.4.1.2" class="section-number selfRef">7.4.1.2. </a><a href="#name-proof-of-possession-during-i" class="section-name selfRef">Proof-of-Possession During ID-JAG Exchange</a>
+<a href="#section-8.4.1.2" class="section-number selfRef">8.4.1.2. </a><a href="#name-proof-of-possession-during-i" class="section-name selfRef">Proof-of-Possession During ID-JAG Exchange</a>
             </h5>
-<p id="section-7.4.1.2-1">When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a <code>cnf</code> claim and whether the client presents a DPoP proof.<a href="#section-7.4.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1.2-1">When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a <code>cnf</code> claim and whether the client presents a DPoP proof.<a href="#section-8.4.1.2-1" class="pilcrow">¶</a></p>
 <div id="id-jag-contains-cnf-claim-and-dpop-proof-is-presented">
-<section id="section-7.4.1.2.1">
+<section id="section-8.4.1.2.1">
               <h6 id="name-id-jag-contains-cnf-claim-a">
-<a href="#section-7.4.1.2.1" class="section-number selfRef">7.4.1.2.1. </a><a href="#name-id-jag-contains-cnf-claim-a" class="section-name selfRef">ID-JAG Contains <code>cnf</code> Claim and DPoP Proof is Presented</a>
+<a href="#section-8.4.1.2.1" class="section-number selfRef">8.4.1.2.1. </a><a href="#name-id-jag-contains-cnf-claim-a" class="section-name selfRef">ID-JAG Contains <code>cnf</code> Claim and DPoP Proof is Presented</a>
               </h6>
-<p id="section-7.4.1.2.1-1">If the ID-JAG contains a <code>cnf</code> claim and the client presents a DPoP proof, the Resource Authorization Server <span class="bcp14">MUST</span>:<a href="#section-7.4.1.2.1-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.4.1.2.1-2">
-<li id="section-7.4.1.2.1-2.1">
-                  <p id="section-7.4.1.2.1-2.1.1">Validate the DPoP proof according to <span><a href="https://rfc-editor.org/rfc/rfc9449#section-4" class="relref">Section 4</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>.<a href="#section-7.4.1.2.1-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1.2.1-1">If the ID-JAG contains a <code>cnf</code> claim and the client presents a DPoP proof, the Resource Authorization Server <span class="bcp14">MUST</span>:<a href="#section-8.4.1.2.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.4.1.2.1-2">
+<li id="section-8.4.1.2.1-2.1">
+                  <p id="section-8.4.1.2.1-2.1.1">Validate the DPoP proof according to <span><a href="https://rfc-editor.org/rfc/rfc9449#section-4" class="relref">Section 4</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>.<a href="#section-8.4.1.2.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-7.4.1.2.1-2.2">
-                  <p id="section-7.4.1.2.1-2.2.1">Extract the JWK SHA-256 Thumbprint from the DPoP proof by computing the thumbprint of the <code>jwk</code> header parameter in the DPoP proof according to <span>[<a href="#RFC7638" class="cite xref">RFC7638</a>]</span>.<a href="#section-7.4.1.2.1-2.2.1" class="pilcrow">¶</a></p>
+                <li id="section-8.4.1.2.1-2.2">
+                  <p id="section-8.4.1.2.1-2.2.1">Extract the JWK SHA-256 Thumbprint from the DPoP proof by computing the thumbprint of the <code>jwk</code> header parameter in the DPoP proof according to <span>[<a href="#RFC7638" class="cite xref">RFC7638</a>]</span>.<a href="#section-8.4.1.2.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-7.4.1.2.1-2.3">
-                  <p id="section-7.4.1.2.1-2.3.1">Extract the JWK SHA-256 Thumbprint from the <code>jkt</code> property of the <code>cnf</code> claim in the ID-JAG.<a href="#section-7.4.1.2.1-2.3.1" class="pilcrow">¶</a></p>
+                <li id="section-8.4.1.2.1-2.3">
+                  <p id="section-8.4.1.2.1-2.3.1">Extract the JWK SHA-256 Thumbprint from the <code>jkt</code> property of the <code>cnf</code> claim in the ID-JAG.<a href="#section-8.4.1.2.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-7.4.1.2.1-2.4">
-                  <p id="section-7.4.1.2.1-2.4.1">Compare the two thumbprints. They <span class="bcp14">MUST</span> match exactly. If they do not match, the request <span class="bcp14">MUST</span> fail with an <code>invalid_grant</code> error.<a href="#section-7.4.1.2.1-2.4.1" class="pilcrow">¶</a></p>
+                <li id="section-8.4.1.2.1-2.4">
+                  <p id="section-8.4.1.2.1-2.4.1">Compare the two thumbprints. They <span class="bcp14">MUST</span> match exactly. If they do not match, the request <span class="bcp14">MUST</span> fail with an <code>invalid_grant</code> error.<a href="#section-8.4.1.2.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-7.4.1.2.1-2.5">
-                  <p id="section-7.4.1.2.1-2.5.1">If the thumbprints match, the Resource Authorization Server <span class="bcp14">MAY</span> issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration. The issued access token <span class="bcp14">SHOULD</span> be bound to the same key.<a href="#section-7.4.1.2.1-2.5.1" class="pilcrow">¶</a></p>
+                <li id="section-8.4.1.2.1-2.5">
+                  <p id="section-8.4.1.2.1-2.5.1">If the thumbprints match, the Resource Authorization Server <span class="bcp14">MAY</span> issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration. The issued access token <span class="bcp14">SHOULD</span> be bound to the same key.<a href="#section-8.4.1.2.1-2.5.1" class="pilcrow">¶</a></p>
 </li>
               </ol>
-<p id="section-7.4.1.2.1-3">Example request:<a href="#section-7.4.1.2.1-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.1.2.1-4">
+<p id="section-8.4.1.2.1-3">Example request:<a href="#section-8.4.1.2.1-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.4.1.2.1-4">
 <pre>
 POST /oauth2/token HTTP/1.1
 Host: acme.chat.example
@@ -2438,10 +2541,10 @@ DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
 &amp;assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
-</pre><a href="#section-7.4.1.2.1-4" class="pilcrow">¶</a>
+</pre><a href="#section-8.4.1.2.1-4" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.1.2.1-5">Example successful response with DPoP-bound token:<a href="#section-7.4.1.2.1-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.1.2.1-6">
+<p id="section-8.4.1.2.1-5">Example successful response with DPoP-bound token:<a href="#section-8.4.1.2.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.4.1.2.1-6">
 <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
@@ -2454,18 +2557,18 @@ Pragma: no-cache
   "expires_in": 86400,
   "scope": "chat.read chat.history"
 }
-</pre><a href="#section-7.4.1.2.1-6" class="pilcrow">¶</a>
+</pre><a href="#section-8.4.1.2.1-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="id-jag-contains-cnf-claim-but-dpop-proof-is-not-presented">
-<section id="section-7.4.1.2.2">
+<section id="section-8.4.1.2.2">
               <h6 id="name-id-jag-contains-cnf-claim-b">
-<a href="#section-7.4.1.2.2" class="section-number selfRef">7.4.1.2.2. </a><a href="#name-id-jag-contains-cnf-claim-b" class="section-name selfRef">ID-JAG Contains <code>cnf</code> Claim but DPoP Proof is Not Presented</a>
+<a href="#section-8.4.1.2.2" class="section-number selfRef">8.4.1.2.2. </a><a href="#name-id-jag-contains-cnf-claim-b" class="section-name selfRef">ID-JAG Contains <code>cnf</code> Claim but DPoP Proof is Not Presented</a>
               </h6>
-<p id="section-7.4.1.2.2-1">If the ID-JAG contains a <code>cnf</code> claim but the client does not present a DPoP proof, the Resource Authorization Server <span class="bcp14">MUST</span> reject the request with an <code>invalid_grant</code> error, as the ID-JAG requires proof of possession.<a href="#section-7.4.1.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-7.4.1.2.2-2">Example error response:<a href="#section-7.4.1.2.2-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.1.2.2-3">
+<p id="section-8.4.1.2.2-1">If the ID-JAG contains a <code>cnf</code> claim but the client does not present a DPoP proof, the Resource Authorization Server <span class="bcp14">MUST</span> reject the request with an <code>invalid_grant</code> error, as the ID-JAG requires proof of possession.<a href="#section-8.4.1.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1.2.2-2">Example error response:<a href="#section-8.4.1.2.2-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.4.1.2.2-3">
 <pre>
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
@@ -2475,45 +2578,45 @@ Cache-Control: no-store
   "error": "invalid_grant",
   "error_description": "Proof of possession required for this authorization grant"
 }
-</pre><a href="#section-7.4.1.2.2-3" class="pilcrow">¶</a>
+</pre><a href="#section-8.4.1.2.2-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="id-jag-does-not-contain-cnf-claim-and-dpop-proof-is-presented">
-<section id="section-7.4.1.2.3">
+<section id="section-8.4.1.2.3">
               <h6 id="name-id-jag-does-not-contain-cnf">
-<a href="#section-7.4.1.2.3" class="section-number selfRef">7.4.1.2.3. </a><a href="#name-id-jag-does-not-contain-cnf" class="section-name selfRef">ID-JAG Does Not Contain <code>cnf</code> Claim and DPoP Proof is Presented</a>
+<a href="#section-8.4.1.2.3" class="section-number selfRef">8.4.1.2.3. </a><a href="#name-id-jag-does-not-contain-cnf" class="section-name selfRef">ID-JAG Does Not Contain <code>cnf</code> Claim and DPoP Proof is Presented</a>
               </h6>
-<p id="section-7.4.1.2.3-1">If the ID-JAG does not contain a <code>cnf</code> claim but the client presents a DPoP proof, the Resource Authorization Server:<a href="#section-7.4.1.2.3-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.4.1.2.3-2">
-<li id="section-7.4.1.2.3-2.1">
-                  <p id="section-7.4.1.2.3-2.1.1"><span class="bcp14">MUST</span> validate the DPoP proof according to <span><a href="https://rfc-editor.org/rfc/rfc9449#section-4" class="relref">Section 4</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>.<a href="#section-7.4.1.2.3-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1.2.3-1">If the ID-JAG does not contain a <code>cnf</code> claim but the client presents a DPoP proof, the Resource Authorization Server:<a href="#section-8.4.1.2.3-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.4.1.2.3-2">
+<li id="section-8.4.1.2.3-2.1">
+                  <p id="section-8.4.1.2.3-2.1.1"><span class="bcp14">MUST</span> validate the DPoP proof according to <span><a href="https://rfc-editor.org/rfc/rfc9449#section-4" class="relref">Section 4</a> of [<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>.<a href="#section-8.4.1.2.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-7.4.1.2.3-2.2">
-                  <p id="section-7.4.1.2.3-2.2.1"><span class="bcp14">MAY</span> issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration at the Authorization Server, binding the access token to the key demonstrated in the DPoP proof.<a href="#section-7.4.1.2.3-2.2.1" class="pilcrow">¶</a></p>
+                <li id="section-8.4.1.2.3-2.2">
+                  <p id="section-8.4.1.2.3-2.2.1"><span class="bcp14">MAY</span> issue a sender-constrained access token (e.g., a DPoP-bound token) per the Resource Server configuration at the Authorization Server, binding the access token to the key demonstrated in the DPoP proof.<a href="#section-8.4.1.2.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-7.4.1.2.3-2.3">
-                  <p id="section-7.4.1.2.3-2.3.1">The access token response will indicate the token type (e.g., <code>DPoP</code> for DPoP-bound tokens, or <code>Bearer</code> for unconstrained tokens).<a href="#section-7.4.1.2.3-2.3.1" class="pilcrow">¶</a></p>
+                <li id="section-8.4.1.2.3-2.3">
+                  <p id="section-8.4.1.2.3-2.3.1">The access token response will indicate the token type (e.g., <code>DPoP</code> for DPoP-bound tokens, or <code>Bearer</code> for unconstrained tokens).<a href="#section-8.4.1.2.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
               </ol>
 </section>
 </div>
 <div id="id-jag-does-not-contain-cnf-claim-and-dpop-proof-is-not-presented">
-<section id="section-7.4.1.2.4">
+<section id="section-8.4.1.2.4">
               <h6 id="name-id-jag-does-not-contain-cnf-">
-<a href="#section-7.4.1.2.4" class="section-number selfRef">7.4.1.2.4. </a><a href="#name-id-jag-does-not-contain-cnf-" class="section-name selfRef">ID-JAG Does Not Contain <code>cnf</code> Claim and DPoP Proof is Not Presented</a>
+<a href="#section-8.4.1.2.4" class="section-number selfRef">8.4.1.2.4. </a><a href="#name-id-jag-does-not-contain-cnf-" class="section-name selfRef">ID-JAG Does Not Contain <code>cnf</code> Claim and DPoP Proof is Not Presented</a>
               </h6>
-<p id="section-7.4.1.2.4-1">If the ID-JAG does not contain a <code>cnf</code> claim and the client does not present a DPoP proof:<a href="#section-7.4.1.2.4-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.4.1.2.4-2">
-<li id="section-7.4.1.2.4-2.1">
-                  <p id="section-7.4.1.2.4-2.1.1">The Resource Authorization Server <span class="bcp14">MAY</span> issue an unconstrained Bearer token.<a href="#section-7.4.1.2.4-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-8.4.1.2.4-1">If the ID-JAG does not contain a <code>cnf</code> claim and the client does not present a DPoP proof:<a href="#section-8.4.1.2.4-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.4.1.2.4-2">
+<li id="section-8.4.1.2.4-2.1">
+                  <p id="section-8.4.1.2.4-2.1.1">The Resource Authorization Server <span class="bcp14">MAY</span> issue an unconstrained Bearer token.<a href="#section-8.4.1.2.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-7.4.1.2.4-2.2">
-                  <p id="section-7.4.1.2.4-2.2.1">However, if the Resource Server configuration at the Authorization Server requires constrained tokens for that Resource Server, the request <span class="bcp14">MUST</span> fail with an <code>invalid_grant</code> error.<a href="#section-7.4.1.2.4-2.2.1" class="pilcrow">¶</a></p>
+                <li id="section-8.4.1.2.4-2.2">
+                  <p id="section-8.4.1.2.4-2.2.1">However, if the Resource Server configuration at the Authorization Server requires constrained tokens for that Resource Server, the request <span class="bcp14">MUST</span> fail with an <code>invalid_grant</code> error.<a href="#section-8.4.1.2.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
               </ol>
-<p id="section-7.4.1.2.4-3">Example error response when constrained tokens are required:<a href="#section-7.4.1.2.4-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.1.2.4-4">
+<p id="section-8.4.1.2.4-3">Example error response when constrained tokens are required:<a href="#section-8.4.1.2.4-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.4.1.2.4-4">
 <pre>
 HTTP/1.1 400 Bad Request
 Content-Type: application/json
@@ -2523,7 +2626,7 @@ Cache-Control: no-store
   "error": "invalid_grant",
   "error_description": "Sender-constrained tokens required for this resource server"
 }
-</pre><a href="#section-7.4.1.2.4-4" class="pilcrow">¶</a>
+</pre><a href="#section-8.4.1.2.4-4" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -2536,58 +2639,70 @@ Cache-Control: no-store
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-8">
+<section id="section-9">
       <h2 id="name-iana-considerations">
-<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
 <div id="media-types">
-<section id="section-8.1">
+<section id="section-9.1">
         <h3 id="name-media-types">
-<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-media-types" class="section-name selfRef">Media Types</a>
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-media-types" class="section-name selfRef">Media Types</a>
         </h3>
-<p id="section-8.1-1">This section registers <code>oauth-id-jag+jwt</code>, a new media type <span>[<a href="#RFC2046" class="cite xref">RFC2046</a>]</span> in the "Media Types" registry <span>[<a href="#IANA.media-types" class="cite xref">IANA.media-types</a>]</span> in the manner described in <span>[<a href="#RFC6838" class="cite xref">RFC6838</a>]</span>. It can be used to indicate that the content is an Identity Assertion JWT Authorization Grant.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-1">This section registers <code>oauth-id-jag+jwt</code>, a new media type <span>[<a href="#RFC2046" class="cite xref">RFC2046</a>]</span> in the "Media Types" registry <span>[<a href="#IANA.media-types" class="cite xref">IANA.media-types</a>]</span> in the manner described in <span>[<a href="#RFC6838" class="cite xref">RFC6838</a>]</span>. It can be used to indicate that the content is an Identity Assertion JWT Authorization Grant.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="oauth-uri-registration">
-<section id="section-8.2">
+<section id="section-9.2">
         <h3 id="name-oauth-uri-registration">
-<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-oauth-uri-registration" class="section-name selfRef">OAuth URI Registration</a>
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-oauth-uri-registration" class="section-name selfRef">OAuth URI Registration</a>
         </h3>
-<p id="section-8.2-1">This section registers <code>urn:ietf:params:oauth:token-type:id-jag</code> in the "OAuth URI" subregistry of the "OAuth Parameters" registry <span>[<a href="#IANA.oauth-parameters" class="cite xref">IANA.oauth-parameters</a>]</span>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.2-1">This section registers <code>urn:ietf:params:oauth:token-type:id-jag</code> in the "OAuth URI" subregistry of the "OAuth Parameters" registry <span>[<a href="#IANA.oauth-parameters" class="cite xref">IANA.oauth-parameters</a>]</span>.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.2-2.1">
-            <p id="section-8.2-2.1.1">URN: urn:ietf:params:oauth:token-type:id-jag<a href="#section-8.2-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-9.2-2.1">
+            <p id="section-9.2-2.1.1">URN: urn:ietf:params:oauth:token-type:id-jag<a href="#section-9.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-8.2-2.2">
-            <p id="section-8.2-2.2.1">Common Name: Token type URI for an Identity Assertion JWT Authorization Grant<a href="#section-8.2-2.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-9.2-2.2">
+            <p id="section-9.2-2.2.1">Common Name: Token type URI for an Identity Assertion JWT Authorization Grant<a href="#section-9.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-8.2-2.3">
-            <p id="section-8.2-2.3.1">Change Controller: IETF<a href="#section-8.2-2.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-9.2-2.3">
+            <p id="section-9.2-2.3.1">Change Controller: IETF<a href="#section-9.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-8.2-2.4">
-            <p id="section-8.2-2.4.1">Specification Document: This document<a href="#section-8.2-2.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-9.2-2.4">
+            <p id="section-9.2-2.4.1">Specification Document: This document<a href="#section-9.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 <div id="json-web-token-claims-registration">
-<section id="section-8.3">
+<section id="section-9.3">
         <h3 id="name-json-web-token-claims-regis">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-json-web-token-claims-regis" class="section-name selfRef">JSON Web Token Claims Registration</a>
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-json-web-token-claims-regis" class="section-name selfRef">JSON Web Token Claims Registration</a>
         </h3>
-<p id="section-8.3-1">This section registers <code>resource</code> in the "JSON Web Token Claims" subregistry of the "JSON Web Token (JWT)" registry <span>[<a href="#IANA.jwt" class="cite xref">IANA.jwt</a>]</span>. The "JSON Web Token Claims" subregistry was established by <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-1">This section registers the following claims in the "JSON Web Token Claims" subregistry of the "JSON Web Token (JWT)" registry <span>[<a href="#IANA.jwt" class="cite xref">IANA.jwt</a>]</span>. The "JSON Web Token Claims" subregistry was established by <span>[<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.3-2.1">
-            <p id="section-8.3-2.1.1">Claim Name: <code>resource</code><a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-9.3-2.1">
+            <p id="section-9.3-2.1.1">Claim Name: <code>resource</code><a href="#section-9.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-8.3-2.2">
-            <p id="section-8.3-2.2.1">Claim Description: Resource<a href="#section-8.3-2.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-9.3-2.2">
+            <p id="section-9.3-2.2.1">Claim Description: Resource<a href="#section-9.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-8.3-2.3">
-            <p id="section-8.3-2.3.1">Change Controller: IETF<a href="#section-8.3-2.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-9.3-2.3">
+            <p id="section-9.3-2.3.1">Change Controller: IETF<a href="#section-9.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-8.3-2.4">
-            <p id="section-8.3-2.4.1">Specification Document(s): <a href="#id-jag" class="auto internal xref">Section 3</a><a href="#section-8.3-2.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-9.3-2.4">
+            <p id="section-9.3-2.4.1">Specification Document(s): <a href="#id-jag" class="auto internal xref">Section 3</a><a href="#section-9.3-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.3-2.5">
+            <p id="section-9.3-2.5.1">Claim Name: <code>aud_tenant</code><a href="#section-9.3-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.3-2.6">
+            <p id="section-9.3-2.6.1">Claim Description: Resource Authorization Server tenant identifier<a href="#section-9.3-2.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.3-2.7">
+            <p id="section-9.3-2.7.1">Change Controller: IETF<a href="#section-9.3-2.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.3-2.8">
+            <p id="section-9.3-2.8.1">Specification Document(s): <a href="#id-jag" class="auto internal xref">Section 3</a><a href="#section-9.3-2.8.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -2595,19 +2710,19 @@ Cache-Control: no-store
 </section>
 </div>
 <div id="sec-combined-references">
-<section id="section-9">
+<section id="section-10">
       <h2 id="name-references">
-<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
 <div id="sec-normative-references">
-<section id="section-9.1">
+<section id="section-10.1">
         <h3 id="name-normative-references">
-<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="I-D.ietf-oauth-identity-chaining">[I-D.ietf-oauth-identity-chaining]</dt>
         <dd>
-<span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Kasselman, P.</span>, <span class="refAuthor">Burgin, K.</span>, <span class="refAuthor">Jenkins, M. J.</span>, and <span class="refAuthor">B. Campbell</span>, <span class="refTitle">"OAuth Identity and Authorization Chaining Across Domains"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-identity-chaining-06</span>, <time datetime="2025-09-12" class="refDate">12 September 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-06">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-06</a>&gt;</span>. </dd>
+<span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Kasselman, P.</span>, <span class="refAuthor">Burgin, K.</span>, <span class="refAuthor">Jenkins, M. J.</span>, and <span class="refAuthor">B. Campbell</span>, <span class="refTitle">"OAuth Identity and Authorization Chaining Across Domains"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-identity-chaining-08</span>, <time datetime="2026-02-09" class="refDate">9 February 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-08">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-08</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-oauth-rfc7523bis">[I-D.ietf-oauth-rfc7523bis]</dt>
         <dd>
@@ -2705,14 +2820,14 @@ Cache-Control: no-store
 </section>
 </div>
 <div id="sec-informative-references">
-<section id="section-9.2">
+<section id="section-10.2">
         <h3 id="name-informative-references">
-<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
 <dt id="I-D.ietf-oauth-client-id-metadata-document">[I-D.ietf-oauth-client-id-metadata-document]</dt>
         <dd>
-<span class="refAuthor">Parecki, A.</span> and <span class="refAuthor">E. Smith</span>, <span class="refTitle">"OAuth Client ID Metadata Document"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-client-id-metadata-document-00</span>, <time datetime="2025-10-08" class="refDate">8 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00</a>&gt;</span>. </dd>
+<span class="refAuthor">Parecki, A.</span> and <span class="refAuthor">E. Smith</span>, <span class="refTitle">"OAuth Client ID Metadata Document"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-client-id-metadata-document-01</span>, <time datetime="2026-03-01" class="refDate">1 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-01">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-01</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9470">[RFC9470]</dt>
         <dd>
