@@ -77,6 +77,7 @@ Table of Contents
    2.  Conventions and Definitions
      2.1.  Roles
    3.  Identity Assertion JWT Authorization Grant
+     3.1.  ID-JAG Claims
    4.  Cross-Domain Access
      4.1.  Overview
      4.2.  User Authentication
@@ -178,8 +179,8 @@ Table of Contents
       another independent OAuth 2.0 client relationship with the
       Resource Authorization Server in trust domain B.
 
-   IdP Authorization Server (IdP)  A SAML 2.0 Identity Provider or
-      OpenID Connect Provider (OP) [OpenID.Core] that issues Identity
+   IdP Authorization Server (IdP)  An OpenID Connect Provider (OP)
+      [OpenID.Core] or SAML 2.0 Identity Provider that issues Identity
       Assertions for single sign-on and cross-domain authorization
       grants Section 3 for a set of trusted applications in an
       organization's application ecosystem.  In
@@ -228,6 +229,8 @@ Table of Contents
    processed by the Relying Party (indicated by the ID Token audience)
    or the Issuer (e.g. for revocation), and not by other actors in a
    different trust domain such as an Authorization Server.
+
+3.1.  ID-JAG Claims
 
    The following claims are used within the Identity Assertion JWT
    Authorization Grant:
@@ -304,12 +307,12 @@ Table of Contents
    aud_sub:  OPTIONAL - The Resource Authorization Server's identifier
       for the End-User as defined in [OpenID.Enterprise].
 
-   email: :OPTIONAL - End-User's e-mail address as defined in
-   Section 5.1 of [OpenID.Core].
+   email:  OPTIONAL - End-User's e-mail address as defined in
+      Section 5.1 of [OpenID.Core].
 
    The typ of the JWT indicated in the JWT header MUST be oauth-id-
    jag+jwt.  Using typed JWTs is a recommendation of the JSON Web Token
-   Best Current Practices (Section 3.11 of [RFC8725]).
+   Best Current Practices as described in Section 3.11 of [RFC8725].
 
    A non-normative example JWT with expanded header and payload claims
    is below:
@@ -2170,7 +2173,10 @@ Document History
    *  Added refresh token as an optional subject token input to the
       Token Exchange for SAML interop
 
-   *  Described how to use DPoP with the JD-JAG exchange
+   *  Described how to use DPoP with the ID-JAG exchange
+
+   *  Added aud_tenant and aud_sub claims to ID-JAG to support multi-
+      tenant systems
 
    -01
 
