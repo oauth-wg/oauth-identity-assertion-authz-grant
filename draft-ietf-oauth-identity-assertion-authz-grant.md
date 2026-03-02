@@ -176,6 +176,9 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 `amr`:
 : OPTIONAL -  Identifiers for authentication methods used when authenticating the End-User as defined in {{OpenID.Core}}.
 
+`aud_tenant`:
+: OPTIONAL - A JSON string that represents a Resource Authorization Server tenant identifier. This claim is only included when the Resource Authorization Server is multi-tenant and the IdP knows the tenant identifier. When `aud_tenant` is present, the `aud_sub` claim represents the identifier the Resource Authorization Server has for the account within the context of that specific Resource Authorization Server tenant. The combination of `aud` + `aud_tenant` and `aud_sub` MUST be unique within the Resource Authorization Server.
+
 `aud_sub`:
 : OPTIONAL - The Resource Authorization Server's identifier for the End-User as defined in {{OpenID.Enterprise}}.
 
@@ -316,7 +319,7 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an Identity Assertion JWT Authorization Grant is being requested.
 
 `audience`:
-: REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}.
+: REQUIRED - The identifier of the Resource Authorization Server in another trust domain as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY support additional IdP-specific unique identifiers for Resource Authorization Servers in other trust domains as an extension point; when such identifiers are used, the IdP maps them to the corresponding Resource Authorization Server audience for the purposes of issuing the ID-JAG.
 
 `resource`:
 : OPTIONAL - The Resource Identifier of the Resource Server as defined in {{Section 2 of RFC8707}}.
@@ -753,6 +756,50 @@ Note:  The IdP Authorization Server is also responsible for mapping subject iden
 
 Alternatively, if clients use "Client ID Metadata Document" {{I-D.ietf-oauth-client-id-metadata-document}} as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.
 
+# Tenant Relationships with Issuer and Client ID {#tenant-relationships}
+
+In multi-tenant deployments, the relationship between tenants, issuers, and client identifiers is critical for proper identity and authorization management. This section explains how these components relate to each other in the context of Identity Assertion JWT Authorization Grants.
+
+## Issuer and Tenant Relationship
+
+An Authorization Server may operate as either a single-tenant or multi-tenant issuer:
+
+* **Single-tenant issuer**: The issuer identifier (`iss`) uniquely identifies both the Authorization Server and the tenant. All clients and users belong to a single tenant context. The issuer identifier alone is sufficient to identify the tenant.
+
+* **Multi-tenant issuer**: The issuer identifier (`iss`) identifies the Authorization Server, but multiple tenants may be hosted by the same issuer. In this case, the tenant identifier (`tenant`) claim is used in conjunction with the issuer identifier to uniquely identify the tenant context. The combination of `iss` + `tenant` uniquely identifies the tenant.
+
+When an IdP Authorization Server issues an ID-JAG, it MUST include the `tenant` claim if the issuer is multi-tenant and the tenant context is relevant for the Resource Authorization Server. The IdP MUST determine the appropriate tenant identifier based on the subject's tenant membership and the target Resource Authorization Server's tenant requirements.
+
+## Client ID and Tenant Relationship
+
+The relationship between `client_id` and tenant depends on the deployment model:
+
+* **Tenant-scoped client identifiers**: In some deployments, the `client_id` is unique only within a tenant context. The same `client_id` value may exist in different tenants, and the combination of `tenant` + `client_id` (or `iss` + `tenant` + `client_id` for multi-tenant issuers) uniquely identifies the client registration.
+
+* **Global client identifiers**: In other deployments, the `client_id` is globally unique across all tenants. The `client_id` alone uniquely identifies the client, regardless of tenant context.
+
+The IdP Authorization Server MUST understand the client identifier model used by the Resource Authorization Server when including the `client_id` claim in an ID-JAG. For tenant-scoped client identifiers, the IdP MUST ensure that the `client_id` included in the ID-JAG is valid within the tenant context indicated by the `tenant` claim (if present) or the issuer's tenant context.
+
+## Subject Identifier Uniqueness with Tenants
+
+As specified in {{id-jag}}, subject identifiers (`sub`) have different uniqueness requirements based on tenant configuration:
+
+* For single-tenant issuers: The subject identifier MUST be unique when scoped with issuer (`iss` + `sub`).
+
+* For multi-tenant issuers: The subject identifier MUST be unique when scoped with issuer and tenant (`iss` + `tenant` + `sub`).
+
+The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server. When the Resource Authorization Server is multi-tenant, the IdP MUST include the `tenant` claim in the ID-JAG to ensure proper subject identifier scoping.
+
+## Tenant Context in Token Exchange
+
+When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Server determines the tenant context from:
+
+1. The subject token (e.g., ID Token or SAML assertion) used in the token exchange request, which may contain tenant information
+2. The authenticated client's tenant membership
+3. The target Resource Authorization Server's tenant requirements
+
+The IdP MUST evaluate policy to determine if the requested `audience` (Resource Authorization Server) requires tenant information, and if so, which tenant identifier to include in the issued ID-JAG. The tenant identifier in the ID-JAG MUST match the tenant context that the Resource Authorization Server expects for the specified `client_id` and `sub`.
+
 # Authorization Server (IdP) Metadata {#idp-metadata}
 
 An IdP can advertise its support for this profile in its OAuth Authorization Server Metadata {{RFC8414}}. Identity and Authorization Chaining Across Domains {{I-D.ietf-oauth-identity-chaining}} defines a new metadata property `identity_chaining_requested_token_types_supported` for this purpose.
@@ -956,10 +1003,15 @@ This section registers `urn:ietf:params:oauth:token-type:id-jag` in the "OAuth U
 
 ## JSON Web Token Claims Registration
 
-This section registers `resource` in the "JSON Web Token Claims" subregistry of the "JSON Web Token (JWT)" registry {{IANA.jwt}}. The "JSON Web Token Claims" subregistry was established by {{RFC7519}}.
+This section registers the following claims in the "JSON Web Token Claims" subregistry of the "JSON Web Token (JWT)" registry {{IANA.jwt}}. The "JSON Web Token Claims" subregistry was established by {{RFC7519}}.
 
 * Claim Name: `resource`
 * Claim Description: Resource
+* Change Controller: IETF
+* Specification Document(s): {{id-jag}}
+
+* Claim Name: `aud_tenant`
+* Claim Description: Resource Authorization Server tenant identifier
 * Change Controller: IETF
 * Specification Document(s): {{id-jag}}
 
