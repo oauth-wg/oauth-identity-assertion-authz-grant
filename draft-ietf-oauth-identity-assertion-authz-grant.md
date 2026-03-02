@@ -115,7 +115,7 @@ Client
 : The application that wants to obtain an OAuth 2.0 access token on behalf of a signed-in user to an external/3rd party application's API (Resource Server below). In {{I-D.ietf-oauth-identity-chaining}}, this is the Client in trust domain A.  The application has a direct relationship with the IdP Authorization Server for single sign-on as a Relying Party and another independent OAuth 2.0 client relationship with the Resource Authorization Server in trust domain B.
 
 IdP Authorization Server (IdP)
-: A SAML 2.0 Identity Provider or OpenID Connect Provider (OP) {{OpenID.Core}} that issues Identity Assertions for single sign-on and cross-domain authorization grants {{id-jag}} for a set of trusted applications in an organization's application ecosystem.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.
+: An OpenID Connect Provider (OP) {{OpenID.Core}} or SAML 2.0 Identity Provider that issues Identity Assertions for single sign-on and cross-domain authorization grants {{id-jag}} for a set of trusted applications in an organization's application ecosystem.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain A, which is also trusted by the Resource Authorization Server in trust domain B.
 
 Resource Authorization Server (AS)
 : Issues OAuth 2.0 access tokens for protected resources provided by the Resource Server. In {{I-D.ietf-oauth-identity-chaining}}, this is the Authorization Server in trust domain B, and trusts cross-domain authorization grants {{id-jag}} from the IdP Authorization Server.
@@ -131,6 +131,8 @@ The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT 
 An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.
 
 As described in {{OpenID.Core}}, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.
+
+## ID-JAG Claims
 
 The following claims are used within the Identity Assertion JWT Authorization Grant:
 
@@ -183,9 +185,9 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : OPTIONAL - The Resource Authorization Server's identifier for the End-User as defined in {{OpenID.Enterprise}}.
 
 `email`:
-:OPTIONAL - End-User's e-mail address as defined in Section 5.1 of {{OpenID.Core}}.
+: OPTIONAL - End-User's e-mail address as defined in Section 5.1 of {{OpenID.Core}}.
 
-The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices ({{Section 3.11 of RFC8725}}).
+The `typ` of the JWT indicated in the JWT header MUST be `oauth-id-jag+jwt`. Using typed JWTs is a recommendation of the JSON Web Token Best Current Practices as described in {{Section 3.11 of RFC8725}}.
 
 A non-normative example JWT with expanded header and payload claims is below:
 
@@ -1343,7 +1345,8 @@ The authors would like to thank the following people for their contributions and
 
 * Added reference and examples of a RAR `authorization_details` object in the Token Exchange and ID-JAG
 * Added refresh token as an optional subject token input to the Token Exchange for SAML interop
-* Described how to use DPoP with the JD-JAG exchange
+* Described how to use DPoP with the ID-JAG exchange
+* Added `aud_tenant` and `aud_sub` claims to ID-JAG to support multi-tenant systems
 
 -01
 
