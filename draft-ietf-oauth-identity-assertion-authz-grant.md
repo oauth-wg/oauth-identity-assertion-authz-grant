@@ -1054,42 +1054,48 @@ To streamline the user experience, this specification can be used to enable the 
 * The Client has obtained an Identity Assertion (e.g. ID Token) from the IdP Authorization Server
 * The Resource Authorization Server is configured to allow the Identity Assertion JWT Authorization Grant from unregistered clients
 
-## LLM Agent using Enterprise Tools
+## AI Agent using Enterprise Tools
 
-AI agents, including those based on large language models (LLMs), are designed to manage user context, memory, and interaction state across multi-turn conversations. To perform complex tasks, these agents often integrate with external systems such as SaaS applications, internal services, or enterprise data sources. When accessing these systems, the agent operates on behalf of the end user, and its actions are constrained by the user’s identity, role, and permissions as defined by the enterprise. This ensures that all data access and operations are properly scoped and compliant with organizational access controls.
+AI agents are designed to perform complex tasks on behalf of users, often requiring integration with external systems such as SaaS applications, internal services, or enterprise data sources. When accessing these systems, the agent operates on behalf of the end user, and its actions are constrained by the user’s identity, role, and permissions as defined by the enterprise. This ensures that all data access and operations are properly scoped and compliant with organizational access controls.
 
 ### Preconditions
 
-* The LLM Agent has a registered OAuth 2.0 Client (`com.example.ai-agent`) with the Enterprise IdP (`cyberdyne.idp.example`)
-* The LLM Agent has a registered OAuth 2.0 Client (`4960880b83dc9`) with the External Tool Application (`saas.example.net`)
-* Enterprise has established a trust relationship between their IdP and the LLM Agent for SSO
-* Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion JWT Authorization Grant
-* Enterprise has granted the LLM Agent permission to act on behalf of users for the External Tool Application with a specific set of scopes
+This example involves two distinct trust domains. The AI Agent is the OAuth 2.0 client and is not itself a trust domain in this flow.
+
+* The Enterprise IdP at `idp.cyberdyne-corp.example` authenticates the enterprise’s users and issues identity assertions
+* The tool API (resource server) at `api.saas-tool.example` and its authorization server at `authorization-server.saas-tool.example` are operated by a SaaS tool vendor, in a different trust domain from the enterprise IdP
+
+* The AI Agent is an OAuth 2.0 client with client ID `ai-agent-app`
+* The AI Agent (`ai-agent-app`) has a registered OAuth 2.0 Client with the Enterprise IdP (`idp.cyberdyne-corp.example`)
+* The AI Agent (`ai-agent-app`) has a registered OAuth 2.0 Client with the Tool Resource Authorization Server (`authorization-server.saas-tool.example`)
+* The enterprise has established a trust relationship between their IdP (`idp.cyberdyne-corp.example`) and the AI Agent for SSO
+* The enterprise has established a trust relationship between their IdP (`idp.cyberdyne-corp.example`) and the Tool Resource Authorization Server (`authorization-server.saas-tool.example`) for SSO and Identity Assertion JWT Authorization Grant
+* The enterprise has granted the AI Agent permission to act on behalf of users for the Tool Resource Authorization Server with a specific set of scopes
 
 ### Example Sequence
 
-The steps below describe the sequence of the LLM agent obtaining an access token using an Identity Assertion JWT Authorization Grant ({{id-jag}}).
+The steps below describe the sequence of the AI Agent obtaining an access token using an Identity Assertion JWT Authorization Grant ({{id-jag}}).
 
-#### LLM Agent establishes a User Identity with Enterprise IdP
+#### AI Agent establishes a User Identity with Enterprise IdP
 
-LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured `issuer` that was previously established.
+AI Agent (`ai-agent-app`) discovers the Enterprise IdP's (`idp.cyberdyne-corp.example`) OpenID Connect Provider configuration based on a configured `issuer` that was previously established.
 
 > Note: IdP discovery where an agent discovers which IdP the agent should use to authenticate a given user is out of scope of this specification.
 
     GET /.well-known/openid-configuration
-    Host: cyberdyne.idp.example
+    Host: idp.cyberdyne-corp.example
     Accept: application/json
 
     HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
-      "issuer": "https://cyberdyne.idp.example/",
-      "authorization_endpoint": "https://cyberdyne.idp.example/oauth2/authorize",
-      "token_endpoint": "https://cyberdyne.idp.example/oauth2/token",
-      "userinfo_endpoint": "https://cyberdyne.idp.example/oauth2/userinfo",
-      "jwks_uri": "https://cyberdyne.idp.example/oauth2/keys",
-      "registration_endpoint": "https://cyberdyne.idp.example/oauth2/register",
+      "issuer": "https://idp.cyberdyne-corp.example/",
+      "authorization_endpoint": "https://idp.cyberdyne-corp.example/oauth2/authorize",
+      "token_endpoint": "https://idp.cyberdyne-corp.example/oauth2/token",
+      "userinfo_endpoint": "https://idp.cyberdyne-corp.example/oauth2/userinfo",
+      "jwks_uri": "https://idp.cyberdyne-corp.example/oauth2/keys",
+      "registration_endpoint": "https://idp.cyberdyne-corp.example/oauth2/register",
       "scopes_supported": [
         "openid", "email", "profile"
       ],
@@ -1103,38 +1109,38 @@ LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration b
       ...
     }
 
-LLM Agent discovers all necessary endpoints for authentication as well as support for the Identity Chaining requested token type `urn:ietf:params:oauth:token-type:id-jag`
+AI Agent discovers all necessary endpoints for authentication as well as support for the Identity Chaining requested token type `urn:ietf:params:oauth:token-type:id-jag`
 
 #### IdP Authorization Request (with PKCE)
 
-LLM Agent generates a PKCE `code_verifier` and a `code_challenge` (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP with an authorization request
+AI Agent (`ai-agent-app`) generates a PKCE `code_verifier` and a `code_challenge` (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP (`idp.cyberdyne-corp.example`) with an authorization request
 
     GET /authorize?
       response_type=code
-      &client_id=com.example.ai-agent
-      &redirect_uri=https://ai-agent.example.com/oauth2/callback
+      &client_id=ai-agent-app
+      &redirect_uri=https://ai-agent-app.example/callback
       &scope=openid+profile+email
       &state=xyzABC123
       &code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
       &code_challenge_method=S256
-    Host: cyberdyne.idp.example
+    Host: idp.cyberdyne-corp.example
 
-#### User authenticates and authorizes LLM Agent
+#### User authenticates and authorizes AI Agent
 
-Enterprise IdP authenticates the end-user and redirects back to the LLM Agent's registered client redirect URI with an authorization code:
+Enterprise IdP (`idp.cyberdyne-corp.example`) authenticates the end-user and redirects back to the AI Agent's registered redirect URI with an authorization code:
 
-    https://ai-agent.example.com/oauth2/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC123
+    https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC123
 
-LLM Agent exchanges the `code` and PKCE `code_verifier` to obtain an ID Token and Access Token for the IdP's UserInfo endpoint
+AI Agent (`ai-agent-app`) exchanges the `code` and PKCE `code_verifier` to obtain an ID Token and Access Token for the IdP's UserInfo endpoint
 
     POST /oauth2/token
-    Host: cyberdyne.idp.example
+    Host: idp.cyberdyne-corp.example
+    Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
     Content-Type: application/x-www-form-urlencoded
 
     grant_type=authorization_code
     &code=SplxlOBeZQQYbYS6WxSbIA
-    &redirect_uri=https://ai-agent.example.com/oauth2/callback
-    &client_id=com.example.ai-agent
+    &redirect_uri=https://ai-agent-app.example/callback
     &code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 
     HTTP/1.1 200 OK
@@ -1147,40 +1153,40 @@ LLM Agent exchanges the `code` and PKCE `code_verifier` to obtain an ID Token an
       "scope": "openid profile email"
     }
 
-LLM Agent validates the ID Token using the published JWKS for the IdP
+AI Agent validates the ID Token using the published JWKS for the Enterprise IdP (`idp.cyberdyne-corp.example`)
 
     {
-      "iss": "https://cyberdyne.idp.example/",
+      "iss": "https://idp.cyberdyne-corp.example/",
       "sub": "1997e829-2029-41d4-a716-446655440000",
-      "aud": "com.example.ai-agent",
-      "exp": 1984444800,
-      "iat": 1684441200,
-      "auth_time": 1684440000,
+      "aud": "ai-agent-app",
+      "exp": 1984448400,
+      "iat": 1984444800,
+      "auth_time": 1984444800,
       "name": "John Connor",
-      "email": "john.connor@cyberdyne.example",
+      "email": "john.connor@cyberdyne-corp.example",
       "email_verified": true
     }
 
-LLM Agent now has an identity binding for context
+AI Agent now has an identity binding for context
 
-#### LLM Agent calls Enterprise External Tool
+#### AI Agent calls Enterprise External Tool
 
-LLM Agent tool calls an external tool provided by an Enterprise SaaS Application (Resource Server) without a valid access token and is issued an authentication challenge per Protected Resource Metadata {{RFC9728}}.
+AI Agent (`ai-agent-app`) calls the tool API (Resource Server) at `api.saas-tool.example` without a valid access token and is issued an authentication challenge per Protected Resource Metadata {{RFC9728}}.
 
 > Note: How agents discover available tools is out of scope of this specification
 
     GET /tools
-    Host: saas.example.net
+    Host: api.saas-tool.example
     Accept: application/json
 
     HTTP/1.1 401 Unauthorized
     WWW-Authenticate: Bearer resource_metadata=
-      "https://saas.example.net/.well-known/oauth-protected-resource"
+      "https://api.saas-tool.example/.well-known/oauth-protected-resource"
 
-LLM Agent fetches the external tool resource's OAuth 2.0 Protected Resource Metadata per {{RFC9728}} to dynamically discover an authorization server that can issue an access token for the resource.
+AI Agent fetches the tool API's OAuth 2.0 Protected Resource Metadata per {{RFC9728}} to dynamically discover an authorization server that can issue an access token for the resource.
 
     GET /.well-known/oauth-protected-resource
-    Host: saas.example.net
+    Host: api.saas-tool.example
     Accept: application/json
 
     HTTP/1.1 200 OK
@@ -1188,32 +1194,32 @@ LLM Agent fetches the external tool resource's OAuth 2.0 Protected Resource Meta
 
     {
        "resource":
-         "https://saas.example.net/",
+         "https://api.saas-tool.example/",
        "authorization_servers":
-         [ "https://authorization-server.saas.com/" ],
+         [ "https://authorization-server.saas-tool.example/" ],
        "bearer_methods_supported":
          ["header", "body"],
        "scopes_supported":
-         ["agent.tools.read", "agent.tools.write"],
+         ["agent.read", "agent.write"],
        "resource_documentation":
-         "https://saas.example.net/tools/resource_documentation.html"
+         "https://api.saas-tool.example/resource_documentation.html"
      }
 
-LLM Agent discovers the Authorization Server configuration per {{RFC8414}}
+AI Agent discovers the Tool Resource Authorization Server (`authorization-server.saas-tool.example`) configuration per {{RFC8414}}
 
     GET /.well-known/oauth-authorization-server
-    Host: authorization-server.saas.com
+    Host: authorization-server.saas-tool.example
     Accept: application/json
 
     HTTP/1.1 200 Ok
     Content-Type: application/json
 
     {
-      "issuer": "https://authorization-server.saas.com/",
-      "authorization_endpoint": "https://authorization-server.saas.com/oauth2/authorize",
-      "token_endpoint": "https://authorization-server.saas.com/oauth2/token",
-      "jwks_uri": "https://authorization-server.saas.com/oauth2/keys",
-      "registration_endpoint": "authorization-server.saas.com/oauth2/register",
+      "issuer": "https://authorization-server.saas-tool.example/",
+      "authorization_endpoint": "https://authorization-server.saas-tool.example/oauth2/authorize",
+      "token_endpoint": "https://authorization-server.saas-tool.example/oauth2/token",
+      "jwks_uri": "https://authorization-server.saas-tool.example/oauth2/keys",
+      "registration_endpoint": "https://authorization-server.saas-tool.example/oauth2/register",
       "scopes_supported": [
         "agent.read", "agent.write"
       ],
@@ -1226,31 +1232,31 @@ LLM Agent discovers the Authorization Server configuration per {{RFC8414}}
       ...
     }
 
-LLM Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.
+AI Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.
 
-If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard `authorization_code` from the SaaS Application's Authorization Server
+If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the AI Agent can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard `authorization_code` from the Tool Resource Authorization Server
 
 > Note: This would benefit from an Authorization Server Metadata {{RFC8414}} property to indicate whether the Identity Assertion JWT Authorization Grant form of `jwt-bearer` would be accepted by this authorization server. There are other uses of `jwt-bearer` that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion JWT Authorization Grant would be supported. See [issue #16](https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16).
 
-#### LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP
+#### AI Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP
 
-LLM Agent makes an Identity Assertion JWT Authorization Grant Token Exchange {{RFC8693}} request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's `OAuth 2.0 Protected Resource Metadata`
+AI Agent (`ai-agent-app`) makes an Identity Assertion JWT Authorization Grant Token Exchange {{RFC8693}} request to the Enterprise IdP (`idp.cyberdyne-corp.example`) using the ID Token obtained when establishing an identity binding context, along with scopes and the resource identifier for the tool API (`api.saas-tool.example`) that was returned in the tool's `OAuth 2.0 Protected Resource Metadata`
 
     POST /oauth2/token HTTP/1.1
-    Host: cyberdyne.idp.example
+    Host: idp.cyberdyne-corp.example
     Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:token-exchange
     &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
-    &audience=https://authorization-server.saas.com/
-    &resource=https://saas.example.net/
+    &audience=https://authorization-server.saas-tool.example/
+    &resource=https://api.saas-tool.example/
     &scope=agent.read+agent.write
     &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
     &subject_token_type=urn:ietf:params:oauth:token-type:id_token
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
-If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in {{Section 2.2 of RFC8693}}:
+If access is granted, the Enterprise IdP (`idp.cyberdyne-corp.example`) creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in {{Section 2.2 of RFC8693}}:
 
     HTTP/1.1 200 OK
     Content-Type: application/json
@@ -1274,11 +1280,11 @@ Identity Assertion JWT Authorization Grant claims:
     .
     {
       "jti": "9e43f81b64a33f20116179",
-      "iss": "https://cyberdyne.idp.example",
-      "sub": "1llb-b4c0-0000-8000-t800b4ck0000",
-      "aud": "https://authorization-server.saas.com",
-      "resource": "https://saas.example.net/",
-      "client_id": "4960880b83dc9",
+      "iss": "https://idp.cyberdyne-corp.example/",
+      "sub": "1997e829-2029-41d4-a716-446655440000",
+      "aud": "https://authorization-server.saas-tool.example/",
+      "resource": "https://api.saas-tool.example/",
+      "client_id": "ai-agent-app",
       "exp": 1984445160,
       "iat": 1984445100,
       "scope": "agent.read agent.write"
@@ -1286,22 +1292,21 @@ Identity Assertion JWT Authorization Grant claims:
     .
     signature
 
-#### LLM Agent obtains an Access Token for Enterprise External Tool
+#### AI Agent obtains an Access Token for Enterprise External Tool
 
-LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by {{RFC7523}}.
+AI Agent (`ai-agent-app`) makes a token request to the Tool Resource Authorization Server (`authorization-server.saas-tool.example`) token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP (`idp.cyberdyne-corp.example`) as a JWT Assertion as defined by {{RFC7523}}.
 
-The LLM Agent authenticates with its client credentials that were registered with the SaaS Authorization Server
-
-> Note: How the LLM Agent registers with the Authorization Server (e.g static or dynamic client registration), and whether or not it has credentials, is out-of-scope of this specification
+> Note: How the AI Agent registers with the Tool Resource Authorization Server (e.g static or dynamic client registration), and whether or not it has credentials, is out-of-scope of this specification
 
     POST /oauth2/token HTTP/1.1
-    Host: authorization-server.saas.com
+    Host: authorization-server.saas-tool.example
     Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+    Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-    assertion=eyJhbGciOiJIUzI1NiIsI...
+    &assertion=eyJhbGciOiJIUzI1NiIsI...
 
-SaaS Authorization Server validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP
+Tool Resource Authorization Server (`authorization-server.saas-tool.example`) validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP (`idp.cyberdyne-corp.example`)
 
     HTTP/1.1 200 OK
     Content-Type: application/json;charset=UTF-8
@@ -1315,13 +1320,13 @@ SaaS Authorization Server validates the Identity Assertion JWT Authorization Gra
       "scope": "agent.read agent.write"
     }
 
-#### LLM Agent makes an authorized External Tool request
+#### AI Agent makes an authorized External Tool request
 
-LLM Agent tool calls an external tool provided by the Enterprise SaaS Application (Resource Server) with a valid access token
+AI Agent (`ai-agent-app`) calls the tool API (Resource Server) at `api.saas-tool.example` with a valid access token
 
     GET /tools
-    Host: saas.example.net
-    Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA"
+    Host: api.saas-tool.example
+    Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA
     Accept: application/json
 
     HTTP/1.1 200 OK
