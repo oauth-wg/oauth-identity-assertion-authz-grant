@@ -1065,9 +1065,11 @@ This example involves two distinct trust domains. The AI Agent is the OAuth 2.0 
 * The Enterprise IdP at `idp.cyberdyne-corp.example` authenticates the enterprise’s users and issues identity assertions
 * The tool API (resource server) at `api.saas-tool.example` and its authorization server at `authorization-server.saas-tool.example` are operated by a SaaS tool vendor, in a different trust domain from the enterprise IdP
 
-* The AI Agent is an OAuth 2.0 client with client ID `ai-agent-app`
-* The AI Agent (`ai-agent-app`) has a registered OAuth 2.0 Client with the Enterprise IdP (`idp.cyberdyne-corp.example`)
-* The AI Agent (`ai-agent-app`) has a registered OAuth 2.0 Client with the Tool Resource Authorization Server (`authorization-server.saas-tool.example`)
+* The AI Agent is an OAuth 2.0 client with client ID `https://ai-agent-app.example/`
+* The Enterprise IdP (`idp.cyberdyne-corp.example`) recognizes the AI Agent (`https://ai-agent-app.example/`) as a trusted client, either through static registration or dynamic discovery via {{I-D.ietf-oauth-client-id-metadata-document}}
+* The Tool Resource Authorization Server (`authorization-server.saas-tool.example`) recognizes the AI Agent (`https://ai-agent-app.example/`) as a trusted client, either through static registration or dynamic discovery via {{I-D.ietf-oauth-client-id-metadata-document}}
+
+> Note: This example uses a URL as the client ID, following the Client Identity Metadata Document pattern {{I-D.ietf-oauth-client-id-metadata-document}} to allow servers to dynamically discover client metadata. Alternatively, clients may be statically registered with an opaque client ID, with metadata configured directly in the IdP and Authorization Server.
 * The enterprise has established a trust relationship between their IdP (`idp.cyberdyne-corp.example`) and the AI Agent for SSO
 * The enterprise has established a trust relationship between their IdP (`idp.cyberdyne-corp.example`) and the Tool Resource Authorization Server (`authorization-server.saas-tool.example`) for SSO and Identity Assertion JWT Authorization Grant
 * The enterprise has granted the AI Agent permission to act on behalf of users for the Tool Resource Authorization Server with a specific set of scopes
@@ -1078,7 +1080,7 @@ The steps below describe the sequence of the AI Agent obtaining an access token 
 
 #### AI Agent establishes a User Identity with Enterprise IdP
 
-AI Agent (`ai-agent-app`) discovers the Enterprise IdP's (`idp.cyberdyne-corp.example`) OpenID Connect Provider configuration based on a configured `issuer` that was previously established.
+AI Agent (`https://ai-agent-app.example/`) discovers the Enterprise IdP's (`idp.cyberdyne-corp.example`) OpenID Connect Provider configuration based on a configured `issuer` that was previously established.
 
 > Note: IdP discovery where an agent discovers which IdP the agent should use to authenticate a given user is out of scope of this specification.
 
@@ -1113,11 +1115,11 @@ AI Agent discovers all necessary endpoints for authentication as well as support
 
 #### IdP Authorization Request (with PKCE)
 
-AI Agent (`ai-agent-app`) generates a PKCE `code_verifier` and a `code_challenge` (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP (`idp.cyberdyne-corp.example`) with an authorization request
+AI Agent (`https://ai-agent-app.example/`) generates a PKCE `code_verifier` and a `code_challenge` (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP (`idp.cyberdyne-corp.example`) with an authorization request
 
     GET /authorize?
       response_type=code
-      &client_id=ai-agent-app
+      &client_id=https://ai-agent-app.example/
       &redirect_uri=https://ai-agent-app.example/callback
       &scope=openid+profile+email
       &state=xyzABC123
@@ -1131,7 +1133,7 @@ Enterprise IdP (`idp.cyberdyne-corp.example`) authenticates the end-user and red
 
     https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC123
 
-AI Agent (`ai-agent-app`) exchanges the `code` and PKCE `code_verifier` to obtain an ID Token and Access Token for the IdP's UserInfo endpoint
+AI Agent (`https://ai-agent-app.example/`) exchanges the `code` and PKCE `code_verifier` to obtain an ID Token and Access Token for the IdP's UserInfo endpoint
 
     POST /oauth2/token
     Host: idp.cyberdyne-corp.example
@@ -1158,7 +1160,7 @@ AI Agent validates the ID Token using the published JWKS for the Enterprise IdP 
     {
       "iss": "https://idp.cyberdyne-corp.example/",
       "sub": "1997e829-2029-41d4-a716-446655440000",
-      "aud": "ai-agent-app",
+      "aud": "https://ai-agent-app.example/",
       "exp": 1984448400,
       "iat": 1984444800,
       "auth_time": 1984444800,
@@ -1171,7 +1173,7 @@ AI Agent now has an identity binding for context
 
 #### AI Agent calls Enterprise External Tool
 
-AI Agent (`ai-agent-app`) calls the tool API (Resource Server) at `api.saas-tool.example` without a valid access token and is issued an authentication challenge per Protected Resource Metadata {{RFC9728}}.
+AI Agent (`https://ai-agent-app.example/`) calls the tool API (Resource Server) at `api.saas-tool.example` without a valid access token and is issued an authentication challenge per Protected Resource Metadata {{RFC9728}}.
 
 > Note: How agents discover available tools is out of scope of this specification
 
@@ -1240,7 +1242,7 @@ If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the
 
 #### AI Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP
 
-AI Agent (`ai-agent-app`) makes an Identity Assertion JWT Authorization Grant Token Exchange {{RFC8693}} request to the Enterprise IdP (`idp.cyberdyne-corp.example`) using the ID Token obtained when establishing an identity binding context, along with scopes and the resource identifier for the tool API (`api.saas-tool.example`) that was returned in the tool's `OAuth 2.0 Protected Resource Metadata`
+AI Agent (`https://ai-agent-app.example/`) makes an Identity Assertion JWT Authorization Grant Token Exchange {{RFC8693}} request to the Enterprise IdP (`idp.cyberdyne-corp.example`) using the ID Token obtained when establishing an identity binding context, along with scopes and the resource identifier for the tool API (`api.saas-tool.example`) that was returned in the tool's `OAuth 2.0 Protected Resource Metadata`
 
     POST /oauth2/token HTTP/1.1
     Host: idp.cyberdyne-corp.example
@@ -1284,7 +1286,7 @@ Identity Assertion JWT Authorization Grant claims:
       "sub": "1997e829-2029-41d4-a716-446655440000",
       "aud": "https://authorization-server.saas-tool.example/",
       "resource": "https://api.saas-tool.example/",
-      "client_id": "ai-agent-app",
+      "client_id": "https://ai-agent-app.example/",
       "exp": 1984445160,
       "iat": 1984445100,
       "scope": "agent.read agent.write"
@@ -1294,7 +1296,7 @@ Identity Assertion JWT Authorization Grant claims:
 
 #### AI Agent obtains an Access Token for Enterprise External Tool
 
-AI Agent (`ai-agent-app`) makes a token request to the Tool Resource Authorization Server (`authorization-server.saas-tool.example`) token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP (`idp.cyberdyne-corp.example`) as a JWT Assertion as defined by {{RFC7523}}.
+AI Agent (`https://ai-agent-app.example/`) makes a token request to the Tool Resource Authorization Server (`authorization-server.saas-tool.example`) token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP (`idp.cyberdyne-corp.example`) as a JWT Assertion as defined by {{RFC7523}}.
 
 > Note: How the AI Agent registers with the Tool Resource Authorization Server (e.g static or dynamic client registration), and whether or not it has credentials, is out-of-scope of this specification
 
@@ -1322,7 +1324,7 @@ Tool Resource Authorization Server (`authorization-server.saas-tool.example`) va
 
 #### AI Agent makes an authorized External Tool request
 
-AI Agent (`ai-agent-app`) calls the tool API (Resource Server) at `api.saas-tool.example` with a valid access token
+AI Agent (`https://ai-agent-app.example/`) calls the tool API (Resource Server) at `api.saas-tool.example` with a valid access token
 
     GET /tools
     Host: api.saas-tool.example
