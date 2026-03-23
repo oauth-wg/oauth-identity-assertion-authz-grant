@@ -802,13 +802,27 @@ When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Serve
 
 The IdP MUST evaluate policy to determine if the requested `audience` (Resource Authorization Server) requires tenant information, and if so, which tenant identifier to include in the issued ID-JAG. The tenant identifier in the ID-JAG MUST match the tenant context that the Resource Authorization Server expects for the specified `client_id` and `sub`.
 
-# Authorization Server (IdP) Metadata {#idp-metadata}
+# Authorization Server Metadata {#idp-metadata}
 
-An IdP can advertise its support for this profile in its OAuth Authorization Server Metadata {{RFC8414}}. Identity and Authorization Chaining Across Domains {{I-D.ietf-oauth-identity-chaining}} defines a new metadata property `identity_chaining_requested_token_types_supported` for this purpose.
+An IdP Authorization Server can advertise the identity chaining token types it can issue in its OAuth Authorization Server Metadata {{RFC8414}}. Identity and Authorization Chaining Across Domains {{I-D.ietf-oauth-identity-chaining}} defines the `identity_chaining_requested_token_types_supported` metadata parameter for this purpose.
 
-To advertise support for the Identity Assertion JWT Authorization Grant, the authorization server SHOULD include the following value in the `identity_chaining_requested_token_types_supported` property:
+To advertise support for issuing an Identity Assertion JWT Authorization Grant via Token Exchange, the IdP Authorization Server SHOULD include the following value in `identity_chaining_requested_token_types_supported`:
 
 `urn:ietf:params:oauth:token-type:id-jag`
+
+A Resource Authorization Server can advertise support for authorization grant profiles in its OAuth Authorization Server Metadata {{RFC8414}} using the `authorization_grant_profiles_supported` metadata parameter.
+
+The value of `authorization_grant_profiles_supported` MUST be a JSON array of strings. Each string MUST identify a supported authorization grant profile.
+
+Inclusion of a profile identifier in `authorization_grant_profiles_supported` indicates only that the Resource Authorization Server implements the processing rules for that profile. It does not indicate that any particular issuer, tenant, client, subject, audience, or authorization request will be accepted.
+
+To advertise support for the Identity Assertion JWT Authorization Grant profile, the Resource Authorization Server SHOULD include the following value in the `authorization_grant_profiles_supported` property:
+
+`urn:ietf:params:oauth:grant-profile:id-jag`
+
+A Resource Authorization Server that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authorization_grant_profiles_supported` for this specification MUST also include `urn:ietf:params:oauth:grant-type:jwt-bearer` in `grant_types_supported`.
+
+These metadata parameters are complementary. `identity_chaining_requested_token_types_supported` indicates which token types an IdP Authorization Server can issue for identity chaining, while `authorization_grant_profiles_supported` indicates which authorization grant profiles a Resource Authorization Server can process.
 
 
 # Security Considerations
@@ -840,6 +854,14 @@ TBD: It may make more sense to request the Identity Assertion JWT Authorization 
 ## Cross-Domain Use
 
 This specification is intended for cross-domain uses where the Client, Resource App, and Identity Provider are all in different trust domains. In particular, the Identity Provider MUST NOT issue access tokens in response to an ID-JAG it issued itself. Doing so could lead to unintentional broadening of the scope of authorization.
+
+## Metadata Disclosure
+
+Advertising issuer-specific trust relationships in publicly accessible metadata can disclose federation topology, business relationships, tenant configuration, or other deployment-sensitive information.
+
+Resource Authorization Servers MUST NOT use `authorization_grant_profiles_supported` to disclose issuer allow lists or other profile-specific trust relationships.
+
+Resource Authorization Servers MAY provide a protected discovery mechanism by which an authenticated client can determine whether an Identity Assertion JWT Authorization Grant from a particular issuer would be accepted for that client. If such a mechanism is provided, the Resource Authorization Server MUST require client authentication before disclosing issuer-specific acceptance information. The response MUST be specific to the authenticated client and MAY also be scoped by tenant, resource, or other local policy context.
 
 ## Sender Constraining Tokens
 
@@ -1002,6 +1024,22 @@ This section registers `urn:ietf:params:oauth:token-type:id-jag` in the "OAuth U
 * Change Controller: IETF
 * Specification Document: This document
 
+This section registers `urn:ietf:params:oauth:grant-profile:id-jag` in the "OAuth URI" subregistry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+
+* URN: urn:ietf:params:oauth:grant-profile:id-jag
+* Common Name: Authorization grant profile identifier for an Identity Assertion JWT Authorization Grant
+* Change Controller: IETF
+* Specification Document: This document
+
+## OAuth Authorization Server Metadata Registration
+
+This section registers `authorization_grant_profiles_supported` in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+
+* Metadata Name: `authorization_grant_profiles_supported`
+* Metadata Description: JSON array of supported authorization grant profile identifiers
+* Change Controller: IETF
+* Specification Document: This document
+
 
 ## JSON Web Token Claims Registration
 
@@ -1135,7 +1173,7 @@ AI Agent (`https://ai-agent-app.example/`) discovers the Enterprise IdP's (`idp.
       ...
     }
 
-AI Agent discovers all necessary endpoints for authentication as well as support for the Identity Chaining requested token type `urn:ietf:params:oauth:token-type:id-jag`
+AI Agent discovers all necessary endpoints for authentication as well as support for the identity chaining requested token type `urn:ietf:params:oauth:token-type:id-jag`
 
 #### IdP Authorization Request (with PKCE)
 
@@ -1255,14 +1293,13 @@ AI Agent discovers the External Tool Resource Authorization Server (`authorizati
       "grant_types_supported": [
         "authorization_code", "refresh_token", "urn:ietf:params:oauth:grant-type:jwt-bearer"
       ],
+      "authorization_grant_profiles_supported": ["urn:ietf:params:oauth:grant-profile:id-jag"],
       ...
     }
 
 AI Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.
 
-If the `urn:ietf:params:oauth:grant-type:jwt-bearer` grant type is supported the AI Agent can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard `authorization_code` from the External Tool Resource Authorization Server
-
-> Note: This would benefit from an Authorization Server Metadata {{RFC8414}} property to indicate whether the Identity Assertion JWT Authorization Grant form of `jwt-bearer` would be accepted by this authorization server. There are other uses of `jwt-bearer` that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion JWT Authorization Grant would be supported. See [issue #16](https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16).
+If the `urn:ietf:params:oauth:grant-profile:id-jag` authorization grant profile is supported, the AI Agent can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard `authorization_code` from the External Tool Resource Authorization Server.
 
 #### AI Agent obtains an Identity Assertion JWT Authorization Grant for External Tool from the Enterprise IdP
 
@@ -1395,4 +1432,3 @@ The authors would like to thank the following people for their contributions and
 -00
 
 * Initial revision as adopted working group draft
-
