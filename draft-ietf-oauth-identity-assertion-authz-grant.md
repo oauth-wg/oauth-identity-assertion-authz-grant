@@ -1040,6 +1040,28 @@ This specification can be used to extend the SSO relationship of multiple SaaS a
 * Enterprise has established a trust relationship between their IdP and the Resource Authorization Server for SSO and Identity Assertion JWT Authorization Grant
 * Enterprise has granted the Client permission to act on behalf of users for the Resource Authorization Server with a set of scopes
 
+## Customer Identity for Developer SaaS Components
+
+In some enterprise deployments, the shared identity layer is not a workforce IdP used to sign employees into internal or SaaS productivity tools.  Instead, the identity provider is a Customer Identity and Access Management (CIAM) platform that signs end-users into a customer-facing application or suite of first-party applications.
+
+These customer applications often embed or depend on third-party developer SaaS components such as communications, analytics, fraud detection, document processing, support tooling, or logging and observability services.  A first-party application may need to request an access token on behalf of the signed-in customer so that these components can be invoked seamlessly as part of the product experience, without interrupting the customer with separate delegated OAuth authorization prompts for each downstream service.
+
+This specification can be used in these deployments when the CIAM platform serves as the common identity layer trusted by the first-party applications and by the authorization servers for the third-party developer SaaS components.  In that model, the CIAM platform can broker an Identity Assertion JWT Authorization Grant that allows the component provider to issue an access token scoped to the customer and to the specific component APIs needed by the first-party application.
+
+### Preconditions
+
+#### Deployment and Client Preconditions
+
+* The first-party application has a registered OAuth 2.0 Client with the CIAM IdP Authorization Server
+* The first-party application has a registered OAuth 2.0 Client with the Resource Authorization Server for the developer SaaS component
+* The Resource Authorization Server is able to map the customer identity conveyed by the CIAM platform to the corresponding account, tenant, or just-in-time provisioned subject at the developer SaaS component
+
+#### Trust Relationship Preconditions
+
+* The organization operating the customer application has established a trust relationship between its CIAM platform and the first-party application for customer sign-in and issuance of identity assertions
+* The organization operating the customer application and the developer SaaS provider have established a trust relationship between the CIAM platform and the Resource Authorization Server for Identity Assertion JWT Authorization Grant
+* The organization operating the customer application has granted the first-party application permission to act on behalf of signed-in customers for the developer SaaS component with a defined set of scopes
+
 ## Email and Calendaring Applications
 
 Email clients can be used with arbitrary email servers, and cannot require pre-established relationships between each email client and each email server. When an email client uses OAuth to obtain an access token to an email server, this provides the security benefit of being able to use strong multi-factor authentication methods provided by the email server's authorization server, but does require that the user go through a web-based flow to log in to the email client. However, this web-based flow is often seen as disruptive to the user experience when initiated from a desktop or mobile native application, and so is often attempted to be minimized as much as possible.
@@ -1364,5 +1386,4 @@ The authors would like to thank the following people for their contributions and
 -00
 
 * Initial revision as adopted working group draft
-
 
