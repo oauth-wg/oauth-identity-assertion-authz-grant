@@ -1063,7 +1063,7 @@ AI agents are designed to perform complex tasks on behalf of users, often requir
 This example involves two distinct trust domains. The AI Agent is the OAuth 2.0 client and is not itself a trust domain in this flow.
 
 * The Enterprise IdP at `idp.cyberdyne-corp.example` authenticates the enterprise’s users and issues identity assertions
-* The tool API (resource server) at `api.saas-tool.example` and its authorization server at `authorization-server.saas-tool.example` are operated by a SaaS tool vendor, in a different trust domain from the enterprise IdP
+* The Tool API (resource server) at `api.saas-tool.example` and its authorization server at `authorization-server.saas-tool.example` are operated by a SaaS tool vendor, in a different trust domain from the enterprise IdP
 
 * The AI Agent is an OAuth 2.0 client with client ID `https://ai-agent-app.example/`
 * The Enterprise IdP (`idp.cyberdyne-corp.example`) recognizes the AI Agent (`https://ai-agent-app.example/`) as a trusted client, either through static registration or dynamic discovery via {{I-D.ietf-oauth-client-id-metadata-document}}
@@ -1173,7 +1173,7 @@ AI Agent now has an identity binding for context
 
 #### AI Agent calls Enterprise External Tool
 
-AI Agent (`https://ai-agent-app.example/`) calls the tool API (Resource Server) at `api.saas-tool.example` without a valid access token and is issued an authentication challenge per Protected Resource Metadata {{RFC9728}}.
+AI Agent (`https://ai-agent-app.example/`) calls the Tool API (Resource Server) at `api.saas-tool.example` without a valid access token and is issued an authentication challenge per Protected Resource Metadata {{RFC9728}}.
 
 > Note: How agents discover available tools is out of scope of this specification
 
@@ -1185,7 +1185,7 @@ AI Agent (`https://ai-agent-app.example/`) calls the tool API (Resource Server) 
     WWW-Authenticate: Bearer resource_metadata=
       "https://api.saas-tool.example/.well-known/oauth-protected-resource"
 
-AI Agent fetches the tool API's OAuth 2.0 Protected Resource Metadata per {{RFC9728}} to dynamically discover an authorization server that can issue an access token for the resource.
+AI Agent fetches the Tool API's OAuth 2.0 Protected Resource Metadata per {{RFC9728}} to dynamically discover an authorization server that can issue an access token for the resource.
 
     GET /.well-known/oauth-protected-resource
     Host: api.saas-tool.example
@@ -1324,7 +1324,7 @@ Tool Resource Authorization Server (`authorization-server.saas-tool.example`) va
 
 #### AI Agent makes an authorized External Tool request
 
-AI Agent (`https://ai-agent-app.example/`) calls the tool API (Resource Server) at `api.saas-tool.example` with a valid access token
+AI Agent (`https://ai-agent-app.example/`) calls the Tool API (Resource Server) at `api.saas-tool.example` with a valid access token
 
     GET /tools
     Host: api.saas-tool.example
