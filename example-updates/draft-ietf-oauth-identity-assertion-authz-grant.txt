@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 23 September 2026                                   Independent
+Expires: 24 September 2026                                   Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                           22 March 2026
+                                                           23 March 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 September 2026.
+   This Internet-Draft will expire on 24 September 2026.
 
 Copyright Notice
 
@@ -1823,7 +1823,7 @@ A.3.1.  Preconditions
    *  The Enterprise IdP at idp.cyberdyne-corp.example authenticates the
       enterprise’s users and issues identity assertions
 
-   *  The tool API (resource server) at api.saas-tool.example and its
+   *  The Tool API (resource server) at api.saas-tool.example and its
       authorization server at authorization-server.saas-tool.example are
       operated by a SaaS tool vendor, in a different trust domain from
       the enterprise IdP
@@ -1974,7 +1974,7 @@ https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC12
 
 A.3.2.4.  AI Agent calls Enterprise External Tool
 
-   AI Agent (https://ai-agent-app.example/) calls the tool API (Resource
+   AI Agent (https://ai-agent-app.example/) calls the Tool API (Resource
    Server) at api.saas-tool.example without a valid access token and is
    issued an authentication challenge per Protected Resource Metadata
    [RFC9728].
@@ -1990,7 +1990,7 @@ A.3.2.4.  AI Agent calls Enterprise External Tool
   WWW-Authenticate: Bearer resource_metadata=
     "https://api.saas-tool.example/.well-known/oauth-protected-resource"
 
-   AI Agent fetches the tool API's OAuth 2.0 Protected Resource Metadata
+   AI Agent fetches the Tool API's OAuth 2.0 Protected Resource Metadata
    per [RFC9728] to dynamically discover an authorization server that
    can issue an access token for the resource.
 
@@ -2166,7 +2166,7 @@ A.3.2.6.  AI Agent obtains an Access Token for Enterprise External Tool
 
 A.3.2.7.  AI Agent makes an authorized External Tool request
 
-   AI Agent (https://ai-agent-app.example/) calls the tool API (Resource
+   AI Agent (https://ai-agent-app.example/) calls the Tool API (Resource
    Server) at api.saas-tool.example with a valid access token
 
    GET /tools
