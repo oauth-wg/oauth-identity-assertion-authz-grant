@@ -115,7 +115,7 @@ Table of Contents
        A.1.1.  Preconditions
      A.2.  Email and Calendaring Applications
        A.2.1.  Preconditions
-     A.3.  AI Agent using Enterprise Tools
+     A.3.  AI Agent using External Tools
        A.3.1.  Preconditions
        A.3.2.  Example Sequence
    Acknowledgments
@@ -1804,29 +1804,28 @@ A.2.1.  Preconditions
       Identity Assertion JWT Authorization Grant from unregistered
       clients
 
-A.3.  AI Agent using Enterprise Tools
+A.3.  AI Agent using External Tools
 
    AI agents are designed to perform complex tasks on behalf of users,
-   often requiring integration with external systems such as SaaS
+   often requiring integration with external tools provided by SaaS
    applications, internal services, or enterprise data sources.  When
-   accessing these systems, the agent operates on behalf of the end
-   user, and its actions are constrained by the user’s identity, role,
-   and permissions as defined by the enterprise.  This ensures that all
-   data access and operations are properly scoped and compliant with
-   organizational access controls.
+   accessing these systems, the agent often operates on behalf of the
+   end user, and its actions are constrained by the user’s identity,
+   role, and permissions as defined by the enterprise.  This ensures
+   that all data access and operations are properly scoped and compliant
+   with organizational access controls.
 
 A.3.1.  Preconditions
 
-   This example involves two distinct trust domains.  The AI Agent is
-   the OAuth 2.0 client and is not itself a trust domain in this flow.
+A.3.1.1.  Deployment and Client Preconditions
 
    *  The Enterprise IdP at idp.cyberdyne-corp.example authenticates the
       enterprise’s users and issues identity assertions
 
-   *  The Tool API (resource server) at api.saas-tool.example and its
-      authorization server at authorization-server.saas-tool.example are
-      operated by a SaaS tool vendor, in a different trust domain from
-      the enterprise IdP
+   *  The External Tool API (resource server) at api.saas-tool.example
+      and its authorization server at authorization-server.saas-
+      tool.example are operated by a SaaS tool vendor, in a different
+      trust domain from the enterprise IdP
 
    *  The AI Agent is an OAuth 2.0 client with client ID https://ai-
       agent-app.example/
@@ -1836,9 +1835,9 @@ A.3.1.  Preconditions
       through static registration or dynamic discovery via
       [I-D.ietf-oauth-client-id-metadata-document]
 
-   *  The Tool Resource Authorization Server (authorization-server.saas-
-      tool.example) recognizes the AI Agent (https://ai-agent-
-      app.example/) as a trusted client, either through static
+   *  The External Tool Resource Authorization Server (authorization-
+      server.saas-tool.example) recognizes the AI Agent (https://ai-
+      agent-app.example/) as a trusted client, either through static
       registration or dynamic discovery via
       [I-D.ietf-oauth-client-id-metadata-document]
 
@@ -1847,15 +1846,21 @@ A.3.1.  Preconditions
       [I-D.ietf-oauth-client-id-metadata-document] to allow servers to
       dynamically discover client metadata.  Alternatively, clients may
       be statically registered with an opaque client ID, with metadata
-      configured directly in the IdP and Authorization Server. * The
-      enterprise has established a trust relationship between their IdP
-      (idp.cyberdyne-corp.example) and the AI Agent for SSO * The
-      enterprise has established a trust relationship between their IdP
-      (idp.cyberdyne-corp.example) and the Tool Resource Authorization
-      Server (authorization-server.saas-tool.example) for SSO and
-      Identity Assertion JWT Authorization Grant * The enterprise has
-      granted the AI Agent permission to act on behalf of users for the
-      Tool Resource Authorization Server with a specific set of scopes
+      configured directly in the IdP and Authorization Server.
+
+A.3.1.2.  Trust Relationship Preconditions
+
+   *  The enterprise has established a trust relationship between their
+      IdP (idp.cyberdyne-corp.example) and the AI Agent for SSO
+
+   *  The enterprise has established a trust relationship between their
+      IdP (idp.cyberdyne-corp.example) and the External Tool Resource
+      Authorization Server (authorization-server.saas-tool.example) for
+      SSO and Identity Assertion JWT Authorization Grant
+
+   *  The enterprise has granted the AI Agent permission to act on
+      behalf of users for the External Tool Resource Authorization
+      Server with a specific set of scopes
 
 A.3.2.  Example Sequence
 
@@ -1972,15 +1977,15 @@ https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC12
 
    AI Agent now has an identity binding for context
 
-A.3.2.4.  AI Agent calls Enterprise External Tool
+A.3.2.4.  AI Agent calls External Tool
 
-   AI Agent (https://ai-agent-app.example/) calls the Tool API (Resource
-   Server) at api.saas-tool.example without a valid access token and is
-   issued an authentication challenge per Protected Resource Metadata
-   [RFC9728].
+   AI Agent (https://ai-agent-app.example/) calls the External Tool API
+   (Resource Server) at api.saas-tool.example without a valid access
+   token and is issued an authentication challenge per Protected
+   Resource Metadata [RFC9728].
 
-      Note: How agents discover available tools is out of scope of this
-      specification
+      Note: How agents discover available external tools is out of scope
+      of this specification
 
   GET /tools
   Host: api.saas-tool.example
@@ -1990,9 +1995,9 @@ A.3.2.4.  AI Agent calls Enterprise External Tool
   WWW-Authenticate: Bearer resource_metadata=
     "https://api.saas-tool.example/.well-known/oauth-protected-resource"
 
-   AI Agent fetches the Tool API's OAuth 2.0 Protected Resource Metadata
-   per [RFC9728] to dynamically discover an authorization server that
-   can issue an access token for the resource.
+   AI Agent fetches the External Tool API's OAuth 2.0 Protected Resource
+   Metadata per [RFC9728] to dynamically discover an authorization
+   server that can issue an access token for the resource.
 
    GET /.well-known/oauth-protected-resource
    Host: api.saas-tool.example
@@ -2014,7 +2019,7 @@ A.3.2.4.  AI Agent calls Enterprise External Tool
         "https://api.saas-tool.example/resource_documentation.html"
     }
 
-   AI Agent discovers the Tool Resource Authorization Server
+   AI Agent discovers the External Tool Resource Authorization Server
    (authorization-server.saas-tool.example) configuration per [RFC8414]
 
 GET /.well-known/oauth-authorization-server
@@ -2049,8 +2054,8 @@ Content-Type: application/json
    supported the AI Agent can first attempt to silently obtain an access
    token using an Identity Assertion JWT Authorization Grant from the
    Enterprise's IdP otherwise it can fallback to interactively obtaining
-   a standard authorization_code from the Tool Resource Authorization
-   Server
+   a standard authorization_code from the External Tool Resource
+   Authorization Server
 
       Note: This would benefit from an Authorization Server Metadata
       [RFC8414] property to indicate whether the Identity Assertion JWT
@@ -2063,15 +2068,15 @@ Content-Type: application/json
       assertion-authz-grant/issues/16).
 
 A.3.2.5.  AI Agent obtains an Identity Assertion JWT Authorization Grant
-          for Enterprise External Tool from the Enterprise IdP
+          for External Tool from the Enterprise IdP
 
    AI Agent (https://ai-agent-app.example/) makes an Identity Assertion
    JWT Authorization Grant Token Exchange [RFC8693] request to the
    Enterprise IdP (idp.cyberdyne-corp.example) using the ID Token
    obtained when establishing an identity binding context, along with
-   scopes and the resource identifier for the tool API (api.saas-
-   tool.example) that was returned in the tool's OAuth 2.0 Protected
-   Resource Metadata
+   scopes and the resource identifier for the External Tool API
+   (api.saas-tool.example) that was returned in the external tool's
+   OAuth 2.0 Protected Resource Metadata
 
 POST /oauth2/token HTTP/1.1
 Host: idp.cyberdyne-corp.example
@@ -2126,15 +2131,16 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    .
    signature
 
-A.3.2.6.  AI Agent obtains an Access Token for Enterprise External Tool
+A.3.2.6.  AI Agent obtains an Access Token for External Tool
 
    AI Agent (https://ai-agent-app.example/) makes a token request to the
-   Tool Resource Authorization Server (authorization-server.saas-
-   tool.example) token endpoint using the Identity Assertion JWT
-   Authorization Grant obtained from the Enterprise IdP (idp.cyberdyne-
-   corp.example) as a JWT Assertion as defined by [RFC7523].
+   External Tool Resource Authorization Server (authorization-
+   server.saas-tool.example) token endpoint using the Identity Assertion
+   JWT Authorization Grant obtained from the Enterprise IdP
+   (idp.cyberdyne-corp.example) as a JWT Assertion as defined by
+   [RFC7523].
 
-      Note: How the AI Agent registers with the Tool Resource
+      Note: How the AI Agent registers with the External Tool Resource
       Authorization Server (e.g static or dynamic client registration),
       and whether or not it has credentials, is out-of-scope of this
       specification
@@ -2147,10 +2153,10 @@ A.3.2.6.  AI Agent obtains an Access Token for Enterprise External Tool
    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
    &assertion=eyJhbGciOiJIUzI1NiIsI...
 
-   Tool Resource Authorization Server (authorization-server.saas-
-   tool.example) validates the Identity Assertion JWT Authorization
-   Grant using the published JWKS for the trusted Enterprise IdP
-   (idp.cyberdyne-corp.example)
+   External Tool Resource Authorization Server (authorization-
+   server.saas-tool.example) validates the Identity Assertion JWT
+   Authorization Grant using the published JWKS for the trusted
+   Enterprise IdP (idp.cyberdyne-corp.example)
 
    HTTP/1.1 200 OK
    Content-Type: application/json;charset=UTF-8
@@ -2166,8 +2172,8 @@ A.3.2.6.  AI Agent obtains an Access Token for Enterprise External Tool
 
 A.3.2.7.  AI Agent makes an authorized External Tool request
 
-   AI Agent (https://ai-agent-app.example/) calls the Tool API (Resource
-   Server) at api.saas-tool.example with a valid access token
+   AI Agent (https://ai-agent-app.example/) calls the External Tool API
+   (Resource Server) at api.saas-tool.example with a valid access token
 
    GET /tools
    Host: api.saas-tool.example
