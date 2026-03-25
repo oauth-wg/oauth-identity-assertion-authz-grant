@@ -11,7 +11,7 @@
 <meta content="
        This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through a common enterprise identity provider using Token Exchange   and JWT Profile for OAuth 2.0 Authorization Grants  . 
     " name="description">
-<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="xml2rfc 3.32.0" name="generator">
 <meta content="cross-domain" name="keyword">
 <meta content="authorization" name="keyword">
 <meta content="authz" name="keyword">
@@ -19,18 +19,18 @@
 <meta content="enterprise" name="keyword">
 <meta content="draft-ietf-oauth-identity-assertion-authz-grant-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.31.0
+  xml2rfc 3.32.0
     Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.0.2
-    platformdirs 4.5.1
+    platformdirs 4.9.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.32.5
-    wcwidth 0.3.0
+    wcwidth 0.6.0
 -->
 <link href="draft-ietf-oauth-identity-assertion-authz-grant.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1055,7 +1055,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Parecki, et al.</td>
-<td class="center">Expires 3 September 2026</td>
+<td class="center">Expires 26 September 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-oauth-identity-assertion-authz-grant-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-03-02" class="published">2 March 2026</time>
+<time datetime="2026-03-25" class="published">25 March 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-09-03">3 September 2026</time></dd>
+<dd class="expires"><time datetime="2026-09-26">26 September 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 26 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1343,9 +1343,9 @@ svg :is([fill="white"], [fill^="#fff"]) {
       </h2>
 <p id="section-1-1">In typical enterprise scenarios, applications are configured for single sign-on to the enterprise identity provider (IdP) using OpenID Connect or SAML. This enables users to access all the necessary enterprise applications using a single account at the IdP, and enables the enterprise to manage which users can access which applications.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">When one application wants to access a user's data at another application, it will start an interactive OAuth flow <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> to obtain an access token for the application on behalf of the user. This OAuth flow enables a direct app-to-app connection between the two apps, and is not visible to the IdP used to log in to each app.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This specification enables this kind of "Cross App Access" to be managed by the enterprise IdP, similar to how the IdP manages single sign-on to individual applications.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The draft specification Identity Chaining Across Trust Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines how to request a JWT authorization grant from an Authorization Server and exchange it for an Access Token at another Authorization Server in a different trust domain. The specification combines OAuth 2.0 Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> and JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>. The draft supports multiple different use cases by leaving many details of the token exchange request and JWT authorization grant unspecified.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">This specification defines the additional details necessary to support interoperable implementations in enterprise scenarios when two applications are configured for single sign-on to the same enterprise identity provider. In particular, this specification uses an Identity Assertion as the input to the token exchange request. This way, the same enterprise Identity Provider that is trusted by applications for single sign-on can be extended to broker access to APIs.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-3">This specification enables this access to be managed by the enterprise IdP, similar to how the IdP manages single sign-on to individual applications. This mechanism is informally referred to as "cross app access", often abbreviated "XAA".<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">The draft specification "Identity Chaining Across Trust Domains" <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines how to request a JWT Authorization Grant from an Authorization Server and exchange it for an Access Token at another Authorization Server in a different trust domain. The specification combines OAuth 2.0 Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> and JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>. The draft supports multiple different use cases by leaving many details of the token exchange request and JWT authorization grant unspecified.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">This specification defines the additional details necessary to support interoperable implementations in enterprise scenarios when two applications are configured for single sign-on to the same enterprise identity provider. In particular, this specification uses an Identity Assertion as the input to the token exchange request (as opposed to other types of tokens). This way, the same enterprise Identity Provider that is trusted by applications for single sign-on can be extended to broker access to APIs.<a href="#section-1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1393,8 +1393,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-identity-assertion-jwt-auth">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-identity-assertion-jwt-auth" class="section-name selfRef">Identity Assertion JWT Authorization Grant</a>
       </h2>
-<p id="section-3-1">The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification supports Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>, allowing clients to request limited authorization using structured authorization details.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an End-User. Instead of being issued for a client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-1">The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>, allowing clients to request limited authorization using structured authorization details.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.<a href="#section-3-2" class="pilcrow">¶</a></p>
 <p id="section-3-3">As described in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="id-jag-claims">
 <section id="section-3.1">
@@ -1412,7 +1412,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <dt id="section-3.1-2.3">
 <code>sub</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-3.1-2.4">
-            <p id="section-3.1-2.4.1"><span class="bcp14">REQUIRED</span> - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>. The identifier <span class="bcp14">MUST</span> be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for SSO.  A public subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer (<code>iss</code>+<code>sub</code>) for a single-tenant issuer and <span class="bcp14">MUST</span> be unique when scoped with issuer and tenant (<code>iss</code>+<code>tenant</code>+<code>sub</code>) for multi-tenant issuer. See <a href="#client-id-mapping" class="auto internal xref">Section 5</a> for additional considerations.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-3.1-2.4.1"><span class="bcp14">REQUIRED</span> - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>. The identifier <span class="bcp14">MUST</span> be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for Single Sign-On (SSO).  A public subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer (<code>iss</code>+<code>sub</code>) for a single-tenant issuer and <span class="bcp14">MUST</span> be unique when scoped with issuer and tenant (<code>iss</code>+<code>tenant</code>+<code>sub</code>) for multi-tenant issuer. See <a href="#client-id-mapping" class="auto internal xref">Section 5</a> for additional considerations.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-3.1-2.5">
@@ -2742,7 +2742,7 @@ Cache-Control: no-store
 <dd class="break"></dd>
 <dt id="I-D.ietf-oauth-rfc7523bis">[I-D.ietf-oauth-rfc7523bis]</dt>
         <dd>
-<span class="refAuthor">Jones, M. B.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Mortimore, C.</span>, and <span class="refAuthor">F. Skokan</span>, <span class="refTitle">"Updates to OAuth 2.0 JSON Web Token (JWT) Client Authentication and Assertion-Based Authorization Grants"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-rfc7523bis-05</span>, <time datetime="2026-01-12" class="refDate">12 January 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-05">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-05</a>&gt;</span>. </dd>
+<span class="refAuthor">Jones, M. B.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Mortimore, C.</span>, and <span class="refAuthor">F. Skokan</span>, <span class="refTitle">"Updates to OAuth 2.0 JSON Web Token (JWT) Client Authentication and Assertion-Based Authorization Grants"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-rfc7523bis-06</span>, <time datetime="2026-03-02" class="refDate">2 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-06">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-06</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.parecki-oauth-jwt-dpop-grant">[I-D.parecki-oauth-jwt-dpop-grant]</dt>
         <dd>
