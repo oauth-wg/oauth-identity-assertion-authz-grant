@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-24T00:05:36.600171+00:00",
+  "timestamp": "2026-03-26T00:08:28.958780+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2081,7 +2081,7 @@
       "labels": [],
       "body": "I have a variation of the usecases described in sections `A.2` and `A.3` that may be interesting to talk through. I think authentication for whitelabled SaaS components could be a strong application of XAA. There are other less standardized approaches for this problem today.\n\n----\n\n## Intro\n\nSaaS platforms often purchase and re-expose whitelabeled capabilities from other SaaS platforms. For example,\nfunctionality like comments sections, chat widgets, support bots, or email notifications can often be sold as standalone features and embedded into customer-facing applications. \n\nThis functionality may consist of UI elements, APIs, or the combination of both to create full-stack widgets. When an end user interacts with one of these widgets,it is advantageous to use OAuth access tokens to authorize the interaction so the widget understand the user identity. For example, a comments section widget might allow users to edit their own comment, but not the comments of other users. A feedback widget might want to aggregate feedback by user, or might want to only accept feedback from authenticated users.\n\nToday, there are a few common approaches for whitelabeled authentication usecases:\n\n- Completely unauthenticated widgets like Google Maps use [public API Keys](https://developers.google.com/maps/documentation/javascript/demo-key). These public keys are highly abusable. Attackers that scrape the key can use it to exhaust API quotas and drive up usage bills. No calls within the Google Maps system can be tied back to an end user identity.\n\n- Svix does away with OAuth and access tokens entirely, and has the website backend generate a [pre-signed URL](https://docs.svix.com/app-portal#giving-your-users-access) for the frontend to use. This method is more secure than a completely public API, but still loses the user identity context. \n\n- The whitelabel resource server could be preconfigured to accept tokens issued by the CIAM IDP directly - like how Supabase can accept access tokens [issued by Auth0](https://supabase.com/docs/guides/auth/third-party/auth0). This approach typically only works with JWT access tokens that adhere to a specific & interoperable format. Access tokens in a bespoke or nonstandard format are much more difficult to validate. This approach also pushes a lot of complexity on the resource server - which may accept access tokens from hundreds or thousands of ASs.\n\nI believe XAA can be used here instead to create a standardized approach.\n\n----\n\n## Applying XAA\n\nLet's take the `wiki.example` case and assume that the wiki app developers want to whitelabel a feedback widget to \ncollect feedback from authenticated users on each page. \n\nThis flow differs from other examples already documented in the following ways:\n- The IDP Authorization Server is the CIAM AS, operated by the application developer\n- The application developer is the persona setting policy considerations\n- The client is a first-party application to the IDP AS\n- The client is integrated with both the IDP AS and the Resource Server AS - no dynamic discovery of AS information is needed during the flow.\n\nWe have the following entities in the system:\n\n```\n  +======================+================================+================================================+\n  | Role                 | App URL                        | Description                                    |\n  +======================+================================+================================================+\n  | Client               | https://wiki.example           | Wiki app that embeds content from one or more  |\n  |                      |                                | resource servers                               |\n  +----------------------+--------------------------------+------------------------------------------------+\n  | Identity Provider    | https://auth.wiki.example      | CIAM Identity Provider for the wiki app        |\n  | Authorization Server |                                |                                                |\n  +----------------------+--------------------------------+------------------------------------------------+\n  | Resource             | https://auth.feedback.example  | Authorization Server for a customer feedback   |\n  | Authorization Server |                                | service                                        |\n  +----------------------+--------------------------------+------------------------------------------------+\n  | Resource Server      | https://api.feedback.example   | Public API for the customer feedback service   |\n  +----------------------+--------------------------------+------------------------------------------------+\n```\n\n## Preconditions\n- The First Party App has a registered OAuth 2.0 Client (`com.example.wiki`) with the CIAM IdP (`auth.wiki.example`)\n- The First Party App has a registered OAuth 2.0 Client (`18723649238176`) with the Whitelabel AS (`auth.feedback.example`)\n- Application Developer has established a trust relationship between their CIAM IdP and the First Party App for SSO\n- Application Developer has established a trust relationship between their CIAM IdP and the Whitelabel AS for SSO and Identity Assertion JWT Authorization Grant\n- Application Developer has granted the First Party App permission to act on behalf of users within the Whitelabel API with a specific set of scopes\n\n## Example Sequence\n\n### First Party App establishes a User Identity with CIAM IdP\n\n#### IdP Authorization Request (with PKCE)\nFirst Party App generates a PKCE code_verifier and a code_challenge (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the CIAM IdP with an authorization request\n```\nGET /authorize?\n  response_type=code\n  &client_id=com.example.wiki\n  &redirect_uri=https://wiki.example/oauth2/callback\n  &scope=openid+profile+email\n  &state=xyzABC123\n  &code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM\n  &code_challenge_method=S256\nHost: auth.wiki.example\n```\nNo explicit user authorization step is required as the application is considered first party. \nThe CIAM IdP authenticates the end-user and redirects back to the First Party App's registered client redirect URI with an authorization code:\n\n    https://wiki.example/oauth2/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC123\n\nFirst Party App exchanges the code and PKCE code_verifier to obtain an ID Token and Access Token for the IdP's UserInfo endpoint\n\n```\nPOST /oauth2/token\nHost: auth.wiki.example\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=authorization_code\n&code=SplxlOBeZQQYbYS6WxSbIA\n&redirect_uri=https://wiki.example/oauth2/callback\n&client_id=com.example.wiki\n&code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk\n\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n\"id_token\": \"eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...\",\n\"token_type\": \"Bearer\",\n\"access_token\": \"7SliwCQP1brGdjBtsaMnXo\",\n\"scope\": \"openid profile email\"\n}\n```\nFirst Party App validates the ID Token using the published JWKS for the IdP\n```\n{\n\"iss\": \"https://auth.wiki.example/\",\n\"sub\": \"1997e829-2029-41d4-a716-446655440000\",\n\"aud\": \"com.example.wiki\",\n\"exp\": 1984444800,\n\"iat\": 1684441200,\n\"auth_time\": 1684440000,\n\"name\": \"John Connor\",\n\"email\": \"john.connor@cyberdyne.example\",\n\"email_verified\": true\n}\n```\n\n###  First Party App calls Whitelabeled API\n\nAs the First Party App is integrated directly with the Whitelabeled API, no AS discovery step is necessary.\nThe App can proceed directly to requesting an ID-JAG for token exchange.\n\n#### First Party App obtains an Identity Assertion JWT Authorization Grant for Whitelabeled API from the CIAM IdP\nFirst Party App makes an ID-JAG token exchange request to the CIAM IdP. It presents the ID Token obtained in the previous step, along with the scopes and resource identifier for the whitelabel API (both preconfigured by the developer)\n```\nPOST /oauth2/token HTTP/1.1\nHost: auth.wiki.example\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&requested_token_type=urn:ietf:params:oauth:token-type:id-jag\n&audience=https://auth.feedback.example/\n&resource=https://api.feedback.example/\n&scope=feedback.submit\n&subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...\n&subject_token_type=urn:ietf:params:oauth:token-type:id_token\n&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer\n&client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...\n```\nIf access is granted, the CIAM IDP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response.\n```\nHTTP/1.1 200 OK\nContent-Type: application/json\nCache-Control: no-store\nPragma: no-cache\n\n{\n\"issued_token_type\": \"urn:ietf:params:oauth:token-type:id-jag\",\n\"access_token\": \"eyJhbGciOiJIUzI1NiIsI...\",\n\"token_type\": \"N_A\",\n\"scope\": \"feedback.submit\",\n\"expires_in\": 300\n}\n```\nIdentity Assertion JWT Authorization Grant claims:\n```\n{\n\"alg\": \"ES256\",\n\"typ\": \"oauth-id-jag+jwt\"\n}\n.\n{\n\"jti\": \"9e43f81b64a33f20116179\",\n\"iss\": \"https://auth.wiki.example\",\n\"sub\": \"1llb-b4c0-0000-8000-t800b4ck0000\",\n\"aud\": \"https://auth.feedback.example\",\n\"resource\": \"https://api.feedback.example/\",\n\"client_id\": \"18723649238176\",\n\"exp\": 1984445160,\n\"iat\": 1984445100,\n\"scope\": \"feedback.submit\"\n}\n.\nsignature\n```\n#### First Party App obtains an Access Token for Whitelabel API\nFirst Party App makes a token request to the previously registered whitelabel API's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the CIAM IDP as a JWT Assertion.\n\nThe First Party App authenticates with its client credentials that were registered with the Whitelabel API's Authorization Server\n\n```\nPOST /oauth2/token HTTP/1.1\nHost: auth.feedback.example\nAuthorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2\n\ngrant_type=urn:ietf:params:oauth:grant-type:jwt-bearer\nassertion=eyJhbGciOiJIUzI1NiIsI...\n```\nWhitelabel API's Authorization Server validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted CIAM IDP\n```\nHTTP/1.1 200 OK\nContent-Type: application/json;charset=UTF-8\nCache-Control: no-store\nPragma: no-cache\n\n{\n\"token_type\": \"Bearer\",\n\"access_token\": \"2YotnFZFEjr1zCsicMWpAA\",\n\"expires_in\": 86400,\n\"scope\": \"feedback.submit\"\n}\n```\n#### First Party App makes an authorized Whitelabel API request\nFirst Party App invokes a Whitelabel API provided by the Resource Server with a valid access token\n```\nPOST /feedback/submit\nHost: api.feedback.example\nAuthorization: Bearer 2YotnFZFEjr1zCsicMWpAA\"\nAccept: application/json\n\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n...\n}\n```\n",
       "createdAt": "2026-03-20T22:37:58Z",
-      "updatedAt": "2026-03-23T19:49:20Z",
+      "updatedAt": "2026-03-24T03:42:18Z",
       "closedAt": null,
       "comments": [
         {
@@ -2125,6 +2125,27 @@
           "body": "@max-stytch can you review #78 ",
           "createdAt": "2026-03-23T19:49:20Z",
           "updatedAt": "2026-03-23T19:49:20Z"
+        },
+        {
+          "author": "max-stytch",
+          "authorAssociation": "NONE",
+          "body": "> In your example, what client is the ID-JAG bound to?\n\nThe ID-JAG is bound to the IdP. The IdP acts as a Client registered in the Resource Server AS. In the example, the IdP mints the ID-JAG and immediately exchanges the ID-JAG for an access token, using its client credentials. \n\nOnce the IdP receives an access token, the IdP can then choose to distribute that access token internally within its trust domain, following logic not defined by XAA. This means the access token can ultimately be used by software systems that are not known to the Resource Server AS (who only sees the Client ID of the IdP).\n\nAssume there are two clients:\n- `first_party_app` registered at the IdP\n- `acme_co_client` registered at the Resource Server AS\n- The IdP is configured with the `acme_co_client` credentials\n- The IdP returns the access token to the `first_party_app` afterwards\n\n```mermaid\nsequenceDiagram\n      participant App as First-Party App\n      participant IdP as IdP AS\n      participant RAS as Resource Server AS\n      participant RS as Resource Server\n\n      App->>IdP: non-XAA Token Exchange Request<br/>(requesting access token for Resource Server)\n      IdP->>IdP: Mints ID-JAG internally\n      IdP->>RAS: Present JWT Assertion as acme_co_client\n      Note over RAS: Validates ID-JAG\n      RAS-->>IdP: Access Token\n      IdP-->>App: Access Token\n\n      App->>RS: API Request with Access Token\n      RS-->>App: Response\n```\n\nWould this \"remixing\" of the XAA flow in a way the Resource Server AS is unable to detect or prevent - be categorized as a valid use of XAA? or an invalid use that should be addressed?",
+          "createdAt": "2026-03-24T03:02:01Z",
+          "updatedAt": "2026-03-24T03:02:47Z"
+        },
+        {
+          "author": "max-stytch",
+          "authorAssociation": "NONE",
+          "body": "Happy to move the token vault discussion to a separate issue as well",
+          "createdAt": "2026-03-24T03:04:28Z",
+          "updatedAt": "2026-03-24T03:04:28Z"
+        },
+        {
+          "author": "vsinghania-stytch",
+          "authorAssociation": "NONE",
+          "body": "i'd second moving the token vault discussion to its own issue -- i started thinking about it as an extension to max's initial thought, but the more i think about it the more it feels like its own thing.",
+          "createdAt": "2026-03-24T03:42:18Z",
+          "updatedAt": "2026-03-24T03:42:18Z"
         }
       ]
     },
@@ -5762,7 +5783,7 @@
       "labels": [],
       "body": "- Renamed LLM Agent to just AI Agent\r\n- Adopted OAuth standard terms for actors\r\n- Adopted CIMD identifiers\r\n- Relaxed Enterprise Tool to just External Tool to indicate different trust domain\r\n\r\nResolved #76 ",
       "createdAt": "2026-03-23T18:55:13Z",
-      "updatedAt": "2026-03-23T19:48:36Z",
+      "updatedAt": "2026-03-24T02:33:37Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "e1da9056c46463725740627bafe36580ddc620f7",
@@ -5774,7 +5795,41 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7uLBPZ",
+          "commit": {
+            "abbreviatedOid": "9c4a429"
+          },
+          "author": "max-stytch",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-03-24T02:33:11Z",
+          "updatedAt": "2026-03-24T02:33:11Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "nit: `clients may be statically registered with an opaque client ID` sounds to me like clients are given a single client ID that is shared between both the IdP and the AS.\n\nmaybe...\n\n> Alternatively, clients may be statically registered ahead of time. In this case, each server assigns the client an opaque client ID and metadata is configured directly at the server level.",
+              "createdAt": "2026-03-24T02:33:11Z",
+              "updatedAt": "2026-03-24T02:33:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s7uLBeW",
+          "commit": {
+            "abbreviatedOid": "9c4a429"
+          },
+          "author": "max-stytch",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-03-24T02:33:37Z",
+          "updatedAt": "2026-03-24T02:33:37Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 78,
@@ -5788,7 +5843,7 @@
       "labels": [],
       "body": "Add example were Enterprise IdP could be a CIAM IdP (resolves #75) ",
       "createdAt": "2026-03-23T19:47:47Z",
-      "updatedAt": "2026-03-23T19:47:47Z",
+      "updatedAt": "2026-03-24T03:03:59Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "e1da9056c46463725740627bafe36580ddc620f7",
@@ -5800,7 +5855,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s7uLRjR",
+          "commit": {
+            "abbreviatedOid": "0cac532"
+          },
+          "author": "max-stytch",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "LGTM",
+          "createdAt": "2026-03-24T03:03:59Z",
+          "updatedAt": "2026-03-24T03:03:59Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 79,
