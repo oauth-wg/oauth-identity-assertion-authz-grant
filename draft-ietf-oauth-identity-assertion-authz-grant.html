@@ -1319,7 +1319,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4">
-                <p id="section-toc.1-1.11.2.4.1"><a href="#appendix-A.4" class="auto internal xref">A.4</a>.  <a href="#name-llm-agent-using-enterprise-" class="internal xref">LLM Agent using Enterprise Tools</a></p>
+                <p id="section-toc.1-1.11.2.4.1"><a href="#appendix-A.4" class="auto internal xref">A.4</a>.  <a href="#name-ai-agent-using-external-too" class="internal xref">AI Agent using External Tools</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4.2.1">
                     <p id="section-toc.1-1.11.2.4.2.1.1"><a href="#appendix-A.4.1" class="auto internal xref">A.4.1</a>.  <a href="#name-preconditions-4" class="internal xref">Preconditions</a></p>
@@ -2986,34 +2986,64 @@ Cache-Control: no-store
 </div>
 </section>
 </div>
-<div id="llm-agent-using-enterprise-tools">
+<div id="ai-agent-using-external-tools">
 <section id="appendix-A.4">
-        <h3 id="name-llm-agent-using-enterprise-">
-<a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-llm-agent-using-enterprise-" class="section-name selfRef">LLM Agent using Enterprise Tools</a>
+        <h3 id="name-ai-agent-using-external-too">
+<a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-ai-agent-using-external-too" class="section-name selfRef">AI Agent using External Tools</a>
         </h3>
-<p id="appendix-A.4-1">AI agents, including those based on large language models (LLMs), are designed to manage user context, memory, and interaction state across multi-turn conversations. To perform complex tasks, these agents often integrate with external systems such as SaaS applications, internal services, or enterprise data sources. When accessing these systems, the agent operates on behalf of the end user, and its actions are constrained by the user’s identity, role, and permissions as defined by the enterprise. This ensures that all data access and operations are properly scoped and compliant with organizational access controls.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4-1">AI agents are designed to perform complex tasks on behalf of users, often requiring integration with external tools provided by SaaS applications, internal services, or enterprise data sources. When accessing these systems, the agent often operates on behalf of the end user, and its actions are constrained by the user’s identity, role, and permissions as defined by the enterprise. This ensures that all data access and operations are properly scoped and compliant with organizational access controls.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
 <div id="preconditions-3">
 <section id="appendix-A.4.1">
           <h4 id="name-preconditions-4">
 <a href="#appendix-A.4.1" class="section-number selfRef">A.4.1. </a><a href="#name-preconditions-4" class="section-name selfRef">Preconditions</a>
           </h4>
+<div id="deployment-and-client-preconditions-1">
+<section id="appendix-A.4.1.1">
+            <h5 id="name-deployment-and-client-precon">
+<a href="#appendix-A.4.1.1" class="section-number selfRef">A.4.1.1. </a><a href="#name-deployment-and-client-precon" class="section-name selfRef">Deployment and Client Preconditions</a>
+            </h5>
 <ul class="normal">
-<li class="normal" id="appendix-A.4.1-1.1">
-              <p id="appendix-A.4.1-1.1.1">The LLM Agent has a registered OAuth 2.0 Client (<code>com.example.ai-agent</code>) with the Enterprise IdP (<code>cyberdyne.idp.example</code>)<a href="#appendix-A.4.1-1.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-A.4.1.1-1.1">
+                <p id="appendix-A.4.1.1-1.1.1">The Enterprise IdP at <code>idp.cyberdyne-corp.example</code> authenticates the enterprise’s users and issues identity assertions<a href="#appendix-A.4.1.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-A.4.1-1.2">
-              <p id="appendix-A.4.1-1.2.1">The LLM Agent has a registered OAuth 2.0 Client (<code>4960880b83dc9</code>) with the External Tool Application (<code>saas.example.net</code>)<a href="#appendix-A.4.1-1.2.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="appendix-A.4.1.1-1.2">
+                <p id="appendix-A.4.1.1-1.2.1">The External Tool API (resource server) at <code>api.saas-tool.example</code> and its authorization server at <code>authorization-server.saas-tool.example</code> are operated by a SaaS tool vendor, in a different trust domain from the enterprise IdP<a href="#appendix-A.4.1.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-A.4.1-1.3">
-              <p id="appendix-A.4.1-1.3.1">Enterprise has established a trust relationship between their IdP and the LLM Agent for SSO<a href="#appendix-A.4.1-1.3.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="appendix-A.4.1.1-1.3">
+                <p id="appendix-A.4.1.1-1.3.1">The AI Agent is an OAuth 2.0 client with client ID <code>https://ai-agent-app.example/</code><a href="#appendix-A.4.1.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-A.4.1-1.4">
-              <p id="appendix-A.4.1-1.4.1">Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion JWT Authorization Grant<a href="#appendix-A.4.1-1.4.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="appendix-A.4.1.1-1.4">
+                <p id="appendix-A.4.1.1-1.4.1">The Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) recognizes the AI Agent (<code>https://ai-agent-app.example/</code>) as a trusted client, either through static registration or dynamic discovery via <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span><a href="#appendix-A.4.1.1-1.4.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-A.4.1-1.5">
-              <p id="appendix-A.4.1-1.5.1">Enterprise has granted the LLM Agent permission to act on behalf of users for the External Tool Application with a specific set of scopes<a href="#appendix-A.4.1-1.5.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="appendix-A.4.1.1-1.5">
+                <p id="appendix-A.4.1.1-1.5.1">The External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) recognizes the AI Agent (<code>https://ai-agent-app.example/</code>) as a trusted client, either through static registration or dynamic discovery via <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span><a href="#appendix-A.4.1.1-1.5.1" class="pilcrow">¶</a></p>
 </li>
-          </ul>
+            </ul>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.4.1.1-2.1">
+                <p id="appendix-A.4.1.1-2.1.1">Note: This example uses a URL as the client ID, following the Client Identity Metadata Document pattern <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span> to allow servers to dynamically discover client metadata. Alternatively, clients may be statically registered at the IdP and authorization server and given static opaque client IDs, with metadata configured directly in the IdP and Authorization Server.<a href="#appendix-A.4.1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
+<div id="trust-relationship-preconditions-1">
+<section id="appendix-A.4.1.2">
+            <h5 id="name-trust-relationship-precondit">
+<a href="#appendix-A.4.1.2" class="section-number selfRef">A.4.1.2. </a><a href="#name-trust-relationship-precondit" class="section-name selfRef">Trust Relationship Preconditions</a>
+            </h5>
+<ul class="normal">
+<li class="normal" id="appendix-A.4.1.2-1.1">
+                <p id="appendix-A.4.1.2-1.1.1">The enterprise has established a trust relationship between their IdP (<code>idp.cyberdyne-corp.example</code>) and the AI Agent for SSO<a href="#appendix-A.4.1.2-1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.2-1.2">
+                <p id="appendix-A.4.1.2-1.2.1">The enterprise has established a trust relationship between their IdP (<code>idp.cyberdyne-corp.example</code>) and the External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) for SSO and Identity Assertion JWT Authorization Grant<a href="#appendix-A.4.1.2-1.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.2-1.3">
+                <p id="appendix-A.4.1.2-1.3.1">The enterprise has granted the AI Agent permission to act on behalf of users for the External Tool Resource Authorization Server with a specific set of scopes<a href="#appendix-A.4.1.2-1.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
 </section>
 </div>
 <div id="example-sequence">
@@ -3021,13 +3051,13 @@ Cache-Control: no-store
           <h4 id="name-example-sequence">
 <a href="#appendix-A.4.2" class="section-number selfRef">A.4.2. </a><a href="#name-example-sequence" class="section-name selfRef">Example Sequence</a>
           </h4>
-<p id="appendix-A.4.2-1">The steps below describe the sequence of the LLM agent obtaining an access token using an Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>).<a href="#appendix-A.4.2-1" class="pilcrow">¶</a></p>
-<div id="llm-agent-establishes-a-user-identity-with-enterprise-idp">
+<p id="appendix-A.4.2-1">The steps below describe the sequence of the AI Agent obtaining an access token using an Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>).<a href="#appendix-A.4.2-1" class="pilcrow">¶</a></p>
+<div id="ai-agent-establishes-a-user-identity-with-enterprise-idp">
 <section id="appendix-A.4.2.1">
-            <h5 id="name-llm-agent-establishes-a-use">
-<a href="#appendix-A.4.2.1" class="section-number selfRef">A.4.2.1. </a><a href="#name-llm-agent-establishes-a-use" class="section-name selfRef">LLM Agent establishes a User Identity with Enterprise IdP</a>
+            <h5 id="name-ai-agent-establishes-a-user">
+<a href="#appendix-A.4.2.1" class="section-number selfRef">A.4.2.1. </a><a href="#name-ai-agent-establishes-a-user" class="section-name selfRef">AI Agent establishes a User Identity with Enterprise IdP</a>
             </h5>
-<p id="appendix-A.4.2.1-1">LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured <code>issuer</code> that was previously established.<a href="#appendix-A.4.2.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.1-1">AI Agent (<code>https://ai-agent-app.example/</code>) discovers the Enterprise IdP's (<code>idp.cyberdyne-corp.example</code>) OpenID Connect Provider configuration based on a configured <code>issuer</code> that was previously established.<a href="#appendix-A.4.2.1-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-A.4.2.1-2.1">
                 <p id="appendix-A.4.2.1-2.1.1">Note: IdP discovery where an agent discovers which IdP the agent should use to authenticate a given user is out of scope of this specification.<a href="#appendix-A.4.2.1-2.1.1" class="pilcrow">¶</a></p>
@@ -3036,19 +3066,19 @@ Cache-Control: no-store
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.1-3">
 <pre>
 GET /.well-known/openid-configuration
-Host: cyberdyne.idp.example
+Host: idp.cyberdyne-corp.example
 Accept: application/json
 
 HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "issuer": "https://cyberdyne.idp.example/",
-  "authorization_endpoint": "https://cyberdyne.idp.example/oauth2/authorize",
-  "token_endpoint": "https://cyberdyne.idp.example/oauth2/token",
-  "userinfo_endpoint": "https://cyberdyne.idp.example/oauth2/userinfo",
-  "jwks_uri": "https://cyberdyne.idp.example/oauth2/keys",
-  "registration_endpoint": "https://cyberdyne.idp.example/oauth2/register",
+  "issuer": "https://idp.cyberdyne-corp.example/",
+  "authorization_endpoint": "https://idp.cyberdyne-corp.example/oauth2/authorize",
+  "token_endpoint": "https://idp.cyberdyne-corp.example/oauth2/token",
+  "userinfo_endpoint": "https://idp.cyberdyne-corp.example/oauth2/userinfo",
+  "jwks_uri": "https://idp.cyberdyne-corp.example/oauth2/keys",
+  "registration_endpoint": "https://idp.cyberdyne-corp.example/oauth2/register",
   "scopes_supported": [
     "openid", "email", "profile"
   ],
@@ -3063,7 +3093,7 @@ Content-Type: application/json
 }
 </pre><a href="#appendix-A.4.2.1-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.1-4">LLM Agent discovers all necessary endpoints for authentication as well as support for the Identity Chaining requested token type <code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#appendix-A.4.2.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.1-4">AI Agent discovers all necessary endpoints for authentication as well as support for the Identity Chaining requested token type <code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#appendix-A.4.2.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="idp-authorization-request-with-pkce">
@@ -3071,44 +3101,44 @@ Content-Type: application/json
             <h5 id="name-idp-authorization-request-w">
 <a href="#appendix-A.4.2.2" class="section-number selfRef">A.4.2.2. </a><a href="#name-idp-authorization-request-w" class="section-name selfRef">IdP Authorization Request (with PKCE)</a>
             </h5>
-<p id="appendix-A.4.2.2-1">LLM Agent generates a PKCE <code>code_verifier</code> and a <code>code_challenge</code> (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP with an authorization request<a href="#appendix-A.4.2.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.2-1">AI Agent (<code>https://ai-agent-app.example/</code>) generates a PKCE <code>code_verifier</code> and a <code>code_challenge</code> (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) with an authorization request<a href="#appendix-A.4.2.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.2-2">
 <pre>
 GET /authorize?
   response_type=code
-  &amp;client_id=com.example.ai-agent
-  &amp;redirect_uri=https://ai-agent.example.com/oauth2/callback
+  &amp;client_id=https://ai-agent-app.example/
+  &amp;redirect_uri=https://ai-agent-app.example/callback
   &amp;scope=openid+profile+email
   &amp;state=xyzABC123
   &amp;code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
   &amp;code_challenge_method=S256
-Host: cyberdyne.idp.example
+Host: idp.cyberdyne-corp.example
 </pre><a href="#appendix-A.4.2.2-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
-<div id="user-authenticates-and-authorizes-llm-agent">
+<div id="user-authenticates-and-authorizes-ai-agent">
 <section id="appendix-A.4.2.3">
             <h5 id="name-user-authenticates-and-auth">
-<a href="#appendix-A.4.2.3" class="section-number selfRef">A.4.2.3. </a><a href="#name-user-authenticates-and-auth" class="section-name selfRef">User authenticates and authorizes LLM Agent</a>
+<a href="#appendix-A.4.2.3" class="section-number selfRef">A.4.2.3. </a><a href="#name-user-authenticates-and-auth" class="section-name selfRef">User authenticates and authorizes AI Agent</a>
             </h5>
-<p id="appendix-A.4.2.3-1">Enterprise IdP authenticates the end-user and redirects back to the LLM Agent's registered client redirect URI with an authorization code:<a href="#appendix-A.4.2.3-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.3-1">Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) authenticates the end-user and redirects back to the AI Agent's registered redirect URI with an authorization code:<a href="#appendix-A.4.2.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.3-2">
 <pre>
-https://ai-agent.example.com/oauth2/callback?code=SplxlOBeZQQYbYS6WxSbIA&amp;state=xyzABC123
+https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&amp;state=xyzABC123
 </pre><a href="#appendix-A.4.2.3-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.3-3">LLM Agent exchanges the <code>code</code> and PKCE <code>code_verifier</code> to obtain an ID Token and Access Token for the IdP's UserInfo endpoint<a href="#appendix-A.4.2.3-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.3-3">AI Agent (<code>https://ai-agent-app.example/</code>) exchanges the <code>code</code> and PKCE <code>code_verifier</code> to obtain an ID Token and Access Token for the IdP's UserInfo endpoint<a href="#appendix-A.4.2.3-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.3-4">
 <pre>
 POST /oauth2/token
-Host: cyberdyne.idp.example
+Host: idp.cyberdyne-corp.example
+Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=authorization_code
 &amp;code=SplxlOBeZQQYbYS6WxSbIA
-&amp;redirect_uri=https://ai-agent.example.com/oauth2/callback
-&amp;client_id=com.example.ai-agent
+&amp;redirect_uri=https://ai-agent-app.example/callback
 &amp;code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 
 HTTP/1.1 200 OK
@@ -3122,52 +3152,52 @@ Content-Type: application/json
 }
 </pre><a href="#appendix-A.4.2.3-4" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.3-5">LLM Agent validates the ID Token using the published JWKS for the IdP<a href="#appendix-A.4.2.3-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.3-5">AI Agent validates the ID Token using the published JWKS for the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>)<a href="#appendix-A.4.2.3-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.3-6">
 <pre>
 {
-  "iss": "https://cyberdyne.idp.example/",
+  "iss": "https://idp.cyberdyne-corp.example/",
   "sub": "1997e829-2029-41d4-a716-446655440000",
-  "aud": "com.example.ai-agent",
-  "exp": 1984444800,
-  "iat": 1684441200,
-  "auth_time": 1684440000,
+  "aud": "https://ai-agent-app.example/",
+  "exp": 1984448400,
+  "iat": 1984444800,
+  "auth_time": 1984444800,
   "name": "John Connor",
-  "email": "john.connor@cyberdyne.example",
+  "email": "john.connor@cyberdyne-corp.example",
   "email_verified": true
 }
 </pre><a href="#appendix-A.4.2.3-6" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.3-7">LLM Agent now has an identity binding for context<a href="#appendix-A.4.2.3-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.3-7">AI Agent now has an identity binding for context<a href="#appendix-A.4.2.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="llm-agent-calls-enterprise-external-tool">
+<div id="ai-agent-calls-external-tool">
 <section id="appendix-A.4.2.4">
-            <h5 id="name-llm-agent-calls-enterprise-">
-<a href="#appendix-A.4.2.4" class="section-number selfRef">A.4.2.4. </a><a href="#name-llm-agent-calls-enterprise-" class="section-name selfRef">LLM Agent calls Enterprise External Tool</a>
+            <h5 id="name-ai-agent-calls-external-too">
+<a href="#appendix-A.4.2.4" class="section-number selfRef">A.4.2.4. </a><a href="#name-ai-agent-calls-external-too" class="section-name selfRef">AI Agent calls External Tool</a>
             </h5>
-<p id="appendix-A.4.2.4-1">LLM Agent tool calls an external tool provided by an Enterprise SaaS Application (Resource Server) without a valid access token and is issued an authentication challenge per Protected Resource Metadata <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span>.<a href="#appendix-A.4.2.4-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-1">AI Agent (<code>https://ai-agent-app.example/</code>) calls the External Tool API (Resource Server) at <code>api.saas-tool.example</code> without a valid access token and is issued an authentication challenge per Protected Resource Metadata <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span>.<a href="#appendix-A.4.2.4-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-A.4.2.4-2.1">
-                <p id="appendix-A.4.2.4-2.1.1">Note: How agents discover available tools is out of scope of this specification<a href="#appendix-A.4.2.4-2.1.1" class="pilcrow">¶</a></p>
+                <p id="appendix-A.4.2.4-2.1.1">Note: How agents discover available external tools is out of scope of this specification<a href="#appendix-A.4.2.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.4-3">
 <pre>
 GET /tools
-Host: saas.example.net
+Host: api.saas-tool.example
 Accept: application/json
 
 HTTP/1.1 401 Unauthorized
 WWW-Authenticate: Bearer resource_metadata=
-  "https://saas.example.net/.well-known/oauth-protected-resource"
+  "https://api.saas-tool.example/.well-known/oauth-protected-resource"
 </pre><a href="#appendix-A.4.2.4-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.4-4">LLM Agent fetches the external tool resource's OAuth 2.0 Protected Resource Metadata per <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span> to dynamically discover an authorization server that can issue an access token for the resource.<a href="#appendix-A.4.2.4-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-4">AI Agent fetches the External Tool API's OAuth 2.0 Protected Resource Metadata per <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span> to dynamically discover an authorization server that can issue an access token for the resource.<a href="#appendix-A.4.2.4-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.4-5">
 <pre>
 GET /.well-known/oauth-protected-resource
-Host: saas.example.net
+Host: api.saas-tool.example
 Accept: application/json
 
 HTTP/1.1 200 OK
@@ -3175,34 +3205,34 @@ Content-Type: application/json
 
 {
    "resource":
-     "https://saas.example.net/",
+     "https://api.saas-tool.example/",
    "authorization_servers":
-     [ "https://authorization-server.saas.com/" ],
+     [ "https://authorization-server.saas-tool.example/" ],
    "bearer_methods_supported":
      ["header", "body"],
    "scopes_supported":
-     ["agent.tools.read", "agent.tools.write"],
+     ["agent.read", "agent.write"],
    "resource_documentation":
-     "https://saas.example.net/tools/resource_documentation.html"
+     "https://api.saas-tool.example/resource_documentation.html"
  }
 </pre><a href="#appendix-A.4.2.4-5" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.4-6">LLM Agent discovers the Authorization Server configuration per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span><a href="#appendix-A.4.2.4-6" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-6">AI Agent discovers the External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) configuration per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span><a href="#appendix-A.4.2.4-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.4-7">
 <pre>
 GET /.well-known/oauth-authorization-server
-Host: authorization-server.saas.com
+Host: authorization-server.saas-tool.example
 Accept: application/json
 
 HTTP/1.1 200 Ok
 Content-Type: application/json
 
 {
-  "issuer": "https://authorization-server.saas.com/",
-  "authorization_endpoint": "https://authorization-server.saas.com/oauth2/authorize",
-  "token_endpoint": "https://authorization-server.saas.com/oauth2/token",
-  "jwks_uri": "https://authorization-server.saas.com/oauth2/keys",
-  "registration_endpoint": "authorization-server.saas.com/oauth2/register",
+  "issuer": "https://authorization-server.saas-tool.example/",
+  "authorization_endpoint": "https://authorization-server.saas-tool.example/oauth2/authorize",
+  "token_endpoint": "https://authorization-server.saas-tool.example/oauth2/token",
+  "jwks_uri": "https://authorization-server.saas-tool.example/oauth2/keys",
+  "registration_endpoint": "https://authorization-server.saas-tool.example/oauth2/register",
   "scopes_supported": [
     "agent.read", "agent.write"
   ],
@@ -3216,8 +3246,8 @@ Content-Type: application/json
 }
 </pre><a href="#appendix-A.4.2.4-7" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.4-8">LLM Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.<a href="#appendix-A.4.2.4-8" class="pilcrow">¶</a></p>
-<p id="appendix-A.4.2.4-9">If the <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> grant type is supported the LLM can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard <code>authorization_code</code> from the SaaS Application's Authorization Server<a href="#appendix-A.4.2.4-9" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-8">AI Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.<a href="#appendix-A.4.2.4-8" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-9">If the <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> grant type is supported the AI Agent can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard <code>authorization_code</code> from the External Tool Resource Authorization Server<a href="#appendix-A.4.2.4-9" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-A.4.2.4-10.1">
                 <p id="appendix-A.4.2.4-10.1.1">Note: This would benefit from an Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> property to indicate whether the Identity Assertion JWT Authorization Grant form of <code>jwt-bearer</code> would be accepted by this authorization server. There are other uses of <code>jwt-bearer</code> that may be supported by the authorization server as well, and is not necessarily a reliable indication that the Identity Assertion JWT Authorization Grant would be supported. See <a href="https://github.com/aaronpk/draft-parecki-oauth-identity-assertion-authz-grant/issues/16">issue #16</a>.<a href="#appendix-A.4.2.4-10.1.1" class="pilcrow">¶</a></p>
@@ -3225,22 +3255,22 @@ Content-Type: application/json
             </ul>
 </section>
 </div>
-<div id="llm-agent-obtains-an-identity-assertion-jwt-authorization-grant-for-enterprise-external-tool-from-the-enterprise-idp">
+<div id="ai-agent-obtains-an-identity-assertion-jwt-authorization-grant-for-external-tool-from-the-enterprise-idp">
 <section id="appendix-A.4.2.5">
-            <h5 id="name-llm-agent-obtains-an-identi">
-<a href="#appendix-A.4.2.5" class="section-number selfRef">A.4.2.5. </a><a href="#name-llm-agent-obtains-an-identi" class="section-name selfRef">LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP</a>
+            <h5 id="name-ai-agent-obtains-an-identit">
+<a href="#appendix-A.4.2.5" class="section-number selfRef">A.4.2.5. </a><a href="#name-ai-agent-obtains-an-identit" class="section-name selfRef">AI Agent obtains an Identity Assertion JWT Authorization Grant for External Tool from the Enterprise IdP</a>
             </h5>
-<p id="appendix-A.4.2.5-1">LLM Agent makes an Identity Assertion JWT Authorization Grant Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's <code>OAuth 2.0 Protected Resource Metadata</code><a href="#appendix-A.4.2.5-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.5-1">AI Agent (<code>https://ai-agent-app.example/</code>) makes an Identity Assertion JWT Authorization Grant Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> request to the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) using the ID Token obtained when establishing an identity binding context, along with scopes and the resource identifier for the External Tool API (<code>api.saas-tool.example</code>) that was returned in the external tool's <code>OAuth 2.0 Protected Resource Metadata</code><a href="#appendix-A.4.2.5-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.5-2">
 <pre>
 POST /oauth2/token HTTP/1.1
-Host: cyberdyne.idp.example
+Host: idp.cyberdyne-corp.example
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;requested_token_type=urn:ietf:params:oauth:token-type:id-jag
-&amp;audience=https://authorization-server.saas.com/
-&amp;resource=https://saas.example.net/
+&amp;audience=https://authorization-server.saas-tool.example/
+&amp;resource=https://api.saas-tool.example/
 &amp;scope=agent.read+agent.write
 &amp;subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
 &amp;subject_token_type=urn:ietf:params:oauth:token-type:id_token
@@ -3248,7 +3278,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 </pre><a href="#appendix-A.4.2.5-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.5-3">If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.4.2.5-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.5-3">If access is granted, the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.4.2.5-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.5-4">
 <pre>
 HTTP/1.1 200 OK
@@ -3275,11 +3305,11 @@ Pragma: no-cache
 .
 {
   "jti": "9e43f81b64a33f20116179",
-  "iss": "https://cyberdyne.idp.example",
-  "sub": "1llb-b4c0-0000-8000-t800b4ck0000",
-  "aud": "https://authorization-server.saas.com",
-  "resource": "https://saas.example.net/",
-  "client_id": "4960880b83dc9",
+  "iss": "https://idp.cyberdyne-corp.example/",
+  "sub": "1997e829-2029-41d4-a716-446655440000",
+  "aud": "https://authorization-server.saas-tool.example/",
+  "resource": "https://api.saas-tool.example/",
+  "client_id": "https://ai-agent-app.example/",
   "exp": 1984445160,
   "iat": 1984445100,
   "scope": "agent.read agent.write"
@@ -3290,30 +3320,30 @@ signature
 </div>
 </section>
 </div>
-<div id="llm-agent-obtains-an-access-token-for-enterprise-external-tool">
+<div id="ai-agent-obtains-an-access-token-for-external-tool">
 <section id="appendix-A.4.2.6">
-            <h5 id="name-llm-agent-obtains-an-access">
-<a href="#appendix-A.4.2.6" class="section-number selfRef">A.4.2.6. </a><a href="#name-llm-agent-obtains-an-access" class="section-name selfRef">LLM Agent obtains an Access Token for Enterprise External Tool</a>
+            <h5 id="name-ai-agent-obtains-an-access-">
+<a href="#appendix-A.4.2.6" class="section-number selfRef">A.4.2.6. </a><a href="#name-ai-agent-obtains-an-access-" class="section-name selfRef">AI Agent obtains an Access Token for External Tool</a>
             </h5>
-<p id="appendix-A.4.2.6-1">LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#appendix-A.4.2.6-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.4.2.6-2">The LLM Agent authenticates with its client credentials that were registered with the SaaS Authorization Server<a href="#appendix-A.4.2.6-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.6-1">AI Agent (<code>https://ai-agent-app.example/</code>) makes a token request to the External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) as a JWT Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#appendix-A.4.2.6-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-A.4.2.6-3.1">
-                <p id="appendix-A.4.2.6-3.1.1">Note: How the LLM Agent registers with the Authorization Server (e.g static or dynamic client registration), and whether or not it has credentials, is out-of-scope of this specification<a href="#appendix-A.4.2.6-3.1.1" class="pilcrow">¶</a></p>
+<li class="normal ulEmpty" id="appendix-A.4.2.6-2.1">
+                <p id="appendix-A.4.2.6-2.1.1">Note: How the AI Agent registers with the External Tool Resource Authorization Server (e.g static or dynamic client registration), and whether or not it has credentials, is out-of-scope of this specification<a href="#appendix-A.4.2.6-2.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<div class="alignLeft art-text artwork" id="appendix-A.4.2.6-4">
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.6-3">
 <pre>
 POST /oauth2/token HTTP/1.1
-Host: authorization-server.saas.com
+Host: authorization-server.saas-tool.example
 Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-assertion=eyJhbGciOiJIUzI1NiIsI...
-</pre><a href="#appendix-A.4.2.6-4" class="pilcrow">¶</a>
+&amp;assertion=eyJhbGciOiJIUzI1NiIsI...
+</pre><a href="#appendix-A.4.2.6-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.4.2.6-5">SaaS Authorization Server validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP<a href="#appendix-A.4.2.6-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.4.2.6-6">
+<p id="appendix-A.4.2.6-4">External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP (<code>idp.cyberdyne-corp.example</code>)<a href="#appendix-A.4.2.6-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.6-5">
 <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
@@ -3326,21 +3356,21 @@ Pragma: no-cache
   "expires_in": 86400,
   "scope": "agent.read agent.write"
 }
-</pre><a href="#appendix-A.4.2.6-6" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.6-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
-<div id="llm-agent-makes-an-authorized-external-tool-request">
+<div id="ai-agent-makes-an-authorized-external-tool-request">
 <section id="appendix-A.4.2.7">
-            <h5 id="name-llm-agent-makes-an-authoriz">
-<a href="#appendix-A.4.2.7" class="section-number selfRef">A.4.2.7. </a><a href="#name-llm-agent-makes-an-authoriz" class="section-name selfRef">LLM Agent makes an authorized External Tool request</a>
+            <h5 id="name-ai-agent-makes-an-authorize">
+<a href="#appendix-A.4.2.7" class="section-number selfRef">A.4.2.7. </a><a href="#name-ai-agent-makes-an-authorize" class="section-name selfRef">AI Agent makes an authorized External Tool request</a>
             </h5>
-<p id="appendix-A.4.2.7-1">LLM Agent tool calls an external tool provided by the Enterprise SaaS Application (Resource Server) with a valid access token<a href="#appendix-A.4.2.7-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.7-1">AI Agent (<code>https://ai-agent-app.example/</code>) calls the External Tool API (Resource Server) at <code>api.saas-tool.example</code> with a valid access token<a href="#appendix-A.4.2.7-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.4.2.7-2">
 <pre>
 GET /tools
-Host: saas.example.net
-Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA"
+Host: api.saas-tool.example
+Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA
 Accept: application/json
 
 HTTP/1.1 200 OK
