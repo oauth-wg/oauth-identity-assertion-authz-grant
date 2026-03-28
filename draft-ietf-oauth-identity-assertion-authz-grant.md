@@ -1068,7 +1068,7 @@ AI agents are designed to perform complex tasks on behalf of users, often requir
 * The Enterprise IdP (`idp.cyberdyne-corp.example`) recognizes the AI Agent (`https://ai-agent-app.example/`) as a trusted client, either through static registration or dynamic discovery via {{I-D.ietf-oauth-client-id-metadata-document}}
 * The External Tool Resource Authorization Server (`authorization-server.saas-tool.example`) recognizes the AI Agent (`https://ai-agent-app.example/`) as a trusted client, either through static registration or dynamic discovery via {{I-D.ietf-oauth-client-id-metadata-document}}
 
-> Note: This example uses a URL as the client ID, following the Client Identity Metadata Document pattern {{I-D.ietf-oauth-client-id-metadata-document}} to allow servers to dynamically discover client metadata. Alternatively, clients may be statically registered with an opaque client ID, with metadata configured directly in the IdP and Authorization Server.
+> Note: This example uses a URL as the client ID, following the Client Identity Metadata Document pattern {{I-D.ietf-oauth-client-id-metadata-document}} to allow servers to dynamically discover client metadata. Alternatively, clients may be statically registered at the IdP and authorization server and given static opaque client IDs, with metadata configured directly in the IdP and Authorization Server.
 
 #### Trust Relationship Preconditions
 
