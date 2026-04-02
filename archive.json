@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-29T00:07:23.392312+00:00",
+  "timestamp": "2026-04-02T00:07:34.613532+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -5941,7 +5941,7 @@
       "labels": [],
       "body": "Register new AS metadata parameter `authorization_grant_profiles_supported` that enables a Resource Authorization Server to publish support for `urn:ietf:params:oauth:grant-profile:id-jag` profile.  This enables a client to discover at runtime whether a Resource AS supports ID-JAG processing or not as inspecting `grant_type` is not sufficient for assertion grants like `urn:ietf:params:oauth:grant-type:jwt-bearer`.  \r\n\r\nThis resolves #16 ",
       "createdAt": "2026-03-23T21:45:47Z",
-      "updatedAt": "2026-03-28T03:15:01Z",
+      "updatedAt": "2026-03-31T23:52:09Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "e1da9056c46463725740627bafe36580ddc620f7",
@@ -5980,6 +5980,13 @@
           "body": "oh sorry, the alternative I was thinking was to establish a new registry for authorization grant profiles. \r\n\r\nTho now that I am thinking about this again after a few hours, it sounds similar to the discussion (on the list?) about the current lack of registry for grant types. Currently grant types are in the \"OAuth URI\" registry: https://www.iana.org/assignments/oauth-parameters/oauth-parameters.xhtml#uri\r\n\r\nSo I think we should update this to add `urn:ietf:params:oauth:grant-profile:id-jag` to the \"OAuth URI\" registry.\r\n\r\nThe only other question would be whether it should use `urn:ietf:params:oauth:grant-type:jwt-bearer` as a prefix, so `urn:ietf:params:oauth:grant-type:jwt-bearer:id-jag`.",
           "createdAt": "2026-03-28T03:15:01Z",
           "updatedAt": "2026-03-28T03:15:01Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": ">The only other question would be whether it should use urn:ietf:params:oauth:grant-type:jwt-bearer as a prefix, so urn:ietf:params:oauth:grant-type:jwt-bearer:id-jag.\r\n\r\nThe ID-JAG JWT `typ` is already `oauth-id-jag+jwt` so it can be processed as a generic JWT.   I'm personally not a fan of \"structured syntax suffix\" for grant types.  Grant types specify processing semantics of the entire token request and not just about parsing token formats.  I think we should either define `urn:ietf:params:oauth:grant-type:id-jag` as its own grant type or we should use the existing grant type `urn:ietf:params:oauth:grant-type:jwt-bearer` and introduce a new registry for profiles that is discoverable by a client for negotiation but not needed for the token request and up to the AS to process based on configured profiles for the grant type. The latter is what the PR proposes. \r\n\r\nMy thinking is that an AS will over time have many different profiles for assertions that it could support that can be additive not mutually exclusive.  For example ID-JAG may not contain all the processing rules for actor chains which could be its own profile but compatible with ID-JAG.  There may be future extensions for other behaviors.  ",
+          "createdAt": "2026-03-31T23:52:09Z",
+          "updatedAt": "2026-03-31T23:52:09Z"
         }
       ],
       "reviews": []
