@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-05T00:07:24.863680+00:00",
+  "timestamp": "2026-04-14T00:13:33.053114+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -6039,6 +6039,46 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 82,
+      "id": "PR_kwDOKv5r-s7RzSG-",
+      "title": "Broadened the draft\u2019s framing of Enterprise IdP to apply to more deployment scenarios",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/82",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Broaden the draft\u2019s framing from \u201centerprise IdP\u201d to the more precise trust model the protocol actually depends on: the IdP Authorization Server the downstream Resource Authorization Server already trusts for SSO and subject resolution.\r\n\r\nThis update keeps the protocol semantics intact while making the document align better with the CIAM and agentic examples already in the draft. The revised text consistently clarifies that the Resource Authorization Server still applies its own local policy and issues its own access tokens; ID-JAG changes the grant path, not resource ownership or token issuance authority.\r\n\r\nIt also tightens the cross-domain guidance for multi-hop deployments. The draft now says an ID-JAG is specific to the issuer-to-RAS trust relationship identified by `aud`, and the same ID-JAG must not be reused as the authorization grant for a different downstream Resource Authorization Server. Later hops may use newly issued ID-JAGs or other mechanisms.\r\n\r\nKey edits:\r\n- Update abstract, introduction, roles, and overview to describe the trusted-IdP model instead of enterprise-only framing.\r\n- Preserve existing consent/policy semantics by clarifying that the RAS does not need to obtain user consent directly again at the token exchange step.\r\n- Generalize use-case framing so enterprise remains a primary example, but not the only valid deployment model.\r\n- Refresh CIAM and AI agent text to match the same trust-boundary language.\r\n\r\nNo protocol flow changes were introduced beyond clarifying the scope of ID-JAG reuse in downstream multi-hop scenarios.",
+      "createdAt": "2026-04-12T17:58:45Z",
+      "updatedAt": "2026-04-13T23:47:15Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "fa6b031347737cec43cd202ff006c710b046de14",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "relax-enterprise-idp",
+      "headRefOid": "b651d8e570bcafa582ec9e1b4317bb82d31e5aa4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s70iEmh",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "this is great, thanks for doing this!",
+          "createdAt": "2026-04-13T23:47:15Z",
+          "updatedAt": "2026-04-13T23:47:15Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
