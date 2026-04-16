@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-14T00:13:33.053114+00:00",
+  "timestamp": "2026-04-16T00:13:49.959405+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2202,6 +2202,58 @@
       "updatedAt": "2026-04-02T18:38:22Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 83,
+      "id": "I_kwDOKv5r-s7-OSgL",
+      "title": "Interoperability gap: JIT provisioning and identity claim negotiation",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/83",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "# Problem\n\nSection 2.1 of the draft currently says:\n\n> It is RECOMMENDED that the ID-JAG contain an `email` and/or `aud_sub` claim. The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation... Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.\n\nThis language acknowledges the JIT problem but does not solve it. There is no interoperable mechanism for a Resource Authorization Server (RAS) to signal which identity claims it requires, or for a Client to convey that signal back to the IdP so it can include them in the ID-JAG. The result requires out-of-band coordination between every IdP/RAS pair, which undermines the composability goal of the spec.\n\n## Specific failure modes\n\n1. **What claims does the IdP put in the ID-JAG?** The spec provides a fixed optional set (`email`, `aud_sub`) but gives no mechanism for the RAS to express its requirements. IdPs must either over-include claims (privacy risk) or guess conservatively and leave JIT broken.\n\n2. **What claims does the RAS need to JIT?** RAS-specific claims (department, cost center, license tier, custom identifiers) may not be OIDC standard claims. Even for OIDC-defined claims, different RASes need different subsets. There is no way to express this per-RAS, per-deployment requirement today.\n\n3. **How does the IdP know to issue the right claims?** The IdP has no standardized signal from the Client about what the target RAS needs. The Client knows the RAS endpoint (from discovery) but cannot ask the IdP to tailor the ID-JAG for that RAS's JIT requirements.\n\n4. **The UserInfo dead end.** When the RAS receives the ID-JAG it has no Access Token and cannot reach back to the IdP's UserInfo endpoint or any other IdP-hosted endpoint to fetch additional claims. The ID-JAG exchange must succeed or fail on the claims already present in the token. This is not a fixable limitation; it is a structural constraint of the grant flow.\n\n# Proposed Solution\n\nStandardize exactly three things.\n\n## 1. Error code: `insufficient_identity_claims`\n\nIf the RAS determines that the identity assertion is cryptographically valid and the grant type is accepted, but the token does not contain sufficient identity claims to perform account resolution or JIT account creation, it SHOULD return an error response per RFC 6749 Section 5.2:\n\n```\nHTTP/1.1 400 Bad Request\nContent-Type: application/json\n\n{\n  \"error\": \"insufficient_identity_claims\",\n  \"error_description\": \"The identity assertion is missing required claims for account resolution.\"\n}\n```\n\nThe name follows the `insufficient_*` pattern established by RFC 9470 (`insufficient_user_authentication`). It signals \"valid but not enough\", distinguishing this condition from `invalid_grant`, which would indicate the token itself is rejected. \n\n## 2. Error response parameter: `required_claims`\n\nThe error response SHOULD include a `required_claims` parameter: a space-separated list of the claim names the RAS requires, following the same format as `scope` (RFC 6749 Section 3.3):\n\n```json\n{\n  \"error\": \"insufficient_identity_claims\",\n  \"error_description\": \"The identity assertion is missing required claims for account resolution.\",\n  \"required_claims\": \"email department employee_number\"\n}\n```\n\nSpace-separated is the right format here. Claim names are JSON member names and cannot contain spaces, so the delimiter is unambiguous. This is consistent with `scope` and avoids the framework-parsing ambiguity of a JSON array in a form-encoded body (cf. RFC 9396 `authorization_details`, which uses JSON because its values are structured objects; claim names are flat tokens and do not warrant that complexity).\n\n`required_claims` is intentionally defined as a flat list of names. Value constraints, type hints, and schema references are deferred pending real deployment experience.\n\n## 3. Token Exchange request extension parameter: `required_claims`\n\nA Client receiving an `insufficient_identity_claims` error MAY retry the Token Exchange request to the IdP Authorization Server, including the `required_claims` parameter with the value carried directly from the RAS error response:\n\n```\nPOST /oauth2/token\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&requested_token_type=urn:ietf:params:oauth:token-type:id-jag\n&subject_token=<id_token>\n&subject_token_type=urn:ietf:params:oauth:token-type:id_token\n&audience=https://api.example.com/\n&required_claims=email+department+employee_number\n```\n\nThe symmetric naming (`required_claims` in both the error response and the Token Exchange request) means the Client can pass the value through without transformation. \"Required\" reflects the RAS's perspective, which is authoritative: these claims are required for the flow to succeed. It does not obligate the IdP to provide all of them; the IdP SHOULD include the requested claims subject to its own policy (consent, availability, privacy controls), and MAY decline to include specific claims.\n\n## End-to-end flow\n\n```\nClient \u2192 IdP:    Token Exchange \u2192 ID-JAG (minimal claims)\nClient \u2192 RAS:    Token Exchange with ID-JAG\nRAS \u2192 Client:    400 insufficient_identity_claims\n                     required_claims=email department employee_number\nClient \u2192 IdP:    Token Exchange + required_claims=email department employee_number\nIdP \u2192 Client:    ID-JAG with additional claims included\nClient \u2192 RAS:    Token Exchange with enriched ID-JAG\nRAS \u2192 Client:    200 OK, access_token\n```\n\n# Editorial: relax `email` and `aud_sub` to plain OPTIONAL\n\nWith `required_claims` providing the negotiation mechanism, the RECOMMENDED status of `email` and `aud_sub` in Section 2.1 should be downgraded to OPTIONAL. These claims become examples of what a RAS might request rather than a standing recommendation that every IdP include them. The existing guidance language should be replaced with a pointer to the `required_claims` mechanism as the interoperable way to express and negotiate claim requirements, and an example end-to-end flow demonstrating the retry pattern.\n\n# Advanced use case: RAS Token Exchange to IdP\n\nFor deployments where the identity data needed cannot reasonably be pre-embedded in a signed token (because it is large, sensitive, or needs to be fresher than the ID-JAG allows), the RAS MAY perform its own Token Exchange: presenting the received ID-JAG as the subject token to the IdP's token endpoint and requesting an Access Token scoped to the IdP's identity APIs.\n\nThis covers the UserInfo-equivalent pattern without burdening the Client as intermediary, and without embedding what is effectively a profile API response inside the ID-JAG. It should be acknowledged in the spec as a valid deployment pattern with the IdP-side API contract left to a future profile. This keeps the core ID-JAG spec clean and avoids scope creep.\n\n# Optional / future: claim requirements discovery at the RAS\n\nTo allow IdPs to import a RAS's claim requirements at onboarding time rather than waiting for a runtime error, the RAS could advertise the claims it needs for JIT provisioning via its Authorization Server metadata (RFC 8414), using a new metadata parameter scoped to this profile (to avoid collision with base OAuth or other profiles).\n\nThis is an optimization for IdP onboarding UX, not a correctness requirement. The runtime `insufficient_identity_claims` negotiation works without it. Worth raising for debate; not a blocker for the core proposal.\n\n---\n\n# Questions for the group\n\n1. **Error name:** `insufficient_identity_claims` (cause, RFC 9470 pattern)  or alternative?\n2. **IdP acknowledgment:** Should the IdP be required to indicate in the ID-JAG which claims from `required_claims` it was able to include, or is the Client expected to inspect the resulting token before retrying at the RAS?\n3. **RAS-to-IdP Token Exchange:** Should the advanced pattern be noted in Security Considerations? The RAS acting as an OAuth client to the IdP has trust and SSRF implications worth calling out even if the pattern itself is out of scope.",
+      "createdAt": "2026-04-14T22:49:22Z",
+      "updatedAt": "2026-04-14T23:24:16Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Interesting idea...\n\nOne concern that pops out immediately is the privacy leakage of the information to the client.\n\nNormally the provisioning would happen server-to-server, and the user's data would be sent over TLS directly between the IdP and authorization server. This makes the client the transport mechanism of the data, which it could read from the unencrypted ID-JAG. \n\nUnfortunately the only ways to avoid this are significantly more complex (encrypted ID-JAG, encrypted claims in the ID-JAG, secondary provisioning protocol like OP Commands/SCIM).",
+          "createdAt": "2026-04-14T22:59:50Z",
+          "updatedAt": "2026-04-14T22:59:50Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Proposal addresses that in a **limited** way\n\n- IdP determines if it wants to release the claims (meets policy/etc) \n- Escape hatch with RAS Token Exchange to IdP\n\nIn practice many deployments use standard OIDC claims where the values are the same profile used across apps.  Its the same data it already has access to via OIDC for example.   Yes there are pair-wise identifiers this could leak as well as other claims but you correctly identified the solution (encrypted ID-JAG).  \n\nI have personally seen enough deployments to convince me that standard OIDC claims meet the need for JIT for many apps that this is valuable enough to have without adding encryption.  IdPs can choose to reject the claims so there is safe exit.",
+          "createdAt": "2026-04-14T23:07:09Z",
+          "updatedAt": "2026-04-14T23:07:09Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Ok good point. If the OIDC claims are enough for JIT provisioning then this isn't any worse. It would be worth calling out explicitly that this is only for OIDC claims. Or if we don't want to actually require that, then at the very least a big security considerations section talking about the risk of including non-OIDC claims.\n\nI was getting thrown off from the language about non-OIDC claims:\n\n> RAS-specific claims (department, cost center, license tier, custom identifiers) may not be OIDC standard claims",
+          "createdAt": "2026-04-14T23:11:51Z",
+          "updatedAt": "2026-04-14T23:12:26Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Actually it's less important that they are OIDC-defined claims, and more important that the IdP only includes claims in the ID-JAG that it would have included in an ID Token.\n\nThe risk is then that the claims might have been pairwise and only the AS (domain B) would have gotten the claims for domain B, but now the client in domain A is getting the claims that will be provided to domain B. \n\nBut to your point, if the limited claims that are OIDC defined are sufficient for most JIT use cases, it might be fine to just explain this in the security considerations.",
+          "createdAt": "2026-04-14T23:14:23Z",
+          "updatedAt": "2026-04-14T23:14:23Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Actually it's less important that they are OIDC-defined claims, and more important that the IdP only includes claims in the ID-JAG that it would have included in an ID Token.\n\nCorrect.  There are claims that sometimes may only be available over UserInfo (e.g large group graphs) that this wouldn't support.  This would require \"RAS Token Exchange to IdP\" so the RAS can obtain its own access token.   Custom RP claims can be used over ID Token\n\n> The risk is then that the claims might have been pairwise and only the AS (domain B) would have gotten the claims for domain B, but now the client in domain A is getting the claims that will be provided to domain B.\n\nCorrect, this would need to be documented and would be decision for the IdP to make.  There may be apps an IdP operator is OK releasing this to. \n\nWe can add ID-JAG encryption if folks think its worth it.  I think its easier to just implement \"RAS Token Exchange to IdP\" for those scenarios but biased.  Either way the privacy risks need to be documented.   Where I was hoping for more consensus is whether the base proposal has enough interoperability value to be useful knowing the risks.\n\n",
+          "createdAt": "2026-04-14T23:23:36Z",
+          "updatedAt": "2026-04-14T23:24:16Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -6052,7 +6104,7 @@
       "labels": [],
       "body": "Broaden the draft\u2019s framing from \u201centerprise IdP\u201d to the more precise trust model the protocol actually depends on: the IdP Authorization Server the downstream Resource Authorization Server already trusts for SSO and subject resolution.\r\n\r\nThis update keeps the protocol semantics intact while making the document align better with the CIAM and agentic examples already in the draft. The revised text consistently clarifies that the Resource Authorization Server still applies its own local policy and issues its own access tokens; ID-JAG changes the grant path, not resource ownership or token issuance authority.\r\n\r\nIt also tightens the cross-domain guidance for multi-hop deployments. The draft now says an ID-JAG is specific to the issuer-to-RAS trust relationship identified by `aud`, and the same ID-JAG must not be reused as the authorization grant for a different downstream Resource Authorization Server. Later hops may use newly issued ID-JAGs or other mechanisms.\r\n\r\nKey edits:\r\n- Update abstract, introduction, roles, and overview to describe the trusted-IdP model instead of enterprise-only framing.\r\n- Preserve existing consent/policy semantics by clarifying that the RAS does not need to obtain user consent directly again at the token exchange step.\r\n- Generalize use-case framing so enterprise remains a primary example, but not the only valid deployment model.\r\n- Refresh CIAM and AI agent text to match the same trust-boundary language.\r\n\r\nNo protocol flow changes were introduced beyond clarifying the scope of ID-JAG reuse in downstream multi-hop scenarios.",
       "createdAt": "2026-04-12T17:58:45Z",
-      "updatedAt": "2026-04-13T23:47:15Z",
+      "updatedAt": "2026-04-14T05:13:31Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "fa6b031347737cec43cd202ff006c710b046de14",
@@ -6077,6 +6129,86 @@
           "createdAt": "2026-04-13T23:47:15Z",
           "updatedAt": "2026-04-13T23:47:15Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOKv5r-s70kir_",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "max-stytch",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-14T03:43:22Z",
+          "updatedAt": "2026-04-14T03:43:23Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "What does the phrase `subject resolution` mean exactly? Is subject resolution something that the IDP does, or does the IDP provide inputs that are then trusted for the RAS to perform subject resolution itself. I _think_ it means the latter, but I'm not sure. From what I can see that exact phrase hasn't been used in [OAuth](https://mailarchive.ietf.org/arch/search/?q=%22subject%20resolution%22) before. Other examples from [FHIR](https://build.fhir.org/ig/jmandel/smart-permission-tickets-wip/) describe subject resolution as something that the RP does, not the issuer.\n\nWould `subject assertion` or `identity assertion` make more sense?",
+              "createdAt": "2026-04-14T03:43:22Z",
+              "updatedAt": "2026-04-14T03:43:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s70ksjX",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-14T03:56:33Z",
+          "updatedAt": "2026-04-14T03:56:33Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "`Subject resolution` is the step where a  RP or Resource Authorization Server takes an asserted identity and determines which local subject it corresponds to.\r\n\r\nIn practice, that means mapping incoming identity data like:\r\n- `sub`\r\n- issuer\r\n- email\r\n- tenant context\r\n- federation identifiers\r\n\r\nto the local thing the service actually authorizes, such as:\r\n- a user record\r\n- an account\r\n- a tenant member\r\n- a service principal\r\n\r\nWhy it matters:\r\nauthentication says \u201cthis assertion is valid.\u201d  \r\nsubject resolution says \u201cwhich local identity is this, here?\u201d  \r\n\r\nWithout subject resolution, the service cannot safely apply local authorization.\r\n\r\nIts a pretty standard IAM term, but probably worth adding a definition to the spec as I'm sure others will have same question as you.",
+              "createdAt": "2026-04-14T03:56:33Z",
+              "updatedAt": "2026-04-14T03:57:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s70kwrF",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-14T04:02:15Z",
+          "updatedAt": "2026-04-14T04:02:15Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I think the spec in general is missing term definitions (not just roles) as we are using of lot IAM concepts in this spec as we are building on identity assertions.  I think it makes sense to have that a separate PR that adds common terms including subject resolution as well as others. ",
+              "createdAt": "2026-04-14T04:02:15Z",
+              "updatedAt": "2026-04-14T04:02:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s70ljEC",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "max-stytch",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-14T05:13:31Z",
+          "updatedAt": "2026-04-14T05:13:31Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Yeah, subject resolution as a thing the resource authorization server does makes sense to me. I initially interpreted the phrasing as if the resource authorization server trusts the IdP to do subject resolution itself.",
+              "createdAt": "2026-04-14T05:13:31Z",
+              "updatedAt": "2026-04-14T05:13:31Z"
+            }
+          ]
         }
       ]
     }
