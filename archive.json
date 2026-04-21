@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-19T00:09:28.304222+00:00",
+  "timestamp": "2026-04-21T00:13:07.437225+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2299,6 +2299,22 @@
           "updatedAt": "2026-04-16T01:13:14Z"
         }
       ]
+    },
+    {
+      "number": 85,
+      "id": "I_kwDOKv5r-s8AAAABAEA8ew",
+      "title": "Allow public client registration at the Resource Authorization Server when the client is confidential at the IdP and the ID-JAG is key-bound?",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/85",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The current draft generally assumes confidential clients at the Resource Authorization Server (RAS), and the Security Considerations say that this specification `SHOULD` only be supported for confidential clients. The draft also notes in Cross-Domain Client ID Handling that requiring a confidential client at the RAS helps prevent the IdP from delegating access to any valid client at the RAS.\n\nAt the same time, the draft now defines proof-of-possession / key-binding for ID-JAG using `cnf` and DPoP. That raises a question about whether the spec should allow an explicit tradeoff here.\n\n**Deployment model to discuss**\n\n- The client is confidential at the IdP.\n- The client is public at the RAS, or the RAS otherwise does not require confidential client authentication for this exchange.\n- The client includes DPoP in the token exchange to the IdP.\n- The IdP issues a key-bound ID-JAG with a `cnf` / `jkt`.\n- The client presents DPoP when exchanging the ID-JAG at the RAS.\n- The RAS verifies that the DPoP key matches the `cnf` in the ID-JAG.\n\n**Why allow this**\n\n- Credential lifecycle can be centralized at the IdP.\n- The client does not need to maintain separate credentials with each RAS.\n- This may be useful in ecosystems with many downstream RAS deployments.\n- Client ID Metadata Document (CIMD) helps address part of this problem when adopted, but it will not always be available immediately.\n- This could make the deployment model possible until CIMD becomes more widely deployed.\n\n**Tradeoff**\n\nThis is not equivalent to requiring a confidential client at the RAS.\n\nWhat is preserved:\n\n- Replay resistance for the ID-JAG, assuming the RAS requires proof-of-possession and validates `cnf` against the proof token.\n- Stronger protection than an unconstrained bearer-style exchange.\n\nWhat is reduced:\n\n- The RAS no longer gets the same client-authentication assurance it gets from a confidential registration at the RAS.\n- The anti-client-substitution property is weaker unless the spec explicitly defines how public-client identification is handled in this profile.\n\n**Question**\n\nShould the specification explicitly allow this tradeoff?\n\nPossible direction:\n\n- Keep confidential registration at the RAS as the recommended/default model.\n- Allow RAS deployments to accept public clients for ID-JAG exchange when the ID-JAG is key-bound and the proof token presented to the RAS matches the `cnf`.\n- Clarify that this does not require any RAS to support public clients.\n- A RAS, or the administrator/operator of that RAS, can always decide to require confidential registration instead.\n- In that sense, this change would make the model possible, not mandatory, until CIMD is more widely deployed.\n\nIf the spec does allow this, it would likely need explicit processing rules for this profile, for example:\n\n- `cnf` in the ID-JAG is required.\n- Proof-of-possession at the RAS is required.\n- The proof key MUST match the `cnf` in the ID-JAG.\n- The RAS SHOULD issue only sender-constrained access tokens in this case.\n- The client identification / `client_id` matching rules need to be defined for public clients at the RAS.\n\nThe main question is whether the spec should permit this as an optional deployment tradeoff, while still allowing any RAS to require confidential registration.",
+      "createdAt": "2026-04-20T23:01:03Z",
+      "updatedAt": "2026-04-20T23:01:03Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
