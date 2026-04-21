@@ -11,7 +11,7 @@
 <meta content="
        This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through a common enterprise identity provider using Token Exchange   and JWT Profile for OAuth 2.0 Authorization Grants  . 
     " name="description">
-<meta content="xml2rfc 3.32.0" name="generator">
+<meta content="xml2rfc 3.33.0" name="generator">
 <meta content="cross-domain" name="keyword">
 <meta content="authorization" name="keyword">
 <meta content="authz" name="keyword">
@@ -19,14 +19,14 @@
 <meta content="enterprise" name="keyword">
 <meta content="draft-ietf-oauth-identity-assertion-authz-grant-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.32.0
-    Python 3.12.12
+  xml2rfc 3.33.0
+    Python 3.12.13
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.0.2
-    platformdirs 4.9.4
+    platformdirs 4.9.6
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.32.5
@@ -1051,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">ID JWT Authz Grant</td>
-<td class="right">March 2026</td>
+<td class="right">April 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Parecki, et al.</td>
-<td class="center">Expires 24 September 2026</td>
+<td class="center">Expires 23 October 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-oauth-identity-assertion-authz-grant-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-03-23" class="published">23 March 2026</time>
+<time datetime="2026-04-21" class="published">21 April 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-09-24">24 September 2026</time></dd>
+<dd class="expires"><time datetime="2026-10-23">23 October 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 24 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 23 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1309,7 +1309,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
-                <p id="section-toc.1-1.11.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-email-and-calendaring-appli" class="internal xref">Email and Calendaring Applications</a></p>
+                <p id="section-toc.1-1.11.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-customer-identity-for-devel" class="internal xref">Customer Identity for Developer SaaS Components</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2.2.1">
                     <p id="section-toc.1-1.11.2.2.2.1.1"><a href="#appendix-A.2.1" class="auto internal xref">A.2.1</a>.  <a href="#name-preconditions-2" class="internal xref">Preconditions</a></p>
@@ -1317,13 +1317,21 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3">
-                <p id="section-toc.1-1.11.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-llm-agent-using-enterprise-" class="internal xref">LLM Agent using Enterprise Tools</a></p>
+                <p id="section-toc.1-1.11.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-email-and-calendaring-appli" class="internal xref">Email and Calendaring Applications</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.1">
                     <p id="section-toc.1-1.11.2.3.2.1.1"><a href="#appendix-A.3.1" class="auto internal xref">A.3.1</a>.  <a href="#name-preconditions-3" class="internal xref">Preconditions</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.2">
-                    <p id="section-toc.1-1.11.2.3.2.2.1"><a href="#appendix-A.3.2" class="auto internal xref">A.3.2</a>.  <a href="#name-example-sequence" class="internal xref">Example Sequence</a></p>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4">
+                <p id="section-toc.1-1.11.2.4.1"><a href="#appendix-A.4" class="auto internal xref">A.4</a>.  <a href="#name-ai-agent-using-external-too" class="internal xref">AI Agent using External Tools</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4.2.1">
+                    <p id="section-toc.1-1.11.2.4.2.1.1"><a href="#appendix-A.4.1" class="auto internal xref">A.4.1</a>.  <a href="#name-preconditions-4" class="internal xref">Preconditions</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4.2.2">
+                    <p id="section-toc.1-1.11.2.4.2.2.1"><a href="#appendix-A.4.2" class="auto internal xref">A.4.2</a>.  <a href="#name-example-sequence" class="internal xref">Example Sequence</a></p>
 </li>
                 </ul>
 </li>
@@ -1349,9 +1357,9 @@ svg :is([fill="white"], [fill^="#fff"]) {
       </h2>
 <p id="section-1-1">In typical enterprise scenarios, applications are configured for single sign-on to the enterprise identity provider (IdP) using OpenID Connect or SAML. This enables users to access all the necessary enterprise applications using a single account at the IdP, and enables the enterprise to manage which users can access which applications.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">When one application wants to access a user's data at another application, it will start an interactive OAuth flow <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> to obtain an access token for the application on behalf of the user. This OAuth flow enables a direct app-to-app connection between the two apps, and is not visible to the IdP used to log in to each app.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This specification enables this kind of "Cross App Access" to be managed by the enterprise IdP, similar to how the IdP manages single sign-on to individual applications.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The draft specification Identity Chaining Across Trust Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines how to request a JWT authorization grant from an Authorization Server and exchange it for an Access Token at another Authorization Server in a different trust domain. The specification combines OAuth 2.0 Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> and JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>. The draft supports multiple different use cases by leaving many details of the token exchange request and JWT authorization grant unspecified.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">This specification defines the additional details necessary to support interoperable implementations in enterprise scenarios when two applications are configured for single sign-on to the same enterprise identity provider. In particular, this specification uses an Identity Assertion as the input to the token exchange request. This way, the same enterprise Identity Provider that is trusted by applications for single sign-on can be extended to broker access to APIs.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-3">This specification enables this access to be managed by the enterprise IdP, similar to how the IdP manages single sign-on to individual applications. This mechanism is informally referred to as "cross app access", often abbreviated "XAA".<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">The draft specification "Identity Chaining Across Trust Domains" <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines how to request a JWT Authorization Grant from an Authorization Server and exchange it for an Access Token at another Authorization Server in a different trust domain. The specification combines OAuth 2.0 Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> and JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>. The draft supports multiple different use cases by leaving many details of the token exchange request and JWT authorization grant unspecified.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">This specification defines the additional details necessary to support interoperable implementations in enterprise scenarios when two applications are configured for single sign-on to the same enterprise identity provider. In particular, this specification uses an Identity Assertion as the input to the token exchange request (as opposed to other types of tokens). This way, the same enterprise Identity Provider that is trusted by applications for single sign-on can be extended to broker access to APIs.<a href="#section-1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1399,8 +1407,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-identity-assertion-jwt-auth">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-identity-assertion-jwt-auth" class="section-name selfRef">Identity Assertion JWT Authorization Grant</a>
       </h2>
-<p id="section-3-1">The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification supports Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>, allowing clients to request limited authorization using structured authorization details.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an End-User. Instead of being issued for a client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-1">The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>, allowing clients to request limited authorization using structured authorization details.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server which is trusted by the Resource Authorization Server to delegate access to the client.<a href="#section-3-2" class="pilcrow">¶</a></p>
 <p id="section-3-3">As described in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="id-jag-claims">
 <section id="section-3.1">
@@ -1418,7 +1426,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <dt id="section-3.1-2.3">
 <code>sub</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-3.1-2.4">
-            <p id="section-3.1-2.4.1"><span class="bcp14">REQUIRED</span> - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>. The identifier <span class="bcp14">MUST</span> be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for SSO.  A public subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer (<code>iss</code>+<code>sub</code>) for a single-tenant issuer and <span class="bcp14">MUST</span> be unique when scoped with issuer and tenant (<code>iss</code>+<code>tenant</code>+<code>sub</code>) for multi-tenant issuer. See <a href="#client-id-mapping" class="auto internal xref">Section 5</a> for additional considerations.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-3.1-2.4.1"><span class="bcp14">REQUIRED</span> - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>. The identifier <span class="bcp14">MUST</span> be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for Single Sign-On (SSO).  A public subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer (<code>iss</code>+<code>sub</code>) for a single-tenant issuer and <span class="bcp14">MUST</span> be unique when scoped with issuer and tenant (<code>iss</code>+<code>tenant</code>+<code>sub</code>) for multi-tenant issuer. See <a href="#client-id-mapping" class="auto internal xref">Section 5</a> for additional considerations.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-3.1-2.5">
@@ -2802,7 +2810,7 @@ Cache-Control: no-store
 <dd class="break"></dd>
 <dt id="I-D.ietf-oauth-rfc7523bis">[I-D.ietf-oauth-rfc7523bis]</dt>
         <dd>
-<span class="refAuthor">Jones, M. B.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Mortimore, C.</span>, and <span class="refAuthor">F. Skokan</span>, <span class="refTitle">"Updates to OAuth 2.0 JSON Web Token (JWT) Client Authentication and Assertion-Based Authorization Grants"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-rfc7523bis-06</span>, <time datetime="2026-03-02" class="refDate">2 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-06">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-06</a>&gt;</span>. </dd>
+<span class="refAuthor">Jones, M. B.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Mortimore, C.</span>, and <span class="refAuthor">F. Skokan</span>, <span class="refTitle">"Updates to OAuth 2.0 JSON Web Token (JWT) Client Authentication and Assertion-Based Authorization Grants"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-rfc7523bis-10</span>, <time datetime="2026-04-20" class="refDate">20 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-10">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-10</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.parecki-oauth-jwt-dpop-grant">[I-D.parecki-oauth-jwt-dpop-grant]</dt>
         <dd>
@@ -2957,40 +2965,67 @@ Cache-Control: no-store
 </div>
 </section>
 </div>
-<div id="email-and-calendaring-applications">
+<div id="customer-identity-for-developer-saas-components">
 <section id="appendix-A.2">
-        <h3 id="name-email-and-calendaring-appli">
-<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-email-and-calendaring-appli" class="section-name selfRef">Email and Calendaring Applications</a>
+        <h3 id="name-customer-identity-for-devel">
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-customer-identity-for-devel" class="section-name selfRef">Customer Identity for Developer SaaS Components</a>
         </h3>
-<p id="appendix-A.2-1">Email clients can be used with arbitrary email servers, and cannot require pre-established relationships between each email client and each email server. When an email client uses OAuth to obtain an access token to an email server, this provides the security benefit of being able to use strong multi-factor authentication methods provided by the email server's authorization server, but does require that the user go through a web-based flow to log in to the email client. However, this web-based flow is often seen as disruptive to the user experience when initiated from a desktop or mobile native application, and so is often attempted to be minimized as much as possible.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.2-2">When the email client needs access to a separate API, such as a third-party calendaring application, traditionally this would require that the email client go through another web-based OAuth redirect flow to obtain authorization and ultimately an access token.<a href="#appendix-A.2-2" class="pilcrow">¶</a></p>
-<p id="appendix-A.2-3">To streamline the user experience, this specification can be used to enable the email client to use the Identity Assertion to obtain an access token for the third-party calendaring application without any user interaction.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-1">In some enterprise deployments, the shared identity layer is not a workforce IdP used to sign employees into internal or SaaS productivity tools.  Instead, the identity provider is a Customer Identity and Access Management (CIAM) platform that signs end-users into a customer-facing application or suite of first-party applications.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-2">These customer applications often embed or depend on third-party developer SaaS components such as communications, analytics, fraud detection, document processing, support tooling, or logging and observability services.  A first-party application may need to request an access token on behalf of the signed-in customer so that these components can be invoked seamlessly as part of the product experience, without interrupting the customer with separate delegated OAuth authorization prompts for each downstream service.<a href="#appendix-A.2-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-3">This specification can be used in these deployments when the CIAM platform serves as the common identity layer trusted by the first-party applications and by the authorization servers for the third-party developer SaaS components.  In that model, the CIAM platform can broker an Identity Assertion JWT Authorization Grant that allows the component provider to issue an access token scoped to the customer and to the specific component APIs needed by the first-party application.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
 <div id="preconditions-1">
 <section id="appendix-A.2.1">
           <h4 id="name-preconditions-2">
 <a href="#appendix-A.2.1" class="section-number selfRef">A.2.1. </a><a href="#name-preconditions-2" class="section-name selfRef">Preconditions</a>
           </h4>
+<div id="deployment-and-client-preconditions">
+<section id="appendix-A.2.1.1">
+            <h5 id="name-deployment-and-client-preco">
+<a href="#appendix-A.2.1.1" class="section-number selfRef">A.2.1.1. </a><a href="#name-deployment-and-client-preco" class="section-name selfRef">Deployment and Client Preconditions</a>
+            </h5>
 <ul class="normal">
-<li class="normal" id="appendix-A.2.1-1.1">
-              <p id="appendix-A.2.1-1.1.1">The Client does not have a pre-registered OAuth 2.0 client at the IdP Authorization Server or the Resource Authorization Server<a href="#appendix-A.2.1-1.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-A.2.1.1-1.1">
+                <p id="appendix-A.2.1.1-1.1.1">The first-party application has a registered OAuth 2.0 Client with the CIAM IdP Authorization Server<a href="#appendix-A.2.1.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-A.2.1-1.2">
-              <p id="appendix-A.2.1-1.2.1">The Client has obtained an Identity Assertion (e.g. ID Token) from the IdP Authorization Server<a href="#appendix-A.2.1-1.2.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="appendix-A.2.1.1-1.2">
+                <p id="appendix-A.2.1.1-1.2.1">The first-party application has a registered OAuth 2.0 Client with the Resource Authorization Server for the developer SaaS component<a href="#appendix-A.2.1.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-A.2.1-1.3">
-              <p id="appendix-A.2.1-1.3.1">The Resource Authorization Server is configured to allow the Identity Assertion JWT Authorization Grant from unregistered clients<a href="#appendix-A.2.1-1.3.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="appendix-A.2.1.1-1.3">
+                <p id="appendix-A.2.1.1-1.3.1">The Resource Authorization Server is able to map the customer identity conveyed by the CIAM platform to the corresponding account, tenant, or just-in-time provisioned subject at the developer SaaS component<a href="#appendix-A.2.1.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
-          </ul>
+            </ul>
+</section>
+</div>
+<div id="trust-relationship-preconditions">
+<section id="appendix-A.2.1.2">
+            <h5 id="name-trust-relationship-precondi">
+<a href="#appendix-A.2.1.2" class="section-number selfRef">A.2.1.2. </a><a href="#name-trust-relationship-precondi" class="section-name selfRef">Trust Relationship Preconditions</a>
+            </h5>
+<ul class="normal">
+<li class="normal" id="appendix-A.2.1.2-1.1">
+                <p id="appendix-A.2.1.2-1.1.1">The organization operating the customer application has established a trust relationship between its CIAM platform and the first-party application for customer sign-in and issuance of identity assertions<a href="#appendix-A.2.1.2-1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.2.1.2-1.2">
+                <p id="appendix-A.2.1.2-1.2.1">The organization operating the customer application and the developer SaaS provider have established a trust relationship between the CIAM platform and the Resource Authorization Server for Identity Assertion JWT Authorization Grant<a href="#appendix-A.2.1.2-1.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.2.1.2-1.3">
+                <p id="appendix-A.2.1.2-1.3.1">The organization operating the customer application has granted the first-party application permission to act on behalf of signed-in customers for the developer SaaS component with a defined set of scopes<a href="#appendix-A.2.1.2-1.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
 </section>
 </div>
 </section>
 </div>
-<div id="llm-agent-using-enterprise-tools">
+</section>
+</div>
+<div id="email-and-calendaring-applications">
 <section id="appendix-A.3">
-        <h3 id="name-llm-agent-using-enterprise-">
-<a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a href="#name-llm-agent-using-enterprise-" class="section-name selfRef">LLM Agent using Enterprise Tools</a>
+        <h3 id="name-email-and-calendaring-appli">
+<a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a href="#name-email-and-calendaring-appli" class="section-name selfRef">Email and Calendaring Applications</a>
         </h3>
-<p id="appendix-A.3-1">AI agents, including those based on large language models (LLMs), are designed to manage user context, memory, and interaction state across multi-turn conversations. To perform complex tasks, these agents often integrate with external systems such as SaaS applications, internal services, or enterprise data sources. When accessing these systems, the agent operates on behalf of the end user, and its actions are constrained by the user’s identity, role, and permissions as defined by the enterprise. This ensures that all data access and operations are properly scoped and compliant with organizational access controls.<a href="#appendix-A.3-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.3-1">Email clients can be used with arbitrary email servers, and cannot require pre-established relationships between each email client and each email server. When an email client uses OAuth to obtain an access token to an email server, this provides the security benefit of being able to use strong multi-factor authentication methods provided by the email server's authorization server, but does require that the user go through a web-based flow to log in to the email client. However, this web-based flow is often seen as disruptive to the user experience when initiated from a desktop or mobile native application, and so is often attempted to be minimized as much as possible.<a href="#appendix-A.3-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.3-2">When the email client needs access to a separate API, such as a third-party calendaring application, traditionally this would require that the email client go through another web-based OAuth redirect flow to obtain authorization and ultimately an access token.<a href="#appendix-A.3-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.3-3">To streamline the user experience, this specification can be used to enable the email client to use the Identity Assertion to obtain an access token for the third-party calendaring application without any user interaction.<a href="#appendix-A.3-3" class="pilcrow">¶</a></p>
 <div id="preconditions-2">
 <section id="appendix-A.3.1">
           <h4 id="name-preconditions-3">
@@ -2998,56 +3033,112 @@ Cache-Control: no-store
           </h4>
 <ul class="normal">
 <li class="normal" id="appendix-A.3.1-1.1">
-              <p id="appendix-A.3.1-1.1.1">The LLM Agent has a registered OAuth 2.0 Client (<code>com.example.ai-agent</code>) with the Enterprise IdP (<code>cyberdyne.idp.example</code>)<a href="#appendix-A.3.1-1.1.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.3.1-1.1.1">The Client does not have a pre-registered OAuth 2.0 client at the IdP Authorization Server or the Resource Authorization Server<a href="#appendix-A.3.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.3.1-1.2">
-              <p id="appendix-A.3.1-1.2.1">The LLM Agent has a registered OAuth 2.0 Client (<code>4960880b83dc9</code>) with the External Tool Application (<code>saas.example.net</code>)<a href="#appendix-A.3.1-1.2.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.3.1-1.2.1">The Client has obtained an Identity Assertion (e.g. ID Token) from the IdP Authorization Server<a href="#appendix-A.3.1-1.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="appendix-A.3.1-1.3">
-              <p id="appendix-A.3.1-1.3.1">Enterprise has established a trust relationship between their IdP and the LLM Agent for SSO<a href="#appendix-A.3.1-1.3.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-A.3.1-1.4">
-              <p id="appendix-A.3.1-1.4.1">Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion JWT Authorization Grant<a href="#appendix-A.3.1-1.4.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-A.3.1-1.5">
-              <p id="appendix-A.3.1-1.5.1">Enterprise has granted the LLM Agent permission to act on behalf of users for the External Tool Application with a specific set of scopes<a href="#appendix-A.3.1-1.5.1" class="pilcrow">¶</a></p>
+              <p id="appendix-A.3.1-1.3.1">The Resource Authorization Server is configured to allow the Identity Assertion JWT Authorization Grant from unregistered clients<a href="#appendix-A.3.1-1.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
 </div>
-<div id="example-sequence">
-<section id="appendix-A.3.2">
-          <h4 id="name-example-sequence">
-<a href="#appendix-A.3.2" class="section-number selfRef">A.3.2. </a><a href="#name-example-sequence" class="section-name selfRef">Example Sequence</a>
+</section>
+</div>
+<div id="ai-agent-using-external-tools">
+<section id="appendix-A.4">
+        <h3 id="name-ai-agent-using-external-too">
+<a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-ai-agent-using-external-too" class="section-name selfRef">AI Agent using External Tools</a>
+        </h3>
+<p id="appendix-A.4-1">AI agents are designed to perform complex tasks on behalf of users, often requiring integration with external tools provided by SaaS applications, internal services, or enterprise data sources. When accessing these systems, the agent often operates on behalf of the end user, and its actions are constrained by the user’s identity, role, and permissions as defined by the enterprise. This ensures that all data access and operations are properly scoped and compliant with organizational access controls.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
+<div id="preconditions-3">
+<section id="appendix-A.4.1">
+          <h4 id="name-preconditions-4">
+<a href="#appendix-A.4.1" class="section-number selfRef">A.4.1. </a><a href="#name-preconditions-4" class="section-name selfRef">Preconditions</a>
           </h4>
-<p id="appendix-A.3.2-1">The steps below describe the sequence of the LLM agent obtaining an access token using an Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>).<a href="#appendix-A.3.2-1" class="pilcrow">¶</a></p>
-<div id="llm-agent-establishes-a-user-identity-with-enterprise-idp">
-<section id="appendix-A.3.2.1">
-            <h5 id="name-llm-agent-establishes-a-use">
-<a href="#appendix-A.3.2.1" class="section-number selfRef">A.3.2.1. </a><a href="#name-llm-agent-establishes-a-use" class="section-name selfRef">LLM Agent establishes a User Identity with Enterprise IdP</a>
+<div id="deployment-and-client-preconditions-1">
+<section id="appendix-A.4.1.1">
+            <h5 id="name-deployment-and-client-precon">
+<a href="#appendix-A.4.1.1" class="section-number selfRef">A.4.1.1. </a><a href="#name-deployment-and-client-precon" class="section-name selfRef">Deployment and Client Preconditions</a>
             </h5>
-<p id="appendix-A.3.2.1-1">LLM Agent discovers the Enterprise IdP's OpenID Connect Provider configuration based on a configured <code>issuer</code> that was previously established.<a href="#appendix-A.3.2.1-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-A.3.2.1-2.1">
-                <p id="appendix-A.3.2.1-2.1.1">Note: IdP discovery where an agent discovers which IdP the agent should use to authenticate a given user is out of scope of this specification.<a href="#appendix-A.3.2.1-2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A.4.1.1-1.1">
+                <p id="appendix-A.4.1.1-1.1.1">The Enterprise IdP at <code>idp.cyberdyne-corp.example</code> authenticates the enterprise’s users and issues identity assertions<a href="#appendix-A.4.1.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.1-1.2">
+                <p id="appendix-A.4.1.1-1.2.1">The External Tool API (resource server) at <code>api.saas-tool.example</code> and its authorization server at <code>authorization-server.saas-tool.example</code> are operated by a SaaS tool vendor, in a different trust domain from the enterprise IdP<a href="#appendix-A.4.1.1-1.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.1-1.3">
+                <p id="appendix-A.4.1.1-1.3.1">The AI Agent is an OAuth 2.0 client with client ID <code>https://ai-agent-app.example/</code><a href="#appendix-A.4.1.1-1.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.1-1.4">
+                <p id="appendix-A.4.1.1-1.4.1">The Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) recognizes the AI Agent (<code>https://ai-agent-app.example/</code>) as a trusted client, either through static registration or dynamic discovery via <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span><a href="#appendix-A.4.1.1-1.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.1-1.5">
+                <p id="appendix-A.4.1.1-1.5.1">The External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) recognizes the AI Agent (<code>https://ai-agent-app.example/</code>) as a trusted client, either through static registration or dynamic discovery via <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span><a href="#appendix-A.4.1.1-1.5.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.1-3">
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.4.1.1-2.1">
+                <p id="appendix-A.4.1.1-2.1.1">Note: This example uses a URL as the client ID, following the Client Identity Metadata Document pattern <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span> to allow servers to dynamically discover client metadata. Alternatively, clients may be statically registered at the IdP and authorization server and given static opaque client IDs, with metadata configured directly in the IdP and Authorization Server.<a href="#appendix-A.4.1.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
+<div id="trust-relationship-preconditions-1">
+<section id="appendix-A.4.1.2">
+            <h5 id="name-trust-relationship-precondit">
+<a href="#appendix-A.4.1.2" class="section-number selfRef">A.4.1.2. </a><a href="#name-trust-relationship-precondit" class="section-name selfRef">Trust Relationship Preconditions</a>
+            </h5>
+<ul class="normal">
+<li class="normal" id="appendix-A.4.1.2-1.1">
+                <p id="appendix-A.4.1.2-1.1.1">The enterprise has established a trust relationship between their IdP (<code>idp.cyberdyne-corp.example</code>) and the AI Agent for SSO<a href="#appendix-A.4.1.2-1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.2-1.2">
+                <p id="appendix-A.4.1.2-1.2.1">The enterprise has established a trust relationship between their IdP (<code>idp.cyberdyne-corp.example</code>) and the External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) for SSO and Identity Assertion JWT Authorization Grant<a href="#appendix-A.4.1.2-1.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="appendix-A.4.1.2-1.3">
+                <p id="appendix-A.4.1.2-1.3.1">The enterprise has granted the AI Agent permission to act on behalf of users for the External Tool Resource Authorization Server with a specific set of scopes<a href="#appendix-A.4.1.2-1.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="example-sequence">
+<section id="appendix-A.4.2">
+          <h4 id="name-example-sequence">
+<a href="#appendix-A.4.2" class="section-number selfRef">A.4.2. </a><a href="#name-example-sequence" class="section-name selfRef">Example Sequence</a>
+          </h4>
+<p id="appendix-A.4.2-1">The steps below describe the sequence of the AI Agent obtaining an access token using an Identity Assertion JWT Authorization Grant (<a href="#id-jag" class="auto internal xref">Section 3</a>).<a href="#appendix-A.4.2-1" class="pilcrow">¶</a></p>
+<div id="ai-agent-establishes-a-user-identity-with-enterprise-idp">
+<section id="appendix-A.4.2.1">
+            <h5 id="name-ai-agent-establishes-a-user">
+<a href="#appendix-A.4.2.1" class="section-number selfRef">A.4.2.1. </a><a href="#name-ai-agent-establishes-a-user" class="section-name selfRef">AI Agent establishes a User Identity with Enterprise IdP</a>
+            </h5>
+<p id="appendix-A.4.2.1-1">AI Agent (<code>https://ai-agent-app.example/</code>) discovers the Enterprise IdP's (<code>idp.cyberdyne-corp.example</code>) OpenID Connect Provider configuration based on a configured <code>issuer</code> that was previously established.<a href="#appendix-A.4.2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="appendix-A.4.2.1-2.1">
+                <p id="appendix-A.4.2.1-2.1.1">Note: IdP discovery where an agent discovers which IdP the agent should use to authenticate a given user is out of scope of this specification.<a href="#appendix-A.4.2.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.1-3">
 <pre>
 GET /.well-known/openid-configuration
-Host: cyberdyne.idp.example
+Host: idp.cyberdyne-corp.example
 Accept: application/json
 
 HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
-  "issuer": "https://cyberdyne.idp.example/",
-  "authorization_endpoint": "https://cyberdyne.idp.example/oauth2/authorize",
-  "token_endpoint": "https://cyberdyne.idp.example/oauth2/token",
-  "userinfo_endpoint": "https://cyberdyne.idp.example/oauth2/userinfo",
-  "jwks_uri": "https://cyberdyne.idp.example/oauth2/keys",
-  "registration_endpoint": "https://cyberdyne.idp.example/oauth2/register",
+  "issuer": "https://idp.cyberdyne-corp.example/",
+  "authorization_endpoint": "https://idp.cyberdyne-corp.example/oauth2/authorize",
+  "token_endpoint": "https://idp.cyberdyne-corp.example/oauth2/token",
+  "userinfo_endpoint": "https://idp.cyberdyne-corp.example/oauth2/userinfo",
+  "jwks_uri": "https://idp.cyberdyne-corp.example/oauth2/keys",
+  "registration_endpoint": "https://idp.cyberdyne-corp.example/oauth2/register",
   "scopes_supported": [
     "openid", "email", "profile"
   ],
@@ -3060,54 +3151,54 @@ Content-Type: application/json
   "identity_chaining_requested_token_types_supported": ["urn:ietf:params:oauth:token-type:id-jag"],
   ...
 }
-</pre><a href="#appendix-A.3.2.1-3" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.1-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.1-4">LLM Agent discovers all necessary endpoints for authentication as well as support for the identity chaining requested token type <code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#appendix-A.3.2.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.1-4">AI Agent discovers all necessary endpoints for authentication as well as support for the identity chaining requested token type <code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#appendix-A.4.2.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="idp-authorization-request-with-pkce">
-<section id="appendix-A.3.2.2">
+<section id="appendix-A.4.2.2">
             <h5 id="name-idp-authorization-request-w">
-<a href="#appendix-A.3.2.2" class="section-number selfRef">A.3.2.2. </a><a href="#name-idp-authorization-request-w" class="section-name selfRef">IdP Authorization Request (with PKCE)</a>
+<a href="#appendix-A.4.2.2" class="section-number selfRef">A.4.2.2. </a><a href="#name-idp-authorization-request-w" class="section-name selfRef">IdP Authorization Request (with PKCE)</a>
             </h5>
-<p id="appendix-A.3.2.2-1">LLM Agent generates a PKCE <code>code_verifier</code> and a <code>code_challenge</code> (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP with an authorization request<a href="#appendix-A.3.2.2-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.2-2">
+<p id="appendix-A.4.2.2-1">AI Agent (<code>https://ai-agent-app.example/</code>) generates a PKCE <code>code_verifier</code> and a <code>code_challenge</code> (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) with an authorization request<a href="#appendix-A.4.2.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.2-2">
 <pre>
 GET /authorize?
   response_type=code
-  &amp;client_id=com.example.ai-agent
-  &amp;redirect_uri=https://ai-agent.example.com/oauth2/callback
+  &amp;client_id=https://ai-agent-app.example/
+  &amp;redirect_uri=https://ai-agent-app.example/callback
   &amp;scope=openid+profile+email
   &amp;state=xyzABC123
   &amp;code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
   &amp;code_challenge_method=S256
-Host: cyberdyne.idp.example
-</pre><a href="#appendix-A.3.2.2-2" class="pilcrow">¶</a>
+Host: idp.cyberdyne-corp.example
+</pre><a href="#appendix-A.4.2.2-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
-<div id="user-authenticates-and-authorizes-llm-agent">
-<section id="appendix-A.3.2.3">
+<div id="user-authenticates-and-authorizes-ai-agent">
+<section id="appendix-A.4.2.3">
             <h5 id="name-user-authenticates-and-auth">
-<a href="#appendix-A.3.2.3" class="section-number selfRef">A.3.2.3. </a><a href="#name-user-authenticates-and-auth" class="section-name selfRef">User authenticates and authorizes LLM Agent</a>
+<a href="#appendix-A.4.2.3" class="section-number selfRef">A.4.2.3. </a><a href="#name-user-authenticates-and-auth" class="section-name selfRef">User authenticates and authorizes AI Agent</a>
             </h5>
-<p id="appendix-A.3.2.3-1">Enterprise IdP authenticates the end-user and redirects back to the LLM Agent's registered client redirect URI with an authorization code:<a href="#appendix-A.3.2.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.3-2">
+<p id="appendix-A.4.2.3-1">Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) authenticates the end-user and redirects back to the AI Agent's registered redirect URI with an authorization code:<a href="#appendix-A.4.2.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.3-2">
 <pre>
-https://ai-agent.example.com/oauth2/callback?code=SplxlOBeZQQYbYS6WxSbIA&amp;state=xyzABC123
-</pre><a href="#appendix-A.3.2.3-2" class="pilcrow">¶</a>
+https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&amp;state=xyzABC123
+</pre><a href="#appendix-A.4.2.3-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.3-3">LLM Agent exchanges the <code>code</code> and PKCE <code>code_verifier</code> to obtain an ID Token and Access Token for the IdP's UserInfo endpoint<a href="#appendix-A.3.2.3-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.3-4">
+<p id="appendix-A.4.2.3-3">AI Agent (<code>https://ai-agent-app.example/</code>) exchanges the <code>code</code> and PKCE <code>code_verifier</code> to obtain an ID Token and Access Token for the IdP's UserInfo endpoint<a href="#appendix-A.4.2.3-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.3-4">
 <pre>
 POST /oauth2/token
-Host: cyberdyne.idp.example
+Host: idp.cyberdyne-corp.example
+Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=authorization_code
 &amp;code=SplxlOBeZQQYbYS6WxSbIA
-&amp;redirect_uri=https://ai-agent.example.com/oauth2/callback
-&amp;client_id=com.example.ai-agent
+&amp;redirect_uri=https://ai-agent-app.example/callback
 &amp;code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
 
 HTTP/1.1 200 OK
@@ -3119,54 +3210,54 @@ Content-Type: application/json
   "access_token": "7SliwCQP1brGdjBtsaMnXo",
   "scope": "openid profile email"
 }
-</pre><a href="#appendix-A.3.2.3-4" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.3-4" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.3-5">LLM Agent validates the ID Token using the published JWKS for the IdP<a href="#appendix-A.3.2.3-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.3-6">
+<p id="appendix-A.4.2.3-5">AI Agent validates the ID Token using the published JWKS for the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>)<a href="#appendix-A.4.2.3-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.3-6">
 <pre>
 {
-  "iss": "https://cyberdyne.idp.example/",
+  "iss": "https://idp.cyberdyne-corp.example/",
   "sub": "1997e829-2029-41d4-a716-446655440000",
-  "aud": "com.example.ai-agent",
-  "exp": 1984444800,
-  "iat": 1684441200,
-  "auth_time": 1684440000,
+  "aud": "https://ai-agent-app.example/",
+  "exp": 1984448400,
+  "iat": 1984444800,
+  "auth_time": 1984444800,
   "name": "John Connor",
-  "email": "john.connor@cyberdyne.example",
+  "email": "john.connor@cyberdyne-corp.example",
   "email_verified": true
 }
-</pre><a href="#appendix-A.3.2.3-6" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.3-6" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.3-7">LLM Agent now has an identity binding for context<a href="#appendix-A.3.2.3-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.3-7">AI Agent now has an identity binding for context<a href="#appendix-A.4.2.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="llm-agent-calls-enterprise-external-tool">
-<section id="appendix-A.3.2.4">
-            <h5 id="name-llm-agent-calls-enterprise-">
-<a href="#appendix-A.3.2.4" class="section-number selfRef">A.3.2.4. </a><a href="#name-llm-agent-calls-enterprise-" class="section-name selfRef">LLM Agent calls Enterprise External Tool</a>
+<div id="ai-agent-calls-external-tool">
+<section id="appendix-A.4.2.4">
+            <h5 id="name-ai-agent-calls-external-too">
+<a href="#appendix-A.4.2.4" class="section-number selfRef">A.4.2.4. </a><a href="#name-ai-agent-calls-external-too" class="section-name selfRef">AI Agent calls External Tool</a>
             </h5>
-<p id="appendix-A.3.2.4-1">LLM Agent tool calls an external tool provided by an Enterprise SaaS Application (Resource Server) without a valid access token and is issued an authentication challenge per Protected Resource Metadata <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span>.<a href="#appendix-A.3.2.4-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-1">AI Agent (<code>https://ai-agent-app.example/</code>) calls the External Tool API (Resource Server) at <code>api.saas-tool.example</code> without a valid access token and is issued an authentication challenge per Protected Resource Metadata <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span>.<a href="#appendix-A.4.2.4-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-A.3.2.4-2.1">
-                <p id="appendix-A.3.2.4-2.1.1">Note: How agents discover available tools is out of scope of this specification<a href="#appendix-A.3.2.4-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal ulEmpty" id="appendix-A.4.2.4-2.1">
+                <p id="appendix-A.4.2.4-2.1.1">Note: How agents discover available external tools is out of scope of this specification<a href="#appendix-A.4.2.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.4-3">
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.4-3">
 <pre>
 GET /tools
-Host: saas.example.net
+Host: api.saas-tool.example
 Accept: application/json
 
 HTTP/1.1 401 Unauthorized
 WWW-Authenticate: Bearer resource_metadata=
-  "https://saas.example.net/.well-known/oauth-protected-resource"
-</pre><a href="#appendix-A.3.2.4-3" class="pilcrow">¶</a>
+  "https://api.saas-tool.example/.well-known/oauth-protected-resource"
+</pre><a href="#appendix-A.4.2.4-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.4-4">LLM Agent fetches the external tool resource's OAuth 2.0 Protected Resource Metadata per <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span> to dynamically discover an authorization server that can issue an access token for the resource.<a href="#appendix-A.3.2.4-4" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.4-5">
+<p id="appendix-A.4.2.4-4">AI Agent fetches the External Tool API's OAuth 2.0 Protected Resource Metadata per <span>[<a href="#RFC9728" class="cite xref">RFC9728</a>]</span> to dynamically discover an authorization server that can issue an access token for the resource.<a href="#appendix-A.4.2.4-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.4-5">
 <pre>
 GET /.well-known/oauth-protected-resource
-Host: saas.example.net
+Host: api.saas-tool.example
 Accept: application/json
 
 HTTP/1.1 200 OK
@@ -3174,34 +3265,34 @@ Content-Type: application/json
 
 {
    "resource":
-     "https://saas.example.net/",
+     "https://api.saas-tool.example/",
    "authorization_servers":
-     [ "https://authorization-server.saas.com/" ],
+     [ "https://authorization-server.saas-tool.example/" ],
    "bearer_methods_supported":
      ["header", "body"],
    "scopes_supported":
-     ["agent.tools.read", "agent.tools.write"],
+     ["agent.read", "agent.write"],
    "resource_documentation":
-     "https://saas.example.net/tools/resource_documentation.html"
+     "https://api.saas-tool.example/resource_documentation.html"
  }
-</pre><a href="#appendix-A.3.2.4-5" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.4-5" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.4-6">LLM Agent discovers the Authorization Server configuration per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span><a href="#appendix-A.3.2.4-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.4-7">
+<p id="appendix-A.4.2.4-6">AI Agent discovers the External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) configuration per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span><a href="#appendix-A.4.2.4-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.4-7">
 <pre>
 GET /.well-known/oauth-authorization-server
-Host: authorization-server.saas.com
+Host: authorization-server.saas-tool.example
 Accept: application/json
 
 HTTP/1.1 200 Ok
 Content-Type: application/json
 
 {
-  "issuer": "https://authorization-server.saas.com/",
-  "authorization_endpoint": "https://authorization-server.saas.com/oauth2/authorize",
-  "token_endpoint": "https://authorization-server.saas.com/oauth2/token",
-  "jwks_uri": "https://authorization-server.saas.com/oauth2/keys",
-  "registration_endpoint": "authorization-server.saas.com/oauth2/register",
+  "issuer": "https://authorization-server.saas-tool.example/",
+  "authorization_endpoint": "https://authorization-server.saas-tool.example/oauth2/authorize",
+  "token_endpoint": "https://authorization-server.saas-tool.example/oauth2/token",
+  "jwks_uri": "https://authorization-server.saas-tool.example/oauth2/keys",
+  "registration_endpoint": "https://authorization-server.saas-tool.example/oauth2/register",
   "scopes_supported": [
     "agent.read", "agent.write"
   ],
@@ -3214,37 +3305,37 @@ Content-Type: application/json
   "authorization_grant_profiles_supported": ["urn:ietf:params:oauth:grant-profile:id-jag"],
   ...
 }
-</pre><a href="#appendix-A.3.2.4-7" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.4-7" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.4-8">LLM Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.<a href="#appendix-A.3.2.4-8" class="pilcrow">¶</a></p>
-<p id="appendix-A.3.2.4-9">If the <code>urn:ietf:params:oauth:grant-profile:id-jag</code> authorization grant profile is supported, the LLM can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard <code>authorization_code</code> from the SaaS Application's Authorization Server.<a href="#appendix-A.3.2.4-9" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-8">AI Agent has learned all necessary endpoints and supported capabilities to obtain an access token for the external tool.<a href="#appendix-A.4.2.4-8" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.4-9">If the <code>urn:ietf:params:oauth:grant-profile:id-jag</code> authorization grant profile is supported, the AI Agent can first attempt to silently obtain an access token using an Identity Assertion JWT Authorization Grant from the Enterprise's IdP otherwise it can fallback to interactively obtaining a standard <code>authorization_code</code> from the External Tool Resource Authorization Server.<a href="#appendix-A.4.2.4-9" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="llm-agent-obtains-an-identity-assertion-jwt-authorization-grant-for-enterprise-external-tool-from-the-enterprise-idp">
-<section id="appendix-A.3.2.5">
-            <h5 id="name-llm-agent-obtains-an-identi">
-<a href="#appendix-A.3.2.5" class="section-number selfRef">A.3.2.5. </a><a href="#name-llm-agent-obtains-an-identi" class="section-name selfRef">LLM Agent obtains an Identity Assertion JWT Authorization Grant for Enterprise External Tool from the Enterprise IdP</a>
+<div id="ai-agent-obtains-an-identity-assertion-jwt-authorization-grant-for-external-tool-from-the-enterprise-idp">
+<section id="appendix-A.4.2.5">
+            <h5 id="name-ai-agent-obtains-an-identit">
+<a href="#appendix-A.4.2.5" class="section-number selfRef">A.4.2.5. </a><a href="#name-ai-agent-obtains-an-identit" class="section-name selfRef">AI Agent obtains an Identity Assertion JWT Authorization Grant for External Tool from the Enterprise IdP</a>
             </h5>
-<p id="appendix-A.3.2.5-1">LLM Agent makes an Identity Assertion JWT Authorization Grant Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> request for the external tool's resource from the user's Enterprise IdP using the ID Token the LLM Agent obtained when establishing an identity binding context along with scopes and the resource identifier for the external tool that was returned in the tool's <code>OAuth 2.0 Protected Resource Metadata</code><a href="#appendix-A.3.2.5-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.5-2">
+<p id="appendix-A.4.2.5-1">AI Agent (<code>https://ai-agent-app.example/</code>) makes an Identity Assertion JWT Authorization Grant Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> request to the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) using the ID Token obtained when establishing an identity binding context, along with scopes and the resource identifier for the External Tool API (<code>api.saas-tool.example</code>) that was returned in the external tool's <code>OAuth 2.0 Protected Resource Metadata</code><a href="#appendix-A.4.2.5-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.5-2">
 <pre>
 POST /oauth2/token HTTP/1.1
-Host: cyberdyne.idp.example
+Host: idp.cyberdyne-corp.example
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 &amp;requested_token_type=urn:ietf:params:oauth:token-type:id-jag
-&amp;audience=https://authorization-server.saas.com/
-&amp;resource=https://saas.example.net/
+&amp;audience=https://authorization-server.saas-tool.example/
+&amp;resource=https://api.saas-tool.example/
 &amp;scope=agent.read+agent.write
 &amp;subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
 &amp;subject_token_type=urn:ietf:params:oauth:token-type:id_token
 &amp;client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
 &amp;client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
-</pre><a href="#appendix-A.3.2.5-2" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.5-2" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.5-3">If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.3.2.5-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.5-4">
+<p id="appendix-A.4.2.5-3">If access is granted, the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>:<a href="#appendix-A.4.2.5-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.5-4">
 <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -3258,10 +3349,10 @@ Pragma: no-cache
   "scope": "agent.read agent.write",
   "expires_in": 300
 }
-</pre><a href="#appendix-A.3.2.5-4" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.5-4" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.5-5">Identity Assertion JWT Authorization Grant claims:<a href="#appendix-A.3.2.5-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.5-6">
+<p id="appendix-A.4.2.5-5">Identity Assertion JWT Authorization Grant claims:<a href="#appendix-A.4.2.5-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.5-6">
 <pre>
 {
   "alg": "ES256",
@@ -3270,45 +3361,45 @@ Pragma: no-cache
 .
 {
   "jti": "9e43f81b64a33f20116179",
-  "iss": "https://cyberdyne.idp.example",
-  "sub": "1llb-b4c0-0000-8000-t800b4ck0000",
-  "aud": "https://authorization-server.saas.com",
-  "resource": "https://saas.example.net/",
-  "client_id": "4960880b83dc9",
+  "iss": "https://idp.cyberdyne-corp.example/",
+  "sub": "1997e829-2029-41d4-a716-446655440000",
+  "aud": "https://authorization-server.saas-tool.example/",
+  "resource": "https://api.saas-tool.example/",
+  "client_id": "https://ai-agent-app.example/",
   "exp": 1984445160,
   "iat": 1984445100,
   "scope": "agent.read agent.write"
 }
 .
 signature
-</pre><a href="#appendix-A.3.2.5-6" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.5-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
-<div id="llm-agent-obtains-an-access-token-for-enterprise-external-tool">
-<section id="appendix-A.3.2.6">
-            <h5 id="name-llm-agent-obtains-an-access">
-<a href="#appendix-A.3.2.6" class="section-number selfRef">A.3.2.6. </a><a href="#name-llm-agent-obtains-an-access" class="section-name selfRef">LLM Agent obtains an Access Token for Enterprise External Tool</a>
+<div id="ai-agent-obtains-an-access-token-for-external-tool">
+<section id="appendix-A.4.2.6">
+            <h5 id="name-ai-agent-obtains-an-access-">
+<a href="#appendix-A.4.2.6" class="section-number selfRef">A.4.2.6. </a><a href="#name-ai-agent-obtains-an-access-" class="section-name selfRef">AI Agent obtains an Access Token for External Tool</a>
             </h5>
-<p id="appendix-A.3.2.6-1">LLM Agent makes a token request to the previously discovered external tool's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP as a JWT Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#appendix-A.3.2.6-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.3.2.6-2">The LLM Agent authenticates with its client credentials that were registered with the SaaS Authorization Server<a href="#appendix-A.3.2.6-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.4.2.6-1">AI Agent (<code>https://ai-agent-app.example/</code>) makes a token request to the External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) token endpoint using the Identity Assertion JWT Authorization Grant obtained from the Enterprise IdP (<code>idp.cyberdyne-corp.example</code>) as a JWT Assertion as defined by <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>.<a href="#appendix-A.4.2.6-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-A.3.2.6-3.1">
-                <p id="appendix-A.3.2.6-3.1.1">Note: How the LLM Agent registers with the Authorization Server (e.g static or dynamic client registration), and whether or not it has credentials, is out-of-scope of this specification<a href="#appendix-A.3.2.6-3.1.1" class="pilcrow">¶</a></p>
+<li class="normal ulEmpty" id="appendix-A.4.2.6-2.1">
+                <p id="appendix-A.4.2.6-2.1.1">Note: How the AI Agent registers with the External Tool Resource Authorization Server (e.g static or dynamic client registration), and whether or not it has credentials, is out-of-scope of this specification<a href="#appendix-A.4.2.6-2.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.6-4">
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.6-3">
 <pre>
 POST /oauth2/token HTTP/1.1
-Host: authorization-server.saas.com
+Host: authorization-server.saas-tool.example
 Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-assertion=eyJhbGciOiJIUzI1NiIsI...
-</pre><a href="#appendix-A.3.2.6-4" class="pilcrow">¶</a>
+&amp;assertion=eyJhbGciOiJIUzI1NiIsI...
+</pre><a href="#appendix-A.4.2.6-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.3.2.6-5">SaaS Authorization Server validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP<a href="#appendix-A.3.2.6-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.6-6">
+<p id="appendix-A.4.2.6-4">External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP (<code>idp.cyberdyne-corp.example</code>)<a href="#appendix-A.4.2.6-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.6-5">
 <pre>
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
@@ -3321,21 +3412,21 @@ Pragma: no-cache
   "expires_in": 86400,
   "scope": "agent.read agent.write"
 }
-</pre><a href="#appendix-A.3.2.6-6" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.6-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
-<div id="llm-agent-makes-an-authorized-external-tool-request">
-<section id="appendix-A.3.2.7">
-            <h5 id="name-llm-agent-makes-an-authoriz">
-<a href="#appendix-A.3.2.7" class="section-number selfRef">A.3.2.7. </a><a href="#name-llm-agent-makes-an-authoriz" class="section-name selfRef">LLM Agent makes an authorized External Tool request</a>
+<div id="ai-agent-makes-an-authorized-external-tool-request">
+<section id="appendix-A.4.2.7">
+            <h5 id="name-ai-agent-makes-an-authorize">
+<a href="#appendix-A.4.2.7" class="section-number selfRef">A.4.2.7. </a><a href="#name-ai-agent-makes-an-authorize" class="section-name selfRef">AI Agent makes an authorized External Tool request</a>
             </h5>
-<p id="appendix-A.3.2.7-1">LLM Agent tool calls an external tool provided by the Enterprise SaaS Application (Resource Server) with a valid access token<a href="#appendix-A.3.2.7-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A.3.2.7-2">
+<p id="appendix-A.4.2.7-1">AI Agent (<code>https://ai-agent-app.example/</code>) calls the External Tool API (Resource Server) at <code>api.saas-tool.example</code> with a valid access token<a href="#appendix-A.4.2.7-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A.4.2.7-2">
 <pre>
 GET /tools
-Host: saas.example.net
-Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA"
+Host: api.saas-tool.example
+Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA
 Accept: application/json
 
 HTTP/1.1 200 OK
@@ -3344,7 +3435,7 @@ Content-Type: application/json
 {
   ...
 }
-</pre><a href="#appendix-A.3.2.7-2" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4.2.7-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
