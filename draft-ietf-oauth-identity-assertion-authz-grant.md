@@ -863,13 +863,19 @@ When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Serve
 
 The IdP MUST evaluate policy to determine if the requested `audience` (Resource Authorization Server) requires tenant information, and if so, which tenant identifier to include in the issued ID-JAG. The tenant identifier in the ID-JAG MUST match the tenant context that the Resource Authorization Server expects for the specified `client_id` and `sub`.
 
-# Authorization Server Metadata {#idp-metadata}
+# Authorization Server Metadata {#as-metadata}
+
+There are two complementary metadata parameters that can be used by the two different authorization servers. `identity_chaining_requested_token_types_supported` indicates which token types an IdP Authorization Server can issue for identity chaining, while `authorization_grant_profiles_supported` indicates which authorization grant profiles a Resource Authorization Server can process.
+
+## IdP Authorization Server Metadata {#idp-metadata}
 
 An IdP Authorization Server can advertise the identity chaining token types it can issue in its OAuth Authorization Server Metadata {{RFC8414}}. Identity and Authorization Chaining Across Domains {{I-D.ietf-oauth-identity-chaining}} defines the `identity_chaining_requested_token_types_supported` metadata parameter for this purpose.
 
 To advertise support for issuing an Identity Assertion JWT Authorization Grant via Token Exchange, the IdP Authorization Server SHOULD include the following value in `identity_chaining_requested_token_types_supported`:
 
 `urn:ietf:params:oauth:token-type:id-jag`
+
+## Resource Authorization Server Metadata {#ras-metadata}
 
 A Resource Authorization Server can advertise support for authorization grant profiles in its OAuth Authorization Server Metadata {{RFC8414}} using the `authorization_grant_profiles_supported` metadata parameter.
 
@@ -882,9 +888,6 @@ To advertise support for the Identity Assertion JWT Authorization Grant profile,
 `urn:ietf:params:oauth:grant-profile:id-jag`
 
 A Resource Authorization Server that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authorization_grant_profiles_supported` for this specification MUST also include `urn:ietf:params:oauth:grant-type:jwt-bearer` in `grant_types_supported`.
-
-These metadata parameters are complementary. `identity_chaining_requested_token_types_supported` indicates which token types an IdP Authorization Server can issue for identity chaining, while `authorization_grant_profiles_supported` indicates which authorization grant profiles a Resource Authorization Server can process.
-
 
 # Security Considerations
 
