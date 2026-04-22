@@ -3574,58 +3574,76 @@ Content-Type: application/json
 <a href="#name-document-history" class="section-name selfRef">Document History</a>
       </h2>
 <p id="appendix-C-1">[[ To be removed from the final specification ]]<a href="#appendix-C-1" class="pilcrow">¶</a></p>
-<p id="appendix-C-2">-02<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<p id="appendix-C-2">-03<a href="#appendix-C-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-C-3.1">
-          <p id="appendix-C-3.1.1">Added reference and examples of a RAR <code>authorization_details</code> object in the Token Exchange and ID-JAG<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.1.1">Added a section defining terms used in the document<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-3.2">
-          <p id="appendix-C-3.2.1">Added refresh token as an optional subject token input to the Token Exchange for SAML interop<a href="#appendix-C-3.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.2.1">Updated language to be less specific to "enterprise" and more about the relationships between the IdP and Resource Authorization Server<a href="#appendix-C-3.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-3.3">
-          <p id="appendix-C-3.3.1">Described how to use DPoP with the ID-JAG exchange<a href="#appendix-C-3.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.3.1">Clarified the use of the <code>resource</code> and <code>audience</code> parameters in the token exchange request<a href="#appendix-C-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-3.4">
-          <p id="appendix-C-3.4.1">Added <code>aud_tenant</code> and <code>aud_sub</code> claims to ID-JAG to support multi-tenant systems<a href="#appendix-C-3.4.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.4.1">Removed language discouraging the use of the <code>actor_token</code> in the token exchange request<a href="#appendix-C-3.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.5">
+          <p id="appendix-C-3.5.1">Added a new AS metadata parameter <code>authorization_grant_profiles_supported</code> to enable a Resource Authorization Server to publish support for this profile<a href="#appendix-C-3.5.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-C-4">-01<a href="#appendix-C-4" class="pilcrow">¶</a></p>
+<p id="appendix-C-4">-02<a href="#appendix-C-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-C-5.1">
-          <p id="appendix-C-5.1.1">Moved ID-JAG definition to document root instead of nested under Token Exchange<a href="#appendix-C-5.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-5.1.1">Added reference and examples of a RAR <code>authorization_details</code> object in the Token Exchange and ID-JAG<a href="#appendix-C-5.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-5.2">
-          <p id="appendix-C-5.2.1">Added proposed OpenID Connect <code>tenant</code> claim<a href="#appendix-C-5.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-5.2.1">Added refresh token as an optional subject token input to the Token Exchange for SAML interop<a href="#appendix-C-5.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-5.3">
-          <p id="appendix-C-5.3.1">Added authentication claims from ID Token<a href="#appendix-C-5.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-5.3.1">Described how to use DPoP with the ID-JAG exchange<a href="#appendix-C-5.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-5.4">
-          <p id="appendix-C-5.4.1">Adopted standard OAuth 2.0 role names instead of Resource App or Resource App's Authorization Server<a href="#appendix-C-5.4.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-C-5.5">
-          <p id="appendix-C-5.5.1">Updated sequence diagram<a href="#appendix-C-5.5.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-C-5.6">
-          <p id="appendix-C-5.6.1">Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"<a href="#appendix-C-5.6.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-C-5.7">
-          <p id="appendix-C-5.7.1">Updated section references with more specific links<a href="#appendix-C-5.7.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-C-5.8">
-          <p id="appendix-C-5.8.1">Added reference to scope parameter in ID-JAG processing rules<a href="#appendix-C-5.8.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-C-5.9">
-          <p id="appendix-C-5.9.1">Added a section discussing client ID mapping and reference to Client ID Metadata Document<a href="#appendix-C-5.9.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="appendix-C-5.10">
-          <p id="appendix-C-5.10.1">Added recommendations for refresh tokens<a href="#appendix-C-5.10.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-5.4.1">Added <code>aud_tenant</code> and <code>aud_sub</code> claims to ID-JAG to support multi-tenant systems<a href="#appendix-C-5.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-C-6">-00<a href="#appendix-C-6" class="pilcrow">¶</a></p>
+<p id="appendix-C-6">-01<a href="#appendix-C-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-C-7.1">
-          <p id="appendix-C-7.1.1">Initial revision as adopted working group draft<a href="#appendix-C-7.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-7.1.1">Moved ID-JAG definition to document root instead of nested under Token Exchange<a href="#appendix-C-7.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.2">
+          <p id="appendix-C-7.2.1">Added proposed OpenID Connect <code>tenant</code> claim<a href="#appendix-C-7.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.3">
+          <p id="appendix-C-7.3.1">Added authentication claims from ID Token<a href="#appendix-C-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.4">
+          <p id="appendix-C-7.4.1">Adopted standard OAuth 2.0 role names instead of Resource App or Resource App's Authorization Server<a href="#appendix-C-7.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.5">
+          <p id="appendix-C-7.5.1">Updated sequence diagram<a href="#appendix-C-7.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.6">
+          <p id="appendix-C-7.6.1">Updated all inconsistent references of ID-JAG to "Identity Assertion JWT Authorization Grant"<a href="#appendix-C-7.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.7">
+          <p id="appendix-C-7.7.1">Updated section references with more specific links<a href="#appendix-C-7.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.8">
+          <p id="appendix-C-7.8.1">Added reference to scope parameter in ID-JAG processing rules<a href="#appendix-C-7.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.9">
+          <p id="appendix-C-7.9.1">Added a section discussing client ID mapping and reference to Client ID Metadata Document<a href="#appendix-C-7.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-7.10">
+          <p id="appendix-C-7.10.1">Added recommendations for refresh tokens<a href="#appendix-C-7.10.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-C-8">-00<a href="#appendix-C-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C-9.1">
+          <p id="appendix-C-9.1.1">Initial revision as adopted working group draft<a href="#appendix-C-9.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
