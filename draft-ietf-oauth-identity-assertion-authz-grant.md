@@ -1484,6 +1484,14 @@ The authors would like to thank the following people for their contributions and
 
 \[\[ To be removed from the final specification ]]
 
+-03
+
+* Added a section defining terms used in the document
+* Updated language to be less specific to "enterprise" and more about the relationships between the IdP and Resource Authorization Server
+* Clarified the use of the `resource` and `audience` parameters in the token exchange request
+* Removed language discouraging the use of the `actor_token` in the token exchange request
+* Added a new AS metadata parameter `authorization_grant_profiles_supported` to enable a Resource Authorization Server to publish support for this profile
+
 -02
 
 * Added reference and examples of a RAR `authorization_details` object in the Token Exchange and ID-JAG
