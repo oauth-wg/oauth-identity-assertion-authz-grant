@@ -344,12 +344,12 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 When a Refresh Token is used as the subject token, the client still requests `requested_token_type=urn:ietf:params:oauth:token-type:id-jag`; this allows the client to refresh an Identity Assertion JWT Authorization Grant without fetching a new Identity Assertion from the user-facing SSO flow.
 
 `actor_token`:
-: OPTIONAL - A security token that identifies the actor, as described in {{Section 2.1 of RFC8693}}. When present, the actor token represents the party that is acting on behalf of the subject identified by the `subject_token`.
+: OPTIONAL - A security token that identifies the actor, as described in {{Section 2.1 of RFC8693}}.
 
 `actor_token_type`:
-: REQUIRED when `actor_token` is present - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `actor_token` parameter. If `actor_token` is present but `actor_token_type` is absent, the IdP Authorization Server MUST return an `invalid_request` error as defined in {{Section 5.2 of RFC6749}}.
+: REQUIRED when `actor_token` is present, as described in {{Section 2.1 of RFC8693}} - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `actor_token` parameter.
 
-When `actor_token` is used, the IdP Authorization Server evaluates policy for the combination of subject, actor, authenticated client, target audience, resources, scopes, and authorization details. If the request is granted, the issued ID-JAG MUST include an `act` claim representing the actor, as described in {{Section 4.1 of RFC8693}}.
+This specification does not define normative processing requirements for `actor_token` or whether an `act` claim is included in the issued ID-JAG. Future profiles or extensions MAY define how `actor_token` is validated, how it influences policy evaluation, and whether it results in an `act` claim in the issued ID-JAG.
 
 Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
@@ -397,9 +397,9 @@ The IdP MUST validate the subject token:
 * If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
 * If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
 
-If an `actor_token` is present, the IdP Authorization Server MUST validate it according to its type. The IdP Authorization Server MAY reject combinations of `subject_token`, `actor_token`, and authenticated client that are not permitted by policy.
+If an `actor_token` is present, any processing of it is outside the scope of this specification. Future profiles or extensions MAY define validation requirements, policy evaluation rules, and issued token content related to `actor_token`.
 
-The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details. When `actor_token` is present, this policy evaluation also includes whether the actor is allowed to act on behalf of the subject for the requested delegation.
+The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.
 
 When processing the request:
 
@@ -414,8 +414,6 @@ When processing the request:
 * If both `scope` and `authorization_details` are present, the IdP MUST process both. The IdP SHOULD ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
 
 * The IdP MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it MUST reflect the granted values in the ID-JAG.
-
-* If `actor_token` is present and the request is granted, the IdP Authorization Server MUST include an `act` claim in the issued ID-JAG as described in {{Section 4.1 of RFC8693}}.
 
 The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.
 
@@ -854,21 +852,15 @@ TBD: It may make more sense to request the Identity Assertion JWT Authorization 
 
 This specification is intended for cross-domain uses where the Client, Resource App, and Identity Provider are all in different trust domains. In particular, the Identity Provider MUST NOT issue access tokens in response to an ID-JAG it issued itself. Doing so could lead to unintentional broadening of the scope of authorization.
 
-## Actor Delegation
+## Actor Delegation Extensions
 
-When `actor_token` is used in Token Exchange, the IdP Authorization Server is making a delegation decision based on the relationship between the subject, the actor, and the authenticated client. This introduces a risk that a client could attempt to combine a valid `subject_token` with an unrelated or less-trusted `actor_token` to obtain an ID-JAG that overstates the actor's authority.
+This specification allows Token Exchange requests for ID-JAG to carry `actor_token`, but it does not define normative processing requirements for it. Future profiles or extensions can define how `actor_token` is validated, authorized, and reflected in the issued ID-JAG, including whether an `act` claim is included.
 
-The IdP Authorization Server MUST validate the `actor_token` with the same care as other security tokens used in the request, including cryptographic validation, issuer validation, and expiry checks. If the `actor_token` is a JWT, its `aud` claim MUST identify the IdP Authorization Server's token endpoint or issuer identifier, and the IdP Authorization Server MUST reject tokens whose `aud` does not match.
+Profiles or extensions that define use of `actor_token` need to consider delegation risks. In particular, a client could attempt to combine a valid `subject_token` with an unrelated or less-trusted `actor_token` to obtain an ID-JAG that overstates the actor's authority.
 
-The IdP Authorization Server MUST ensure that the delegation represented by the resulting ID-JAG is authorized for the combination of authenticated client, subject, actor, target audience, and requested authorization. In particular, successful validation of the `subject_token` and `actor_token` individually is not sufficient to approve the request.
+Such profiles or extensions should define how `actor_token` is validated, how the relationship between the authenticated client, subject, and actor is authorized, how any resulting `act` claim is derived, and how unnecessary disclosure of actor identity or attributes is minimized across trust domains.
 
-When `actor_token` is present and the request is granted, the IdP Authorization Server MUST derive the `act` claim from validated `actor_token` content and local policy, and MUST NOT copy unverified actor identifiers into the ID-JAG.
-
-The IdP Authorization Server SHOULD minimize the actor information included in the `act` claim to only the information needed by the Resource Authorization Server, in order to reduce unnecessary disclosure of actor identity or attributes across trust domains.
-
-The Resource Authorization Server MUST treat the `act` claim as delegation context about the actor and MUST continue to treat the `sub` claim as the identity of the resource owner. The presence of an `act` claim does not change the subject of the delegation.
-
-This specification enforces continuity of the OAuth client through the `client_id` claim and downstream client authentication, but the authenticated client identity is not a substitute for actor identity. When implementations need to preserve the identity of a distinct acting party across the exchange, they SHOULD use `actor_token` and the resulting `act` claim rather than inferring the actor solely from the authenticated client.
+When such profiles or extensions use an `act` claim, they should preserve the distinction between the actor identified by `act` and the resource owner identified by `sub`. The authenticated client identity is also not a substitute for actor identity.
 
 ## Sender Constraining Tokens
 
@@ -1382,157 +1374,6 @@ AI Agent (`https://ai-agent-app.example/`) calls the External Tool API (Resource
     GET /tools
     Host: api.saas-tool.example
     Authorization: Bearer 2YotnFZFEjr1zCsicMWpAA
-    Accept: application/json
-
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-
-    {
-      ...
-    }
-
-## AI Agent using External Tools with Actor Token
-
-In some agentic deployments, an AI orchestrator coordinates one or more specialized sub-agents to carry out user-directed tasks. The orchestrator has established user identity through SSO, but a sub-agent is the party that will actually call the external tool. Using the `actor_token` parameter in the Token Exchange request, the orchestrator can include the sub-agent's identity so that the resulting ID-JAG carries an `act` claim. This allows the External Tool Resource Authorization Server to observe both who the resource is being accessed on behalf of (the user, identified by `sub`) and which actor is performing the access (the sub-agent, identified by `act`).
-
-### Preconditions
-
-#### Deployment and Client Preconditions
-
-* The Enterprise IdP at `idp.cyberdyne-corp.example` authenticates the enterprise's users and issues identity assertions
-* The External Tool API (resource server) at `api.saas-tool.example` and its authorization server at `authorization-server.saas-tool.example` are operated by a SaaS tool vendor, in a different trust domain from the Enterprise IdP
-* The Orchestrator Agent is an OAuth 2.0 client with client ID `https://orchestrator.ai-platform.example/`
-* The Sub-Agent has an identity represented by the URI `https://task-agent.ai-platform.example/` and holds a private key for signing JWT credentials; the Enterprise IdP verifies the Sub-Agent's signatures, either by resolving its JWKS via the Client Identity Metadata Document {{I-D.ietf-oauth-client-id-metadata-document}} or through a pre-provisioned public key
-* The Enterprise IdP (`idp.cyberdyne-corp.example`) recognizes the Orchestrator Agent (`https://orchestrator.ai-platform.example/`) as a trusted client
-* The External Tool Resource Authorization Server (`authorization-server.saas-tool.example`) recognizes the Orchestrator Agent (`https://orchestrator.ai-platform.example/`) as a trusted client
-
-#### Trust Relationship Preconditions
-
-* The enterprise has established a trust relationship between the Enterprise IdP (`idp.cyberdyne-corp.example`) and the Orchestrator Agent for SSO
-* The enterprise has established a trust relationship between the Enterprise IdP (`idp.cyberdyne-corp.example`) and the External Tool Resource Authorization Server (`authorization-server.saas-tool.example`) for SSO and Identity Assertion JWT Authorization Grant
-* The enterprise has configured policy in the Enterprise IdP permitting the Orchestrator Agent to delegate to Sub-Agents (`https://task-agent.ai-platform.example/`) on behalf of users for the External Tool Resource Authorization Server
-
-### Example Sequence
-
-The Orchestrator Agent has already authenticated the user with the Enterprise IdP (following the same SSO steps described in {{ai-agent-using-external-tools}}) and holds the user's ID Token. The Orchestrator Agent now delegates execution of a specific tool call to the Sub-Agent and obtains an ID-JAG that identifies both the user (as `sub`) and the Sub-Agent (as `act`).
-
-#### Sub-Agent provides an Actor Token to the Orchestrator Agent
-
-The Sub-Agent signs a short-lived JWT asserting its own identity, which the Orchestrator Agent will include as the `actor_token` in the Token Exchange request. The Sub-Agent JWT is audience-restricted to the Enterprise IdP's token endpoint:
-
-    {
-      "alg": "ES256",
-      "kid": "task-agent-key-1",
-      "typ": "JWT"
-    }
-    .
-    {
-      "iss": "https://task-agent.ai-platform.example/",
-      "sub": "https://task-agent.ai-platform.example/",
-      "aud": "https://idp.cyberdyne-corp.example/oauth2/token",
-      "jti": "b7d4e1f092a83c56",
-      "iat": 1984445050,
-      "exp": 1984445350
-    }
-    .
-    signature
-
-#### Orchestrator Agent obtains an Identity Assertion JWT Authorization Grant for External Tool
-
-The Orchestrator Agent (`https://orchestrator.ai-platform.example/`) makes a Token Exchange {{RFC8693}} request to the Enterprise IdP (`idp.cyberdyne-corp.example`) including both the user's ID Token as the `subject_token` and the Sub-Agent's JWT as the `actor_token`:
-
-    POST /oauth2/token HTTP/1.1
-    Host: idp.cyberdyne-corp.example
-    Content-Type: application/x-www-form-urlencoded
-
-    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
-    &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
-    &audience=https://authorization-server.saas-tool.example/
-    &resource=https://api.saas-tool.example/
-    &scope=agent.read+agent.write
-    &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
-    &subject_token_type=urn:ietf:params:oauth:token-type:id_token
-    &actor_token=eyJhbGciOiJFUzI1NiIsImtpZCI6InRhc2stYWdlbnQta2V5LTEi...
-    &actor_token_type=urn:ietf:params:oauth:token-type:jwt
-    &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
-    &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
-
-The Enterprise IdP validates the user's ID Token as the `subject_token`, validates the Sub-Agent JWT as the `actor_token` including its signature, issuer, audience, and expiry, and evaluates policy for the combination of authenticated client, subject, actor, target audience, and requested scopes.
-
-If access is granted, the Enterprise IdP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response defined in {{Section 2.2 of RFC8693}}:
-
-    HTTP/1.1 200 OK
-    Content-Type: application/json
-    Cache-Control: no-store
-    Pragma: no-cache
-
-    {
-      "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-      "access_token": "eyJhbGciOiJFUzI1NiIsI...",
-      "token_type": "N_A",
-      "scope": "agent.read agent.write",
-      "expires_in": 300
-    }
-
-Identity Assertion JWT Authorization Grant claims:
-
-    {
-      "alg": "ES256",
-      "typ": "oauth-id-jag+jwt"
-    }
-    .
-    {
-      "jti": "c3f82a9d1b047e51",
-      "iss": "https://idp.cyberdyne-corp.example/",
-      "sub": "1997e829-2029-41d4-a716-446655440000",
-      "aud": "https://authorization-server.saas-tool.example/",
-      "resource": "https://api.saas-tool.example/",
-      "client_id": "https://orchestrator.ai-platform.example/",
-      "exp": 1984445400,
-      "iat": 1984445100,
-      "scope": "agent.read agent.write",
-      "act": {
-        "sub": "https://task-agent.ai-platform.example/"
-      }
-    }
-    .
-    signature
-
-The `sub` claim identifies the user on whose behalf access is being granted. The `act` claim identifies the Sub-Agent that is performing the access. The `client_id` identifies the Orchestrator Agent, which remains the OAuth client for the downstream access token request.
-
-#### Orchestrator Agent obtains an Access Token for External Tool
-
-The Orchestrator Agent (`https://orchestrator.ai-platform.example/`) makes a token request to the External Tool Resource Authorization Server (`authorization-server.saas-tool.example`) using the ID-JAG as a JWT Assertion as defined by {{RFC7523}}:
-
-    POST /oauth2/token HTTP/1.1
-    Host: authorization-server.saas-tool.example
-    Authorization: Basic b3JjaGVzdHJhdG9yLWFnZW50OnNlY3JldA...
-    Content-Type: application/x-www-form-urlencoded
-
-    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-    &assertion=eyJhbGciOiJFUzI1NiIsI...
-
-The External Tool Resource Authorization Server validates the ID-JAG using the published JWKS for the trusted Enterprise IdP (`idp.cyberdyne-corp.example`) and validates that the authenticated client matches the `client_id` claim in the ID-JAG. The `act` claim informs the Resource Authorization Server that the Sub-Agent is the party acting on behalf of the user. The Resource Authorization Server MUST treat the `sub` claim as the resource owner's identity and MAY use the `act` claim for audit logging, policy enforcement, or rate limiting specific to the acting party. Whether actor information is propagated beyond the Resource Authorization Server to the access token or Resource Server is deployment-specific and out of scope of this specification.
-
-    HTTP/1.1 200 OK
-    Content-Type: application/json;charset=UTF-8
-    Cache-Control: no-store
-    Pragma: no-cache
-
-    {
-      "token_type": "Bearer",
-      "access_token": "8KjnpFZFEjr1zCsicMWpBB",
-      "expires_in": 86400,
-      "scope": "agent.read agent.write"
-    }
-
-#### Orchestrator Agent makes an authorized External Tool request
-
-The Orchestrator Agent (`https://orchestrator.ai-platform.example/`) holds the access token and calls the External Tool API (Resource Server) at `api.saas-tool.example` to perform the delegated task. Because the `client_id` in the ID-JAG must match the authenticated client at the Resource Authorization Server, the Orchestrator Agent remains the OAuth client for this call. The Sub-Agent's identity is conveyed in the `act` claim for Resource Authorization Server policy and audit use, but this specification does not define whether that actor identity is propagated to the access token or Resource Server.
-
-    GET /tools
-    Host: api.saas-tool.example
-    Authorization: Bearer 8KjnpFZFEjr1zCsicMWpBB
     Accept: application/json
 
     HTTP/1.1 200 OK
