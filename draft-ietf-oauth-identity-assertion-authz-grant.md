@@ -51,6 +51,7 @@ normative:
   RFC7638:
   RFC9449:
   RFC9396:
+  RFC9470:
   I-D.ietf-oauth-identity-chaining:
   I-D.ietf-oauth-rfc7523bis:
   IANA.media-types:
@@ -81,7 +82,6 @@ normative:
       - ins: K. McGuinness
 
 informative:
-  RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
 
@@ -449,7 +449,7 @@ The IdP MUST validate the subject token:
 
 If an `actor_token` is present, any processing of it is outside the scope of this specification. Future profiles or extensions MAY define validation requirements, policy evaluation rules, and issued token content related to `actor_token`.
 
-The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.
+The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details. This policy evaluation MAY consider the requested `audience`, `resource`, `scope`, and `authorization_details`, the authenticated client, and the authentication context associated with the subject token.
 
 When processing the request:
 
@@ -465,7 +465,7 @@ When processing the request:
 
 * The IdP MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it MUST reflect the granted values in the ID-JAG.
 
-The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.
+* If the authentication context associated with the subject token does not satisfy local policy for the requested token exchange, including policy tied to the requested `audience`, `resource`, `scope`, or `authorization_details`, the IdP Authorization Server MUST reject the request with the `insufficient_user_authentication` token error defined in this specification. The error response MAY include `acr_values` and/or `max_age` parameters to indicate the authentication requirements the client needs to satisfy before retrying the token exchange.
 
 ### Response
 
@@ -894,7 +894,16 @@ This specification SHOULD only be supported for confidential clients.  Public cl
 
 ## Step-Up Authentication
 
-In the initial token exchange request, the IdP may require step-up authentication for the subject if the authentication context in the subject's assertion does not meet policy requirements. An `insufficient_user_authentication` OAuth error response may be returned to convey the authentication requirements back to the client similar to OAuth 2.0 Step-up Authentication Challenge Protocol {{RFC9470}}.
+When processing a token exchange request for an ID-JAG, the IdP Authorization Server can determine that the authentication event associated with the subject token does not meet the authentication requirements for issuing the requested ID-JAG. This determination can depend on the requested `audience`, `resource`, `scope`, and `authorization_details`, the authenticated client, and other local policy inputs. To allow the client to obtain a fresh subject token and retry, this specification extends the `insufficient_user_authentication` error from {{RFC9470}} for use in token error responses.
+
+`insufficient_user_authentication`:
+: The authentication event associated with the subject token does not meet the authentication requirements for issuing the requested ID-JAG.
+
+`acr_values`:
+: OPTIONAL - A JSON string containing a space-separated list of authentication context class reference values that the client can use in a subsequent authorization request to the IdP Authorization Server. The syntax and semantics are the same as the `acr_values` authorization request parameter defined by {{OpenID.Core}} and the `acr_values` challenge parameter defined by {{RFC9470}}.
+
+`max_age`:
+: OPTIONAL - A JSON number containing the maximum authentication age in seconds that the client can use in a subsequent authorization request to the IdP Authorization Server. The syntax and semantics are the same as the `max_age` authorization request parameter defined by {{OpenID.Core}} and the `max_age` challenge parameter defined by {{RFC9470}}.
 
 
     HTTP/1.1 400 Bad Request
@@ -903,14 +912,14 @@ In the initial token exchange request, the IdP may require step-up authenticatio
 
     {
       "error": "insufficient_user_authentication",
-      "error_description": "Subject doesn't meet authentication requirements",
+      "error_description": "More recent authentication is required",
       "max_age": 5
     }
 
 
-The Client would need to redirect the user back to the IdP to obtain a new assertion that meets the requirements and retry the token exchange.
+A Client that receives this error and still requires the ID-JAG SHOULD obtain a fresh subject token that satisfies the IdP Authorization Server's policy and then retry the token exchange. For OpenID Connect-based sign-in, the client SHOULD use the returned `acr_values` and/or `max_age` values, if present, in a subsequent authorization request to the IdP Authorization Server. For SAML or other deployment-specific sign-in protocols, equivalent step-up mechanisms are out of scope of this specification.
 
-TBD: It may make more sense to request the Identity Assertion JWT Authorization Grant in the authorization request if using OpenID Connect for SSO when performing a step-up to skip the need for additional token exchange round-trip.
+The `insufficient_user_authentication` error is used only when the requested token exchange could succeed if retried with a subject token that satisfies the indicated authentication requirements. If the request is invalid or unacceptable regardless of authentication strength or recentness, the IdP Authorization Server MUST return the applicable error for the request, such as `invalid_target`, `invalid_scope`, or `invalid_authorization_details`.
 
 ## Cross-Domain Use
 
@@ -1101,6 +1110,30 @@ This section registers `urn:ietf:params:oauth:grant-profile:id-jag` in the "OAut
 
 * URN: urn:ietf:params:oauth:grant-profile:id-jag
 * Common Name: Authorization grant profile identifier for an Identity Assertion JWT Authorization Grant
+* Change Controller: IETF
+* Specification Document: This document
+
+## OAuth Extensions Error Registration
+
+This section updates the existing registration of `insufficient_user_authentication` in the "OAuth Extensions Error Registry" of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+
+* Name: `insufficient_user_authentication`
+* Updated Usage Location: token error response, resource access error response
+* Protocol Extension: OAuth 2.0 Step Up Authentication Challenge Protocol; Identity Assertion JWT Authorization Grant
+* Change Controller: IETF
+* Specification Document(s): {{RFC9470}}, This document
+
+## OAuth Parameters Registration
+
+This section registers the following parameters in the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+
+* Parameter Name: `acr_values`
+* Parameter Usage Location: token error response
+* Change Controller: IETF
+* Specification Document: This document
+
+* Parameter Name: `max_age`
+* Parameter Usage Location: token error response
 * Change Controller: IETF
 * Specification Document: This document
 
