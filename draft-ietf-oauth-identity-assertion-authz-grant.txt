@@ -18,9 +18,10 @@ Abstract
 
    This specification provides a mechanism for an application to use an
    identity assertion to obtain an access token for a third-party API by
-   coordinating through a common enterprise identity provider using
-   Token Exchange [RFC8693] and JWT Profile for OAuth 2.0 Authorization
-   Grants [RFC7523].
+   coordinating through an identity provider that the downstream
+   Resource Authorization Server already trusts for single sign-on
+   (SSO), using Token Exchange [RFC8693] and JWT Profile for OAuth 2.0
+   Authorization Grants [RFC7523].
 
 About This Document
 
@@ -130,12 +131,15 @@ Table of Contents
 
 1.  Introduction
 
-   In typical enterprise scenarios, applications are configured for
-   single sign-on to the enterprise identity provider (IdP) using OpenID
-   Connect or SAML.  This enables users to access all the necessary
-   enterprise applications using a single account at the IdP, and
-   enables the enterprise to manage which users can access which
-   applications.
+   In many deployments, applications are configured for single sign-on
+   to a common identity provider (IdP) using OpenID Connect or SAML.
+   This enables users to access multiple applications using a single
+   account at the IdP, and enables the operator of that IdP to manage
+   which users can access which applications and enforce policy for
+   access to those applications.  Enterprise workforce identity
+   providers are one common example, but the same trust pattern can also
+   arise in customer identity, platform identity, and other federated
+   application ecosystems.
 
    When one application wants to access a user's data at another
    application, it will start an interactive OAuth flow [RFC6749] to
@@ -143,10 +147,11 @@ Table of Contents
    This OAuth flow enables a direct app-to-app connection between the
    two apps, and is not visible to the IdP used to log in to each app.
 
-   This specification enables this access to be managed by the
-   enterprise IdP, similar to how the IdP manages single sign-on to
-   individual applications.  This mechanism is informally referred to as
-   "cross app access", often abbreviated "XAA".
+   This specification enables this access to be mediated by the IdP that
+   the downstream Resource Authorization Server already trusts for SSO
+   and subject resolution, similar to how the IdP manages single sign-on
+   to individual applications.  This mechanism is informally referred to
+   as "cross app access", often abbreviated "XAA".
 
    The draft specification "Identity Chaining Across Trust Domains"
    [I-D.ietf-oauth-identity-chaining] defines how to request a JWT
@@ -159,13 +164,16 @@ Table of Contents
    token exchange request and JWT authorization grant unspecified.
 
    This specification defines the additional details necessary to
-   support interoperable implementations in enterprise scenarios when
-   two applications are configured for single sign-on to the same
-   enterprise identity provider.  In particular, this specification uses
-   an Identity Assertion as the input to the token exchange request (as
-   opposed to other types of tokens).  This way, the same enterprise
-   Identity Provider that is trusted by applications for single sign-on
-   can be extended to broker access to APIs.
+   support interoperable implementations when two applications are
+   configured such that the downstream Resource Authorization Server
+   trusts the same IdP for SSO and subject resolution.  In particular,
+   this specification uses an Identity Assertion as the input to the
+   token exchange request (as opposed to other types of tokens).  This
+   way, the same IdP that is trusted by the Resource Authorization
+   Server for SSO can be extended to broker access to APIs.  The
+   Resource Authorization Server still determines whether to honor the
+   ID-JAG, what scopes or authorization details to allow, and what
+   access token to issue under its own policy.
 
 2.  Conventions and Definitions
 
@@ -190,7 +198,9 @@ Table of Contents
       [OpenID.Core] or SAML 2.0 Identity Provider that issues Identity
       Assertions for single sign-on and cross-domain authorization
       grants Section 3 for a set of trusted applications in an
-      organization's application ecosystem.  In
+      application ecosystem.  In this specification, the IdP is the
+      issuer that the Resource Authorization Server already trusts for
+      SSO and subject resolution for the target user accounts.  In
       [I-D.ietf-oauth-identity-chaining], this is the Authorization
       Server in trust domain A, which is also trusted by the Resource
       Authorization Server in trust domain B.
@@ -229,8 +239,11 @@ Table of Contents
    (Resource Authorization Server).  It replaces the need for the client
    to obtain an authorization code from the Resource Authorization
    Server to delegate access to the client, and instead uses the IdP
-   Authorization Server which is trusted by the Resource Authorization
-   Server to delegate access to the client.
+   Authorization Server that is trusted by the Resource Authorization
+   Server for SSO and subject resolution to delegate access to the
+   client.  The Resource Authorization Server still applies local policy
+   when deciding whether to honor the ID-JAG and what access token to
+   issue.
 
    As described in [OpenID.Core], ID Tokens are only intended to be
    processed by the Relying Party (indicated by the ID Token audience)
@@ -373,7 +386,10 @@ Table of Contents
    The example flow is for an enterprise acme, which uses a multi-tenant
    wiki app and chat app from different vendors, both of which are
    integrated into the enterprise's multi-tenant Identity Provider using
-   OpenID Connect.
+   OpenID Connect.  Enterprise is a common deployment shape for this
+   profile, but it is not the only one.  The same pattern applies
+   anywhere the Resource Authorization Server already trusts the issuing
+   IdP for SSO and subject resolution.
 
    +=============+========================+=========================+==============+
    |Role         |App URL                 |Tenant URL               |Description   |
@@ -462,17 +478,27 @@ Table of Contents
    4.  Client makes an API request to the Resource Server with the
        Access Token
 
-   This specification is constrained to deployments where a set of
-   Resource Authorization Servers for applications used by an
-   organization are trusting the same IdP Authorization Server for
-   Single Sign-On (SSO).  The IdP Authorization Server provides a
-   consistent trust boundary and user identity for the set of Resource
-   Authorization Servers to honor the ID-JAG issued by the IdP.  The
-   Resource Authorization Server not only delegates user authentication
-   but also delegates user authorization authority to the IdP
-   Authorization Server for the scopes and resource specified in the ID-
-   JAG and does not need obtain user consent directly from the resource
-   owner.
+   This specification is constrained to deployments where the Client has
+   a Relying Party relationship with the IdP Authorization Server for
+   SSO, and the Resource Authorization Server independently trusts that
+   same IdP Authorization Server for SSO and subject resolution for the
+   user represented in the ID-JAG.  The IdP Authorization Server
+   provides the trusted identity context that allows the Resource
+   Authorization Server to evaluate the ID-JAG.  The Resource
+   Authorization Server not only delegates user authentication to that
+   IdP, but also relies on the IdP-issued grant as input to delegated
+   authorization for the scopes, resources, and authorization details
+   conveyed in the ID-JAG.  The Resource Authorization Server does not
+   need to obtain user consent directly from the resource owner again at
+   the token exchange step.  The Resource Authorization Server still
+   applies local policy to decide whether to honor the grant, whether to
+   narrow or reject the requested access, and what access token to
+   issue.  A deployment MAY trust more than one IdP Authorization Server
+   for this purpose, but for each trusted issuer the Resource
+   Authorization Server MUST be configured to recognize that issuer,
+   resolve identities asserted by that issuer to the appropriate local
+   account or principal, and associate the ID-JAG with the correct
+   client relationship.
 
 4.2.  User Authentication
 
@@ -1378,10 +1404,20 @@ Cache-Control: no-store
 8.3.  Cross-Domain Use
 
    This specification is intended for cross-domain uses where the
-   Client, Resource App, and Identity Provider are all in different
-   trust domains.  In particular, the Identity Provider MUST NOT issue
-   access tokens in response to an ID-JAG it issued itself.  Doing so
-   could lead to unintentional broadening of the scope of authorization.
+   Client, Resource Authorization Server, and IdP are in different trust
+   domains.  In particular, the IdP MUST NOT issue access tokens in
+   response to an ID-JAG it issued itself.  Doing so could lead to
+   unintentional broadening of the scope of authorization.
+
+   An ID-JAG is specific to the trust relationship between the issuing
+   IdP Authorization Server and the Resource Authorization Server
+   identified by the aud claim.  When a deployment involves additional
+   downstream hops, the same ID-JAG MUST NOT be reused as the
+   authorization grant for a different downstream Resource Authorization
+   Server.  For each subsequent hop, a new ID-JAG MAY be issued by the
+   IdP Authorization Server trusted by that downstream Resource
+   Authorization Server for SSO and subject resolution, or other
+   mechanisms MAY be used.
 
 8.4.  Metadata Disclosure
 
@@ -1861,6 +1897,13 @@ Cache-Control: no-store
 
 Appendix A.  Use Cases
 
+   The following use cases are illustrative and not exhaustive.
+   Enterprise workforce identity is a common deployment context, but
+   this profile can also apply where the IdP Authorization Server
+   trusted by the Resource Authorization Server for SSO and subject
+   resolution is a CIAM layer, platform identity system, or other
+   application-domain identity provider.
+
 A.1.  Enterprise Deployment
 
    Enterprises often have hundreds of SaaS applications.  SaaS
@@ -1911,12 +1954,12 @@ A.1.1.  Preconditions
 
 A.2.  Customer Identity for Developer SaaS Components
 
-   In some enterprise deployments, the shared identity layer is not a
+   In deployments where the shared identity layer serves customer-facing
+   applications, the IdP is a Customer Identity and Access Management
+   (CIAM) platform that signs end-users into a customer-facing
+   application or suite of first-party applications rather than a
    workforce IdP used to sign employees into internal or SaaS
-   productivity tools.  Instead, the identity provider is a Customer
-   Identity and Access Management (CIAM) platform that signs end-users
-   into a customer-facing application or suite of first-party
-   applications.
+   productivity tools.
 
    These customer applications often embed or depend on third-party
    developer SaaS components such as communications, analytics, fraud
@@ -2010,17 +2053,22 @@ A.4.  AI Agent using External Tools
    often requiring integration with external tools provided by SaaS
    applications, internal services, or enterprise data sources.  When
    accessing these systems, the agent often operates on behalf of the
-   end user, and its actions are constrained by the user’s identity,
-   role, and permissions as defined by the enterprise.  This ensures
-   that all data access and operations are properly scoped and compliant
-   with organizational access controls.
+   end user, and its actions are constrained by the user's identity,
+   role, and permissions.  In agentic systems, the relevant IdP for a
+   given ID-JAG hop is the IdP Authorization Server the downstream
+   Resource Authorization Server already trusts for SSO and subject
+   resolution at that boundary.  That may be an enterprise workforce
+   IdP, a CIAM or product identity layer, or an internal platform IdP
+   depending on the deployment.
 
 A.4.1.  Preconditions
 
 A.4.1.1.  Deployment and Client Preconditions
 
    *  The Enterprise IdP at idp.cyberdyne-corp.example authenticates the
-      enterprise’s users and issues identity assertions
+      enterprise's users, issues identity assertions, and is the IdP
+      Authorization Server trusted by the External Tool Resource
+      Authorization Server for SSO and subject resolution for this hop
 
    *  The External Tool API (resource server) at api.saas-tool.example
       and its authorization server at authorization-server.saas-
@@ -2255,7 +2303,8 @@ Content-Type: application/json
    If the urn:ietf:params:oauth:grant-profile:id-jag authorization grant
    profile is supported, the AI Agent can first attempt to silently
    obtain an access token using an Identity Assertion JWT Authorization
-   Grant from the Enterprise's IdP otherwise it can fallback to
+   Grant from the IdP Authorization Server trusted by the External Tool
+   Resource Authorization Server for SSO, otherwise it can fallback to
    interactively obtaining a standard authorization_code from the
    External Tool Resource Authorization Server.
 
