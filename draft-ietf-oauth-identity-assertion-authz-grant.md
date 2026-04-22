@@ -123,6 +123,33 @@ Resource Authorization Server (AS)
 Resource Server (RS)
 : Hosts protected resources and validates access tokens issued by the Resource Authorization Server.  In {{I-D.ietf-oauth-identity-chaining}}, this is the Protected Resource in trust domain B.  The Resource Server has no direct trust relationship with the IdP Authorization Server. Instead, it validates access tokens issued by its trusted Resource Authorization Server to determine who should have access to resources.
 
+## Terms
+
+The following terms are used in this document:
+
+Common OAuth and token processing terms such as client, authorization server, resource server, resource owner, access token, refresh token, token, grant, assertion, `subject_token`, `subject_token_type`, `actor_token`, and `actor_token_type` are used as defined in OAuth 2.0 {{RFC6749}}, JSON Web Token (JWT) {{RFC7519}}, JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}}, OAuth 2.0 Token Exchange {{RFC8693}}, and OAuth 2.0 Authorization Server Metadata {{RFC8414}}, unless otherwise specified by this document.
+
+OpenID Connect terms such as end-user, Relying Party, OpenID Provider, ID Token, subject identifier, and pairwise subject identifier are used as defined in OpenID Connect Core 1.0 {{OpenID.Core}}, unless otherwise specified by this document.
+
+Identity Assertion
+: A security token issued by the IdP Authorization Server that conveys claims about the End-User and can be used as the `subject_token` input to Token Exchange. In this specification, the Identity Assertion is typically an OpenID Connect ID Token or a SAML 2.0 assertion.
+
+Trust Domain
+: A deployment-specific security and administrative boundary within which a set of entities, identifiers, credentials, and policy decisions are mutually trusted according to established trust relationships. In this specification, the IdP Authorization Server operates in trust domain A, while the Resource Authorization Server and Resource Server operate in trust domain B.
+
+Cross-Domain
+: Involving two or more trust domains where an assertion, grant, or authorization decision produced in one trust domain is relied upon in another. In this specification, the IdP Authorization Server operates in trust domain A, while the Resource Authorization Server and Resource Server operate in trust domain B.
+
+Subject Resolution
+: The process by which the Resource Authorization Server determines which local subject represents the End-User identified by the ID-JAG. Subject resolution can use stable identifiers and other trusted claims in the ID-JAG, such as `iss`, `sub`, `tenant`, `aud_sub`, `email`, or deployment-specific claims, and can include JIT provisioning when permitted by policy.
+
+JIT provisioning
+: The process by which the Resource Authorization Server or a relying service creates a new local account or subject record, or updates an existing one, using trusted identity claims presented during the transaction rather than requiring separate pre-provisioning. In this specification, JIT provisioning may occur as part of subject resolution when permitted by policy.
+
+Tenant
+: A deployment-specific administrative, organizational, or customer boundary within an issuer or relying service that scopes subjects, clients, policy, and other identifiers. In single-tenant deployments, the issuer may uniquely identify the tenant context; in multi-tenant deployments, the tenant context may need to be conveyed explicitly, for example by the `tenant` or `aud_tenant` claim.
+
+
 # Identity Assertion JWT Authorization Grant {#id-jag}
 
 The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
@@ -220,7 +247,7 @@ A non-normative example JWT with expanded header and payload claims is below:
 
 The ID-JAG may contain additional authentication, identity, or authorization claims that are valid for an ID Token {{OpenID.Core}} as the grant functions as both an Identity Assertion and authorization delegation for the Resource Authorization Server.
 
-It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim.  The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation, for example when the user has not yet SSO'd into the Resource Authorization Server.  Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.
+It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim. The Resource Authorization Server MAY use these claims for subject resolution, including JIT provisioning, for example when the user has not yet SSO'd into the Resource Authorization Server. Additional Resource Authorization Server specific identity claims MAY be needed for subject resolution.
 
 # Cross-Domain Access
 
@@ -788,7 +815,7 @@ In this flow, the IdP Authorization Server accepts a Token Exchange request from
 
 This can be handled by the IdP Authorization Server maintaining a record of each `client_id` used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.  The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG for the mapped `client_id`. Requiring a confidential client helps to prevent the IdP Authorization Server from delegating access to any of the valid clients for the Resource Authorization Server.
 
-Note:  The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG.  The same user may have a pair-wise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party.  The Resource Authorization Server needs consistent subject identifiers for account resolution for both SSO and API access.   The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the same identifier for the user that it would have included in an ID Token intended for the Resource Authorization Server.
+Note: The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG. The same user may have a pairwise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party. The Resource Authorization Server needs consistent subject identifiers for subject resolution across both SSO and API access. The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the same identifier for the user that it would have included in an ID Token intended for the Resource Authorization Server.
 
 Alternatively, if clients use "Client ID Metadata Document" {{I-D.ietf-oauth-client-id-metadata-document}} as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.
 
@@ -1140,7 +1167,7 @@ This specification can be used in these deployments when the CIAM platform serve
 
 * The first-party application has a registered OAuth 2.0 Client with the CIAM IdP Authorization Server
 * The first-party application has a registered OAuth 2.0 Client with the Resource Authorization Server for the developer SaaS component
-* The Resource Authorization Server is able to map the customer identity conveyed by the CIAM platform to the corresponding account, tenant, or just-in-time provisioned subject at the developer SaaS component
+* The Resource Authorization Server is able to map the customer identity conveyed by the CIAM platform to the corresponding account, tenant, or subject established through JIT provisioning at the developer SaaS component
 
 #### Trust Relationship Preconditions
 
