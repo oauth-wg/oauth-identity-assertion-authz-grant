@@ -166,6 +166,9 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 `authorization_details`:
 : OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This claim enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
 
+`act`:
+: OPTIONAL - Actor claim as defined in {{Section 4.1 of RFC8693}}. When present, this claim identifies the actor that is acting on behalf of the subject (`sub`).
+
 `tenant`:
 : OPTIONAL - JSON string that represents the tenant identifier for a multi-tenant issuer as defined in {{OpenID.Enterprise}}
 
@@ -340,11 +343,17 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 
 When a Refresh Token is used as the subject token, the client still requests `requested_token_type=urn:ietf:params:oauth:token-type:id-jag`; this allows the client to refresh an Identity Assertion JWT Authorization Grant without fetching a new Identity Assertion from the user-facing SSO flow.
 
-The additional parameters defined in {{Section 2.1 of RFC8693}} `actor_token` and `actor_token_type` are not used in this specification.
+`actor_token`:
+: OPTIONAL - A security token that identifies the actor, as described in {{Section 2.1 of RFC8693}}.
+
+`actor_token_type`:
+: REQUIRED when `actor_token` is present, as described in {{Section 2.1 of RFC8693}} - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `actor_token` parameter.
+
+This specification does not define normative processing requirements for `actor_token` or whether an `act` claim is included in the issued ID-JAG. Future profiles or extensions MAY define how `actor_token` is validated, how it influences policy evaluation, and whether it results in an `act` claim in the issued ID-JAG.
 
 Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
-#### Example: Token Exchange using ID Token {#token-exchange-id-token-example}
+### Example: Token Exchange using ID Token {#token-exchange-id-token-example}
 
 This example uses an ID Token as the `subject_token` and a JWT Bearer Assertion {{RFC7523}} for client authentication (tokens truncated for brevity):
 
@@ -362,7 +371,7 @@ This example uses an ID Token as the `subject_token` and a JWT Bearer Assertion 
     &client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer
     &client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...
 
-#### Example: Token Exchange using Refresh Token {#token-exchange-refresh-token-example}
+### Example: Token Exchange using Refresh Token {#token-exchange-refresh-token-example}
 
 This non-normative example shows using a Refresh Token as the `subject_token` (when supported by the IdP Authorization Server) to obtain an ID-JAG without acquiring a new Identity Assertion:
 
@@ -388,7 +397,9 @@ The IdP MUST validate the subject token:
 * If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
 * If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
 
-The IdP evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.
+If an `actor_token` is present, any processing of it is outside the scope of this specification. Future profiles or extensions MAY define validation requirements, policy evaluation rules, and issued token content related to `actor_token`.
+
+The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.
 
 When processing the request:
 
@@ -627,7 +638,7 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
 
-* The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error.
+* The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
 
 When processing authorization information from the ID-JAG:
 
@@ -840,6 +851,16 @@ TBD: It may make more sense to request the Identity Assertion JWT Authorization 
 ## Cross-Domain Use
 
 This specification is intended for cross-domain uses where the Client, Resource App, and Identity Provider are all in different trust domains. In particular, the Identity Provider MUST NOT issue access tokens in response to an ID-JAG it issued itself. Doing so could lead to unintentional broadening of the scope of authorization.
+
+## Actor Delegation Extensions
+
+This specification allows Token Exchange requests for ID-JAG to carry `actor_token`, but it does not define normative processing requirements for it. Future profiles or extensions can define how `actor_token` is validated, authorized, and reflected in the issued ID-JAG, including whether an `act` claim is included.
+
+Profiles or extensions that define use of `actor_token` need to consider delegation risks. In particular, a client could attempt to combine a valid `subject_token` with an unrelated or less-trusted `actor_token` to obtain an ID-JAG that overstates the actor's authority.
+
+Such profiles or extensions should define how `actor_token` is validated, how the relationship between the authenticated client, subject, and actor is authorized, how any resulting `act` claim is derived, and how unnecessary disclosure of actor identity or attributes is minimized across trust domains.
+
+When such profiles or extensions use an `act` claim, they should preserve the distinction between the actor identified by `act` and the resource owner identified by `sub`. The authenticated client identity is also not a substitute for actor identity.
 
 ## Sender Constraining Tokens
 
@@ -1395,4 +1416,3 @@ The authors would like to thank the following people for their contributions and
 -00
 
 * Initial revision as adopted working group draft
-
