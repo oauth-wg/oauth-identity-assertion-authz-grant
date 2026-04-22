@@ -94,7 +94,7 @@ This specification provides a mechanism for an application to use an identity as
 
 # Introduction
 
-In many deployments, applications are configured for single sign-on to a common identity provider (IdP) using OpenID Connect or SAML. This enables users to access multiple applications using a single account at the IdP, and enables the operator of that identity layer to manage which users can access which applications and enforce policy for those applications. Enterprise workforce identity providers are one common example, but the same trust pattern can also arise in customer identity, platform identity, and other federated application ecosystems.
+In many deployments, applications are configured for single sign-on to a common identity provider (IdP) using OpenID Connect or SAML. This enables users to access multiple applications using a single account at the IdP, and enables the operator of that IdP to manage which users can access which applications and enforce policy for access to those applications. Enterprise workforce identity providers are one common example, but the same trust pattern can also arise in customer identity, platform identity, and other federated application ecosystems.
 
 When one application wants to access a user's data at another application, it will start an interactive OAuth flow {{RFC6749}} to obtain an access token for the application on behalf of the user. This OAuth flow enables a direct app-to-app connection between the two apps, and is not visible to the IdP used to log in to each app.
 
