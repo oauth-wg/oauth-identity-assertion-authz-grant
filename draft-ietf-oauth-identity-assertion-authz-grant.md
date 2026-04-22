@@ -321,7 +321,7 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an Identity Assertion JWT Authorization Grant is being requested.
 
 `audience`:
-: REQUIRED - The identifier of the Resource Authorization Server in another trust domain as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY support additional IdP-specific unique identifiers for Resource Authorization Servers in other trust domains as an extension point; when such identifiers are used, the IdP maps them to the corresponding Resource Authorization Server audience for the purposes of issuing the ID-JAG.
+: REQUIRED - The identifier of the Resource Authorization Server in another trust domain as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
 
 `resource`:
 : OPTIONAL - The Resource Identifier of the Resource Server as defined in {{Section 2 of RFC8707}}.
@@ -341,6 +341,30 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 When a Refresh Token is used as the subject token, the client still requests `requested_token_type=urn:ietf:params:oauth:token-type:id-jag`; this allows the client to refresh an Identity Assertion JWT Authorization Grant without fetching a new Identity Assertion from the user-facing SSO flow.
 
 The additional parameters defined in {{Section 2.1 of RFC8693}} `actor_token` and `actor_token_type` are not used in this specification.
+
+This specification profiles the `audience` and `resource` parameters of OAuth 2.0 Token Exchange {{RFC8693}} for interoperable use with ID-JAG. In this profile, `audience` identifies the Resource Authorization Server to which the ID-JAG is issued, and `resource` identifies the protected resource for which access is requested. This profile uses `audience` for the Resource Authorization Server rather than defining a new parameter. The ID-JAG is issued by the IdP Authorization Server for processing by the Resource Authorization Server, and the Resource Authorization Server validates the `aud` claim to determine whether the ID-JAG was issued for it. The `resource` parameter continues to identify the protected resource, as defined in {{RFC8707}}. This convention provides a single interoperable interpretation of `audience` and `resource`, including deployments in which one Resource Authorization Server governs multiple protected resources or tenant-specific resources.
+
+For example, if a SaaS provider operates a Resource Authorization Server at `https://authorization-server.saas-tool.example/` and protected resources at `https://api.saas-tool.example/files` and `https://api.saas-tool.example/messages`, a client requesting access to the Files API uses:
+
+    audience=https://authorization-server.saas-tool.example/
+    resource=https://api.saas-tool.example/files
+
+If a Resource Authorization Server at `https://login.saas-tool.example/` governs tenant-specific resources such as `https://api.saas-tool.example/acme/` and `https://api.saas-tool.example/fabrikam/`, the `audience` value remains the Resource Authorization Server identifier and the `resource` value distinguishes the protected resource. For example:
+
+    audience=https://login.saas-tool.example/
+    resource=https://api.saas-tool.example/acme/
+
+and:
+
+    audience=https://login.saas-tool.example/
+    resource=https://api.saas-tool.example/fabrikam/
+
+If the IdP Authorization Server supports an implementation-specific `audience` value such as `urn:example:idp:saas-tool` for that same Resource Authorization Server, the client MAY send:
+
+    audience=urn:example:idp:saas-tool
+    resource=https://api.saas-tool.example/files
+
+In that case, the IdP Authorization Server resolves the requested `audience` value to `https://authorization-server.saas-tool.example/` and issues the ID-JAG with `aud` set to `https://authorization-server.saas-tool.example/`.
 
 Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
