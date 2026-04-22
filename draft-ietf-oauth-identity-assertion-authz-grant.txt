@@ -97,18 +97,20 @@ Table of Contents
      6.2.  Client ID and Tenant Relationship
      6.3.  Subject Identifier Uniqueness with Tenants
      6.4.  Tenant Context in Token Exchange
-   7.  Authorization Server (IdP) Metadata
+   7.  Authorization Server Metadata
    8.  Security Considerations
      8.1.  Client Authentication
      8.2.  Step-Up Authentication
      8.3.  Cross-Domain Use
-     8.4.  Actor Delegation Extensions
-     8.5.  Sender Constraining Tokens
-       8.5.1.  Proof-of-Possession
+     8.4.  Metadata Disclosure
+     8.5.  Actor Delegation Extensions
+     8.6.  Sender Constraining Tokens
+       8.6.1.  Proof-of-Possession
    9.  IANA Considerations
      9.1.  Media Types
      9.2.  OAuth URI Registration
-     9.3.  JSON Web Token Claims Registration
+     9.3.  OAuth Authorization Server Metadata Registration
+     9.4.  JSON Web Token Claims Registration
    10. References
      10.1.  Normative References
      10.2.  Informative References
@@ -1283,19 +1285,57 @@ Pragma: no-cache
    the Resource Authorization Server expects for the specified client_id
    and sub.
 
-7.  Authorization Server (IdP) Metadata
+7.  Authorization Server Metadata
 
-   An IdP can advertise its support for this profile in its OAuth
-   Authorization Server Metadata [RFC8414].  Identity and Authorization
-   Chaining Across Domains [I-D.ietf-oauth-identity-chaining] defines a
-   new metadata property
-   identity_chaining_requested_token_types_supported for this purpose.
+   An IdP Authorization Server can advertise the identity chaining token
+   types it can issue in its OAuth Authorization Server Metadata
+   [RFC8414].  Identity and Authorization Chaining Across Domains
+   [I-D.ietf-oauth-identity-chaining] defines the
+   identity_chaining_requested_token_types_supported metadata parameter
+   for this purpose.
 
-   To advertise support for the Identity Assertion JWT Authorization
-   Grant, the authorization server SHOULD include the following value in
-   the identity_chaining_requested_token_types_supported property:
+   To advertise support for issuing an Identity Assertion JWT
+   Authorization Grant via Token Exchange, the IdP Authorization Server
+   SHOULD include the following value in
+   identity_chaining_requested_token_types_supported:
 
    urn:ietf:params:oauth:token-type:id-jag
+
+   A Resource Authorization Server can advertise support for
+   authorization grant profiles in its OAuth Authorization Server
+   Metadata [RFC8414] using the authorization_grant_profiles_supported
+   metadata parameter.
+
+   The value of authorization_grant_profiles_supported MUST be a JSON
+   array of strings.  Each string MUST identify a supported
+   authorization grant profile.
+
+   Inclusion of a profile identifier in
+   authorization_grant_profiles_supported indicates only that the
+   Resource Authorization Server implements the processing rules for
+   that profile.  It does not indicate that any particular issuer,
+   tenant, client, subject, audience, or authorization request will be
+   accepted.
+
+   To advertise support for the Identity Assertion JWT Authorization
+   Grant profile, the Resource Authorization Server SHOULD include the
+   following value in the authorization_grant_profiles_supported
+   property:
+
+   urn:ietf:params:oauth:grant-profile:id-jag
+
+   A Resource Authorization Server that includes
+   urn:ietf:params:oauth:grant-profile:id-jag in
+   authorization_grant_profiles_supported for this specification MUST
+   also include urn:ietf:params:oauth:grant-type:jwt-bearer in
+   grant_types_supported.
+
+   These metadata parameters are complementary.
+   identity_chaining_requested_token_types_supported indicates which
+   token types an IdP Authorization Server can issue for identity
+   chaining, while authorization_grant_profiles_supported indicates
+   which authorization grant profiles a Resource Authorization Server
+   can process.
 
 8.  Security Considerations
 
@@ -1343,7 +1383,27 @@ Cache-Control: no-store
    access tokens in response to an ID-JAG it issued itself.  Doing so
    could lead to unintentional broadening of the scope of authorization.
 
-8.4.  Actor Delegation Extensions
+8.4.  Metadata Disclosure
+
+   Advertising issuer-specific trust relationships in publicly
+   accessible metadata can disclose federation topology, business
+   relationships, tenant configuration, or other deployment-sensitive
+   information.
+
+   Resource Authorization Servers MUST NOT use
+   authorization_grant_profiles_supported to disclose issuer allow lists
+   or other profile-specific trust relationships.
+
+   Resource Authorization Servers MAY provide a protected discovery
+   mechanism by which an authenticated client can determine whether an
+   Identity Assertion JWT Authorization Grant from a particular issuer
+   would be accepted for that client.  If such a mechanism is provided,
+   the Resource Authorization Server MUST require client authentication
+   before disclosing issuer-specific acceptance information.  The
+   response MUST be specific to the authenticated client and MAY also be
+   scoped by tenant, resource, or other local policy context.
+
+8.5.  Actor Delegation Extensions
 
    This specification allows Token Exchange requests for ID-JAG to carry
    actor_token, but it does not define normative processing requirements
@@ -1368,9 +1428,9 @@ Cache-Control: no-store
    resource owner identified by sub.  The authenticated client identity
    is also not a substitute for actor identity.
 
-8.5.  Sender Constraining Tokens
+8.6.  Sender Constraining Tokens
 
-8.5.1.  Proof-of-Possession
+8.6.1.  Proof-of-Possession
 
    Identity Assertion JWT Authorization Grant may support key binding to
    enable sender-constrained tokens as described in Section 4 of
@@ -1400,7 +1460,7 @@ Cache-Control: no-store
    exchanging the ID-JAG for an access token at the Resource
    Authorization Server).
 
-8.5.1.1.  Proof-of-Possession During Token Exchange
+8.6.1.1.  Proof-of-Possession During Token Exchange
 
    When a client requests an ID-JAG from the IdP Authorization Server
    via Token Exchange, the client MAY include a DPoP proof in the
@@ -1467,14 +1527,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
        cnf claim.
 
-8.5.1.2.  Proof-of-Possession During ID-JAG Exchange
+8.6.1.2.  Proof-of-Possession During ID-JAG Exchange
 
    When a client exchanges an ID-JAG for an access token at the Resource
    Authorization Server, the processing rules depend on whether the ID-
    JAG contains a cnf claim and whether the client presents a DPoP
    proof.
 
-8.5.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
+8.6.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
 
    If the ID-JAG contains a cnf claim and the client presents a DPoP
    proof, the Resource Authorization Server MUST:
@@ -1520,7 +1580,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
      "scope": "chat.read chat.history"
    }
 
-8.5.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
+8.6.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
 
    If the ID-JAG contains a cnf claim but the client does not present a
    DPoP proof, the Resource Authorization Server MUST reject the request
@@ -1538,7 +1598,7 @@ Cache-Control: no-store
   "error_description": "Proof of possession required for this authorization grant"
 }
 
-8.5.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
+8.6.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
             Presented
 
    If the ID-JAG does not contain a cnf claim but the client presents a
@@ -1554,7 +1614,7 @@ Cache-Control: no-store
    3.  The access token response will indicate the token type (e.g.,
        DPoP for DPoP-bound tokens, or Bearer for unconstrained tokens).
 
-8.5.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
+8.6.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
             Presented
 
    If the ID-JAG does not contain a cnf claim and the client does not
@@ -1603,7 +1663,35 @@ Cache-Control: no-store
 
    *  Specification Document: This document
 
-9.3.  JSON Web Token Claims Registration
+   This section registers urn:ietf:params:oauth:grant-profile:id-jag in
+   the "OAuth URI" subregistry of the "OAuth Parameters" registry
+   [IANA.oauth-parameters].
+
+   *  URN: urn:ietf:params:oauth:grant-profile:id-jag
+
+   *  Common Name: Authorization grant profile identifier for an
+      Identity Assertion JWT Authorization Grant
+
+   *  Change Controller: IETF
+
+   *  Specification Document: This document
+
+9.3.  OAuth Authorization Server Metadata Registration
+
+   This section registers authorization_grant_profiles_supported in the
+   "OAuth Authorization Server Metadata" registry of the "OAuth
+   Parameters" registry [IANA.oauth-parameters].
+
+   *  Metadata Name: authorization_grant_profiles_supported
+
+   *  Metadata Description: JSON array of supported authorization grant
+      profile identifiers
+
+   *  Change Controller: IETF
+
+   *  Specification Document: This document
+
+9.4.  JSON Web Token Claims Registration
 
    This section registers the following claims in the "JSON Web Token
    Claims" subregistry of the "JSON Web Token (JWT)" registry
@@ -2020,7 +2108,7 @@ Content-Type: application/json
 }
 
    AI Agent discovers all necessary endpoints for authentication as well
-   as support for the Identity Chaining requested token type
+   as support for the identity chaining requested token type
    urn:ietf:params:oauth:token-type:id-jag
 
 A.4.2.2.  IdP Authorization Request (with PKCE)
@@ -2157,28 +2245,19 @@ Content-Type: application/json
   "grant_types_supported": [
     "authorization_code", "refresh_token", "urn:ietf:params:oauth:grant-type:jwt-bearer"
   ],
+  "authorization_grant_profiles_supported": ["urn:ietf:params:oauth:grant-profile:id-jag"],
   ...
 }
 
    AI Agent has learned all necessary endpoints and supported
    capabilities to obtain an access token for the external tool.
 
-   If the urn:ietf:params:oauth:grant-type:jwt-bearer grant type is
-   supported the AI Agent can first attempt to silently obtain an access
-   token using an Identity Assertion JWT Authorization Grant from the
-   Enterprise's IdP otherwise it can fallback to interactively obtaining
-   a standard authorization_code from the External Tool Resource
-   Authorization Server
-
-      Note: This would benefit from an Authorization Server Metadata
-      [RFC8414] property to indicate whether the Identity Assertion JWT
-      Authorization Grant form of jwt-bearer would be accepted by this
-      authorization server.  There are other uses of jwt-bearer that may
-      be supported by the authorization server as well, and is not
-      necessarily a reliable indication that the Identity Assertion JWT
-      Authorization Grant would be supported.  See issue #16
-      (https://github.com/aaronpk/draft-parecki-oauth-identity-
-      assertion-authz-grant/issues/16).
+   If the urn:ietf:params:oauth:grant-profile:id-jag authorization grant
+   profile is supported, the AI Agent can first attempt to silently
+   obtain an access token using an Identity Assertion JWT Authorization
+   Grant from the Enterprise's IdP otherwise it can fallback to
+   interactively obtaining a standard authorization_code from the
+   External Tool Resource Authorization Server.
 
 A.4.2.5.  AI Agent obtains an Identity Assertion JWT Authorization Grant
           for External Tool from the Enterprise IdP
