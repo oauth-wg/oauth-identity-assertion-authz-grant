@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-21T00:13:07.437225+00:00",
+  "timestamp": "2026-04-23T00:15:10.493917+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -280,15 +280,15 @@
       "id": "I_kwDOKv5r-s6MkWCT",
       "title": "Why don't the IdP requests the access token from the AS?",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/13",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "randomstuff",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "The scenario described works as follows:\r\n\r\n1. client obtains ID token;\r\n2. client exchanges ID token with IdP against JAG;\r\n3. client requests AT from AS using JAG as an assertion;\r\n4. client uses AT on the RS.\r\n\r\nA downside of this approach is that in step 3, the client must be registered on the AS.\r\n\r\nWhy wouldn't/couldn't the AS take care of step 3?\r\n\r\nThis would make the process simpler for the client:\r\n\r\n* the client does not need to know that the RS is associated with another domain;\r\n* the client does not need to know that the AS exists at all;\r\n* the client therefore does not need to have credentials for the AS.\r\n\r\nThe fact that the RS is in another domain would be transparent for the client. You could have one deployment where the RS in in the same domain and another deployment where is is in another domain without having to change the client logic.\r\n\r\nModified scenario:\r\n\r\n1. client obtains ID token;\r\n2. client exchange ID token with IdP against AT;\r\n  a. in order to obtain the AT, the AS might need to generate an assertion and send it to the AS\r\n4. client uses AT on the RS.\r\n\r\nOne downside is that from the point of view, the token are issued to the IdP but surely this can be worked-around with some extension.\r\n",
       "createdAt": "2024-06-17T21:58:37Z",
-      "updatedAt": "2025-10-18T14:24:34Z",
-      "closedAt": null,
+      "updatedAt": "2026-04-22T21:54:08Z",
+      "closedAt": "2026-04-22T21:54:08Z",
       "comments": [
         {
           "author": "kamronbatman",
@@ -901,15 +901,15 @@
       "id": "I_kwDOKv5r-s7BYFUT",
       "title": "Authorization Server Metadata to enable discovery of JWT Assertion Grant",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/34",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "A given client currently as no mechanism to discover whether an AS supports `oauth-id-jag+jwt` JWT as a valid JWT bearer grant type (`urn:ietf:params:oauth:grant-type:jwt-bearer`)\n\n(This was split off from #16 to focus on only the Resource App discovery question)",
       "createdAt": "2025-07-18T20:32:39Z",
-      "updatedAt": "2025-12-02T05:49:06Z",
-      "closedAt": null,
+      "updatedAt": "2026-04-22T21:53:22Z",
+      "closedAt": "2026-04-22T21:53:22Z",
       "comments": [
         {
           "author": "yaron-zehavi",
@@ -924,6 +924,13 @@
           "body": "> Additionally, it would be helpful if an AS supporting the JWT bearer grant type would publish **which JAG issuers** it supports.\n\nA couple of challenges we have seen and don't have consensus yet on are:\n\n- The list of trusted issuers for multi-tenant Resource Authorization Server (e.g `https://as.saas.com`)  is quite large and needs a way to scope the resolution for it to be meaningful.  For SSO this is solved with IdP discovery (e.g identifier first) or some apps may have a dedicated tenant URL for just SSO but share a common namespace for API Access. \n- Just like IdP discovery this could be considered information disclosure and enables an attacker to learn what issuers to attack next\n\nUnclear is requiring client authentication to discover trusted issuers would address any concerns as clients could also be multi-tenant but may be useful in helping with abuse",
           "createdAt": "2025-12-02T05:49:06Z",
           "updatedAt": "2025-12-02T05:49:06Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Completed in https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/79",
+          "createdAt": "2026-04-22T21:53:22Z",
+          "updatedAt": "2026-04-22T21:53:22Z"
         }
       ]
     },
@@ -1342,15 +1349,15 @@
       "id": "I_kwDOKv5r-s7MkGrV",
       "title": "The spec states that `refresh_token` SHOULD NOT be used",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/48",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "meghnadubey",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "The spec currently states that, `refresh_token` SHOULD NOT be used. I also saw that there is an old closed issue with the comment:\n> Instead we'll recommend using the refresh token to get a new ID token.\n\nIs that decision final, because I do have some security concerns with using `refresh_token` for an `id-jag` and it also seems to be discouraged by RFC 8693, that states:\n> A refresh token will typically not be issued when the exchange is of one temporary credential (the subject_token) for a different temporary credential (the issued token) for use in some other context.\n\n",
       "createdAt": "2025-09-18T21:29:23Z",
-      "updatedAt": "2025-10-14T02:50:58Z",
-      "closedAt": null,
+      "updatedAt": "2026-04-22T21:52:33Z",
+      "closedAt": "2026-04-22T21:52:33Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -1372,6 +1379,20 @@
           "body": "Should we consider having clients convert a SAML2 assertion to a IdP-specific refresh token with Token Exchange for client deployments that need to obtain new ID-JAGs when a Resource App's access token expires? \n\n```\nPOST /oauth2/token HTTP/1.1\nHost: acme.idp.example\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&subject_token_type=urn:ietf:params:oauth:token-type:saml2\n&subject_token=PHNhbWxwOl...[base64url-encoded SAML2 Assertion]...\n&requested_token_type=urn:ietf:params:oauth:token-type:refresh_token\n&audience=https://acme.idp.example\n&scope=openid%20offline_access\n&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer\n&client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...\n```\n\nThe IdP would need a way to map the SAML2 audience entityID to a OAuth2 client to ensure its the same \"RP\".  This would provide a mechanism to slowly migrate a RP over to OIDC even though the initial SSO was SAML.  SSO/AppAdmins don't need change SSO configuration but instead just link the SAML SP to a OAuth Client. \n\nOnce the client obtains the refresh token they can perform a token request and get a new `id_token` and `access_token`.  This simplifies the story going forward as everything is `id_tokens`.",
           "createdAt": "2025-10-14T02:50:58Z",
           "updatedAt": "2025-10-14T02:50:58Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Latest spec version should have resolved this issue.  Can we close?",
+          "createdAt": "2026-04-22T03:20:48Z",
+          "updatedAt": "2026-04-22T03:20:48Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "Yes, this has been addressed through the inclusion of proposed exchange for saml2 assertion for a refresh_token.",
+          "createdAt": "2026-04-22T18:44:57Z",
+          "updatedAt": "2026-04-22T18:44:57Z"
         }
       ]
     },
@@ -1951,15 +1972,15 @@
       "id": "I_kwDOKv5r-s7ec87q",
       "title": "Audience vs Resource Clarity",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/69",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "We made the choice to require `audience` to be the Resource AS identifier and `resource` to be the protected resource for the Resource AS in this spec for interoperability.  While this approach seems allowed from how the Token Exchange spec is written, it isn't obvious to some readers who are familiar with Token Exchange.  We are effective profiling `audience` as the trust domain identifier vs defining a new param.  We don't need to change our decision but I think it may help to better state why we made this choice and provide some examples of multi-tenant resource authorization servers to help the reader understand how this profile is using audience and resource. Note that audience vs resource is a historically confusing problem across the specs. ",
       "createdAt": "2025-12-15T21:10:07Z",
-      "updatedAt": "2025-12-15T21:10:07Z",
-      "closedAt": null,
+      "updatedAt": "2026-04-22T22:11:31Z",
+      "closedAt": "2026-04-22T21:51:11Z",
       "comments": []
     },
     {
@@ -1974,7 +1995,7 @@
       "labels": [],
       "body": "In the flow proposed by this draft, it is possible for a client to send a token exchange request concerning a user that the resource authorization server has never seen before, e.g. (using the terminology in 4.1) if I try to connect the chat app to the wiki app using my enterprise IdP without ever having created a chat app account.\n\nWhat should happen in this scenario? I see a few options:\n1. The chat app should take the ID-JAG token subject to the IdP and JIT provision a user based on the IdP's response. I think this would lead to a somewhat meaningless grant -- if I don't have a chat app account, what exactly would the wiki app gain from this anyway? Also, depending on the chat app's UX, this might spring a whole user onboarding flow on the user in the middle of the authz request.\n2. The chat app should return a user not found error to the wiki app. I think this makes the most sense.\n3. The IdP should not even issue an ID-JAG if it knows the user doesn't have a chat app account. This relies on the IdP always knowing whether the account exists, with high confidence, so I'm not sure it's a viable option.\n\nIn any case, I think it'd be helpful for the draft to address this scenario.",
       "createdAt": "2026-01-06T00:39:24Z",
-      "updatedAt": "2026-03-03T00:10:15Z",
+      "updatedAt": "2026-04-22T22:11:32Z",
       "closedAt": "2026-03-03T00:10:15Z",
       "comments": [
         {
@@ -2088,7 +2109,7 @@
       "labels": [],
       "body": "I have a variation of the usecases described in sections `A.2` and `A.3` that may be interesting to talk through. I think authentication for whitelabled SaaS components could be a strong application of XAA. There are other less standardized approaches for this problem today.\n\n----\n\n## Intro\n\nSaaS platforms often purchase and re-expose whitelabeled capabilities from other SaaS platforms. For example,\nfunctionality like comments sections, chat widgets, support bots, or email notifications can often be sold as standalone features and embedded into customer-facing applications. \n\nThis functionality may consist of UI elements, APIs, or the combination of both to create full-stack widgets. When an end user interacts with one of these widgets,it is advantageous to use OAuth access tokens to authorize the interaction so the widget understand the user identity. For example, a comments section widget might allow users to edit their own comment, but not the comments of other users. A feedback widget might want to aggregate feedback by user, or might want to only accept feedback from authenticated users.\n\nToday, there are a few common approaches for whitelabeled authentication usecases:\n\n- Completely unauthenticated widgets like Google Maps use [public API Keys](https://developers.google.com/maps/documentation/javascript/demo-key). These public keys are highly abusable. Attackers that scrape the key can use it to exhaust API quotas and drive up usage bills. No calls within the Google Maps system can be tied back to an end user identity.\n\n- Svix does away with OAuth and access tokens entirely, and has the website backend generate a [pre-signed URL](https://docs.svix.com/app-portal#giving-your-users-access) for the frontend to use. This method is more secure than a completely public API, but still loses the user identity context. \n\n- The whitelabel resource server could be preconfigured to accept tokens issued by the CIAM IDP directly - like how Supabase can accept access tokens [issued by Auth0](https://supabase.com/docs/guides/auth/third-party/auth0). This approach typically only works with JWT access tokens that adhere to a specific & interoperable format. Access tokens in a bespoke or nonstandard format are much more difficult to validate. This approach also pushes a lot of complexity on the resource server - which may accept access tokens from hundreds or thousands of ASs.\n\nI believe XAA can be used here instead to create a standardized approach.\n\n----\n\n## Applying XAA\n\nLet's take the `wiki.example` case and assume that the wiki app developers want to whitelabel a feedback widget to \ncollect feedback from authenticated users on each page. \n\nThis flow differs from other examples already documented in the following ways:\n- The IDP Authorization Server is the CIAM AS, operated by the application developer\n- The application developer is the persona setting policy considerations\n- The client is a first-party application to the IDP AS\n- The client is integrated with both the IDP AS and the Resource Server AS - no dynamic discovery of AS information is needed during the flow.\n\nWe have the following entities in the system:\n\n```\n  +======================+================================+================================================+\n  | Role                 | App URL                        | Description                                    |\n  +======================+================================+================================================+\n  | Client               | https://wiki.example           | Wiki app that embeds content from one or more  |\n  |                      |                                | resource servers                               |\n  +----------------------+--------------------------------+------------------------------------------------+\n  | Identity Provider    | https://auth.wiki.example      | CIAM Identity Provider for the wiki app        |\n  | Authorization Server |                                |                                                |\n  +----------------------+--------------------------------+------------------------------------------------+\n  | Resource             | https://auth.feedback.example  | Authorization Server for a customer feedback   |\n  | Authorization Server |                                | service                                        |\n  +----------------------+--------------------------------+------------------------------------------------+\n  | Resource Server      | https://api.feedback.example   | Public API for the customer feedback service   |\n  +----------------------+--------------------------------+------------------------------------------------+\n```\n\n## Preconditions\n- The First Party App has a registered OAuth 2.0 Client (`com.example.wiki`) with the CIAM IdP (`auth.wiki.example`)\n- The First Party App has a registered OAuth 2.0 Client (`18723649238176`) with the Whitelabel AS (`auth.feedback.example`)\n- Application Developer has established a trust relationship between their CIAM IdP and the First Party App for SSO\n- Application Developer has established a trust relationship between their CIAM IdP and the Whitelabel AS for SSO and Identity Assertion JWT Authorization Grant\n- Application Developer has granted the First Party App permission to act on behalf of users within the Whitelabel API with a specific set of scopes\n\n## Example Sequence\n\n### First Party App establishes a User Identity with CIAM IdP\n\n#### IdP Authorization Request (with PKCE)\nFirst Party App generates a PKCE code_verifier and a code_challenge (usually a SHA256 hash of the verifier, base64url-encoded) and redirects the end-user to the CIAM IdP with an authorization request\n```\nGET /authorize?\n  response_type=code\n  &client_id=com.example.wiki\n  &redirect_uri=https://wiki.example/oauth2/callback\n  &scope=openid+profile+email\n  &state=xyzABC123\n  &code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM\n  &code_challenge_method=S256\nHost: auth.wiki.example\n```\nNo explicit user authorization step is required as the application is considered first party. \nThe CIAM IdP authenticates the end-user and redirects back to the First Party App's registered client redirect URI with an authorization code:\n\n    https://wiki.example/oauth2/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC123\n\nFirst Party App exchanges the code and PKCE code_verifier to obtain an ID Token and Access Token for the IdP's UserInfo endpoint\n\n```\nPOST /oauth2/token\nHost: auth.wiki.example\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=authorization_code\n&code=SplxlOBeZQQYbYS6WxSbIA\n&redirect_uri=https://wiki.example/oauth2/callback\n&client_id=com.example.wiki\n&code_verifier=dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk\n\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n\"id_token\": \"eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...\",\n\"token_type\": \"Bearer\",\n\"access_token\": \"7SliwCQP1brGdjBtsaMnXo\",\n\"scope\": \"openid profile email\"\n}\n```\nFirst Party App validates the ID Token using the published JWKS for the IdP\n```\n{\n\"iss\": \"https://auth.wiki.example/\",\n\"sub\": \"1997e829-2029-41d4-a716-446655440000\",\n\"aud\": \"com.example.wiki\",\n\"exp\": 1984444800,\n\"iat\": 1684441200,\n\"auth_time\": 1684440000,\n\"name\": \"John Connor\",\n\"email\": \"john.connor@cyberdyne.example\",\n\"email_verified\": true\n}\n```\n\n###  First Party App calls Whitelabeled API\n\nAs the First Party App is integrated directly with the Whitelabeled API, no AS discovery step is necessary.\nThe App can proceed directly to requesting an ID-JAG for token exchange.\n\n#### First Party App obtains an Identity Assertion JWT Authorization Grant for Whitelabeled API from the CIAM IdP\nFirst Party App makes an ID-JAG token exchange request to the CIAM IdP. It presents the ID Token obtained in the previous step, along with the scopes and resource identifier for the whitelabel API (both preconfigured by the developer)\n```\nPOST /oauth2/token HTTP/1.1\nHost: auth.wiki.example\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&requested_token_type=urn:ietf:params:oauth:token-type:id-jag\n&audience=https://auth.feedback.example/\n&resource=https://api.feedback.example/\n&scope=feedback.submit\n&subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...\n&subject_token_type=urn:ietf:params:oauth:token-type:id_token\n&client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer\n&client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjIyIn0...\n```\nIf access is granted, the CIAM IDP creates a signed Identity Assertion JWT Authorization Grant and returns it in the token exchange response.\n```\nHTTP/1.1 200 OK\nContent-Type: application/json\nCache-Control: no-store\nPragma: no-cache\n\n{\n\"issued_token_type\": \"urn:ietf:params:oauth:token-type:id-jag\",\n\"access_token\": \"eyJhbGciOiJIUzI1NiIsI...\",\n\"token_type\": \"N_A\",\n\"scope\": \"feedback.submit\",\n\"expires_in\": 300\n}\n```\nIdentity Assertion JWT Authorization Grant claims:\n```\n{\n\"alg\": \"ES256\",\n\"typ\": \"oauth-id-jag+jwt\"\n}\n.\n{\n\"jti\": \"9e43f81b64a33f20116179\",\n\"iss\": \"https://auth.wiki.example\",\n\"sub\": \"1llb-b4c0-0000-8000-t800b4ck0000\",\n\"aud\": \"https://auth.feedback.example\",\n\"resource\": \"https://api.feedback.example/\",\n\"client_id\": \"18723649238176\",\n\"exp\": 1984445160,\n\"iat\": 1984445100,\n\"scope\": \"feedback.submit\"\n}\n.\nsignature\n```\n#### First Party App obtains an Access Token for Whitelabel API\nFirst Party App makes a token request to the previously registered whitelabel API's Authorization Server token endpoint using the Identity Assertion JWT Authorization Grant obtained from the CIAM IDP as a JWT Assertion.\n\nThe First Party App authenticates with its client credentials that were registered with the Whitelabel API's Authorization Server\n\n```\nPOST /oauth2/token HTTP/1.1\nHost: auth.feedback.example\nAuthorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2\n\ngrant_type=urn:ietf:params:oauth:grant-type:jwt-bearer\nassertion=eyJhbGciOiJIUzI1NiIsI...\n```\nWhitelabel API's Authorization Server validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted CIAM IDP\n```\nHTTP/1.1 200 OK\nContent-Type: application/json;charset=UTF-8\nCache-Control: no-store\nPragma: no-cache\n\n{\n\"token_type\": \"Bearer\",\n\"access_token\": \"2YotnFZFEjr1zCsicMWpAA\",\n\"expires_in\": 86400,\n\"scope\": \"feedback.submit\"\n}\n```\n#### First Party App makes an authorized Whitelabel API request\nFirst Party App invokes a Whitelabel API provided by the Resource Server with a valid access token\n```\nPOST /feedback/submit\nHost: api.feedback.example\nAuthorization: Bearer 2YotnFZFEjr1zCsicMWpAA\"\nAccept: application/json\n\nHTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n...\n}\n```\n",
       "createdAt": "2026-03-20T22:37:58Z",
-      "updatedAt": "2026-03-28T01:25:33Z",
+      "updatedAt": "2026-04-22T22:11:32Z",
       "closedAt": "2026-03-28T01:25:33Z",
       "comments": [
         {
@@ -2168,7 +2189,7 @@
       "labels": [],
       "body": "The `LLM Agent using Enterprise Tools` section preconditions refer to the `External Tool Application` where I believe they should refer to the `SaaS Authorization Server`. This would better align with the structure established in the `Enterprise Deployment` section, which uses `Resource Authorization Server` throughout.\n\n> The LLM Agent has a registered OAuth 2.0 Client (4960880b83dc9) with the External Tool Application (saas.example.net)\n\nThe OAuth 2.0 Client is registered at the `SaaS Authorization Server (authorization-server.saas.com)`, not the `External Tool Application`.\n\n\n> Enterprise has established a trust relationship between their IdP and the External Tool Application for SSO and Identity Assertion JWT Authorization Grant\n\nI believe the trust relationship is established between the IdP and the SaaS Authorization Server instead.\n\n> Enterprise has granted the LLM Agent permission to act on behalf of users for the External Tool Application with a specific set of scopes\n\nThis one I am not as sure on but it does not match the structure established in the `Enterprise Deployment Preconditions` section, which refers to the `Resource Authorization Server` here.",
       "createdAt": "2026-03-20T22:50:28Z",
-      "updatedAt": "2026-03-28T01:28:08Z",
+      "updatedAt": "2026-04-22T22:11:32Z",
       "closedAt": "2026-03-28T01:28:08Z",
       "comments": [
         {
@@ -2192,15 +2213,15 @@
       "id": "I_kwDOKv5r-s76Hnty",
       "title": "Adding Optional `actor_token` to ID-JAG for Explicit Actor Modeling",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/80",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "# Adding Optional `actor_token` to ID-JAG for Explicit Actor Modeling\n\n## Summary\n\nThe OAuth Identity Assertion Authorization Grant (ID-JAG) deliberately enforces **client continuity**:\n\n- the `subject_token` was issued to a specific OAuth client\n- that same client (`client_id`) MUST present the `subject_token` when requesting the ID-JAG\n\nThis is a strong and desirable property. It prevents cross-client substitution and ensures that the OAuth client that obtained the upstream subject credential is the one continuing the flow.\n\nHowever, client continuity and actor identity are not the same thing.\n\nClient continuity answers:\n\n> Which OAuth client continued the flow?\n\nMany delegated systems also need to answer:\n\n> Which actor actually exercised the subject\u2019s authorization?\n\nIn simple deployments, those two identities may coincide. In more complex deployments, they often do not.\n\nThis issue proposes adding **optional support for an `actor_token`** so that deployments that need explicit actor fidelity can represent it directly, while preserving ID-JAG\u2019s current client-continuity guarantees.\n\n## Current Model: Client Continuity as Implicit Actor\n\nID-JAG today enforces:\n\n```text\nsubject_token -> issued to client A\nID-JAG request -> must be made by client A\n```\n\nThis guarantees:\n\n> the same OAuth client that received the subject token is the one continuing the authorization flow\n\nThat is an important security property because it:\n- prevents one client from replaying another client\u2019s subject credential\n- preserves the RP/client binding of the original identity assertion\n- provides a simple and robust model for traditional RP-to-API scenarios\n\nIn effect, the current design treats the authenticated client as the implicit actor.\n\n## The Gap: Client Continuity Is Not Actor Fidelity\n\nThe current model proves continuity of the OAuth client. It does not necessarily prove fidelity of the acting principal.\n\nThat distinction matters because `client_id` identifies an OAuth client registration, not necessarily the execution principal that is acting on behalf of the subject at runtime.\n\nIn modern systems, a single client may front:\n- multiple services\n- multiple workloads\n- multiple agent instances\n- multiple execution environments\n- both human-initiated and automated execution paths\n\nIn those architectures, the current model guarantees:\n\n> client A continued the flow\n\nbut it does not guarantee:\n\n> actor X, rather than actor Y, actually exercised the subject\u2019s authorization\n\n### Where the Current Model Falls Short\n\n### 1. Multiple Actors Behind a Single Client\n\nA single `client_id` may represent multiple distinct acting entities.\n\nExample:\n\n```text\nclient_id = \"frontend-app\"\n\nfrontend-app\n  -> orchestration layer\n     -> agent A executes task\n     -> agent B executes task\n```\n\nBoth requests:\n- use the same `client_id`\n- satisfy the current ID-JAG continuity rules\n\nBut:\n- actor A and actor B are not the same principal\n- they may differ in trust level, permissions, or execution context\n- downstream services cannot distinguish them if only client identity is preserved\n\n### 2. Delegation Within the Same Client Boundary\n\nA user may initiate a flow through an RP, and an automated agent may later continue it under the same client registration.\n\nFrom the current ID-JAG model, nothing has changed:\n- same `client_id`\n- same flow continuity\n\nBut operationally:\n- the acting entity has changed\n- the security, audit, and authorization semantics have changed\n- downstream systems may need to know that the request is now being executed by an agent rather than by the original front-end context\n\n#### 3. Loss of Actor Context for Downstream Consumers\n\nWithout an explicit actor input, downstream components often see only:\n- the issued token\n- the client identity carried or inferred\n- deployment-specific local context\n\nThey do not reliably learn:\n- which execution principal acted\n- whether a distinct delegated actor was involved\n- how to represent that actor across trust boundaries\n\nAs a result, actor semantics become deployment-local rather than portable.\n\n### 4. Overloading `client_id`\n\nUsing `client_id` as a stand-in for the actor conflates distinct concepts:\n\n- OAuth client identity\n- runtime actor identity\n- delegated execution identity\n\nThat overloading works only when those identities happen to collapse to the same principal. When they diverge, the protocol has no explicit way to express the difference.\n\n## Why This Matters\n\nThis is not only an observability issue. It affects:\n\n- **authorization correctness**: policies may need to distinguish subject, client, and actor\n- **audit fidelity**: logs should identify the actual delegated actor, not only the client registration\n- **interoperability**: actor semantics cannot be carried cleanly across issuers if they are only inferred from local client context\n- **security analysis**: confused-deputy and delegation review are harder when actor identity is implicit\n\nSee https://mcguinness.github.io/draft-mcguinness-oauth-actor-profile/draft-mcguinness-oauth-actor-profile.html for more discussion on Actor Chaining and Implicit Delegation\n\n## Proposal: Optional `actor_token`\n\nDefine an optional request parameter:\n\n```text\nactor_token\n```\n\nThe `actor_token` would:\n- represent the entity acting on behalf of the subject\n- be validated by the Authorization Server\n- allow the AS to embed explicit actor information in the resulting JWT, for example via `act` per https://mcguinness.github.io/draft-mcguinness-oauth-actor-profile/draft-mcguinness-oauth-actor-profile.html\n\nThis would not replace the current client-continuity requirement. Rather:\n\n- client continuity would continue to prove that the same OAuth client is continuing the flow\n- `actor_token` would optionally provide explicit evidence of which actor is exercising the subject\u2019s authorization\n\n## Why Optional Support Is the Right Shape\n\nThis should be optional because:\n\n- existing ID-JAG deployments should continue to work unchanged\n- many traditional RP-based flows do not need additional actor modeling\n- explicit actor representation is most valuable in multi-actor, multi-hop, or cross-domain delegated systems\n\nOptional `actor_token` support would therefore:\n- preserve today\u2019s security model\n- avoid imposing new complexity on simple deployments\n- enable explicit actor semantics where they are actually needed\n\n## Benefits of Optional `actor_token`\n\nOptional `actor_token` support would:\n\n- preserve the current same-client continuity guarantee\n- add first-class actor identity when client continuity is not sufficient\n- reduce reliance on deployment-specific inference from `client_id`\n- enable downstream tokens to carry explicit actor semantics\n- improve audit and authorization fidelity in multi-actor systems\n- better support delegated and cross-domain architectures\n\n## Key Question\n\nClient continuity answers which OAuth client continued the flow.\n\nShould ID-JAG also support an optional, explicit mechanism for identifying which actor exercised the subject\u2019s authorization when those are not the same principal?\n",
       "createdAt": "2026-04-02T18:38:22Z",
-      "updatedAt": "2026-04-02T18:38:22Z",
-      "closedAt": null,
+      "updatedAt": "2026-04-22T22:11:33Z",
+      "closedAt": "2026-04-22T17:29:48Z",
       "comments": []
     },
     {
@@ -2313,6 +2334,22 @@
       "body": "The current draft generally assumes confidential clients at the Resource Authorization Server (RAS), and the Security Considerations say that this specification `SHOULD` only be supported for confidential clients. The draft also notes in Cross-Domain Client ID Handling that requiring a confidential client at the RAS helps prevent the IdP from delegating access to any valid client at the RAS.\n\nAt the same time, the draft now defines proof-of-possession / key-binding for ID-JAG using `cnf` and DPoP. That raises a question about whether the spec should allow an explicit tradeoff here.\n\n**Deployment model to discuss**\n\n- The client is confidential at the IdP.\n- The client is public at the RAS, or the RAS otherwise does not require confidential client authentication for this exchange.\n- The client includes DPoP in the token exchange to the IdP.\n- The IdP issues a key-bound ID-JAG with a `cnf` / `jkt`.\n- The client presents DPoP when exchanging the ID-JAG at the RAS.\n- The RAS verifies that the DPoP key matches the `cnf` in the ID-JAG.\n\n**Why allow this**\n\n- Credential lifecycle can be centralized at the IdP.\n- The client does not need to maintain separate credentials with each RAS.\n- This may be useful in ecosystems with many downstream RAS deployments.\n- Client ID Metadata Document (CIMD) helps address part of this problem when adopted, but it will not always be available immediately.\n- This could make the deployment model possible until CIMD becomes more widely deployed.\n\n**Tradeoff**\n\nThis is not equivalent to requiring a confidential client at the RAS.\n\nWhat is preserved:\n\n- Replay resistance for the ID-JAG, assuming the RAS requires proof-of-possession and validates `cnf` against the proof token.\n- Stronger protection than an unconstrained bearer-style exchange.\n\nWhat is reduced:\n\n- The RAS no longer gets the same client-authentication assurance it gets from a confidential registration at the RAS.\n- The anti-client-substitution property is weaker unless the spec explicitly defines how public-client identification is handled in this profile.\n\n**Question**\n\nShould the specification explicitly allow this tradeoff?\n\nPossible direction:\n\n- Keep confidential registration at the RAS as the recommended/default model.\n- Allow RAS deployments to accept public clients for ID-JAG exchange when the ID-JAG is key-bound and the proof token presented to the RAS matches the `cnf`.\n- Clarify that this does not require any RAS to support public clients.\n- A RAS, or the administrator/operator of that RAS, can always decide to require confidential registration instead.\n- In that sense, this change would make the model possible, not mandatory, until CIMD is more widely deployed.\n\nIf the spec does allow this, it would likely need explicit processing rules for this profile, for example:\n\n- `cnf` in the ID-JAG is required.\n- Proof-of-possession at the RAS is required.\n- The proof key MUST match the `cnf` in the ID-JAG.\n- The RAS SHOULD issue only sender-constrained access tokens in this case.\n- The client identification / `client_id` matching rules need to be defined for public clients at the RAS.\n\nThe main question is whether the spec should permit this as an optional deployment tradeoff, while still allowing any RAS to require confidential registration.",
       "createdAt": "2026-04-20T23:01:03Z",
       "updatedAt": "2026-04-20T23:01:03Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 90,
+      "id": "I_kwDOKv5r-s8AAAABAQbzhw",
+      "title": "Add `authorization_grant_profiles_supported` to client metadata too",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/90",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "Clients should be able to advertise support for this profile via DCR/CIMD as well.\n\nThis would need a new section \"Client Metadata\" after \"Authorization Server Metadata\", and a new IANA registry section to add `authorization_grant_profiles_supported` and `urn:ietf:params:oauth:grant-profile:id-jag` to the [DCR registry](https://www.iana.org/assignments/oauth-parameters/oauth-parameters.xhtml#client-metadata).",
+      "createdAt": "2026-04-22T22:34:36Z",
+      "updatedAt": "2026-04-22T22:34:36Z",
       "closedAt": null,
       "comments": []
     }
@@ -4006,24 +4043,26 @@
       "id": "PR_kwDOKv5r-s6wqteE",
       "title": "Change refresh token langugae that implies id-jags should be long lives",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/62",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "sdesen",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Id-jag tokens should be encouraged to be short lived, single use artifacts. This language conflicts with that assumption and implies that id-jags may be longer lived than access tokens. We could optionally remove this paragrah",
       "createdAt": "2025-10-30T17:02:48Z",
-      "updatedAt": "2025-11-05T16:48:37Z",
+      "updatedAt": "2026-04-22T17:48:43Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "390651ed5eb2b4fb1d19096ebe7ab5d9665d5dff",
       "headRepository": "sdesen/draft-parecki-oauth-identity-assertion-authz-grant",
       "headRefName": "refresh-token-language",
-      "headRefOid": "bb423f012b29a2ec44467b6da8a9fd2cfa806519",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "a910073da47c6ef3ca46649a294e3fdce1853524",
+      "closedAt": "2026-04-22T17:48:43Z",
+      "mergedAt": "2026-04-22T17:48:43Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "acb216c63a161e12ebadf1133ac6c3d2e04d4987"
+      },
       "comments": [
         {
           "author": "mcguinness",
@@ -4051,6 +4090,26 @@
               "body": "nit: typo\r\n> The ID-JAG replaces the use `of` Refresh Token for the Resource Authorization Server.\r\nOr alternate rephrasing.\r\n",
               "createdAt": "2025-11-05T16:48:37Z",
               "updatedAt": "2025-11-05T16:48:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s73w749",
+          "commit": {
+            "abbreviatedOid": "bb423f0"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T17:48:26Z",
+          "updatedAt": "2026-04-22T17:48:27Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\nWhen the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server.\n```",
+              "createdAt": "2026-04-22T17:48:26Z",
+              "updatedAt": "2026-04-22T17:48:27Z"
             }
           ]
         }
@@ -6014,7 +6073,7 @@
       "labels": [],
       "body": "Add example were Enterprise IdP could be a CIAM IdP (resolves #75) ",
       "createdAt": "2026-03-23T19:47:47Z",
-      "updatedAt": "2026-03-28T01:25:31Z",
+      "updatedAt": "2026-04-22T22:10:10Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "e1da9056c46463725740627bafe36580ddc620f7",
@@ -6070,24 +6129,26 @@
       "id": "PR_kwDOKv5r-s7M0aq-",
       "title": "Add support for \"authorization_grant_profiles_supported\"",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/79",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Register new AS metadata parameter `authorization_grant_profiles_supported` that enables a Resource Authorization Server to publish support for `urn:ietf:params:oauth:grant-profile:id-jag` profile.  This enables a client to discover at runtime whether a Resource AS supports ID-JAG processing or not as inspecting `grant_type` is not sufficient for assertion grants like `urn:ietf:params:oauth:grant-type:jwt-bearer`.  \r\n\r\nThis resolves #16 ",
       "createdAt": "2026-03-23T21:45:47Z",
-      "updatedAt": "2026-03-31T23:52:09Z",
+      "updatedAt": "2026-04-22T22:10:17Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "e1da9056c46463725740627bafe36580ddc620f7",
+      "baseRefOid": "77dc2e9e20c19e821cb187ddc69c2110bb1434a8",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "jag-metadata",
-      "headRefOid": "33548a4011ed1eefca1d7fad03a0a18164ef1cea",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "90a62f4b58c93ff57c697253da4daf855a916cd3",
+      "closedAt": "2026-04-22T17:39:06Z",
+      "mergedAt": "2026-04-22T17:39:06Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "c35d7c63417541a797f9e690375b5d2a28917635"
+      },
       "comments": [
         {
           "author": "aaronpk",
@@ -6132,24 +6193,26 @@
       "id": "PR_kwDOKv5r-s7PrSmB",
       "title": "Added optional support for actor_token",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/81",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Resolves #80 ",
       "createdAt": "2026-04-02T21:31:28Z",
-      "updatedAt": "2026-04-02T21:31:28Z",
+      "updatedAt": "2026-04-22T22:10:17Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "fa6b031347737cec43cd202ff006c710b046de14",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "actor_token_support",
-      "headRefOid": "b3da13c3789048866ada2dd5ab57db89d4725baf",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "b88dac9398c086e9b69172f73f80e657abcfde62",
+      "closedAt": "2026-04-22T17:29:47Z",
+      "mergedAt": "2026-04-22T17:29:47Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "77dc2e9e20c19e821cb187ddc69c2110bb1434a8"
+      },
       "comments": [],
       "reviews": []
     },
@@ -6158,24 +6221,26 @@
       "id": "PR_kwDOKv5r-s7RzSG-",
       "title": "Broadened the draft\u2019s framing of Enterprise IdP to apply to more deployment scenarios",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/82",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Broaden the draft\u2019s framing from \u201centerprise IdP\u201d to the more precise trust model the protocol actually depends on: the IdP Authorization Server the downstream Resource Authorization Server already trusts for SSO and subject resolution.\r\n\r\nThis update keeps the protocol semantics intact while making the document align better with the CIAM and agentic examples already in the draft. The revised text consistently clarifies that the Resource Authorization Server still applies its own local policy and issues its own access tokens; ID-JAG changes the grant path, not resource ownership or token issuance authority.\r\n\r\nIt also tightens the cross-domain guidance for multi-hop deployments. The draft now says an ID-JAG is specific to the issuer-to-RAS trust relationship identified by `aud`, and the same ID-JAG must not be reused as the authorization grant for a different downstream Resource Authorization Server. Later hops may use newly issued ID-JAGs or other mechanisms.\r\n\r\nKey edits:\r\n- Update abstract, introduction, roles, and overview to describe the trusted-IdP model instead of enterprise-only framing.\r\n- Preserve existing consent/policy semantics by clarifying that the RAS does not need to obtain user consent directly again at the token exchange step.\r\n- Generalize use-case framing so enterprise remains a primary example, but not the only valid deployment model.\r\n- Refresh CIAM and AI agent text to match the same trust-boundary language.\r\n\r\nNo protocol flow changes were introduced beyond clarifying the scope of ID-JAG reuse in downstream multi-hop scenarios.",
       "createdAt": "2026-04-12T17:58:45Z",
-      "updatedAt": "2026-04-14T05:13:31Z",
+      "updatedAt": "2026-04-22T22:10:18Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "fa6b031347737cec43cd202ff006c710b046de14",
+      "baseRefOid": "acb216c63a161e12ebadf1133ac6c3d2e04d4987",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "relax-enterprise-idp",
-      "headRefOid": "b651d8e570bcafa582ec9e1b4317bb82d31e5aa4",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "12fce17e5ac2404b61be30ad7f01173a8ba90ea3",
+      "closedAt": "2026-04-22T21:50:39Z",
+      "mergedAt": "2026-04-22T21:50:39Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "eb8fa299e9e0ca9533cbb56594a6a109271923ae"
+      },
       "comments": [],
       "reviews": [
         {
@@ -6270,8 +6335,351 @@
               "updatedAt": "2026-04-14T05:13:31Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s73vniz",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T16:53:53Z",
+          "updatedAt": "2026-04-22T16:53:53Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "> Its a pretty standard IAM term\n\nis it?",
+              "createdAt": "2026-04-22T16:53:53Z",
+              "updatedAt": "2026-04-22T16:53:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s73vtRW",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T16:56:54Z",
+          "updatedAt": "2026-04-22T16:56:54Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Attempt to solve that with https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/86",
+              "createdAt": "2026-04-22T16:56:54Z",
+              "updatedAt": "2026-04-22T16:56:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s73ysWG",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T19:02:36Z",
+          "updatedAt": "2026-04-22T19:02:36Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Adding some term definitions is useful but I don't think it's even needed in the context of this text in the abstract. \n```suggestion\nThis specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange {{RFC8693}} and JWT Profile for OAuth 2.0 Authorization Grants {{RFC7523}}.\n```",
+              "createdAt": "2026-04-22T19:02:36Z",
+              "updatedAt": "2026-04-22T19:05:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s73zzK3",
+          "commit": {
+            "abbreviatedOid": "b651d8e"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T19:57:41Z",
+          "updatedAt": "2026-04-22T19:57:42Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I'd suggest \u201cIdentity layer\u201d is too vague and overloaded for use in this kind of context. Also SSO doesn't really enable the enforcement of policy by the \u201cIdentity layer\u201d operator at these applications.\n\n```suggestion\nIn many deployments, applications are configured for single sign-on to a common identity provider (IdP) using OpenID Connect or SAML. This enables users to access multiple applications using a single account at the IdP, and enables the operator of that IdP to manage which users can access which applications and enforce policy for access to those applications. Enterprise workforce identity providers are one common example, but the same trust pattern can also arise in customer identity, platform identity, and other federated application ecosystems.\n```",
+              "createdAt": "2026-04-22T19:57:41Z",
+              "updatedAt": "2026-04-22T19:57:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s730ObV",
+          "commit": {
+            "abbreviatedOid": "3044538"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-04-22T20:15:14Z",
+          "updatedAt": "2026-04-22T20:15:14Z",
+          "comments": []
         }
       ]
+    },
+    {
+      "number": 86,
+      "id": "PR_kwDOKv5r-s7UcgHl",
+      "title": "Add terms section and updated use of JIT to use term",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/86",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-04-21T22:00:21Z",
+      "updatedAt": "2026-04-22T22:10:18Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "1f8f2c9f383d94fe3b5653e06b9f8f68398aaa89",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "terms",
+      "headRefOid": "44550452520fd516cccb1eb09c2beb24415d360f",
+      "closedAt": "2026-04-22T21:52:04Z",
+      "mergedAt": "2026-04-22T21:52:04Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "4f8bd10743e95a4eb647abda0cc248fbcd12083f"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s730bj7",
+          "commit": {
+            "abbreviatedOid": "3b38610"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "the shape of this seems directionally correct ",
+          "createdAt": "2026-04-22T20:23:22Z",
+          "updatedAt": "2026-04-22T20:23:22Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 87,
+      "id": "PR_kwDOKv5r-s7UfoEq",
+      "title": "Clarifies use of audience vs resource with token exchange request",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/87",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Resolves #69 ",
+      "createdAt": "2026-04-22T03:19:26Z",
+      "updatedAt": "2026-04-22T22:10:19Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "fa6b031347737cec43cd202ff006c710b046de14",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "resource_v_audience",
+      "headRefOid": "ba94862d8b85dd94a40e41baa258a772b92d0cb1",
+      "closedAt": "2026-04-22T21:51:10Z",
+      "mergedAt": "2026-04-22T21:51:10Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "1f8f2c9f383d94fe3b5653e06b9f8f68398aaa89"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s73yYhM",
+          "commit": {
+            "abbreviatedOid": "ba94862"
+          },
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "WFM & LGTM & thanks @mcguinness for doing this ",
+          "createdAt": "2026-04-22T18:49:14Z",
+          "updatedAt": "2026-04-22T18:49:14Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 88,
+      "id": "PR_kwDOKv5r-s7Ux_L_",
+      "title": "Clarify step-up authentication semantics for token exchange",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/88",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-04-22T22:17:29Z",
+      "updatedAt": "2026-04-22T22:24:30Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "35ef6063b260bd7e6fb9157079f2496b74e2d57c",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "step-up",
+      "headRefOid": "dad98d19804a642d90fb083178e1fc6facd855ec",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s732b5-",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T22:20:38Z",
+          "updatedAt": "2026-04-22T22:20:38Z",
+          "comments": [
+            {
+              "originalPosition": 86,
+              "body": "I would hope we don't need to register these ",
+              "createdAt": "2026-04-22T22:20:38Z",
+              "updatedAt": "2026-04-22T22:20:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s732c1I",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T22:21:50Z",
+          "updatedAt": "2026-04-22T22:21:50Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "```suggestion\nThe IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the requested resource. This policy evaluation MAY consider the requested `audience`, `resource`, `scope`, and `authorization_details`, the authenticated client, and the authentication context associated with the subject token.\n```\n\nSeems redundant to have the long list of things twice",
+              "createdAt": "2026-04-22T22:21:50Z",
+              "updatedAt": "2026-04-22T22:21:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s732c3t",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T22:21:53Z",
+          "updatedAt": "2026-04-22T22:21:53Z",
+          "comments": [
+            {
+              "originalPosition": 86,
+              "body": "we are changing usage to token response",
+              "createdAt": "2026-04-22T22:21:53Z",
+              "updatedAt": "2026-04-22T22:21:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s732dUV",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T22:22:27Z",
+          "updatedAt": "2026-04-22T22:22:27Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "probably want to leave this open to other things beyond \"`audience`, `resource`, `scope`, or `authorization_details`\"",
+              "createdAt": "2026-04-22T22:22:27Z",
+              "updatedAt": "2026-04-22T22:22:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s732efm",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-22T22:23:52Z",
+          "updatedAt": "2026-04-22T22:23:52Z",
+          "comments": [
+            {
+              "originalPosition": 63,
+              "body": "not sure what \"still requires the ID-JAG\" means",
+              "createdAt": "2026-04-22T22:23:52Z",
+              "updatedAt": "2026-04-22T22:23:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s732fAE",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "CHANGES_REQUESTED",
+          "body": "see comments inline",
+          "createdAt": "2026-04-22T22:24:30Z",
+          "updatedAt": "2026-04-22T22:24:30Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 89,
+      "id": "PR_kwDOKv5r-s7UyIl7",
+      "title": "add headings for IdP/RAS metadata",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/89",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-04-22T22:31:53Z",
+      "updatedAt": "2026-04-22T22:31:53Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "35ef6063b260bd7e6fb9157079f2496b74e2d57c",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "aaronpk/metadata-sections",
+      "headRefOid": "5fc3847058c5a3edd710479e2f7d1ee12aec8319",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
