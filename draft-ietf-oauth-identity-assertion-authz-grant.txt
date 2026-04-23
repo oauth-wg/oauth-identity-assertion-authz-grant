@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 24 October 2026                                     Independent
+Expires: 25 October 2026                                     Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                           22 April 2026
+                                                           23 April 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 October 2026.
+   This Internet-Draft will expire on 25 October 2026.
 
 Copyright Notice
 
@@ -100,6 +100,8 @@ Table of Contents
      6.3.  Subject Identifier Uniqueness with Tenants
      6.4.  Tenant Context in Token Exchange
    7.  Authorization Server Metadata
+     7.1.  IdP Authorization Server Metadata
+     7.2.  Resource Authorization Server Metadata
    8.  Security Considerations
      8.1.  Client Authentication
      8.2.  Step-Up Authentication
@@ -1428,6 +1430,16 @@ Pragma: no-cache
 
 7.  Authorization Server Metadata
 
+   There are two complementary metadata parameters that can be used by
+   the two different authorization servers.
+   identity_chaining_requested_token_types_supported indicates which
+   token types an IdP Authorization Server can issue for identity
+   chaining, while authorization_grant_profiles_supported indicates
+   which authorization grant profiles a Resource Authorization Server
+   can process.
+
+7.1.  IdP Authorization Server Metadata
+
    An IdP Authorization Server can advertise the identity chaining token
    types it can issue in its OAuth Authorization Server Metadata
    [RFC8414].  Identity and Authorization Chaining Across Domains
@@ -1441,6 +1453,8 @@ Pragma: no-cache
    identity_chaining_requested_token_types_supported:
 
    urn:ietf:params:oauth:token-type:id-jag
+
+7.2.  Resource Authorization Server Metadata
 
    A Resource Authorization Server can advertise support for
    authorization grant profiles in its OAuth Authorization Server
@@ -1470,13 +1484,6 @@ Pragma: no-cache
    authorization_grant_profiles_supported for this specification MUST
    also include urn:ietf:params:oauth:grant-type:jwt-bearer in
    grant_types_supported.
-
-   These metadata parameters are complementary.
-   identity_chaining_requested_token_types_supported indicates which
-   token types an IdP Authorization Server can issue for identity
-   chaining, while authorization_grant_profiles_supported indicates
-   which authorization grant profiles a Resource Authorization Server
-   can process.
 
 8.  Security Considerations
 

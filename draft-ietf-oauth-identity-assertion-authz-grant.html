@@ -1055,7 +1055,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Parecki, et al.</td>
-<td class="center">Expires 24 October 2026</td>
+<td class="center">Expires 25 October 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-oauth-identity-assertion-authz-grant-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-04-22" class="published">22 April 2026</time>
+<time datetime="2026-04-23" class="published">23 April 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-10-24">24 October 2026</time></dd>
+<dd class="expires"><time datetime="2026-10-25">25 October 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 24 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 25 October 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1249,6 +1249,14 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
             <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-authorization-server-metada" class="internal xref">Authorization Server Metadata</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-idp-authorization-server-me" class="internal xref">IdP Authorization Server Metadata</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-resource-authorization-serv" class="internal xref">Resource Authorization Server Metadata</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
             <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
@@ -2505,21 +2513,35 @@ Pragma: no-cache
 </div>
 </section>
 </div>
-<div id="idp-metadata">
+<div id="as-metadata">
 <section id="section-7">
       <h2 id="name-authorization-server-metada">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-authorization-server-metada" class="section-name selfRef">Authorization Server Metadata</a>
       </h2>
-<p id="section-7-1">An IdP Authorization Server can advertise the identity chaining token types it can issue in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. Identity and Authorization Chaining Across Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines the <code>identity_chaining_requested_token_types_supported</code> metadata parameter for this purpose.<a href="#section-7-1" class="pilcrow">¶</a></p>
-<p id="section-7-2">To advertise support for issuing an Identity Assertion JWT Authorization Grant via Token Exchange, the IdP Authorization Server <span class="bcp14">SHOULD</span> include the following value in <code>identity_chaining_requested_token_types_supported</code>:<a href="#section-7-2" class="pilcrow">¶</a></p>
-<p id="section-7-3"><code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-7-3" class="pilcrow">¶</a></p>
-<p id="section-7-4">A Resource Authorization Server can advertise support for authorization grant profiles in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> using the <code>authorization_grant_profiles_supported</code> metadata parameter.<a href="#section-7-4" class="pilcrow">¶</a></p>
-<p id="section-7-5">The value of <code>authorization_grant_profiles_supported</code> <span class="bcp14">MUST</span> be a JSON array of strings. Each string <span class="bcp14">MUST</span> identify a supported authorization grant profile.<a href="#section-7-5" class="pilcrow">¶</a></p>
-<p id="section-7-6">Inclusion of a profile identifier in <code>authorization_grant_profiles_supported</code> indicates only that the Resource Authorization Server implements the processing rules for that profile. It does not indicate that any particular issuer, tenant, client, subject, audience, or authorization request will be accepted.<a href="#section-7-6" class="pilcrow">¶</a></p>
-<p id="section-7-7">To advertise support for the Identity Assertion JWT Authorization Grant profile, the Resource Authorization Server <span class="bcp14">SHOULD</span> include the following value in the <code>authorization_grant_profiles_supported</code> property:<a href="#section-7-7" class="pilcrow">¶</a></p>
-<p id="section-7-8"><code>urn:ietf:params:oauth:grant-profile:id-jag</code><a href="#section-7-8" class="pilcrow">¶</a></p>
-<p id="section-7-9">A Resource Authorization Server that includes <code>urn:ietf:params:oauth:grant-profile:id-jag</code> in <code>authorization_grant_profiles_supported</code> for this specification <span class="bcp14">MUST</span> also include <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> in <code>grant_types_supported</code>.<a href="#section-7-9" class="pilcrow">¶</a></p>
-<p id="section-7-10">These metadata parameters are complementary. <code>identity_chaining_requested_token_types_supported</code> indicates which token types an IdP Authorization Server can issue for identity chaining, while <code>authorization_grant_profiles_supported</code> indicates which authorization grant profiles a Resource Authorization Server can process.<a href="#section-7-10" class="pilcrow">¶</a></p>
+<p id="section-7-1">There are two complementary metadata parameters that can be used by the two different authorization servers. <code>identity_chaining_requested_token_types_supported</code> indicates which token types an IdP Authorization Server can issue for identity chaining, while <code>authorization_grant_profiles_supported</code> indicates which authorization grant profiles a Resource Authorization Server can process.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<div id="idp-metadata">
+<section id="section-7.1">
+        <h3 id="name-idp-authorization-server-me">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-idp-authorization-server-me" class="section-name selfRef">IdP Authorization Server Metadata</a>
+        </h3>
+<p id="section-7.1-1">An IdP Authorization Server can advertise the identity chaining token types it can issue in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. Identity and Authorization Chaining Across Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines the <code>identity_chaining_requested_token_types_supported</code> metadata parameter for this purpose.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">To advertise support for issuing an Identity Assertion JWT Authorization Grant via Token Exchange, the IdP Authorization Server <span class="bcp14">SHOULD</span> include the following value in <code>identity_chaining_requested_token_types_supported</code>:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.1-3"><code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-7.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ras-metadata">
+<section id="section-7.2">
+        <h3 id="name-resource-authorization-serv">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-resource-authorization-serv" class="section-name selfRef">Resource Authorization Server Metadata</a>
+        </h3>
+<p id="section-7.2-1">A Resource Authorization Server can advertise support for authorization grant profiles in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> using the <code>authorization_grant_profiles_supported</code> metadata parameter.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">The value of <code>authorization_grant_profiles_supported</code> <span class="bcp14">MUST</span> be a JSON array of strings. Each string <span class="bcp14">MUST</span> identify a supported authorization grant profile.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.2-3">Inclusion of a profile identifier in <code>authorization_grant_profiles_supported</code> indicates only that the Resource Authorization Server implements the processing rules for that profile. It does not indicate that any particular issuer, tenant, client, subject, audience, or authorization request will be accepted.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.2-4">To advertise support for the Identity Assertion JWT Authorization Grant profile, the Resource Authorization Server <span class="bcp14">SHOULD</span> include the following value in the <code>authorization_grant_profiles_supported</code> property:<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2-5"><code>urn:ietf:params:oauth:grant-profile:id-jag</code><a href="#section-7.2-5" class="pilcrow">¶</a></p>
+<p id="section-7.2-6">A Resource Authorization Server that includes <code>urn:ietf:params:oauth:grant-profile:id-jag</code> in <code>authorization_grant_profiles_supported</code> for this specification <span class="bcp14">MUST</span> also include <code>urn:ietf:params:oauth:grant-type:jwt-bearer</code> in <code>grant_types_supported</code>.<a href="#section-7.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="security-considerations">
