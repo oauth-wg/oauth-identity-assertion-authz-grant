@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 24 October 2026                                     Independent
+Expires: 25 October 2026                                     Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                           22 April 2026
+                                                           23 April 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 October 2026.
+   This Internet-Draft will expire on 25 October 2026.
 
 Copyright Notice
 
@@ -846,13 +846,12 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    *  If the authentication context associated with the subject token
       does not satisfy local policy for the requested token exchange,
-      including policy tied to the requested audience, resource, scope,
-      or authorization_details, the IdP Authorization Server MUST reject
-      the request with the insufficient_user_authentication token error
-      defined in this specification.  The error response MAY include
-      acr_values and/or max_age parameters to indicate the
-      authentication requirements the client needs to satisfy before
-      retrying the token exchange.
+      including policy tied to the requested resource, the IdP
+      Authorization Server MUST reject the request with the
+      insufficient_user_authentication token error defined in this
+      specification.  The error response MAY include acr_values and/or
+      max_age parameters to indicate the authentication requirements the
+      client needs to satisfy before retrying the token exchange.
 
 4.3.4.  Response
 
@@ -1506,10 +1505,9 @@ Pragma: no-cache
    Authorization Server can determine that the authentication event
    associated with the subject token does not meet the authentication
    requirements for issuing the requested ID-JAG.  This determination
-   can depend on the requested audience, resource, scope, and
-   authorization_details, the authenticated client, and other local
-   policy inputs.  To allow the client to obtain a fresh subject token
-   and retry, this specification extends the
+   can depend on the requested resource, the authenticated client, and
+   other local policy inputs.  To allow the client to obtain a fresh
+   subject token and retry, this specification extends the
    insufficient_user_authentication error from [RFC9470] for use in
    token error responses.
 
@@ -1539,8 +1537,8 @@ Pragma: no-cache
       "error_description": "More recent authentication is required",
       "max_age": 5 }
 
-   A Client that receives this error and still requires the ID-JAG
-   SHOULD obtain a fresh subject token that satisfies the IdP
+   A Client that receives this error and still needs the requested ID-
+   JAG SHOULD obtain a fresh subject token that satisfies the IdP
    Authorization Server's policy and then retry the token exchange.  For
    OpenID Connect-based sign-in, the client SHOULD use the returned
    acr_values and/or max_age values, if present, in a subsequent
@@ -1887,24 +1885,29 @@ Cache-Control: no-store
 
 9.4.  OAuth Parameters Registration
 
-   This section registers the following parameters in the "OAuth
-   Parameters" registry [IANA.oauth-parameters].
+   This section updates the existing registrations of the following
+   parameters in the "OAuth Parameters" registry
+   [IANA.oauth-parameters].
 
    *  Parameter Name: acr_values
 
-   *  Parameter Usage Location: token error response
+   *  Updated Parameter Usage Location: authorization request, token
+      error response
 
-   *  Change Controller: IETF
+   *  Change Controller: OpenID Foundation Artifact Binding Working
+      Group
 
-   *  Specification Document: This document
+   *  Specification Document(s): [OpenID.Core], This document
 
    *  Parameter Name: max_age
 
-   *  Parameter Usage Location: token error response
+   *  Updated Parameter Usage Location: authorization request, token
+      error response
 
-   *  Change Controller: IETF
+   *  Change Controller: OpenID Foundation Artifact Binding Working
+      Group
 
-   *  Specification Document: This document
+   *  Specification Document(s): [OpenID.Core], This document
 
 9.5.  OAuth Authorization Server Metadata Registration
 
