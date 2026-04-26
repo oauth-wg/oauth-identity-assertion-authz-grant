@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-23T00:15:10.493917+00:00",
+  "timestamp": "2026-04-26T00:11:39.511486+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -6527,18 +6527,33 @@
       "labels": [],
       "body": "",
       "createdAt": "2026-04-22T22:17:29Z",
-      "updatedAt": "2026-04-22T22:24:30Z",
+      "updatedAt": "2026-04-25T17:22:16Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "35ef6063b260bd7e6fb9157079f2496b74e2d57c",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "step-up",
-      "headRefOid": "dad98d19804a642d90fb083178e1fc6facd855ec",
+      "headRefOid": "33a94927d86d11b4d498584444ad32263354c2b5",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "Should it specify is the acr_values response from idp is exhaustive, or specific to what was missing from the request that cause it to be rejected?",
+          "createdAt": "2026-04-25T17:19:17Z",
+          "updatedAt": "2026-04-25T17:19:17Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "Also, can / should ACR values be advertised in https://github.com/mcguinness/draft-mcguinness-token-xchg-target-svc-disco ",
+          "createdAt": "2026-04-25T17:22:15Z",
+          "updatedAt": "2026-04-25T17:22:15Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOKv5r-s732b5-",
@@ -6652,6 +6667,66 @@
           "createdAt": "2026-04-22T22:24:30Z",
           "updatedAt": "2026-04-22T22:24:30Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOKv5r-s736ck-",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-23T02:52:32Z",
+          "updatedAt": "2026-04-23T02:52:33Z",
+          "comments": [
+            {
+              "originalPosition": 86,
+              "body": "updated text to say that we are updating the usage location",
+              "createdAt": "2026-04-23T02:52:33Z",
+              "updatedAt": "2026-04-23T02:52:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s736c5u",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-23T02:52:55Z",
+          "updatedAt": "2026-04-23T02:52:55Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "revised",
+              "createdAt": "2026-04-23T02:52:55Z",
+              "updatedAt": "2026-04-23T02:52:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s736e6r",
+          "commit": {
+            "abbreviatedOid": "dad98d1"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-04-23T02:54:55Z",
+          "updatedAt": "2026-04-23T02:54:55Z",
+          "comments": [
+            {
+              "originalPosition": 63,
+              "body": "changed text to `A Client that receives this error and still needs the requested ID-JAG SHOULD obtain a fresh subject token`",
+              "createdAt": "2026-04-23T02:54:55Z",
+              "updatedAt": "2026-04-23T02:54:55Z"
+            }
+          ]
         }
       ]
     },
@@ -6660,24 +6735,26 @@
       "id": "PR_kwDOKv5r-s7UyIl7",
       "title": "add headings for IdP/RAS metadata",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/89",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-04-22T22:31:53Z",
-      "updatedAt": "2026-04-22T22:31:53Z",
+      "updatedAt": "2026-04-23T17:33:23Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "35ef6063b260bd7e6fb9157079f2496b74e2d57c",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "aaronpk/metadata-sections",
       "headRefOid": "5fc3847058c5a3edd710479e2f7d1ee12aec8319",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-04-23T17:33:18Z",
+      "mergedAt": "2026-04-23T17:33:18Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "4b22498ea3c10122efd79278f845d6ba35e63acc"
+      },
       "comments": [],
       "reviews": []
     }
