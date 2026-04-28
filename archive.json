@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-04-26T00:11:39.511486+00:00",
+  "timestamp": "2026-04-28T00:16:05.906939+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2350,6 +2350,22 @@
       "body": "Clients should be able to advertise support for this profile via DCR/CIMD as well.\n\nThis would need a new section \"Client Metadata\" after \"Authorization Server Metadata\", and a new IANA registry section to add `authorization_grant_profiles_supported` and `urn:ietf:params:oauth:grant-profile:id-jag` to the [DCR registry](https://www.iana.org/assignments/oauth-parameters/oauth-parameters.xhtml#client-metadata).",
       "createdAt": "2026-04-22T22:34:36Z",
       "updatedAt": "2026-04-22T22:34:36Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 92,
+      "id": "I_kwDOKv5r-s8AAAABAoumFQ",
+      "title": "ID-JAG standard claim change suggestions",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/92",
+      "state": "OPEN",
+      "author": "khosravian",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Hi Everyone, \n\nI've been slowly reviewing the standard document and came across a couple of cases I wanted to bring up:\n\nFirst:\n>    resource:  OPTIONAL - The Resource Identifier (Section 2 of\n      [RFC8707]) of the Resource Server (either a single URI or an array\n      of URIs).\n\nCan we change this claim description to always be an array of URIs? I understand the recommendation is very nit-picky, although it would be much easier for ID_JAG consumers to handle 'resource' claim validation if it's included.\n\nSecond: \n>    client_id:  REQUIRED - The client identifier of the OAuth 2.0\n      [RFC6749] client at the Resource Authorization Server that will\n      act on behalf of the resource owner (sub).  This identifier MAY be\n      different that client identifier of the OAuth 2.0 client\n      requesting an ID-JAG from the IdP Section 4.3 of [RFC8693] as it\n      represents and independent client relationship to another\n      Authorization Server in a different trust domain.  See Section 5\n      for additional considerations.\n\nI understand the purpose of this claim and it makes sense, although maintenance of these client_id's can become very cumbersome in large scale deployments, I envision the client_id should be manually set at the AS and there isn't any dynamic relationship between the AS and the Resource Authorization Server. Also perhaps dpop can be used to accomplish the same outcome.\n\nI want to suggest to change the type from \"REQUIRED\" to \"RECOMMENDED\". The change would potentially help with the large scale maintenance issues.\n\nThanks,\nJamshid",
+      "createdAt": "2026-04-27T17:31:48Z",
+      "updatedAt": "2026-04-27T17:31:48Z",
       "closedAt": null,
       "comments": []
     }
@@ -6755,6 +6771,32 @@
       "mergeCommit": {
         "oid": "4b22498ea3c10122efd79278f845d6ba35e63acc"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 91,
+      "id": "PR_kwDOKv5r-s7VwCyR",
+      "title": "minor corrections to the example requests",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/91",
+      "state": "OPEN",
+      "author": "havetisyan",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "a couple of minor fixes to the requests - missing Content-Type header and a missing & separator.",
+      "createdAt": "2026-04-26T17:54:17Z",
+      "updatedAt": "2026-04-26T17:54:17Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "4b22498ea3c10122efd79278f845d6ba35e63acc",
+      "headRepository": "havetisyan/oauth-identity-assertion-authz-grant",
+      "headRefName": "havetisyan-patch-1",
+      "headRefOid": "0ec37ae69596bb51f9fe0ec7b4985a5e9cd381e6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
