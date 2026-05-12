@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-10T00:16:47.046073+00:00",
+  "timestamp": "2026-05-12T00:19:14.117001+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2403,7 +2403,7 @@
       "labels": [],
       "body": "Hi Aaron / Karl / Brian,\n\nBj\u00f8rn Baunb\u00e6k and G\u00f6tz Wehberg from the Gimel Foundation here. This is a constructive prior-art notification for any future revision of `draft-ietf-oauth-identity-assertion-authz-grant` (WG-adopted 25 August 2025; superseding `draft-parecki-oauth-identity-assertion-authz-grant-05` of 2 July 2025).\n\nThe Gimel Foundation has published a body of open-core specifications on AI-agent authorization that we believe are directly relevant to - at least - three specific touch-points in the XAA surface as it is likely to evolve. We are filing this as a public-track companion to a direct authors-side note that has been sent off-list to the three of you in parallel.\n\nThree concrete touch-points (not limited to these)\n1. `subject_token` shape \u2014 PoA Credential as a candidate alongside OIDC ID Token and SAML assertion. Today XAA names the OIDC ID Token and the SAML assertion as the two assertions a client may exchange. The Gimel Power-of-Attorney (PoA) Credential defined in GiFo-RFC 0115 carries a structured mandate (principal, agent, scope, delegation chain, expiry, narrowing rules) and could be carried as a `subject_token` of a third explicitly-named type in a future companion document. This becomes useful the moment XAA needs to describe agent-acting-on-behalf-of-user as distinct from user-with-app, which the \"coming soon: secure agent-to-agent delegation\" line item in the Okta blueprint will at some point require.\n\n2. Multi-hop scope narrowing \u2014 already specified in GiFo-RFC 0115 \u00a73.7. RFC 0115 \u00a73.7 specifies mandatory scope narrowing across multi-hop delegation chains: a sub-agent's credential can only narrow, never broaden, the parent's scope, and this is enforced cryptographically rather than by IdP policy lookup. This is the surface the Okta roadmap names as \"secure agent-to-agent delegation\" (announced 29 April 2026). When that work begins inside the OAuth WG, RFC 0115 \u00a73.7 is published prior art.\n\n3. Runtime PEP \u2014 already specified in GiFo-RFC 0117 \u00a74. RFC 0117 \u00a74 specifies a sixteen-check pre-action enforcement pipeline at the Policy Enforcement Point (scope boundaries, delegation-chain integrity, temporal validity, resource constraints, etc.) with a three-way decision model (PERMIT / DENY / CONSTRAIN \u2014 i.e., narrow the action to a subset of what was requested rather than refuse outright). This is the surface the Okta roadmap names as \"Agent Gateway.\" RFC 0117 publishes April 2026; the substantive prior-art anchor for this primitive is also a priority of filed patents.\n\nRequests for a future revision (or a companion document)\nA Related Work / Informative Reference entry naming GiFo-RFC 0115 (PoA Credential), GiFo-RFC 0117 (PEP Interface) and beyond as the closest published prior-art surfaces for the three touch-points above, not limited to these.\n\nWhat this is currently not\n- Not an infringement assertion against XAA `-05` or its WG-adopted successor.\n- Not a request to change the substantive normative content of XAA itself, which we currently read as architecturally complementary to GAuth.\n- A contribution under IETF terms \n\nAll relevant GiFo RFCs are licensed under Apache 2.0 (Specs) or MPL 2.0 (SDKs), both come together with the Legal Terms of the Gimel Foundation. Specs are at `https://github.com/Gimel-Foundation`. Happy to provide section-level pointers or take a call.\n\nThank you and kind regards!\n\nBj\u00f8rn Baunb\u00e6k & G\u00f6tz Wehberg, on behalf of Gimel Foundation",
       "createdAt": "2026-05-02T16:25:06Z",
-      "updatedAt": "2026-05-09T04:30:27Z",
+      "updatedAt": "2026-05-11T17:34:38Z",
       "closedAt": "2026-05-08T16:14:55Z",
       "comments": [
         {
@@ -2426,6 +2426,13 @@
           "body": "@GoetzGW As explained in my original response, if you wish your claim of prior art to be considered then please [file an IPR disclosure](https://datatracker.ietf.org/ipr/about/).  IPR disclosures include important information for IETF participants to consider including any relevant patents and proposed licensing terms.  By filing an IPR disclosure you are not assigning the IETF any form of license to your claimed intellectual property. \n\nAny message you post in this repository will be considered an IETF Contribution, the guidelines for contributing to this repository are unambiguous on that point.",
           "createdAt": "2026-05-09T04:30:27Z",
           "updatedAt": "2026-05-09T04:30:27Z"
+        },
+        {
+          "author": "GoetzGW",
+          "authorAssociation": "NONE",
+          "body": "@JayDaley \u2013 flagging prior art is fair behaviour, we were doing this in good faith.\n\nFor the avoidance of doubt, Gimel Foundation does not grant any IP rights to IETF at this point. Our IP rights are constrained, limited and subject to Exclusions, based on Gimel Foundation licensing, Legal Terms, with patents pending. Gimel Foundation\u2019s GitHub page (https://github.com/Gimel-Foundation) is providing the canonical licensing and legal terms.\n\nGimel Foundation would be open to discuss questions and licensing under the Gimel framework that works for both sides.",
+          "createdAt": "2026-05-11T17:34:38Z",
+          "updatedAt": "2026-05-11T17:34:38Z"
         }
       ]
     }
