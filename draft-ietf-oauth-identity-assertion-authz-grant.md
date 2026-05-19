@@ -276,7 +276,7 @@ This format is intended for deployments where the Resource Authorization Server 
 A Subject Identifier in this format MUST contain:
 
 `issuer`:
-: A JSON string containing the SAML issuer entity identifier associated with the `NameID`, as defined by {{Section 8.3.6 of OASIS.saml-core-2.0-os}}. SAML `<Issuer>` attributes are not represented by this format.
+: A JSON string containing the SAML issuer entity identifier associated with the `NameID`, as defined by Section 8.3.6 of {{OASIS.saml-core-2.0-os}}. SAML `<Issuer>` attributes are not represented by this format.
 
 `nameid`:
 : A JSON string containing the SAML `NameID` value as defined in {{OASIS.saml-core-2.0-os}}.
