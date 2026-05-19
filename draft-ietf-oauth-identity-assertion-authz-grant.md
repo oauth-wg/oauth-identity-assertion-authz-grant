@@ -51,6 +51,7 @@ normative:
   RFC7638:
   RFC9449:
   RFC9396:
+  RFC9493:
   I-D.ietf-oauth-identity-chaining:
   I-D.ietf-oauth-rfc7523bis:
   IANA.media-types:
@@ -79,6 +80,18 @@ normative:
     author:
       - ins: D. Hardt
       - ins: K. McGuinness
+
+  OASIS.saml-core-2.0-os:
+    title: Assertions and Protocol for the OASIS Security Assertion Markup Language (SAML) V2.0
+    target: https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
+    date: March 2005
+    seriesinfo:
+      OASIS Standard: saml-core-2.0-os
+    author:
+      - ins: S. Cantor
+      - ins: J. Kemp
+      - ins: R. Philpott
+      - ins: E. Maler
 
 informative:
   RFC9470:
@@ -166,7 +179,10 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the IdP Authorization Server as defined in {{RFC8414}}.
 
 `sub`:
-: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The identifier MUST be the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for Single Sign-On (SSO).  A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
+: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML NameID namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
+
+`sub_id`:
+: OPTIONAL - Subject Identifier as defined in {{RFC9493}}. The `sub_id` claim MAY be used to identify the same End-User as the `sub` claim using a different identifier namespace from the ID-JAG `iss` and `sub`. This is useful when the Resource Authorization Server resolves users by a non-JWT subject identifier, such as a SAML NameID, in its SSO trust relationship with the IdP Authorization Server. See {{saml-nameid-format}} for the SAML NameID Subject Identifier Format defined by this specification, and {{saml-nameid-sub-id-processing}} for processing rules.
 
 `aud`:
 : REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}.
@@ -248,6 +264,58 @@ A non-normative example JWT with expanded header and payload claims is below:
 The ID-JAG may contain additional authentication, identity, or authorization claims that are valid for an ID Token {{OpenID.Core}} as the grant functions as both an Identity Assertion and authorization delegation for the Resource Authorization Server.
 
 It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim. The Resource Authorization Server MAY use these claims for subject resolution, including JIT provisioning, for example when the user has not yet SSO'd into the Resource Authorization Server. Additional Resource Authorization Server specific identity claims MAY be needed for subject resolution.
+
+## SAML NameID Subject Identifier {#saml-nameid-subject-identifier}
+
+### Subject Identifier Format {#saml-nameid-format}
+
+This specification defines the SAML NameID Subject Identifier Format for use in the `sub_id` claim {{RFC9493}}. The SAML NameID Subject Identifier Format is identified by the name `saml-nameid` and identifies a subject using a SAML 2.0 {{OASIS.saml-core-2.0-os}} `NameID` value within the context of a SAML issuer.
+
+This format is intended for deployments where the Resource Authorization Server resolves users using SAML SSO identifiers rather than the ID-JAG issuer's `iss` and `sub` values.
+
+A Subject Identifier in this format MUST contain:
+
+`issuer`:
+: A JSON string containing the SAML issuer entity identifier associated with the `NameID`, as defined by {{Section 8.3.6 of OASIS.saml-core-2.0-os}}. SAML `<Issuer>` attributes are not represented by this format.
+
+`nameid`:
+: A JSON string containing the SAML `NameID` value as defined in {{OASIS.saml-core-2.0-os}}.
+
+A Subject Identifier in this format MAY contain:
+
+`nameid_format`:
+: A JSON string containing the SAML `NameID` `Format` URI as defined in {{OASIS.saml-core-2.0-os}}.
+
+`name_qualifier`:
+: A JSON string containing the SAML `NameQualifier` value as defined in {{OASIS.saml-core-2.0-os}}.
+
+`sp_name_qualifier`:
+: A JSON string containing the SAML `SPNameQualifier` value as defined in {{OASIS.saml-core-2.0-os}}.
+
+`sp_provided_id`:
+: A JSON string containing the SAML `SPProvidedID` value as defined in {{OASIS.saml-core-2.0-os}}.
+
+The following is a non-normative example of a `sub_id` claim using the SAML NameID Subject Identifier Format:
+
+    "sub_id": {
+      "format": "saml-nameid",
+      "issuer": "https://idp.example.com/exk33qwjcwDda7luK346",
+      "nameid": "foo@example.com",
+      "nameid_format": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+      "sp_name_qualifier": "https://resource.example.com/saml/sp"
+    }
+
+### Subject Identifier Processing {#saml-nameid-sub-id-processing}
+
+When the Resource Authorization Server resolves users by SAML NameID, the IdP Authorization Server MAY include a `sub_id` claim using the SAML NameID Subject Identifier Format ({{saml-nameid-format}}). The `sub_id` claim identifies the same subject as the ID-JAG `sub` claim, but in the SAML subject namespace used by the Resource Authorization Server for SSO.
+
+When constructing a SAML NameID Subject Identifier, the IdP Authorization Server MUST include `nameid_format`, `name_qualifier`, `sp_name_qualifier`, and `sp_provided_id` when the corresponding value is part of the SAML NameID tuple used by the Resource Authorization Server for subject resolution. The IdP Authorization Server MUST include a SAML NameID `sub_id` only when the SAML NameID identifies the same subject as the ID-JAG `sub` claim for the target Resource Authorization Server.
+
+The Resource Authorization Server MAY use `sub_id` for subject resolution when it supports the indicated Subject Identifier Format. The Resource Authorization Server MUST compare every member of the SAML NameID Subject Identifier that is part of its configured subject key for that SAML issuer. The Resource Authorization Server MUST NOT resolve the subject using only the `nameid` value unless local policy explicitly defines `nameid` alone as the subject key for that SAML issuer. In particular, when the SAML `NameID` is scoped to a service provider, the `sp_name_qualifier` value is part of the subject namespace.
+
+If the Resource Authorization Server requires a SAML NameID Subject Identifier for subject resolution, and the ID-JAG does not contain a `sub_id` claim using the SAML NameID Subject Identifier Format, or the `sub_id` claim is malformed, unsupported, or not authorized by local policy for the validated ID-JAG issuer, the Resource Authorization Server MUST reject the token request with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}.
+
+See {{sub-id-trust}} for security considerations on processing the `sub_id` claim.
 
 # Cross-Domain Access
 
@@ -690,6 +758,8 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
 
+* If the Resource Authorization Server uses the `sub_id` claim for subject resolution, it MUST process the claim according to the indicated Subject Identifier Format. For SAML NameID subject identifiers, the Resource Authorization Server MUST apply the processing rules in {{saml-nameid-sub-id-processing}}.
+
 When processing authorization information from the ID-JAG:
 
 * If the `resource` claim is present, the Resource Authorization Server MUST process it according to {{Section 2 of RFC8707}}. The Resource Authorization Server evaluates the resource identifiers and determines which resources to grant access to based on policy. The granted resources MAY be a subset of the resources in the ID-JAG issued by the IdP Authorization Server.
@@ -732,7 +802,7 @@ If the ID Token is expired, the Client MAY use the Refresh Token obtained from t
 
 If the IdP Authorization Server supports Refresh Tokens as a `subject_token` in Token Exchange, the client can skip renewing the Identity Assertion and directly request a new ID-JAG by presenting the Refresh Token (see {{token-exchange-refresh-token-example}}).
 
-## SAML 2.0 Identity Assertion Interopability
+## SAML 2.0 Subject Token Interoperability
 
 Clients using SAML 2.0 for SSO with the IdP Authorization Server can obtain an ID-JAG without changing their SSO protocol to OpenID Connect by first exchanging the SAML 2.0 assertion for a Refresh Token using Token Exchange. This enables protocol transition to OAuth and allows the client to later use the Refresh Token as a `subject_token` to obtain an ID-JAG without prompting the user for a new Identity Assertion.
 
@@ -928,6 +998,16 @@ Advertising issuer-specific trust relationships in publicly accessible metadata 
 Resource Authorization Servers MUST NOT use `authorization_grant_profiles_supported` to disclose issuer allow lists or other profile-specific trust relationships.
 
 Resource Authorization Servers MAY provide a protected discovery mechanism by which an authenticated client can determine whether an Identity Assertion JWT Authorization Grant from a particular issuer would be accepted for that client. If such a mechanism is provided, the Resource Authorization Server MUST require client authentication before disclosing issuer-specific acceptance information. The response MUST be specific to the authenticated client and MAY also be scoped by tenant, resource, or other local policy context.
+
+## Subject Identifier Trust {#sub-id-trust}
+
+When the ID-JAG includes a `sub_id` claim, the Resource Authorization Server MUST NOT use the `sub_id.issuer` value to establish trust in the ID-JAG issuer. The ID-JAG MUST first be validated using the `iss` claim, signature, audience, expiration, and client binding according to this specification.
+
+The Resource Authorization Server MUST use a SAML NameID `sub_id` only when the validated ID-JAG issuer is explicitly associated with the SAML issuer identified by `sub_id.issuer` through local configuration or trusted federation metadata.
+
+## Subject Identifier Disclosure {#sub-id-disclosure}
+
+The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.
 
 ## Actor Delegation Extensions
 
@@ -1132,6 +1212,14 @@ This section registers the following claims in the "JSON Web Token Claims" subre
 * Specification Document(s): {{id-jag}}
 
 
+## Security Event Identifier Format Registration
+
+This section registers the `saml-nameid` Subject Identifier Format in the "Security Event Identifier Formats" registry established by {{RFC9493}}.
+
+* Format Name: `saml-nameid`
+* Format Description: SAML NameID Subject Identifier Format
+* Change Controller: IETF
+* Reference: {{saml-nameid-format}}
 
 
 --- back
