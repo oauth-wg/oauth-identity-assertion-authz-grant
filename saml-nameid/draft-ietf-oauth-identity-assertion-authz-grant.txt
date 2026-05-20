@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 20 November 2026                                    Independent
+Expires: 21 November 2026                                    Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                             19 May 2026
+                                                             20 May 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 November 2026.
+   This Internet-Draft will expire on 21 November 2026.
 
 Copyright Notice
 
@@ -519,14 +519,14 @@ Table of Contents
    SAML subject namespace used by the Resource Authorization Server for
    SSO.
 
-   When constructing a SAML NameID Subject Identifier, the IdP
-   Authorization Server MUST include nameid_format, name_qualifier,
-   sp_name_qualifier, and sp_provided_id when the corresponding value is
-   part of the SAML NameID tuple used by the Resource Authorization
-   Server for subject resolution.  The IdP Authorization Server MUST
-   include a SAML NameID sub_id only when the SAML NameID identifies the
-   same subject as the ID-JAG sub claim for the target Resource
-   Authorization Server.
+   When constructing a SAML NameID Subject Identifier for a target
+   Resource Authorization Server, the IdP Authorization Server MUST
+   populate nameid, nameid_format, name_qualifier, sp_name_qualifier,
+   and sp_provided_id with the same values it would include in the SAML
+   NameID of a SAML SSO assertion issued to that Resource Authorization
+   Server.  The IdP Authorization Server MUST include a SAML NameID
+   sub_id only when the SAML NameID identifies the same subject as the
+   ID-JAG sub claim for the target Resource Authorization Server.
 
    The Resource Authorization Server MAY use sub_id for subject
    resolution when it supports the indicated Subject Identifier Format.
