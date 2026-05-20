@@ -468,27 +468,27 @@ Table of Contents
    This specification defines the SAML NameID Subject Identifier Format
    for use in the sub_id claim [RFC9493].  The SAML NameID Subject
    Identifier Format is identified by the name saml-nameid and
-   identifies a subject using a SAML 2.0 [OASIS.saml-core-2.0-os] NameID
-   value within the context of a SAML issuer.
+   identifies a subject using a SAML 2.0 [OASIS.saml-core-2.0-os]
+   Subject NameID value within the context of a SAML issuer.
 
    This format is intended for deployments where the Resource
-   Authorization Server resolves users using SAML SSO identifiers rather
-   than the ID-JAG issuer's iss and sub values.
+   Authorization Server resolves users using SAML SSO subject
+   identifiers rather than the ID-JAG issuer's iss and sub values.
 
    A Subject Identifier in this format MUST contain:
 
    issuer:  A JSON string containing the SAML issuer entity identifier
-      associated with the NameID, as defined by Section 8.3.6 of
+      associated with the Subject NameID, as defined by Section 8.3.6 of
       [OASIS.saml-core-2.0-os].  SAML <Issuer> attributes are not
       represented by this format.
 
-   nameid:  A JSON string containing the SAML NameID value as defined in
-      [OASIS.saml-core-2.0-os].
+   nameid:  A JSON string containing the SAML Subject NameID value as
+      defined in [OASIS.saml-core-2.0-os].
 
    A Subject Identifier in this format MAY contain:
 
-   nameid_format:  A JSON string containing the SAML NameID Format URI
-      as defined in [OASIS.saml-core-2.0-os].
+   nameid_format:  A JSON string containing the SAML Subject NameID
+      Format URI as defined in [OASIS.saml-core-2.0-os].
 
    name_qualifier:  A JSON string containing the SAML NameQualifier
       value as defined in [OASIS.saml-core-2.0-os].
@@ -512,21 +512,22 @@ Table of Contents
 
 3.2.2.  Subject Identifier Processing
 
-   When the Resource Authorization Server resolves users by SAML NameID,
-   the IdP Authorization Server MAY include a sub_id claim using the
-   SAML NameID Subject Identifier Format (Section 3.2.1).  The sub_id
-   claim identifies the same subject as the ID-JAG sub claim, but in the
-   SAML subject namespace used by the Resource Authorization Server for
-   SSO.
+   When the Resource Authorization Server resolves users by SAML Subject
+   NameID, the IdP Authorization Server MAY include a sub_id claim using
+   the SAML NameID Subject Identifier Format (Section 3.2.1).  The
+   sub_id claim identifies the same subject as the ID-JAG sub claim, but
+   in the SAML subject namespace used by the Resource Authorization
+   Server for SSO.
 
    When constructing a SAML NameID Subject Identifier for a target
    Resource Authorization Server, the IdP Authorization Server MUST
    populate nameid, nameid_format, name_qualifier, sp_name_qualifier,
    and sp_provided_id with the same values it would include in the SAML
-   NameID of a SAML SSO assertion issued to that Resource Authorization
-   Server.  The IdP Authorization Server MUST include a SAML NameID
-   sub_id only when the SAML NameID identifies the same subject as the
-   ID-JAG sub claim for the target Resource Authorization Server.
+   Subject NameID of a SAML SSO assertion issued to that Resource
+   Authorization Server.  The IdP Authorization Server MUST include a
+   SAML NameID sub_id only when the SAML Subject NameID identifies the
+   same subject as the ID-JAG sub claim for the target Resource
+   Authorization Server.
 
    The Resource Authorization Server MAY use sub_id for subject
    resolution when it supports the indicated Subject Identifier Format.
@@ -535,8 +536,8 @@ Table of Contents
    key for that SAML issuer.  The Resource Authorization Server MUST NOT
    resolve the subject using only the nameid value unless local policy
    explicitly defines nameid alone as the subject key for that SAML
-   issuer.  In particular, when the SAML NameID is scoped to a service
-   provider, the sp_name_qualifier value is part of the subject
+   issuer.  In particular, when the SAML Subject NameID is scoped to a
+   service provider, the sp_name_qualifier value is part of the subject
    namespace.
 
    If the Resource Authorization Server requires a SAML NameID Subject
