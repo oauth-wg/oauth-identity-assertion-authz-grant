@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 25 October 2026                                     Independent
+Expires: 21 November 2026                                    Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                           23 April 2026
+                                                             20 May 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 October 2026.
+   This Internet-Draft will expire on 21 November 2026.
 
 Copyright Notice
 
@@ -80,6 +80,9 @@ Table of Contents
      2.2.  Terms
    3.  Identity Assertion JWT Authorization Grant
      3.1.  ID-JAG Claims
+     3.2.  SAML NameID Subject Identifier
+       3.2.1.  Subject Identifier Format
+       3.2.2.  Subject Identifier Processing
    4.  Cross-Domain Access
      4.1.  Overview
      4.2.  User Authentication
@@ -92,7 +95,7 @@ Table of Contents
        4.4.1.  Processing Rules
        4.4.2.  Response
        4.4.3.  Refresh Token
-     4.5.  SAML 2.0 Identity Assertion Interopability
+     4.5.  SAML 2.0 Subject Token Interoperability
    5.  Cross-Domain Client ID Handling
    6.  Tenant Relationships with Issuer and Client ID
      6.1.  Issuer and Tenant Relationship
@@ -107,14 +110,17 @@ Table of Contents
      8.2.  Step-Up Authentication
      8.3.  Cross-Domain Use
      8.4.  Metadata Disclosure
-     8.5.  Actor Delegation Extensions
-     8.6.  Sender Constraining Tokens
-       8.6.1.  Proof-of-Possession
+     8.5.  Subject Identifier Trust
+     8.6.  Subject Identifier Disclosure
+     8.7.  Actor Delegation Extensions
+     8.8.  Sender Constraining Tokens
+       8.8.1.  Proof-of-Possession
    9.  IANA Considerations
      9.1.  Media Types
      9.2.  OAuth URI Registration
      9.3.  OAuth Authorization Server Metadata Registration
      9.4.  JSON Web Token Claims Registration
+     9.5.  Security Event Identifier Format Registration
    10. References
      10.1.  Normative References
      10.2.  Informative References
@@ -325,14 +331,27 @@ Table of Contents
 
    sub:  REQUIRED - Subject Identifier.  An identifier within the IdP
       Authorization Server for the End-User, which is intended to be
-      consumed by the Client as defined in [OpenID.Core].  The
-      identifier MUST be the same as the subject identifier used in an
-      Identity Assertion for the Resource Authorization Server as a
-      Relying Party for Single Sign-On (SSO).  A public subject
-      identifier MUST be unique when scoped with issuer (iss+sub) for a
-      single-tenant issuer and MUST be unique when scoped with issuer
-      and tenant (iss+tenant+sub) for multi-tenant issuer.  See
-      Section 5 for additional considerations.
+      consumed by the Client as defined in [OpenID.Core].  The sub claim
+      identifies the End-User in the subject namespace of the ID-JAG
+      issuer.  When the Resource Authorization Server uses a different
+      subject namespace for SSO, such as a SAML Assertion Subject
+      <NameID> namespace, the ID-JAG MAY include sub_id to carry the SSO
+      subject identifier.  When both sub and sub_id are present, they
+      MUST identify the same End-User.  A public subject identifier MUST
+      be unique when scoped with issuer (iss+sub) for a single-tenant
+      issuer and MUST be unique when scoped with issuer and tenant
+      (iss+tenant+sub) for multi-tenant issuer.  See Section 5 for
+      additional considerations.
+
+   sub_id:  OPTIONAL - Subject Identifier as defined in [RFC9493].  The
+      sub_id claim MAY be used to identify the same End-User as the sub
+      claim using a different identifier namespace from the ID-JAG iss
+      and sub.  This is useful when the Resource Authorization Server
+      resolves users by a non-JWT subject identifier, such as a SAML
+      Assertion Subject <NameID>, in its SSO trust relationship with the
+      IdP Authorization Server.  See Section 3.2.1 for the SAML NameID
+      Subject Identifier Format defined by this specification, and
+      Section 3.2.2 for processing rules.
 
    aud:  REQUIRED - The issuer identifier of the Resource Authorization
       Server as defined in [RFC8414].
@@ -442,6 +461,111 @@ Table of Contents
    provisioning, for example when the user has not yet SSO'd into the
    Resource Authorization Server.  Additional Resource Authorization
    Server specific identity claims MAY be needed for subject resolution.
+
+3.2.  SAML NameID Subject Identifier
+
+3.2.1.  Subject Identifier Format
+
+   This specification defines the SAML NameID Subject Identifier Format
+   for use in the sub_id claim [RFC9493].  The SAML NameID Subject
+   Identifier Format is identified by the name saml-nameid and
+   identifies a subject using a SAML 2.0 Assertion Subject <NameID>
+   value within the context of a SAML issuer [OASIS.saml-core-2.0-os].
+
+   This format is intended for deployments where the Resource
+   Authorization Server resolves users using SAML SSO subject
+   identifiers rather than the ID-JAG issuer's iss and sub values.
+
+   A Subject Identifier in this format MUST contain:
+
+   format:  A JSON string containing the value saml-nameid identifying
+      this Subject Identifier Format, as defined in [RFC9493].
+
+   issuer:  A JSON string containing the SAML issuer entity identifier
+      for the assertion or configured mapping containing the SAML
+      Assertion Subject <NameID>, as defined by Section 8.3.6 of
+      [OASIS.saml-core-2.0-os].  SAML <Issuer> attributes are not
+      represented by this format.
+
+   nameid:  A JSON string containing the SAML Assertion Subject <NameID>
+      value as defined in [OASIS.saml-core-2.0-os].
+
+   A Subject Identifier in this format MAY contain:
+
+   nameid_format:  A JSON string containing the value of the Format
+      attribute on the SAML Assertion Subject <NameID> as defined in
+      [OASIS.saml-core-2.0-os].
+
+   name_qualifier:  A JSON string containing the value of the
+      NameQualifier attribute on the SAML Assertion Subject <NameID> as
+      defined in [OASIS.saml-core-2.0-os].
+
+   sp_name_qualifier:  A JSON string containing the value of the
+      SPNameQualifier attribute on the SAML Assertion Subject <NameID>
+      as defined in [OASIS.saml-core-2.0-os].
+
+   sp_provided_id:  A JSON string containing the value of the
+      SPProvidedID attribute on the SAML Assertion Subject <NameID> as
+      defined in [OASIS.saml-core-2.0-os].
+
+   The following is a non-normative example of a sub_id claim using the
+   SAML NameID Subject Identifier Format:
+
+"sub_id": {
+  "format": "saml-nameid",
+  "issuer": "https://idp.example.com/exk33qwjcwDda7luK346",
+  "nameid": "foo@example.com",
+  "nameid_format": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+  "sp_name_qualifier": "https://resource.example.com/saml/sp"
+}
+
+3.2.2.  Subject Identifier Processing
+
+   When the Resource Authorization Server resolves users by SAML
+   Assertion Subject <NameID>, the IdP Authorization Server MAY include
+   a sub_id claim using the SAML NameID Subject Identifier Format
+   (Section 3.2.1).  The sub_id claim identifies the same subject as the
+   ID-JAG sub claim, but in the SAML subject namespace used by the
+   Resource Authorization Server for SSO.
+
+   When constructing a SAML NameID Subject Identifier, the IdP
+   Authorization Server MUST derive its members from the SAML Assertion
+   Subject <NameID> value it would use for SSO to the target Resource
+   Authorization Server, or from an equivalent configured mapping that
+   records the SAML <NameID> value and attributes the IdP Authorization
+   Server would issue for that subject and Resource Authorization
+   Server.  Each optional field MUST be included exactly when the
+   corresponding attribute is present on that <NameID> or in the
+   configured mapping.  The SAML NameID sub_id MUST identify the same
+   subject as the ID-JAG sub claim.
+
+   The Resource Authorization Server MAY use sub_id for subject
+   resolution when it supports the indicated Subject Identifier Format.
+   The Resource Authorization Server MUST compare every member of the
+   SAML NameID Subject Identifier that is part of the set of identifier
+   fields it uses for subject resolution for that SAML issuer.  The
+   Resource Authorization Server MUST NOT resolve the subject using only
+   the nameid value unless local policy explicitly defines nameid alone
+   as the subject identifier for that SAML issuer.  In particular, when
+   the SAML Assertion Subject <NameID> is scoped to a Service Provider,
+   the sp_name_qualifier value is part of the subject namespace.
+
+   If the Resource Authorization Server requires a SAML NameID Subject
+   Identifier for subject resolution, it MUST reject the token request
+   with an invalid_grant error as defined in Section 5.2 of [RFC6749] if
+   any of the following is true:
+
+   *  the ID-JAG does not contain a sub_id claim using the SAML NameID
+      Subject Identifier Format;
+
+   *  the sub_id claim is malformed or uses a Subject Identifier Format
+      that the Resource Authorization Server does not support;
+
+   *  the sub_id claim is not authorized by local policy for the
+      validated ID-JAG issuer.
+
+   See Section 8.5 and Section 8.6 for security considerations on the
+   sub_id claim.
 
 4.  Cross-Domain Access
 
@@ -1105,6 +1229,12 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       itself identify or authenticate any actor represented in an act
       claim.
 
+   *  If the Resource Authorization Server uses the sub_id claim for
+      subject resolution, it MUST process the claim according to the
+      indicated Subject Identifier Format.  For SAML NameID subject
+      identifiers, the Resource Authorization Server MUST apply the
+      processing rules in Section 3.2.2.
+
    When processing authorization information from the ID-JAG:
 
    *  If the resource claim is present, the Resource Authorization
@@ -1195,7 +1325,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    Identity Assertion and directly request a new ID-JAG by presenting
    the Refresh Token (see Section 4.3.2).
 
-4.5.  SAML 2.0 Identity Assertion Interopability
+4.5.  SAML 2.0 Subject Token Interoperability
 
    Clients using SAML 2.0 for SSO with the IdP Authorization Server can
    obtain an ID-JAG without changing their SSO protocol to OpenID
@@ -1561,7 +1691,31 @@ Cache-Control: no-store
    response MUST be specific to the authenticated client and MAY also be
    scoped by tenant, resource, or other local policy context.
 
-8.5.  Actor Delegation Extensions
+8.5.  Subject Identifier Trust
+
+   When the ID-JAG includes a sub_id claim, the Resource Authorization
+   Server MUST NOT use the sub_id.issuer value to establish trust in the
+   ID-JAG issuer.  The ID-JAG MUST first be validated using the iss
+   claim, signature, audience, expiration, and client binding according
+   to this specification.
+
+   The Resource Authorization Server MUST use a SAML NameID sub_id only
+   when the validated ID-JAG issuer is explicitly associated with the
+   SAML issuer identified by sub_id.issuer through local configuration
+   or trusted federation metadata.
+
+8.6.  Subject Identifier Disclosure
+
+   The IdP Authorization Server SHOULD include sub_id only when needed
+   by the target Resource Authorization Server for subject resolution.
+   Because the ID-JAG is visible to the Client that presents it, sub_id
+   can disclose additional user identifiers, such as email-address
+   NameIDs or stable enterprise account identifiers, that the Client
+   might not otherwise receive.  The IdP Authorization Server SHOULD
+   minimize the subject identifiers included in the ID-JAG to those
+   required by the Resource Authorization Server.
+
+8.7.  Actor Delegation Extensions
 
    This specification allows Token Exchange requests for ID-JAG to carry
    actor_token, but it does not define normative processing requirements
@@ -1586,9 +1740,9 @@ Cache-Control: no-store
    resource owner identified by sub.  The authenticated client identity
    is also not a substitute for actor identity.
 
-8.6.  Sender Constraining Tokens
+8.8.  Sender Constraining Tokens
 
-8.6.1.  Proof-of-Possession
+8.8.1.  Proof-of-Possession
 
    Identity Assertion JWT Authorization Grant may support key binding to
    enable sender-constrained tokens as described in Section 4 of
@@ -1618,7 +1772,7 @@ Cache-Control: no-store
    exchanging the ID-JAG for an access token at the Resource
    Authorization Server).
 
-8.6.1.1.  Proof-of-Possession During Token Exchange
+8.8.1.1.  Proof-of-Possession During Token Exchange
 
    When a client requests an ID-JAG from the IdP Authorization Server
    via Token Exchange, the client MAY include a DPoP proof in the
@@ -1685,14 +1839,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
        cnf claim.
 
-8.6.1.2.  Proof-of-Possession During ID-JAG Exchange
+8.8.1.2.  Proof-of-Possession During ID-JAG Exchange
 
    When a client exchanges an ID-JAG for an access token at the Resource
    Authorization Server, the processing rules depend on whether the ID-
    JAG contains a cnf claim and whether the client presents a DPoP
    proof.
 
-8.6.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
+8.8.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
 
    If the ID-JAG contains a cnf claim and the client presents a DPoP
    proof, the Resource Authorization Server MUST:
@@ -1738,7 +1892,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
      "scope": "chat.read chat.history"
    }
 
-8.6.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
+8.8.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
 
    If the ID-JAG contains a cnf claim but the client does not present a
    DPoP proof, the Resource Authorization Server MUST reject the request
@@ -1756,7 +1910,7 @@ Cache-Control: no-store
   "error_description": "Proof of possession required for this authorization grant"
 }
 
-8.6.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
+8.8.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
             Presented
 
    If the ID-JAG does not contain a cnf claim but the client presents a
@@ -1772,7 +1926,7 @@ Cache-Control: no-store
    3.  The access token response will indicate the token type (e.g.,
        DPoP for DPoP-bound tokens, or Bearer for unconstrained tokens).
 
-8.6.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
+8.8.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
             Presented
 
    If the ID-JAG does not contain a cnf claim and the client does not
@@ -1872,26 +2026,40 @@ Cache-Control: no-store
 
    *  Specification Document(s): Section 3
 
+9.5.  Security Event Identifier Format Registration
+
+   This section registers the saml-nameid Subject Identifier Format in
+   the "Security Event Identifier Formats" registry established by
+   [RFC9493].
+
+   *  Format Name: saml-nameid
+
+   *  Format Description: SAML NameID Subject Identifier Format
+
+   *  Change Controller: IETF
+
+   *  Reference: Section 3.2.1
+
 10.  References
 
 10.1.  Normative References
 
    [I-D.ietf-oauth-identity-chaining]
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
-              M. J., and B. Campbell, "OAuth Identity and Authorization
-              Chaining Across Domains", Work in Progress, Internet-
-              Draft, draft-ietf-oauth-identity-chaining-08, 9 February
-              2026, <https://datatracker.ietf.org/doc/html/draft-ietf-
-              oauth-identity-chaining-08>.
+              M. J., Campbell, B., and A. Parecki, "OAuth Identity and
+              Authorization Chaining Across Domains", Work in Progress,
+              Internet-Draft, draft-ietf-oauth-identity-chaining-12, 11
+              May 2026, <https://datatracker.ietf.org/doc/html/draft-
+              ietf-oauth-identity-chaining-12>.
 
    [I-D.ietf-oauth-rfc7523bis]
               Jones, M. B., Campbell, B., Mortimore, C., and F. Skokan,
               "Updates to OAuth 2.0 JSON Web Token (JWT) Client
               Authentication and Assertion-Based Authorization Grants",
               Work in Progress, Internet-Draft, draft-ietf-oauth-
-              rfc7523bis-10, 20 April 2026,
+              rfc7523bis-11, 28 April 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              rfc7523bis-10>.
+              rfc7523bis-11>.
 
    [I-D.parecki-oauth-jwt-dpop-grant]
               Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP
@@ -1910,6 +2078,13 @@ Cache-Control: no-store
    [IANA.oauth-parameters]
               IANA, "OAuth Parameters",
               <https://www.iana.org/assignments/oauth-parameters>.
+
+   [OASIS.saml-core-2.0-os]
+              Cantor, S., Kemp, J., Philpott, R., and E. Maler,
+              "Assertions and Protocol for the OASIS Security Assertion
+              Markup Language (SAML) V2.0", OASIS Standard saml-core-
+              2.0-os, March 2005, <https://docs.oasis-
+              open.org/security/saml/v2.0/saml-core-2.0-os.pdf>.
 
    [OpenID.Core]
               Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and
@@ -1997,6 +2172,11 @@ Cache-Control: no-store
               Jones, M., and D. Waite, "OAuth 2.0 Demonstrating Proof of
               Possession (DPoP)", RFC 9449, DOI 10.17487/RFC9449,
               September 2023, <https://www.rfc-editor.org/rfc/rfc9449>.
+
+   [RFC9493]  Backman, A., Ed., Scurtescu, M., and P. Jain, "Subject
+              Identifiers for Security Event Tokens", RFC 9493,
+              DOI 10.17487/RFC9493, December 2023,
+              <https://www.rfc-editor.org/rfc/rfc9493>.
 
 10.2.  Informative References
 
