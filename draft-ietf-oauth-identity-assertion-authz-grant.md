@@ -179,10 +179,10 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the IdP Authorization Server as defined in {{RFC8414}}.
 
 `sub`:
-: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML NameID namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
+: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
 
 `sub_id`:
-: OPTIONAL - Subject Identifier as defined in {{RFC9493}}. The `sub_id` claim MAY be used to identify the same End-User as the `sub` claim using a different identifier namespace from the ID-JAG `iss` and `sub`. This is useful when the Resource Authorization Server resolves users by a non-JWT subject identifier, such as a SAML NameID, in its SSO trust relationship with the IdP Authorization Server. See {{saml-nameid-format}} for the SAML NameID Subject Identifier Format defined by this specification, and {{saml-nameid-sub-id-processing}} for processing rules.
+: OPTIONAL - Subject Identifier as defined in {{RFC9493}}. The `sub_id` claim MAY be used to identify the same End-User as the `sub` claim using a different identifier namespace from the ID-JAG `iss` and `sub`. This is useful when the Resource Authorization Server resolves users by a non-JWT subject identifier, such as a SAML Assertion Subject `<NameID>`, in its SSO trust relationship with the IdP Authorization Server. See {{saml-nameid-format}} for the SAML NameID Subject Identifier Format defined by this specification, and {{saml-nameid-sub-id-processing}} for processing rules.
 
 `aud`:
 : REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}.
@@ -275,8 +275,11 @@ This format is intended for deployments where the Resource Authorization Server 
 
 A Subject Identifier in this format MUST contain:
 
+`format`:
+: A JSON string containing the value `saml-nameid` identifying this Subject Identifier Format, as defined in {{RFC9493}}.
+
 `issuer`:
-: A JSON string containing the SAML issuer entity identifier for the assertion containing the SAML Assertion Subject `<NameID>`, as defined by Section 8.3.6 of {{OASIS.saml-core-2.0-os}}. SAML `<Issuer>` attributes are not represented by this format.
+: A JSON string containing the SAML issuer entity identifier for the assertion or configured mapping containing the SAML Assertion Subject `<NameID>`, as defined by Section 8.3.6 of {{OASIS.saml-core-2.0-os}}. SAML `<Issuer>` attributes are not represented by this format.
 
 `nameid`:
 : A JSON string containing the SAML Assertion Subject `<NameID>` value as defined in {{OASIS.saml-core-2.0-os}}.
