@@ -690,6 +690,7 @@ Access Token Request:
     POST /oauth2/token HTTP/1.1
     Host: acme.chat.example
     Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+    Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
     &assertion=eyJhbGciOiJIUzI1NiIsI...
@@ -750,9 +751,10 @@ For example:
     POST /oauth2/token HTTP/1.1
     Host: acme.chat.example
     Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+    Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-    assertion=eyJhbGciOiJIUzI1NiIsI...
+    &assertion=eyJhbGciOiJIUzI1NiIsI...
 
 
 ### Processing Rules
