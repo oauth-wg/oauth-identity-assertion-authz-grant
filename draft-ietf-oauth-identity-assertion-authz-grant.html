@@ -2291,6 +2291,7 @@ signature
 POST /oauth2/token HTTP/1.1
 Host: acme.chat.example
 Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
 &amp;assertion=eyJhbGciOiJIUzI1NiIsI...
@@ -2376,9 +2377,10 @@ Cache-Control: no-store
 POST /oauth2/token HTTP/1.1
 Host: acme.chat.example
 Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
+Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-assertion=eyJhbGciOiJIUzI1NiIsI...
+&amp;assertion=eyJhbGciOiJIUzI1NiIsI...
 </pre><a href="#section-4.4-5" class="pilcrow">¶</a>
 </div>
 <div id="processing-rules-1">
