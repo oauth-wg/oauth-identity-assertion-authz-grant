@@ -94,6 +94,7 @@ normative:
       - ins: E. Maler
 
 informative:
+  RFC9068:
   RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
@@ -120,7 +121,9 @@ XAA is realized over OAuth 2.0 by profiling "Identity Chaining Across Trust Doma
 * the processing rules applied by the Resource Authorization Server when exchanging an ID-JAG for an Access Token; and
 * the authorization server and client metadata used to discover support for the profile.
 
-This specification defines the additional details necessary to support interoperable implementations when two applications are configured such that the downstream Resource Authorization Server trusts the same IdP for SSO and subject resolution. In particular, this specification uses an Identity Assertion as the input to the token exchange request (as opposed to other types of tokens). This way, the same IdP that is trusted by the Resource Authorization Server for SSO can be extended to broker access to APIs. The Resource Authorization Server still determines whether to honor the ID-JAG, what scopes or authorization details to allow, and what access token to issue under its own policy.
+In particular, this profile requires an Identity Assertion (such as an OpenID Connect ID Token or SAML 2.0 assertion) as the Token Exchange `subject_token` input.
+
+Unlike profiles in which the IdP issues access tokens directly to be consumed by the Resource Server (such as the OAuth 2.0 JWT Profile for Access Tokens {{RFC9068}}), this specification preserves the Resource Authorization Server as the issuer of access tokens for its protected resources. This lets the IdP centralize federated identity, SSO trust, and the decision to broker cross-app access, while the Resource Authorization Server keeps independent control over its own access tokens. The Resource Authorization Server determines whether to honor a given ID-JAG, what scopes or authorization details to grant, and what access token to issue, applying its own local policy.
 
 
 # Conventions and Definitions
