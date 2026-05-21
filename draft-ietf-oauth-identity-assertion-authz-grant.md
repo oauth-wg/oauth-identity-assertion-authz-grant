@@ -52,6 +52,7 @@ normative:
   RFC9449:
   RFC9396:
   RFC9493:
+  RFC7591:
   I-D.ietf-oauth-identity-chaining:
   I-D.ietf-oauth-rfc7523bis:
   IANA.media-types:
@@ -968,6 +969,20 @@ To advertise support for the Identity Assertion JWT Authorization Grant profile,
 
 A Resource Authorization Server that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authorization_grant_profiles_supported` for this specification MUST also include `urn:ietf:params:oauth:grant-type:jwt-bearer` in `grant_types_supported`.
 
+# Client Metadata {#client-metadata}
+
+A client can advertise support for authorization grant profiles in its client metadata using the `authorization_grant_profiles_supported` parameter. This parameter MAY be registered via OAuth 2.0 Dynamic Client Registration {{RFC7591}} or published in a Client ID Metadata Document {{I-D.ietf-oauth-client-id-metadata-document}}.
+
+The value of `authorization_grant_profiles_supported` MUST be a JSON array of strings. Each string MUST identify an authorization grant profile that the client implements.
+
+Inclusion of a profile identifier in `authorization_grant_profiles_supported` indicates only that the client implements the processing rules for that profile. It does not indicate that any particular IdP Authorization Server, Resource Authorization Server, audience, resource, or scope will be requested.
+
+To advertise support for the Identity Assertion JWT Authorization Grant profile, the client SHOULD include the following value in the `authorization_grant_profiles_supported` property:
+
+`urn:ietf:params:oauth:grant-profile:id-jag`
+
+A client that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authorization_grant_profiles_supported` for this specification MUST also include both `urn:ietf:params:oauth:grant-type:token-exchange` and `urn:ietf:params:oauth:grant-type:jwt-bearer` in its `grant_types`, since the client uses Token Exchange to obtain the ID-JAG from the IdP Authorization Server and the JWT Bearer Token grant to redeem it at the Resource Authorization Server.
+
 # Security Considerations
 
 ## Client Authentication
@@ -1204,6 +1219,16 @@ This section registers `authorization_grant_profiles_supported` in the "OAuth Au
 * Metadata Description: JSON array of supported authorization grant profile identifiers
 * Change Controller: IETF
 * Specification Document: This document
+
+
+## OAuth Dynamic Client Registration Metadata Registration
+
+This section registers `authorization_grant_profiles_supported` in the "OAuth Dynamic Client Registration Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}, established by {{RFC7591}}.
+
+* Metadata Name: `authorization_grant_profiles_supported`
+* Metadata Description: JSON array of authorization grant profile identifiers supported by the client
+* Change Controller: IETF
+* Specification Document: {{client-metadata}}
 
 
 ## JSON Web Token Claims Registration
