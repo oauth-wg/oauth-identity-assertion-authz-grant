@@ -114,7 +114,7 @@ When one application wants to access a user's data at another application, it wi
 
 This specification defines Cross-App Access (XAA): a pattern in which an application's access to another application's API is mediated by the IdP that both applications already trust for SSO and subject resolution. XAA extends the IdP's role from single sign-on to brokering cross-domain API access, using the same trust relationships that already exist for SSO.
 
-XAA is realized over OAuth 2.0 by profiling "Identity Chaining Across Trust Domains" {{I-D.ietf-oauth-identity-chaining}}, which combines OAuth 2.0 Token Exchange {{RFC8693}} and the JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}} to chain a JWT authorization grant across trust domains. Identity Chaining intentionally leaves many details open to support multiple use cases. This specification profiles it for XAA by defining:
+XAA is built on top of OAuth 2.0 by profiling "Identity Chaining Across Trust Domains" {{I-D.ietf-oauth-identity-chaining}}, which combines OAuth 2.0 Token Exchange {{RFC8693}} and the JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}} to chain a JWT authorization grant across trust domains. Identity Chaining intentionally leaves many details unspecified in order to support multiple use cases. This specification profiles it for XAA by defining:
 
 * the Token Exchange request used to obtain an Identity Assertion JWT Authorization Grant ({{id-jag}});
 * the ID-JAG itself, including its claims and format;
