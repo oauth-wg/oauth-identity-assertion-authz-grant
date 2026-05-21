@@ -1410,7 +1410,8 @@ svg :is([fill="white"], [fill^="#fff"]) {
           <p id="section-1-5.4.1">the authorization server and client metadata used to discover support for the profile.<a href="#section-1-5.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-6">This specification defines the additional details necessary to support interoperable implementations when two applications are configured such that the downstream Resource Authorization Server trusts the same IdP for SSO and subject resolution. In particular, this specification uses an Identity Assertion as the input to the token exchange request (as opposed to other types of tokens). This way, the same IdP that is trusted by the Resource Authorization Server for SSO can be extended to broker access to APIs. The Resource Authorization Server still determines whether to honor the ID-JAG, what scopes or authorization details to allow, and what access token to issue under its own policy.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-6">In particular, this profile requires an Identity Assertion (such as an OpenID Connect ID Token or SAML 2.0 assertion) as the Token Exchange <code>subject_token</code> input.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">Unlike profiles in which the IdP issues access tokens directly to be consumed by the Resource Server (such as the OAuth 2.0 JWT Profile for Access Tokens <span>[<a href="#RFC9068" class="cite xref">RFC9068</a>]</span>), this specification preserves the Resource Authorization Server as the issuer of access tokens for its protected resources. This lets the IdP centralize federated identity, SSO trust, and the decision to broker cross-app access, while the Resource Authorization Server keeps independent control over its own access tokens. The Resource Authorization Server determines whether to honor a given ID-JAG, what scopes or authorization details to grant, and what access token to issue, applying its own local policy.<a href="#section-1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -3244,6 +3245,10 @@ Cache-Control: no-store
 <dt id="I-D.ietf-oauth-client-id-metadata-document">[I-D.ietf-oauth-client-id-metadata-document]</dt>
         <dd>
 <span class="refAuthor">Parecki, A.</span> and <span class="refAuthor">E. Smith</span>, <span class="refTitle">"OAuth Client ID Metadata Document"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-client-id-metadata-document-01</span>, <time datetime="2026-03-01" class="refDate">1 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-01">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-01</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9068">[RFC9068]</dt>
+        <dd>
+<span class="refAuthor">Bertocci, V.</span>, <span class="refTitle">"JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens"</span>, <span class="seriesInfo">RFC 9068</span>, <span class="seriesInfo">DOI 10.17487/RFC9068</span>, <time datetime="2021-10" class="refDate">October 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9068">https://www.rfc-editor.org/rfc/rfc9068</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9470">[RFC9470]</dt>
         <dd>

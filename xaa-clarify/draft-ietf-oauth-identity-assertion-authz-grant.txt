@@ -184,17 +184,21 @@ Table of Contents
    *  the authorization server and client metadata used to discover
       support for the profile.
 
-   This specification defines the additional details necessary to
-   support interoperable implementations when two applications are
-   configured such that the downstream Resource Authorization Server
-   trusts the same IdP for SSO and subject resolution.  In particular,
-   this specification uses an Identity Assertion as the input to the
-   token exchange request (as opposed to other types of tokens).  This
-   way, the same IdP that is trusted by the Resource Authorization
-   Server for SSO can be extended to broker access to APIs.  The
-   Resource Authorization Server still determines whether to honor the
-   ID-JAG, what scopes or authorization details to allow, and what
-   access token to issue under its own policy.
+   In particular, this profile requires an Identity Assertion (such as
+   an OpenID Connect ID Token or SAML 2.0 assertion) as the Token
+   Exchange subject_token input.
+
+   Unlike profiles in which the IdP issues access tokens directly to be
+   consumed by the Resource Server (such as the OAuth 2.0 JWT Profile
+   for Access Tokens [RFC9068]), this specification preserves the
+   Resource Authorization Server as the issuer of access tokens for its
+   protected resources.  This lets the IdP centralize federated
+   identity, SSO trust, and the decision to broker cross-app access,
+   while the Resource Authorization Server keeps independent control
+   over its own access tokens.  The Resource Authorization Server
+   determines whether to honor a given ID-JAG, what scopes or
+   authorization details to grant, and what access token to issue,
+   applying its own local policy.
 
 2.  Conventions and Definitions
 
@@ -2208,6 +2212,10 @@ Cache-Control: no-store
               oauth-client-id-metadata-document-01, 1 March 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
               client-id-metadata-document-01>.
+
+   [RFC9068]  Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0
+              Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October
+              2021, <https://www.rfc-editor.org/rfc/rfc9068>.
 
    [RFC9470]  Bertocci, V. and B. Campbell, "OAuth 2.0 Step Up
               Authentication Challenge Protocol", RFC 9470,
