@@ -1620,6 +1620,13 @@ The authors would like to thank the following people for their contributions and
 
 \[\[ To be removed from the final specification ]]
 
+-04
+
+* Clarified XAA vs ID-JAG terminology in abstract and intro
+* Added compatibility via new `sub_id` claim for Resource Apps configured with SAML SSO, and tightened definition of `sub`
+* Added client metadata property for DCR and CIMD
+* Clarified cross-domain use restriction
+
 -03
 
 * Added a section defining terms used in the document
