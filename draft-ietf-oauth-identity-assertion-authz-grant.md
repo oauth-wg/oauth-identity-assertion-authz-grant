@@ -100,7 +100,7 @@ informative:
 
 --- abstract
 
-This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange {{RFC8693}} and JWT Profile for OAuth 2.0 Authorization Grants {{RFC7523}}.
+This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange {{RFC8693}} and JWT Profile for OAuth 2.0 Authorization Grants {{RFC7523}}. This pattern is informally referred to as Cross-App Access (XAA).
 
 --- middle
 
@@ -111,9 +111,14 @@ In many deployments, applications are configured for single sign-on to a common 
 
 When one application wants to access a user's data at another application, it will start an interactive OAuth flow {{RFC6749}} to obtain an access token for the application on behalf of the user. This OAuth flow enables a direct app-to-app connection between the two apps, and is not visible to the IdP used to log in to each app.
 
-This specification enables this access to be mediated by the IdP that the downstream Resource Authorization Server already trusts for SSO and subject resolution, similar to how the IdP manages single sign-on to individual applications. This mechanism is informally referred to as "cross app access", often abbreviated "XAA".
+This specification defines Cross-App Access (XAA): a pattern in which an application's access to another application's API is mediated by the IdP that both applications already trust for SSO and subject resolution. XAA extends the IdP's role from single sign-on to brokering inter-app API access, using the same trust relationships that already exist for SSO.
 
-The draft specification "Identity Chaining Across Trust Domains" {{I-D.ietf-oauth-identity-chaining}} defines how to request a JWT Authorization Grant from an Authorization Server and exchange it for an Access Token at another Authorization Server in a different trust domain. The specification combines OAuth 2.0 Token Exchange {{RFC8693}} and JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}}. The draft supports multiple different use cases by leaving many details of the token exchange request and JWT authorization grant unspecified.
+XAA is realized over OAuth 2.0 by profiling "Identity Chaining Across Trust Domains" {{I-D.ietf-oauth-identity-chaining}}, which combines OAuth 2.0 Token Exchange {{RFC8693}} and the JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}} to chain a JWT authorization grant across trust domains. Identity Chaining intentionally leaves many details open to support multiple use cases. This specification profiles it for XAA by defining:
+
+* the Token Exchange request used to obtain an Identity Assertion JWT Authorization Grant ({{id-jag}});
+* the ID-JAG itself, including its claims and format;
+* the processing rules applied by the Resource Authorization Server when exchanging an ID-JAG for an Access Token; and
+* the authorization server and client metadata used to discover support for the profile.
 
 This specification defines the additional details necessary to support interoperable implementations when two applications are configured such that the downstream Resource Authorization Server trusts the same IdP for SSO and subject resolution. In particular, this specification uses an Identity Assertion as the input to the token exchange request (as opposed to other types of tokens). This way, the same IdP that is trusted by the Resource Authorization Server for SSO can be extended to broker access to APIs. The Resource Authorization Server still determines whether to honor the ID-JAG, what scopes or authorization details to allow, and what access token to issue under its own policy.
 
@@ -152,6 +157,9 @@ Trust Domain
 
 Cross-Domain
 : Involving two or more trust domains where an assertion, grant, or authorization decision produced in one trust domain is relied upon in another. In this specification, the IdP Authorization Server operates in trust domain A, while the Resource Authorization Server and Resource Server operate in trust domain B.
+
+Cross-App Access (XAA)
+: The application-ecosystem name for the pattern this specification profiles, in which an application obtains an access token at another application's API by coordinating through the IdP both applications trust for SSO. XAA is realized over OAuth 2.0 by using an Identity Assertion JWT Authorization Grant ({{id-jag}}) as a specific instance of cross-domain identity chaining ({{I-D.ietf-oauth-identity-chaining}}).
 
 Subject Resolution
 : The process by which the Resource Authorization Server determines which local subject represents the End-User identified by the ID-JAG. Subject resolution can use stable identifiers and other trusted claims in the ID-JAG, such as `iss`, `sub`, `tenant`, `aud_sub`, `email`, or deployment-specific claims, and can include JIT provisioning when permitted by policy.
