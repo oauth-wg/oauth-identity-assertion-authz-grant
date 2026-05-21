@@ -112,7 +112,7 @@ In many deployments, applications are configured for single sign-on to a common 
 
 When one application wants to access a user's data at another application, it will start an interactive OAuth flow {{RFC6749}} to obtain an access token for the application on behalf of the user. This OAuth flow enables a direct app-to-app connection between the two apps, and is not visible to the IdP used to log in to each app.
 
-This specification defines Cross-App Access (XAA): a pattern in which an application's access to another application's API is mediated by the IdP that both applications already trust for SSO and subject resolution. XAA extends the IdP's role from single sign-on to brokering inter-app API access, using the same trust relationships that already exist for SSO.
+This specification defines Cross-App Access (XAA): a pattern in which an application's access to another application's API is mediated by the IdP that both applications already trust for SSO and subject resolution. XAA extends the IdP's role from single sign-on to brokering cross-domain API access, using the same trust relationships that already exist for SSO.
 
 XAA is realized over OAuth 2.0 by profiling "Identity Chaining Across Trust Domains" {{I-D.ietf-oauth-identity-chaining}}, which combines OAuth 2.0 Token Exchange {{RFC8693}} and the JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}} to chain a JWT authorization grant across trust domains. Identity Chaining intentionally leaves many details open to support multiple use cases. This specification profiles it for XAA by defining:
 
