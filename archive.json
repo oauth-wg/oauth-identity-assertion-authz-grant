@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-17T00:17:59.077427+00:00",
+  "timestamp": "2026-05-21T00:23:22.821780+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2448,15 +2448,15 @@
       "id": "I_kwDOKv5r-s8AAAABCKri1g",
       "title": "How can a Resource Authorization Server recognize an ID-JAG when it is configured with SAML SSO",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/94",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "When a Resource Authorization Server is configured to the enterprise IdP with SAML for SSO, the values currently in the ID-JAG are not able to be mapped to their SAML equivalents.\n\nFor example, the Resource AS might recognize a SAML issuer like `https://example.com/exk33qwjcwDda7luK346` and receive SAML NameIds that are a username or email address. An ID-JAG will contain an OIDC issuer URL like `https://tenant123.example.com/` and subject identifiers that are a random string. (there is no guarantee the SAML issuer and OIDC issuer domain names have anything in common.)\n\nWhen a Resource AS is configured for SAML SSO, what are the options for how it can map the ID-JAG values to the SAML SSO connection? As far as I can tell there are a couple options for the issuer:\n\n* No change to the ID-JAG, require that the customer manually add the OIDC issuer URL into their SAML SSO configuration. This provides the AS the association between the SAML issuer and OIDC issuer.\n* Include the SAML issuer in the ID-JAG somewhere.\n\nFor the user ID question, the options would be:\n\n* Send whatever value the SAML NameId would have been in the ID-JAG `sub` (this is currently allowed according to [section 3.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-03.html#section-3.1) because it would be \"the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for Single Sign-On (SSO)\")\n* Send the SAML NameId as a new claim in the ID-JAG\n\nIf we go with adding new claims to the ID-JAG, the question becomes whether these should be SAML-specific claims or something generic, e.g.\n\n* `saml_issuer` and `saml_nameid`\n* `alt_issuer` and `alt_sub`\n\n### Minimal Changed Example ID-JAG\n\n```\n{\n  \"typ\": \"oauth-id-jag+jwt\"\n}\n.\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"user@idp.example\",                  /* assuming email addresses were sent as SAML NameId */\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"f53f191f9311af35\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"resource\": \"https://acme.chat.example/api\",\n  \"scope\": \"chat.read chat.history\"\n}\n.\nsignature\n```\n\n### Example ID-JAG with New Claims\n\n```\n{\n  \"typ\": \"oauth-id-jag+jwt\"\n}\n.\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"U019488227\",\n  \"alt_iss\": \"https://idp.example/exk33qwjcwDda7luK346\",\n  \"alt_sub\": \"user@idp.example\",\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"f53f191f9311af35\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"resource\": \"https://acme.chat.example/api\",\n  \"scope\": \"chat.read chat.history\"\n}\n.\nsignature\n```\n\n",
       "createdAt": "2026-05-13T18:48:08Z",
-      "updatedAt": "2026-05-15T18:39:34Z",
-      "closedAt": null,
+      "updatedAt": "2026-05-20T19:59:52Z",
+      "closedAt": "2026-05-20T19:59:52Z",
       "comments": [
         {
           "author": "dlozlla",
@@ -2506,6 +2506,20 @@
           "body": "SAML Subject NameID is a string but it also may carry semantic qualifiers and metadata attributes such as:\n\n- Format\n- NameQualifier\n- SPNameQualifier\n- SPProvidedID\n\nAs @gffletch indicated, the spec also doesn't require NameID but from my experience its required for most of SaaS based deployments.  \n\nThere is a lot of surface area to define mappings and interoperability requirements.   You can get a taste of the complexity https://mcguinness.github.io/draft-connect-saml-migration/draft-mcguinness-saml-oidc-migration-profile.html#name-subject-identifier-mapping\n\nOne idea which as originally proposed in this issue was to adopt `sub_id` from secevents/SSF.\n\nhttps://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51#issuecomment-3398407476\n\nWe could define a new `format` for an SAML NameID \n\nExample ID-JAG:\n```\n{\n  \"iss\": \"https://tenant123.example.com/\",\n  \"sub\": \"00u7abc123random\",\n  \"aud\": \"https://resource-as.example.com/\",\n  \"client_id\": \"client-123\",\n  \"exp\": 1715800000,\n  \"iat\": 1715799700,\n  \"sub_id\": {\n    \"format\": \"saml-nameid\",\n    \"issuer\": \"https://example.com/exk33qwjcwDda7luK346\",\n    \"nameid\": \"foo@example.com\",\n    \"nameid_format\": \"urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress\",\n    \"sp_name_qualifier\": \"https://resource.example.com/saml/sp\"\n  }\n}\n```\n\nI would make only these required:\n\n```\n{\n  \"format\": \"saml-nameid\",\n  \"issuer\": \"https://example.com/exk33qwjcwDda7luK346\",\n  \"nameid\": \"foo@example.com\"\n}\n```\n\nAnd make the SAML qualifiers optional:\n\n```\n{\n  \"format\": \"saml-nameid\",\n  \"issuer\": \"https://example.com/exk33qwjcwDda7luK346\",\n  \"nameid\": \"foo@example.com\",\n  \"nameid_format\": \"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\",\n  \"name_qualifier\": \"https://example.com/exk33qwjcwDda7luK346\",\n  \"sp_name_qualifier\": \"https://resource.example.com/saml/sp\",\n  \"sp_provided_id\": \"local-sp-provided-id\"\n}\n```\n\nThe ID-JAG with still need a `sub` so we would still need to define that but  this works because RFC 9493 already says `sub_id` can identify the JWT subject using a different identifier namespace from the JWT iss/sub which seems to match the use case here.  \n\nSpec text shape:\n\n`saml-nameid` Subject Identifier Format\n\nThe `saml-nameid` Subject Identifier Format identifies a subject using a SAML NameID value within the context of a SAML issuer.\n\nA Subject Identifier in this format MUST contain:\n\n* `format`: The value `saml-nameid`.\n* `issuer`: A JSON string containing the SAML issuer/entityID.\n* `nameid`: A JSON string containing the SAML NameID value.\n\nA Subject Identifier in this format MAY contain:\n\n* `nameid_format`: A JSON string containing the SAML NameID Format URI.\n* `name_qualifier`: A JSON string containing the SAML NameQualifier value.\n* `sp_name_qualifier`: A JSON string containing the SAML SPNameQualifier value.\n* `sp_provided_id`: A JSON string containing the SAML SPProvidedID value.\n\nThen add ID-JAG processing text:\n\nWhen the Resource Authorization Server resolves users by SAML NameID, the IdP Authorization Server MAY include a `sub_id` claim using the `saml-nameid` Subject Identifier Format. The `sub_id` claim identifies the same subject as\nthe ID-JAG `sub` claim, but in the SAML subject namespace used by the Resource Authorization Server for SSO.\n\nThe Resource Authorization Server MAY use `sub_id` for subject resolution when it supports the indicated Subject Identifier Format.\n\nSecurity guardrails:\n\nThe Resource Authorization Server MUST NOT use the `sub_id.issuer` value to establish trust in the ID-JAG issuer. The ID-JAG MUST first be validated using the `iss` claim, signature, audience, expiration, and client binding\naccording to this specification.\n\nThe Resource Authorization Server MUST use a `saml-nameid` `sub_id` only when the validated ID-JAG issuer is explicitly associated with the SAML issuer identified by `sub_id.issuer` through local configuration or trusted\nfederation metadata.\n\nThe IdP Authorization Server MUST include a `saml-nameid` `sub_id` only when the SAML NameID identifies the same subject as the ID-JAG `sub` claim for the target Resource Authorization Server.\n\nI would also soften the current \u201csub MUST be the same as the SSO subject\u201d language. It does not hold cleanly across OIDC and SAML. Better:\n\nThe `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML NameID namespace, the ID-JAG MAY include\n`sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User.\n\nThat avoids forcing an impossible SAML NameID-to-JWT sub equality while still preserving the security invariant that both identifiers refer to the same user.\n",
           "createdAt": "2026-05-15T18:15:54Z",
           "updatedAt": "2026-05-15T18:39:34Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Yeah this makes sense to me. I like that it keeps the `iss`+`sub` value cleanly in the OIDC side of things, and also gives people a way to slowly map SAML user IDs to their corresponding OIDC user IDs.",
+          "createdAt": "2026-05-19T18:55:14Z",
+          "updatedAt": "2026-05-19T18:55:14Z"
+        },
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "I agree with this approach of adding a complex claim that adds format specifier. It provides enough context and includes info on how to interpret the claim.",
+          "createdAt": "2026-05-19T18:56:33Z",
+          "updatedAt": "2026-05-19T18:56:33Z"
         }
       ]
     }
@@ -6683,7 +6697,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2026-04-22T22:17:29Z",
-      "updatedAt": "2026-04-28T18:10:36Z",
+      "updatedAt": "2026-05-20T20:07:01Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "35ef6063b260bd7e6fb9157079f2496b74e2d57c",
@@ -6715,6 +6729,13 @@
           "body": "I must confess to some reservations with this. Dispute some familiarity with RFCs 9470 and 8693, this wasn't a combination I'd necessarily envisioned. I realize there's already some text about Step-Up in the document but I'm not sure the existence of some text is necessarily convincing for doing more. And some awkwardness here, to me anyway, points to fundamental things not readily resolvable with comments on a PR. ",
           "createdAt": "2026-04-28T18:10:36Z",
           "updatedAt": "2026-04-28T18:10:36Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Since the ID-JAG carries the login state from SSO into the client, that may not be sufficient to access a particular resource. For example:\r\n\r\n* App 1 (Client) requires any 2 factors for SSO\r\n* App 2 (Resource) requires a phishing-resistant factor for SSO\r\n\r\nSo when the user first logs in to the Client, they may authenticate at the IdP with password + OTP. When the client requests an ID-JAG for the Resource, the password + OTP factors don't meet the requirement of phishing-resistant that is required for the Resource. \r\n\r\nThis lets the IdP return an error that will trigger the client to start a new SSO flow with the appropriate factors needed for the Resource.",
+          "createdAt": "2026-05-20T20:07:01Z",
+          "updatedAt": "2026-05-20T20:07:01Z"
         }
       ],
       "reviews": [
@@ -6926,24 +6947,26 @@
       "id": "PR_kwDOKv5r-s7VwCyR",
       "title": "minor corrections to the example requests",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/91",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "havetisyan",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "a couple of minor fixes to the requests - missing Content-Type header and a missing & separator.",
       "createdAt": "2026-04-26T17:54:17Z",
-      "updatedAt": "2026-04-28T16:41:44Z",
+      "updatedAt": "2026-05-20T20:01:25Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "4b22498ea3c10122efd79278f845d6ba35e63acc",
       "headRepository": "havetisyan/oauth-identity-assertion-authz-grant",
       "headRefName": "havetisyan-patch-1",
       "headRefOid": "0ec37ae69596bb51f9fe0ec7b4985a5e9cd381e6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-05-20T20:01:24Z",
+      "mergedAt": "2026-05-20T20:01:24Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "c5b6adc7ff12206c8009346a1494551b392410d2"
+      },
       "comments": [],
       "reviews": [
         {
@@ -6958,6 +6981,83 @@
           "createdAt": "2026-04-28T16:41:44Z",
           "updatedAt": "2026-04-28T16:41:44Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 95,
+      "id": "PR_kwDOKv5r-s7dPULI",
+      "title": "Add SAML NameID Subject Identifier Support",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/95",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Resource Authorization Servers configured with SAML SSO cannot always map the JWT-style `sub` claim to a SAML NameID. This adds an optional `sub_id` claim carrying a SAML NameID in the SSO subject namespace, so the RAS can resolve users by SAML NameID without forcing `sub` and the SAML NameID to be the same value.\r\n\r\n- Add `sub_id` claim referencing RFC 9493\r\n- Define the `saml-nameid` Subject Identifier Format (required: `issuer`,\r\n  `nameid`; optional: `nameid_format`, `name_qualifier`, `sp_name_qualifier`,\r\n  `sp_provided_id`) with reference to SAML 2.0 (OASIS.saml-core-2.0-os)\r\n- Add processing rules for the IdP (faithful derivation, same-subject\r\n  invariant) and the RAS (tuple-based resolution, `invalid_grant` on\r\n  missing/malformed `sub_id` when required)\r\n- Add Security Considerations: Subject Identifier Trust (don't use\r\n  `sub_id.issuer` to establish ID-JAG issuer trust) and Subject Identifier\r\n  Disclosure (minimize identifiers visible to the Client)\r\n- Register `saml-nameid` in the IANA Security Event Identifier Formats\r\n  registry\r\n- Soften the `sub` claim text to allow different subject namespaces\r\n  between the ID-JAG issuer and SSO, while requiring `sub` and `sub_id`\r\n  to identify the same End-User when both are present\r\n- Rename the existing SAML 2.0 section to \"SAML 2.0 Subject Token\r\n  Interoperability\" so it scopes only to protocol transition\r\n\r\nResolve #94 ",
+      "createdAt": "2026-05-19T20:24:29Z",
+      "updatedAt": "2026-05-20T19:59:34Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "4b22498ea3c10122efd79278f845d6ba35e63acc",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "saml-nameid",
+      "headRefOid": "879f086c44aa1189ec91a97599931baff0b158f0",
+      "closedAt": "2026-05-20T19:59:31Z",
+      "mergedAt": "2026-05-20T19:59:30Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "f7229f1d6792d6d953ba5acc1fa5387066d92438"
+      },
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "This is great, thanks",
+          "createdAt": "2026-05-20T19:58:37Z",
+          "updatedAt": "2026-05-20T19:58:37Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABAcIIMA",
+          "commit": {
+            "abbreviatedOid": "d15b217"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-05-20T00:55:36Z",
+          "updatedAt": "2026-05-20T00:55:36Z",
+          "comments": [
+            {
+              "originalPosition": 87,
+              "body": "\"when the corresponding value is part of the SAML NameID tuple used by the Resource Authorization Server for subject resolution\"\n\nhow does the IdP Authorization Server know this?",
+              "createdAt": "2026-05-20T00:55:36Z",
+              "updatedAt": "2026-05-20T00:55:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABAcpMRg",
+          "commit": {
+            "abbreviatedOid": "d15b217"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-05-20T03:45:03Z",
+          "updatedAt": "2026-05-20T03:45:04Z",
+          "comments": [
+            {
+              "originalPosition": 87,
+              "body": "@aaronpk anchored to the SAML SSO assertion shape it issues to the target RAS",
+              "createdAt": "2026-05-20T03:45:03Z",
+              "updatedAt": "2026-05-20T03:45:04Z"
+            }
+          ]
         }
       ]
     }
