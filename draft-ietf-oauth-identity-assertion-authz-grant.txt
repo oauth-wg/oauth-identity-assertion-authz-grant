@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 21 November 2026                                    Independent
+Expires: 22 November 2026                                    Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                             20 May 2026
+                                                             21 May 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 November 2026.
+   This Internet-Draft will expire on 22 November 2026.
 
 Copyright Notice
 
@@ -105,25 +105,27 @@ Table of Contents
    7.  Authorization Server Metadata
      7.1.  IdP Authorization Server Metadata
      7.2.  Resource Authorization Server Metadata
-   8.  Security Considerations
-     8.1.  Client Authentication
-     8.2.  Step-Up Authentication
-     8.3.  Cross-Domain Use
-     8.4.  Metadata Disclosure
-     8.5.  Subject Identifier Trust
-     8.6.  Subject Identifier Disclosure
-     8.7.  Actor Delegation Extensions
-     8.8.  Sender Constraining Tokens
-       8.8.1.  Proof-of-Possession
-   9.  IANA Considerations
-     9.1.  Media Types
-     9.2.  OAuth URI Registration
-     9.3.  OAuth Authorization Server Metadata Registration
-     9.4.  JSON Web Token Claims Registration
-     9.5.  Security Event Identifier Format Registration
-   10. References
-     10.1.  Normative References
-     10.2.  Informative References
+   8.  Client Metadata
+   9.  Security Considerations
+     9.1.  Client Authentication
+     9.2.  Step-Up Authentication
+     9.3.  Cross-Domain Use
+     9.4.  Metadata Disclosure
+     9.5.  Subject Identifier Trust
+     9.6.  Subject Identifier Disclosure
+     9.7.  Actor Delegation Extensions
+     9.8.  Sender Constraining Tokens
+       9.8.1.  Proof-of-Possession
+   10. IANA Considerations
+     10.1.  Media Types
+     10.2.  OAuth URI Registration
+     10.3.  OAuth Authorization Server Metadata Registration
+     10.4.  OAuth Dynamic Client Registration Metadata Registration
+     10.5.  JSON Web Token Claims Registration
+     10.6.  Security Event Identifier Format Registration
+   11. References
+     11.1.  Normative References
+     11.2.  Informative References
    Appendix A.  Use Cases
      A.1.  Enterprise Deployment
        A.1.1.  Preconditions
@@ -564,7 +566,7 @@ Table of Contents
    *  the sub_id claim is not authorized by local policy for the
       validated ID-JAG issuer.
 
-   See Section 8.5 and Section 8.6 for security considerations on the
+   See Section 9.5 and Section 9.6 for security considerations on the
    sub_id claim.
 
 4.  Cross-Domain Access
@@ -1617,9 +1619,41 @@ Pragma: no-cache
    also include urn:ietf:params:oauth:grant-type:jwt-bearer in
    grant_types_supported.
 
-8.  Security Considerations
+8.  Client Metadata
 
-8.1.  Client Authentication
+   A client can advertise support for authorization grant profiles in
+   its client metadata using the authorization_grant_profiles_supported
+   parameter.  This parameter MAY be registered via OAuth 2.0 Dynamic
+   Client Registration [RFC7591] or published in a Client ID Metadata
+   Document [I-D.ietf-oauth-client-id-metadata-document].
+
+   The value of authorization_grant_profiles_supported MUST be a JSON
+   array of strings.  Each string MUST identify an authorization grant
+   profile that the client implements.
+
+   Inclusion of a profile identifier in
+   authorization_grant_profiles_supported indicates only that the client
+   implements the processing rules for that profile.  It does not
+   indicate that any particular IdP Authorization Server, Resource
+   Authorization Server, audience, resource, or scope will be requested.
+
+   To advertise support for the Identity Assertion JWT Authorization
+   Grant profile, the client SHOULD include the following value in the
+   authorization_grant_profiles_supported property:
+
+   urn:ietf:params:oauth:grant-profile:id-jag
+
+   A client that includes urn:ietf:params:oauth:grant-profile:id-jag in
+   authorization_grant_profiles_supported for this specification MUST
+   also include both urn:ietf:params:oauth:grant-type:token-exchange and
+   urn:ietf:params:oauth:grant-type:jwt-bearer in its grant_types, since
+   the client uses Token Exchange to obtain the ID-JAG from the IdP
+   Authorization Server and the JWT Bearer Token grant to redeem it at
+   the Resource Authorization Server.
+
+9.  Security Considerations
+
+9.1.  Client Authentication
 
    This specification SHOULD only be supported for confidential clients.
    Public clients SHOULD use the existing authorization code grant and
@@ -1627,7 +1661,7 @@ Pragma: no-cache
    2.0 Authorization Request where the user can interactively consent to
    the access delegation.
 
-8.2.  Step-Up Authentication
+9.2.  Step-Up Authentication
 
    In the initial token exchange request, the IdP may require step-up
    authentication for the subject if the authentication context in the
@@ -1655,7 +1689,7 @@ Cache-Control: no-store
    Connect for SSO when performing a step-up to skip the need for
    additional token exchange round-trip.
 
-8.3.  Cross-Domain Use
+9.3.  Cross-Domain Use
 
    This specification is intended for cross-domain uses where the
    Client, Resource Authorization Server, and IdP are in different trust
@@ -1673,7 +1707,7 @@ Cache-Control: no-store
    Authorization Server for SSO and subject resolution, or other
    mechanisms MAY be used.
 
-8.4.  Metadata Disclosure
+9.4.  Metadata Disclosure
 
    Advertising issuer-specific trust relationships in publicly
    accessible metadata can disclose federation topology, business
@@ -1693,7 +1727,7 @@ Cache-Control: no-store
    response MUST be specific to the authenticated client and MAY also be
    scoped by tenant, resource, or other local policy context.
 
-8.5.  Subject Identifier Trust
+9.5.  Subject Identifier Trust
 
    When the ID-JAG includes a sub_id claim, the Resource Authorization
    Server MUST NOT use the sub_id.issuer value to establish trust in the
@@ -1706,7 +1740,7 @@ Cache-Control: no-store
    SAML issuer identified by sub_id.issuer through local configuration
    or trusted federation metadata.
 
-8.6.  Subject Identifier Disclosure
+9.6.  Subject Identifier Disclosure
 
    The IdP Authorization Server SHOULD include sub_id only when needed
    by the target Resource Authorization Server for subject resolution.
@@ -1717,7 +1751,7 @@ Cache-Control: no-store
    minimize the subject identifiers included in the ID-JAG to those
    required by the Resource Authorization Server.
 
-8.7.  Actor Delegation Extensions
+9.7.  Actor Delegation Extensions
 
    This specification allows Token Exchange requests for ID-JAG to carry
    actor_token, but it does not define normative processing requirements
@@ -1742,9 +1776,9 @@ Cache-Control: no-store
    resource owner identified by sub.  The authenticated client identity
    is also not a substitute for actor identity.
 
-8.8.  Sender Constraining Tokens
+9.8.  Sender Constraining Tokens
 
-8.8.1.  Proof-of-Possession
+9.8.1.  Proof-of-Possession
 
    Identity Assertion JWT Authorization Grant may support key binding to
    enable sender-constrained tokens as described in Section 4 of
@@ -1774,7 +1808,7 @@ Cache-Control: no-store
    exchanging the ID-JAG for an access token at the Resource
    Authorization Server).
 
-8.8.1.1.  Proof-of-Possession During Token Exchange
+9.8.1.1.  Proof-of-Possession During Token Exchange
 
    When a client requests an ID-JAG from the IdP Authorization Server
    via Token Exchange, the client MAY include a DPoP proof in the
@@ -1841,14 +1875,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
        cnf claim.
 
-8.8.1.2.  Proof-of-Possession During ID-JAG Exchange
+9.8.1.2.  Proof-of-Possession During ID-JAG Exchange
 
    When a client exchanges an ID-JAG for an access token at the Resource
    Authorization Server, the processing rules depend on whether the ID-
    JAG contains a cnf claim and whether the client presents a DPoP
    proof.
 
-8.8.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
+9.8.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
 
    If the ID-JAG contains a cnf claim and the client presents a DPoP
    proof, the Resource Authorization Server MUST:
@@ -1894,7 +1928,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
      "scope": "chat.read chat.history"
    }
 
-8.8.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
+9.8.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
 
    If the ID-JAG contains a cnf claim but the client does not present a
    DPoP proof, the Resource Authorization Server MUST reject the request
@@ -1912,7 +1946,7 @@ Cache-Control: no-store
   "error_description": "Proof of possession required for this authorization grant"
 }
 
-8.8.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
+9.8.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
             Presented
 
    If the ID-JAG does not contain a cnf claim but the client presents a
@@ -1928,7 +1962,7 @@ Cache-Control: no-store
    3.  The access token response will indicate the token type (e.g.,
        DPoP for DPoP-bound tokens, or Bearer for unconstrained tokens).
 
-8.8.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
+9.8.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
             Presented
 
    If the ID-JAG does not contain a cnf claim and the client does not
@@ -1953,16 +1987,16 @@ Cache-Control: no-store
   "error_description": "Sender-constrained tokens required for this resource server"
 }
 
-9.  IANA Considerations
+10.  IANA Considerations
 
-9.1.  Media Types
+10.1.  Media Types
 
    This section registers oauth-id-jag+jwt, a new media type [RFC2046]
    in the "Media Types" registry [IANA.media-types] in the manner
    described in [RFC6838].  It can be used to indicate that the content
    is an Identity Assertion JWT Authorization Grant.
 
-9.2.  OAuth URI Registration
+10.2.  OAuth URI Registration
 
    This section registers urn:ietf:params:oauth:token-type:id-jag in the
    "OAuth URI" subregistry of the "OAuth Parameters" registry
@@ -1990,7 +2024,7 @@ Cache-Control: no-store
 
    *  Specification Document: This document
 
-9.3.  OAuth Authorization Server Metadata Registration
+10.3.  OAuth Authorization Server Metadata Registration
 
    This section registers authorization_grant_profiles_supported in the
    "OAuth Authorization Server Metadata" registry of the "OAuth
@@ -2005,7 +2039,23 @@ Cache-Control: no-store
 
    *  Specification Document: This document
 
-9.4.  JSON Web Token Claims Registration
+10.4.  OAuth Dynamic Client Registration Metadata Registration
+
+   This section registers authorization_grant_profiles_supported in the
+   "OAuth Dynamic Client Registration Metadata" registry of the "OAuth
+   Parameters" registry [IANA.oauth-parameters], established by
+   [RFC7591].
+
+   *  Metadata Name: authorization_grant_profiles_supported
+
+   *  Metadata Description: JSON array of authorization grant profile
+      identifiers supported by the client
+
+   *  Change Controller: IETF
+
+   *  Specification Document: Section 8
+
+10.5.  JSON Web Token Claims Registration
 
    This section registers the following claims in the "JSON Web Token
    Claims" subregistry of the "JSON Web Token (JWT)" registry
@@ -2028,7 +2078,7 @@ Cache-Control: no-store
 
    *  Specification Document(s): Section 3
 
-9.5.  Security Event Identifier Format Registration
+10.6.  Security Event Identifier Format Registration
 
    This section registers the saml-nameid Subject Identifier Format in
    the "Security Event Identifier Formats" registry established by
@@ -2042,9 +2092,9 @@ Cache-Control: no-store
 
    *  Reference: Section 3.2.1
 
-10.  References
+11.  References
 
-10.1.  Normative References
+11.1.  Normative References
 
    [I-D.ietf-oauth-identity-chaining]
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
@@ -2133,6 +2183,11 @@ Cache-Control: no-store
               Authorization Grants", RFC 7523, DOI 10.17487/RFC7523, May
               2015, <https://www.rfc-editor.org/rfc/rfc7523>.
 
+   [RFC7591]  Richer, J., Ed., Jones, M., Bradley, J., Machulak, M., and
+              P. Hunt, "OAuth 2.0 Dynamic Client Registration Protocol",
+              RFC 7591, DOI 10.17487/RFC7591, July 2015,
+              <https://www.rfc-editor.org/rfc/rfc7591>.
+
    [RFC7638]  Jones, M. and N. Sakimura, "JSON Web Key (JWK)
               Thumbprint", RFC 7638, DOI 10.17487/RFC7638, September
               2015, <https://www.rfc-editor.org/rfc/rfc7638>.
@@ -2180,7 +2235,7 @@ Cache-Control: no-store
               DOI 10.17487/RFC9493, December 2023,
               <https://www.rfc-editor.org/rfc/rfc9493>.
 
-10.2.  Informative References
+11.2.  Informative References
 
    [I-D.ietf-oauth-client-id-metadata-document]
               Parecki, A. and E. Smith, "OAuth Client ID Metadata
