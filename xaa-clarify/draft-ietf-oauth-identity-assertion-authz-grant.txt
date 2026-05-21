@@ -161,7 +161,7 @@ Table of Contents
    an application's access to another application's API is mediated by
    the IdP that both applications already trust for SSO and subject
    resolution.  XAA extends the IdP's role from single sign-on to
-   brokering inter-app API access, using the same trust relationships
+   brokering cross-domain API access, using the same trust relationships
    that already exist for SSO.
 
    XAA is realized over OAuth 2.0 by profiling "Identity Chaining Across
