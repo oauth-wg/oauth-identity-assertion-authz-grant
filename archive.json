@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-21T00:23:22.821780+00:00",
+  "timestamp": "2026-05-24T00:20:12.295554+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -47,6 +47,11 @@
       "name": "wontfix",
       "description": "This will not be worked on",
       "color": "ffffff"
+    },
+    {
+      "name": "ietf-126",
+      "description": "",
+      "color": "f7c144"
     }
   ],
   "issues": [
@@ -2233,10 +2238,12 @@
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-126"
+      ],
       "body": "# Problem\n\nSection 2.1 of the draft currently says:\n\n> It is RECOMMENDED that the ID-JAG contain an `email` and/or `aud_sub` claim. The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation... Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.\n\nThis language acknowledges the JIT problem but does not solve it. There is no interoperable mechanism for a Resource Authorization Server (RAS) to signal which identity claims it requires, or for a Client to convey that signal back to the IdP so it can include them in the ID-JAG. The result requires out-of-band coordination between every IdP/RAS pair, which undermines the composability goal of the spec.\n\n## Specific failure modes\n\n1. **What claims does the IdP put in the ID-JAG?** The spec provides a fixed optional set (`email`, `aud_sub`) but gives no mechanism for the RAS to express its requirements. IdPs must either over-include claims (privacy risk) or guess conservatively and leave JIT broken.\n\n2. **What claims does the RAS need to JIT?** RAS-specific claims (department, cost center, license tier, custom identifiers) may not be OIDC standard claims. Even for OIDC-defined claims, different RASes need different subsets. There is no way to express this per-RAS, per-deployment requirement today.\n\n3. **How does the IdP know to issue the right claims?** The IdP has no standardized signal from the Client about what the target RAS needs. The Client knows the RAS endpoint (from discovery) but cannot ask the IdP to tailor the ID-JAG for that RAS's JIT requirements.\n\n4. **The UserInfo dead end.** When the RAS receives the ID-JAG it has no Access Token and cannot reach back to the IdP's UserInfo endpoint or any other IdP-hosted endpoint to fetch additional claims. The ID-JAG exchange must succeed or fail on the claims already present in the token. This is not a fixable limitation; it is a structural constraint of the grant flow.\n\n# Proposed Solution\n\nStandardize exactly three things.\n\n## 1. Error code: `insufficient_identity_claims`\n\nIf the RAS determines that the identity assertion is cryptographically valid and the grant type is accepted, but the token does not contain sufficient identity claims to perform account resolution or JIT account creation, it SHOULD return an error response per RFC 6749 Section 5.2:\n\n```\nHTTP/1.1 400 Bad Request\nContent-Type: application/json\n\n{\n  \"error\": \"insufficient_identity_claims\",\n  \"error_description\": \"The identity assertion is missing required claims for account resolution.\"\n}\n```\n\nThe name follows the `insufficient_*` pattern established by RFC 9470 (`insufficient_user_authentication`). It signals \"valid but not enough\", distinguishing this condition from `invalid_grant`, which would indicate the token itself is rejected. \n\n## 2. Error response parameter: `required_claims`\n\nThe error response SHOULD include a `required_claims` parameter: a space-separated list of the claim names the RAS requires, following the same format as `scope` (RFC 6749 Section 3.3):\n\n```json\n{\n  \"error\": \"insufficient_identity_claims\",\n  \"error_description\": \"The identity assertion is missing required claims for account resolution.\",\n  \"required_claims\": \"email department employee_number\"\n}\n```\n\nSpace-separated is the right format here. Claim names are JSON member names and cannot contain spaces, so the delimiter is unambiguous. This is consistent with `scope` and avoids the framework-parsing ambiguity of a JSON array in a form-encoded body (cf. RFC 9396 `authorization_details`, which uses JSON because its values are structured objects; claim names are flat tokens and do not warrant that complexity).\n\n`required_claims` is intentionally defined as a flat list of names. Value constraints, type hints, and schema references are deferred pending real deployment experience.\n\n## 3. Token Exchange request extension parameter: `required_claims`\n\nA Client receiving an `insufficient_identity_claims` error MAY retry the Token Exchange request to the IdP Authorization Server, including the `required_claims` parameter with the value carried directly from the RAS error response:\n\n```\nPOST /oauth2/token\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&requested_token_type=urn:ietf:params:oauth:token-type:id-jag\n&subject_token=<id_token>\n&subject_token_type=urn:ietf:params:oauth:token-type:id_token\n&audience=https://api.example.com/\n&required_claims=email+department+employee_number\n```\n\nThe symmetric naming (`required_claims` in both the error response and the Token Exchange request) means the Client can pass the value through without transformation. \"Required\" reflects the RAS's perspective, which is authoritative: these claims are required for the flow to succeed. It does not obligate the IdP to provide all of them; the IdP SHOULD include the requested claims subject to its own policy (consent, availability, privacy controls), and MAY decline to include specific claims.\n\n## End-to-end flow\n\n```\nClient \u2192 IdP:    Token Exchange \u2192 ID-JAG (minimal claims)\nClient \u2192 RAS:    Token Exchange with ID-JAG\nRAS \u2192 Client:    400 insufficient_identity_claims\n                     required_claims=email department employee_number\nClient \u2192 IdP:    Token Exchange + required_claims=email department employee_number\nIdP \u2192 Client:    ID-JAG with additional claims included\nClient \u2192 RAS:    Token Exchange with enriched ID-JAG\nRAS \u2192 Client:    200 OK, access_token\n```\n\n# Editorial: relax `email` and `aud_sub` to plain OPTIONAL\n\nWith `required_claims` providing the negotiation mechanism, the RECOMMENDED status of `email` and `aud_sub` in Section 2.1 should be downgraded to OPTIONAL. These claims become examples of what a RAS might request rather than a standing recommendation that every IdP include them. The existing guidance language should be replaced with a pointer to the `required_claims` mechanism as the interoperable way to express and negotiate claim requirements, and an example end-to-end flow demonstrating the retry pattern.\n\n# Advanced use case: RAS Token Exchange to IdP\n\nFor deployments where the identity data needed cannot reasonably be pre-embedded in a signed token (because it is large, sensitive, or needs to be fresher than the ID-JAG allows), the RAS MAY perform its own Token Exchange: presenting the received ID-JAG as the subject token to the IdP's token endpoint and requesting an Access Token scoped to the IdP's identity APIs.\n\nThis covers the UserInfo-equivalent pattern without burdening the Client as intermediary, and without embedding what is effectively a profile API response inside the ID-JAG. It should be acknowledged in the spec as a valid deployment pattern with the IdP-side API contract left to a future profile. This keeps the core ID-JAG spec clean and avoids scope creep.\n\n# Optional / future: claim requirements discovery at the RAS\n\nTo allow IdPs to import a RAS's claim requirements at onboarding time rather than waiting for a runtime error, the RAS could advertise the claims it needs for JIT provisioning via its Authorization Server metadata (RFC 8414), using a new metadata parameter scoped to this profile (to avoid collision with base OAuth or other profiles).\n\nThis is an optimization for IdP onboarding UX, not a correctness requirement. The runtime `insufficient_identity_claims` negotiation works without it. Worth raising for debate; not a blocker for the core proposal.\n\n---\n\n# Questions for the group\n\n1. **Error name:** `insufficient_identity_claims` (cause, RFC 9470 pattern)  or alternative?\n2. **IdP acknowledgment:** Should the IdP be required to indicate in the ID-JAG which claims from `required_claims` it was able to include, or is the Client expected to inspect the resulting token before retrying at the RAS?\n3. **RAS-to-IdP Token Exchange:** Should the advanced pattern be noted in Security Considerations? The RAS acting as an OAuth client to the IdP has trust and SSRF implications worth calling out even if the pattern itself is out of scope.",
       "createdAt": "2026-04-14T22:49:22Z",
-      "updatedAt": "2026-05-01T17:20:36Z",
+      "updatedAt": "2026-05-22T11:02:50Z",
       "closedAt": null,
       "comments": [
         {
@@ -2309,15 +2316,15 @@
       "id": "I_kwDOKv5r-s7-qb3W",
       "title": "Clarify cross-domain use restriction",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/84",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "> This specification is intended for cross-domain uses where the Client, Resource App, and Identity Provider are all in different trust domains. In particular, the Identity Provider MUST NOT issue access tokens in response to an ID-JAG it issued itself. Doing so could lead to unintentional broadening of the scope of authorization.\n\nThis should not preclude a single piece of software from being both an IdP and Resource AS.\n\n",
       "createdAt": "2026-04-16T00:47:33Z",
-      "updatedAt": "2026-04-16T01:13:14Z",
-      "closedAt": null,
+      "updatedAt": "2026-05-21T21:49:34Z",
+      "closedAt": "2026-05-21T21:49:11Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -2344,10 +2351,12 @@
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-126"
+      ],
       "body": "The current draft generally assumes confidential clients at the Resource Authorization Server (RAS), and the Security Considerations say that this specification `SHOULD` only be supported for confidential clients. The draft also notes in Cross-Domain Client ID Handling that requiring a confidential client at the RAS helps prevent the IdP from delegating access to any valid client at the RAS.\n\nAt the same time, the draft now defines proof-of-possession / key-binding for ID-JAG using `cnf` and DPoP. That raises a question about whether the spec should allow an explicit tradeoff here.\n\n**Deployment model to discuss**\n\n- The client is confidential at the IdP.\n- The client is public at the RAS, or the RAS otherwise does not require confidential client authentication for this exchange.\n- The client includes DPoP in the token exchange to the IdP.\n- The IdP issues a key-bound ID-JAG with a `cnf` / `jkt`.\n- The client presents DPoP when exchanging the ID-JAG at the RAS.\n- The RAS verifies that the DPoP key matches the `cnf` in the ID-JAG.\n\n**Why allow this**\n\n- Credential lifecycle can be centralized at the IdP.\n- The client does not need to maintain separate credentials with each RAS.\n- This may be useful in ecosystems with many downstream RAS deployments.\n- Client ID Metadata Document (CIMD) helps address part of this problem when adopted, but it will not always be available immediately.\n- This could make the deployment model possible until CIMD becomes more widely deployed.\n\n**Tradeoff**\n\nThis is not equivalent to requiring a confidential client at the RAS.\n\nWhat is preserved:\n\n- Replay resistance for the ID-JAG, assuming the RAS requires proof-of-possession and validates `cnf` against the proof token.\n- Stronger protection than an unconstrained bearer-style exchange.\n\nWhat is reduced:\n\n- The RAS no longer gets the same client-authentication assurance it gets from a confidential registration at the RAS.\n- The anti-client-substitution property is weaker unless the spec explicitly defines how public-client identification is handled in this profile.\n\n**Question**\n\nShould the specification explicitly allow this tradeoff?\n\nPossible direction:\n\n- Keep confidential registration at the RAS as the recommended/default model.\n- Allow RAS deployments to accept public clients for ID-JAG exchange when the ID-JAG is key-bound and the proof token presented to the RAS matches the `cnf`.\n- Clarify that this does not require any RAS to support public clients.\n- A RAS, or the administrator/operator of that RAS, can always decide to require confidential registration instead.\n- In that sense, this change would make the model possible, not mandatory, until CIMD is more widely deployed.\n\nIf the spec does allow this, it would likely need explicit processing rules for this profile, for example:\n\n- `cnf` in the ID-JAG is required.\n- Proof-of-possession at the RAS is required.\n- The proof key MUST match the `cnf` in the ID-JAG.\n- The RAS SHOULD issue only sender-constrained access tokens in this case.\n- The client identification / `client_id` matching rules need to be defined for public clients at the RAS.\n\nThe main question is whether the spec should permit this as an optional deployment tradeoff, while still allowing any RAS to require confidential registration.",
       "createdAt": "2026-04-20T23:01:03Z",
-      "updatedAt": "2026-04-20T23:01:03Z",
+      "updatedAt": "2026-05-21T21:01:54Z",
       "closedAt": null,
       "comments": []
     },
@@ -2356,15 +2365,15 @@
       "id": "I_kwDOKv5r-s8AAAABAQbzhw",
       "title": "Add `authorization_grant_profiles_supported` to client metadata too",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/90",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "Clients should be able to advertise support for this profile via DCR/CIMD as well.\n\nThis would need a new section \"Client Metadata\" after \"Authorization Server Metadata\", and a new IANA registry section to add `authorization_grant_profiles_supported` and `urn:ietf:params:oauth:grant-profile:id-jag` to the [DCR registry](https://www.iana.org/assignments/oauth-parameters/oauth-parameters.xhtml#client-metadata).",
       "createdAt": "2026-04-22T22:34:36Z",
-      "updatedAt": "2026-04-22T22:34:36Z",
-      "closedAt": null,
+      "updatedAt": "2026-05-21T21:49:34Z",
+      "closedAt": "2026-05-21T20:57:37Z",
       "comments": []
     },
     {
@@ -2455,7 +2464,7 @@
       "labels": [],
       "body": "When a Resource Authorization Server is configured to the enterprise IdP with SAML for SSO, the values currently in the ID-JAG are not able to be mapped to their SAML equivalents.\n\nFor example, the Resource AS might recognize a SAML issuer like `https://example.com/exk33qwjcwDda7luK346` and receive SAML NameIds that are a username or email address. An ID-JAG will contain an OIDC issuer URL like `https://tenant123.example.com/` and subject identifiers that are a random string. (there is no guarantee the SAML issuer and OIDC issuer domain names have anything in common.)\n\nWhen a Resource AS is configured for SAML SSO, what are the options for how it can map the ID-JAG values to the SAML SSO connection? As far as I can tell there are a couple options for the issuer:\n\n* No change to the ID-JAG, require that the customer manually add the OIDC issuer URL into their SAML SSO configuration. This provides the AS the association between the SAML issuer and OIDC issuer.\n* Include the SAML issuer in the ID-JAG somewhere.\n\nFor the user ID question, the options would be:\n\n* Send whatever value the SAML NameId would have been in the ID-JAG `sub` (this is currently allowed according to [section 3.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-03.html#section-3.1) because it would be \"the same as the subject identifier used in an Identity Assertion for the Resource Authorization Server as a Relying Party for Single Sign-On (SSO)\")\n* Send the SAML NameId as a new claim in the ID-JAG\n\nIf we go with adding new claims to the ID-JAG, the question becomes whether these should be SAML-specific claims or something generic, e.g.\n\n* `saml_issuer` and `saml_nameid`\n* `alt_issuer` and `alt_sub`\n\n### Minimal Changed Example ID-JAG\n\n```\n{\n  \"typ\": \"oauth-id-jag+jwt\"\n}\n.\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"user@idp.example\",                  /* assuming email addresses were sent as SAML NameId */\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"f53f191f9311af35\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"resource\": \"https://acme.chat.example/api\",\n  \"scope\": \"chat.read chat.history\"\n}\n.\nsignature\n```\n\n### Example ID-JAG with New Claims\n\n```\n{\n  \"typ\": \"oauth-id-jag+jwt\"\n}\n.\n{\n  \"jti\": \"9e43f81b64a33f20116179\",\n  \"iss\": \"https://acme.idp.example\",\n  \"sub\": \"U019488227\",\n  \"alt_iss\": \"https://idp.example/exk33qwjcwDda7luK346\",\n  \"alt_sub\": \"user@idp.example\",\n  \"aud\": \"https://acme.chat.example/\",\n  \"client_id\": \"f53f191f9311af35\",\n  \"exp\": 1311281970,\n  \"iat\": 1311280970,\n  \"resource\": \"https://acme.chat.example/api\",\n  \"scope\": \"chat.read chat.history\"\n}\n.\nsignature\n```\n\n",
       "createdAt": "2026-05-13T18:48:08Z",
-      "updatedAt": "2026-05-20T19:59:52Z",
+      "updatedAt": "2026-05-21T21:49:35Z",
       "closedAt": "2026-05-20T19:59:52Z",
       "comments": [
         {
@@ -7056,6 +7065,117 @@
               "body": "@aaronpk anchored to the SAML SSO assertion shape it issues to the target RAS",
               "createdAt": "2026-05-20T03:45:03Z",
               "updatedAt": "2026-05-20T03:45:04Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 96,
+      "id": "PR_kwDOKv5r-s7eBxx4",
+      "title": "Add Client Metadata support for authorization_grant_profiles_supported",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/96",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Lets a client advertise the ID-JAG profile via `authorization_grant_profiles_supported` in its Dynamic Client Registration metadata (RFC 7591) or Client ID Metadata Document. \r\n\r\nRequires both `token-exchange` and `jwt-bearer` grant types, matching the client's two roles.\r\n\r\nResolves #90 ",
+      "createdAt": "2026-05-21T16:49:35Z",
+      "updatedAt": "2026-05-21T20:58:07Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "c5b6adc7ff12206c8009346a1494551b392410d2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "authorization_grant_profiles_supported",
+      "headRefOid": "499606b3c0d06fa34f181ca3cf7b19760569e4bc",
+      "closedAt": "2026-05-21T20:57:36Z",
+      "mergedAt": "2026-05-21T20:57:36Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "09de7a8f9ad361884831cc0ee64c74b8ef1c9302"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABArlOIw",
+          "commit": {
+            "abbreviatedOid": "499606b"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-05-21T20:57:27Z",
+          "updatedAt": "2026-05-21T20:57:27Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 97,
+      "id": "PR_kwDOKv5r-s7eE_4o",
+      "title": "Attempt to clarify XAA as the pattern and ID-JAG as the OAuth 2.0 Profile",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/97",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR attempts to add additional clarity on XAA vs ID-JAG",
+      "createdAt": "2026-05-21T19:31:29Z",
+      "updatedAt": "2026-05-21T20:58:54Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "c5b6adc7ff12206c8009346a1494551b392410d2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "xaa-clarify",
+      "headRefOid": "06583220cf8e675f10721677aa7e0e84719d36d2",
+      "closedAt": "2026-05-21T20:58:38Z",
+      "mergedAt": "2026-05-21T20:58:38Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "57b3db0bacfa9d11cb7f81e7e9722f9a34fdc1dc"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABArgV1w",
+          "commit": {
+            "abbreviatedOid": "07159c9"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-05-21T20:47:25Z",
+          "updatedAt": "2026-05-21T20:47:25Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "```suggestion\nThis specification defines Cross-App Access (XAA): a pattern in which an application's access to another application's API is mediated by the IdP that both applications already trust for SSO and subject resolution. XAA extends the IdP's role from single sign-on to brokering cross-domain API access, using the same trust relationships that already exist for SSO.\n```",
+              "createdAt": "2026-05-21T20:47:25Z",
+              "updatedAt": "2026-05-21T20:47:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABArhmMw",
+          "commit": {
+            "abbreviatedOid": "07159c9"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-05-21T20:49:56Z",
+          "updatedAt": "2026-05-21T20:49:56Z",
+          "comments": [
+            {
+              "originalPosition": 24,
+              "body": "```suggestion\nXAA is built on top of OAuth 2.0 by profiling \"Identity Chaining Across Trust Domains\" {{I-D.ietf-oauth-identity-chaining}}, which combines OAuth 2.0 Token Exchange {{RFC8693}} and the JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants {{RFC7523}} to chain a JWT authorization grant across trust domains. Identity Chaining intentionally leaves many details unspecified in order to support multiple use cases. This specification profiles it for XAA by defining:\n```",
+              "createdAt": "2026-05-21T20:49:56Z",
+              "updatedAt": "2026-05-21T20:50:30Z"
             }
           ]
         }
