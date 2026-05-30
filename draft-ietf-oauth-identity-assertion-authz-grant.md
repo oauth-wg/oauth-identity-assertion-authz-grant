@@ -273,7 +273,7 @@ A non-normative example JWT with expanded header and payload claims is below:
     .
     signature
 
-The ID-JAG may contain additional authentication, identity, or authorization claims that are valid for an ID Token {{OpenID.Core}} as the grant functions as both an Identity Assertion and authorization delegation for the Resource Authorization Server.
+The ID-JAG conveys claims about three subjects: the End-User identified by `sub` (including identity, authentication context, and audience-scoped authorization context such as roles or entitlements at the target application), the OAuth 2.0 client identified by `client_id` that will act on behalf of the End-User at the Resource Authorization Server, and, when present, the actor identified by `act` ({{Section 4.1 of RFC8693}}). The IdP Authorization Server populates these claims for the specific Resource Authorization Server identified by `aud`, in the same way it would populate audience-scoped claims into an ID Token or SAML Assertion issued to that Resource Authorization Server. Any claim that would be valid in an ID Token {{OpenID.Core}} may appear in the ID-JAG, since the grant functions as both an Identity Assertion and an authorization delegation for the Resource Authorization Server.
 
 It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim. The Resource Authorization Server MAY use these claims for subject resolution, including JIT provisioning, for example when the user has not yet SSO'd into the Resource Authorization Server. Additional Resource Authorization Server specific identity claims MAY be needed for subject resolution.
 
