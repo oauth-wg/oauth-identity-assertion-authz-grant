@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-28T00:21:03.262486+00:00",
+  "timestamp": "2026-05-31T00:22:07.635695+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -7187,6 +7187,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 98,
+      "id": "PR_kwDOKv5r-s7g-8XS",
+      "title": "Clarify subjects whose claims the ID-JAG conveys",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/98",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\nClarifies which subjects' claims appear in an ID-JAG and how the IdP populates them, without changing normative behavior.\n\n- Names the three subjects: End-User (`sub`), OAuth client (`client_id`), and optional actor (`act`).\n- Anchors audience-scoped claim population to the same model IdPs already use for ID Tokens and SAML Assertions issued to the target Resource Authorization Server.\n- Preserves the prior text's OpenID Core reference and the \"Identity Assertion plus authorization delegation\" framing as the closing sentence.\n\n## Motivation\n\nImplementer feedback indicated the previous text (`The ID-JAG may contain additional authentication, identity, or authorization claims...`) didn't make the implicit claim model obvious. In particular, audience-scoped authorization claims about the End-User (such as roles or entitlements at the target application) are first-class ID-JAG content. Naming the subjects explicitly and pointing to the existing IdP pattern resolves that without introducing new normative requirements or new claim shapes.\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm cross-references resolve\n- [ ] Confirm no anchors changed",
+      "createdAt": "2026-05-30T18:28:34Z",
+      "updatedAt": "2026-05-30T18:28:34Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "clarify-claim-subjects",
+      "headRefOid": "4e6e69283f999a37aa37ca919631ed471193a687",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
