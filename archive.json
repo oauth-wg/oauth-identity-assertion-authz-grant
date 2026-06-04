@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-05-31T00:22:07.635695+00:00",
+  "timestamp": "2026-06-04T00:32:44.379479+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2395,7 +2395,7 @@
       "labels": [],
       "body": "Hi Everyone, \n\nI've been slowly reviewing the standard document and came across a couple of cases I wanted to bring up:\n\nFirst:\n>    resource:  OPTIONAL - The Resource Identifier (Section 2 of\n      [RFC8707]) of the Resource Server (either a single URI or an array\n      of URIs).\n\nCan we change this claim description to always be an array of URIs? I understand the recommendation is very nit-picky, although it would be much easier for ID_JAG consumers to handle 'resource' claim validation if it's included.\n\nSecond: \n>    client_id:  REQUIRED - The client identifier of the OAuth 2.0\n      [RFC6749] client at the Resource Authorization Server that will\n      act on behalf of the resource owner (sub).  This identifier MAY be\n      different that client identifier of the OAuth 2.0 client\n      requesting an ID-JAG from the IdP Section 4.3 of [RFC8693] as it\n      represents and independent client relationship to another\n      Authorization Server in a different trust domain.  See Section 5\n      for additional considerations.\n\nI understand the purpose of this claim and it makes sense, although maintenance of these client_id's can become very cumbersome in large scale deployments, I envision the client_id should be manually set at the AS and there isn't any dynamic relationship between the AS and the Resource Authorization Server. Also perhaps dpop can be used to accomplish the same outcome.\n\nI want to suggest to change the type from \"REQUIRED\" to \"RECOMMENDED\". The change would potentially help with the large scale maintenance issues.\n\nThanks,\nJamshid",
       "createdAt": "2026-04-27T17:31:48Z",
-      "updatedAt": "2026-04-28T11:53:25Z",
+      "updatedAt": "2026-06-02T23:41:55Z",
       "closedAt": null,
       "comments": [
         {
@@ -2404,6 +2404,13 @@
           "body": "On the second item, worth noting that the direction of #85 would reduce the usefulness of a `client_id` claim. Which might be further rational for not having it REQUIRED. ",
           "createdAt": "2026-04-28T11:53:25Z",
           "updatedAt": "2026-04-28T11:53:25Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "fwiw [Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) also solves the client ID management problem at scale.\n\nAs for the `resource` parameter, I recognize some programming languages don't like dynamically typed values, but I'm not sure that's enough of a reason to restrict this to always be an array. ",
+          "createdAt": "2026-06-02T23:41:55Z",
+          "updatedAt": "2026-06-02T23:41:55Z"
         }
       ]
     },
@@ -2536,6 +2543,30 @@
           "body": "I agree with this approach of adding a complex claim that adds format specifier. It provides enough context and includes info on how to interpret the claim.",
           "createdAt": "2026-05-19T18:56:33Z",
           "updatedAt": "2026-05-19T18:56:33Z"
+        }
+      ]
+    },
+    {
+      "number": 99,
+      "id": "I_kwDOKv5r-s8AAAABELxcDw",
+      "title": "Mention OpenID Connect scopes in the Token Exchange request explicitly",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/99",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently there is no mention of whether OpenID Connect scopes are allowed or not in the [Token Exchange step](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.3) of the flow.\n\nThe text says \n\n> The space-separated list of scopes at the Resource Server that is being requested.\n\nand OpenID Connect scopes are meant for client consumption, not resource server consumption, so it's kind of implied that they should not be accepted in the Token Exchange request.\n\nThoughts are welcome about which direction to go, but in either case we should mention that either they are acceptable in the request or they must not be included in the request.",
+      "createdAt": "2026-06-02T23:44:29Z",
+      "updatedAt": "2026-06-02T23:49:28Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "If there a mechanism to address #83 then I'm included to keep these scopes restricted to OIDC semantics of ID Token and/or Access Token and not ID-JAG as there is other solutions to get claims into the ID-JAG.  Without a solution to #83 then folks will want a way to get additional user claims into the ID-JAG based on the token exchange request which would lead them to re-using OIDC scopes.",
+          "createdAt": "2026-06-02T23:49:28Z",
+          "updatedAt": "2026-06-02T23:49:28Z"
         }
       ]
     }
@@ -6713,7 +6744,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2026-04-22T22:17:29Z",
-      "updatedAt": "2026-05-20T20:07:01Z",
+      "updatedAt": "2026-06-02T10:42:45Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "35ef6063b260bd7e6fb9157079f2496b74e2d57c",
@@ -6742,9 +6773,9 @@
         {
           "author": "bc-pi",
           "authorAssociation": "COLLABORATOR",
-          "body": "I must confess to some reservations with this. Dispute some familiarity with RFCs 9470 and 8693, this wasn't a combination I'd necessarily envisioned. I realize there's already some text about Step-Up in the document but I'm not sure the existence of some text is necessarily convincing for doing more. And some awkwardness here, to me anyway, points to fundamental things not readily resolvable with comments on a PR. ",
+          "body": "I must confess to some reservations with this. Despite some familiarity with RFCs 9470 and 8693, this wasn't a combination I'd necessarily envisioned. I realize there's already some text about Step-Up in the document but I'm not sure the existence of some text is necessarily convincing for doing more. And some awkwardness here, to me anyway, points to fundamental things not readily resolvable with comments on a PR. ",
           "createdAt": "2026-04-28T18:10:36Z",
-          "updatedAt": "2026-04-28T18:10:36Z"
+          "updatedAt": "2026-06-02T10:42:45Z"
         },
         {
           "author": "aaronpk",
