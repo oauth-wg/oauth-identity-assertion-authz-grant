@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-04T00:32:44.379479+00:00",
+  "timestamp": "2026-06-14T00:25:28.351107+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2567,6 +2567,37 @@
           "body": "If there a mechanism to address #83 then I'm included to keep these scopes restricted to OIDC semantics of ID Token and/or Access Token and not ID-JAG as there is other solutions to get claims into the ID-JAG.  Without a solution to #83 then folks will want a way to get additional user claims into the ID-JAG based on the token exchange request which would lead them to re-using OIDC scopes.",
           "createdAt": "2026-06-02T23:49:28Z",
           "updatedAt": "2026-06-02T23:49:28Z"
+        }
+      ]
+    },
+    {
+      "number": 100,
+      "id": "I_kwDOKv5r-s8AAAABFVR7TA",
+      "title": "Should SAML->RT->ID-JAG flow suggest or require the `email` scope?",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/100",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently the spec says the client MUST request the `openid offline_access` scopes when exchanging the SAML assertion for refresh token.\n\nIt is likely, but not guaranteed, that the SAML assertion that the client has would already include the email address. (SAML can be configured to return opaque values for the `NameId`, and there is no guarantee the IdP would be configured to send an `email` attribute.)\n\nIf the SAML assertion did not have the email, you could argue the client should request the email scope because the ID-JAG will be visible to the client and would contain information beyond what is in the SAML assertion.\n\nHowever, the purpose of including the `email` in the ID-JAG is for the benefit of the Resource AS, when it looks up users by email address from the SAML assertion. This behavior isn't necessarily known by the client, since it's about the relationship between the Resource AS and IdP.\n\nSo the question is whether we want to keep the text as is with the `email` claim being optional, or aim for better interoperability by suggesting/requiring that the client request the `email` scope.\n\nAlso note that if the IdP includes the `sub_id` property with the SAML NameId values, then the Resource AS likely won't need to rely on the `email` claim at all.",
+      "createdAt": "2026-06-12T21:48:18Z",
+      "updatedAt": "2026-06-12T22:51:35Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This seems related to #99  and #83.   The lack of interop mechanism for a client to know what claims and needed and how to request them.  I don't think it makes sense to make `email` claim required as it's deployment specific.  Same with requiring a client to request `email` scope.  Its perfectly valid for a deployment to only use sub and sub_id and not email.  \n\nThe IdP AS isn't limited to minting claims in the ID-JAG that were only present in the subject_token.  Why can't the IdP AS make the decision to always send the email claim to a given RAS? ",
+          "createdAt": "2026-06-12T22:34:59Z",
+          "updatedAt": "2026-06-12T22:34:59Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "> The IdP AS isn't limited to minting claims in the ID-JAG that were only present in the subject_token.\n\nTechnically true, my thought there was along the privacy lines. If the client doesn't request `email`, but the IdP returns `email` in the ID-JAG, the client learns more than needed about the user. It's not really a concern in the enterprise scenario, but could be in the consumer scenarios. Maybe it doesn't matter because if the IdP is concerned about revealing info to the client it should always just not return that info even if the client requested it.",
+          "createdAt": "2026-06-12T22:51:35Z",
+          "updatedAt": "2026-06-12T22:51:35Z"
         }
       ]
     }
