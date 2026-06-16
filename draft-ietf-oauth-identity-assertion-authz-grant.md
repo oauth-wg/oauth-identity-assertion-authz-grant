@@ -41,6 +41,9 @@ author:
 
 normative:
   RFC6749:
+  RFC7516:
+  RFC7517:
+  RFC7518:
   RFC7519:
   RFC7521:
   RFC7523:
@@ -99,6 +102,7 @@ informative:
   RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
+  I-D.ietf-jose-hpke-encrypt:
 
 --- abstract
 
@@ -276,6 +280,95 @@ A non-normative example JWT with expanded header and payload claims is below:
 The ID-JAG may contain additional authentication, identity, or authorization claims that are valid for an ID Token {{OpenID.Core}} as the grant functions as both an Identity Assertion and authorization delegation for the Resource Authorization Server.
 
 It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim. The Resource Authorization Server MAY use these claims for subject resolution, including JIT provisioning, for example when the user has not yet SSO'd into the Resource Authorization Server. Additional Resource Authorization Server specific identity claims MAY be needed for subject resolution.
+
+## Encrypted ID-JAG {#id-jag-encryption}
+
+The ID-JAG MAY be encrypted using JSON Web Encryption (JWE) {{RFC7516}}. Encryption allows an IdP Authorization Server to convey claims that are sensitive or contain personal information (for example `email`, `phone_number`, `sub_id`, or other audience-scoped identity attributes) to a Resource Authorization Server without disclosing them to the Client that presents the ID-JAG. The claims an End-User has consented to release to a Client during SSO are not necessarily the same as the claims the IdP Authorization Server is permitted to release to the audience of an ID-JAG, and encryption preserves that distinction.
+
+When encryption is used, the ID-JAG is produced by signing the claims as a JWS using the IdP Authorization Server's signing key (as for an unencrypted ID-JAG), then encrypting the JWS as the plaintext of a JWE {{RFC7516}} addressed to an encryption key published by the Resource Authorization Server. The specific cryptographic structure (Key Encryption mode, Direct Encryption mode, or Integrated Encryption mode such as the HPKE modes defined in {{I-D.ietf-jose-hpke-encrypt}}) is determined by the chosen JWE `alg` value.
+
+Sign-then-encrypt is REQUIRED. An encrypted ID-JAG without an inner JWS signed by the IdP Authorization Server is invalid; encryption MUST NOT replace the signature.
+
+### JWE Structure
+
+The encrypted ID-JAG is a Nested JWT as described in {{Section 5.2 of RFC7519}}:
+
+- The outer JWE protected header MUST include:
+
+  - `alg`: the algorithm used by the IdP Authorization Server to protect the encrypted ID-JAG, registered in the "JSON Web Signature and Encryption Algorithms" registry {{RFC7518}}. The IdP MUST select a value supported by the target Resource Authorization Server.
+  - `cty`: `JWT`, indicating that the encrypted content is a JWT, per {{Section 5.2 of RFC7519}}.
+  - `kid`: the identifier of the encryption key from the Resource Authorization Server's JWK Set {{RFC7517}} used by the IdP Authorization Server.
+
+- The `enc` header parameter MUST be present when the chosen `alg` is a Key Encryption mode (or other mode that uses a separate content encryption algorithm) under JWE {{RFC7516}}. When `enc` is present, the IdP MUST select a value supported by the target Resource Authorization Server from the "JSON Web Signature and Encryption Algorithms" registry {{RFC7518}}. The `enc` header parameter MUST NOT be present when the chosen `alg` is an Integrated Encryption mode that prohibits `enc`, for example the HPKE Integrated Encryption algorithms defined in {{I-D.ietf-jose-hpke-encrypt}}.
+
+- The outer JWE protected header SHOULD include `typ`: `oauth-id-jag+jwt`, identifying the object as an ID-JAG. The `typ` header on the inner JWS MUST also be `oauth-id-jag+jwt`.
+
+### Issuer Processing (IdP Authorization Server)
+
+The IdP Authorization Server MAY encrypt an ID-JAG when, for the target Resource Authorization Server identified by the `aud` claim, all of the following hold:
+
+1. The Resource Authorization Server's metadata advertises `id_jag_encryption_alg_values_supported` and `id_jag_encryption_enc_values_supported` ({{ras-metadata}}) with at least one algorithm pair the IdP Authorization Server can use.
+2. The Resource Authorization Server publishes at least one JWK with `use` set to `enc` in the JWK Set located by its `jwks_uri` metadata parameter {{RFC8414}}.
+
+The IdP Authorization Server SHOULD encrypt the ID-JAG when local policy classifies any included claim as sensitive for the Client that initiated the Token Exchange, when the Resource Authorization Server's metadata indicates that encryption is required (see {{ras-metadata}}), or when local IdP policy requires encryption for that Resource Authorization Server.
+
+When encrypting, the IdP Authorization Server MUST:
+
+1. Sign the ID-JAG claims as a JWS with `typ` `oauth-id-jag+jwt`, using the same signing key it would use for an unencrypted ID-JAG.
+2. Encrypt the resulting JWS using one of the `alg` values advertised in `id_jag_encryption_alg_values_supported`. When the chosen `alg` requires a separate content encryption algorithm, the IdP MUST also select one of the `enc` values advertised in `id_jag_encryption_enc_values_supported`. When the chosen `alg` is an Integrated Encryption mode that prohibits `enc`, the IdP MUST NOT include the `enc` header parameter.
+3. Use a JWK with `use` set to `enc` from the Resource Authorization Server's JWK Set, identified in the outer JWE header by `kid`.
+
+### Consumer Processing (Resource Authorization Server)
+
+A Resource Authorization Server that supports encrypted ID-JAGs MUST, on receiving an ID-JAG that is a JWE:
+
+1. Decrypt the JWE per {{Section 5.2 of RFC7516}} using its private key corresponding to the `kid` indicated in the outer JWE header.
+2. Verify that the outer JWE `cty` is `JWT`.
+3. Apply all processing rules in {{token-request}} to the decrypted JWS as if it had been received unencrypted, including signature validation, `typ`, `iss`, `aud`, `client_id`, `exp`, and any other claim-level checks.
+
+If decryption fails, the Resource Authorization Server MUST reject the request with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. If the Resource Authorization Server requires encryption for an ID-JAG (per its locally configured policy or its published metadata) and receives an unencrypted ID-JAG (a JWS rather than a JWE), it MUST reject the request with an `invalid_grant` error.
+
+The Resource Authorization Server's encryption keys SHOULD be rotated periodically and published in the JWK Set referenced by its `jwks_uri` metadata parameter so that IdP Authorization Servers can fetch current keys.
+
+### Non-normative Example
+
+A non-normative example encrypted ID-JAG, shown with expanded outer JWE and inner JWS headers and the inner JWS payload:
+
+    {
+      "typ": "oauth-id-jag+jwt",
+      "alg": "RSA-OAEP-256",
+      "enc": "A256GCM",
+      "cty": "JWT",
+      "kid": "ras-enc-2026-01"
+    }
+    .
+    encrypted_key
+    .
+    initialization_vector
+    .
+    ciphertext containing the inner JWS:
+        {
+          "typ": "oauth-id-jag+jwt",
+          "alg": "RS256",
+          "kid": "idp-sig-2026-01"
+        }
+        .
+        {
+          "jti": "9e43f81b64a33f20116179",
+          "iss": "https://acme.idp.example",
+          "sub": "U019488227",
+          "aud": "https://acme.chat.example/",
+          "client_id": "f53f191f9311af35",
+          "exp": 1311281970,
+          "iat": 1311280970,
+          "email": "user@example.com",
+          "email_verified": true,
+          "auth_time": 1311280970
+        }
+        .
+        signature
+    .
+    authentication_tag
 
 ## SAML NameID Subject Identifier {#saml-nameid-subject-identifier}
 
@@ -773,6 +866,8 @@ For example:
 
 All of {{Section 5.2 of RFC7521}} applies, in addition to the following processing rules:
 
+* If the received ID-JAG is a JWE, the Resource Authorization Server MUST first decrypt it as described in {{id-jag-encryption}} and apply the remaining processing rules to the inner JWS. If decryption fails, or if the Resource Authorization Server requires encryption (per its locally configured policy or its published metadata) and receives an unencrypted ID-JAG, the Resource Authorization Server MUST reject the request with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}.
+
 * Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{Section 3.11 of RFC8725}})
 
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
@@ -966,6 +1061,16 @@ To advertise support for issuing an Identity Assertion JWT Authorization Grant v
 
 `urn:ietf:params:oauth:token-type:id-jag`
 
+An IdP Authorization Server that can issue encrypted ID-JAGs ({{id-jag-encryption}}) SHOULD advertise the JWE algorithms it supports for that purpose:
+
+`id_jag_encryption_alg_values_supported`:
+: OPTIONAL - JSON array of JWE `alg` values {{RFC7518}} supported by the IdP Authorization Server when encrypting ID-JAGs.
+
+`id_jag_encryption_enc_values_supported`:
+: OPTIONAL - JSON array of JWE `enc` values {{RFC7518}} supported by the IdP Authorization Server for content encryption when encrypting ID-JAGs in modes that require a separate content encryption algorithm. MAY be omitted when the IdP Authorization Server only supports Integrated Encryption modes that prohibit `enc`.
+
+For a given target Resource Authorization Server, the IdP Authorization Server selects an `alg` from the intersection of its own `id_jag_encryption_alg_values_supported` and the Resource Authorization Server's `id_jag_encryption_alg_values_supported` values ({{ras-metadata}}). When the chosen `alg` requires `enc`, the IdP Authorization Server also selects an `enc` value from the intersection of the corresponding `id_jag_encryption_enc_values_supported` values. If no compatible algorithm selection is possible and the Resource Authorization Server has signaled that encryption is required, the IdP Authorization Server SHOULD reject the Token Exchange request rather than issue an unencrypted ID-JAG.
+
 ## Resource Authorization Server Metadata {#ras-metadata}
 
 A Resource Authorization Server can advertise support for authorization grant profiles in its OAuth Authorization Server Metadata {{RFC8414}} using the `authorization_grant_profiles_supported` metadata parameter.
@@ -979,6 +1084,21 @@ To advertise support for the Identity Assertion JWT Authorization Grant profile,
 `urn:ietf:params:oauth:grant-profile:id-jag`
 
 A Resource Authorization Server that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authorization_grant_profiles_supported` for this specification MUST also include `urn:ietf:params:oauth:grant-type:jwt-bearer` in `grant_types_supported`.
+
+A Resource Authorization Server that accepts encrypted ID-JAGs ({{id-jag-encryption}}) SHOULD advertise the encryption algorithms it supports and publish at least one encryption key:
+
+`id_jag_encryption_alg_values_supported`:
+: OPTIONAL - JSON array of JWE `alg` values {{RFC7518}} supported by the Resource Authorization Server for encrypted ID-JAGs.
+
+`id_jag_encryption_enc_values_supported`:
+: OPTIONAL - JSON array of JWE `enc` values {{RFC7518}} supported by the Resource Authorization Server for content encryption of encrypted ID-JAGs in modes that require a separate content encryption algorithm. MAY be omitted when the Resource Authorization Server only supports Integrated Encryption modes that prohibit `enc`.
+
+`id_jag_encryption_required`:
+: OPTIONAL - Boolean value indicating whether the Resource Authorization Server requires the ID-JAG to be encrypted. If omitted, the default is `false`.
+
+When `id_jag_encryption_alg_values_supported` is present, the Resource Authorization Server MUST also publish at least one JWK with `use` set to `enc` in the JWK Set referenced by its `jwks_uri` metadata parameter {{RFC8414}}.
+
+Publication of `id_jag_encryption_alg_values_supported` together with an encryption key in the published JWK Set constitutes a request that the IdP Authorization Server encrypt ID-JAGs issued for this Resource Authorization Server. When `id_jag_encryption_required` is `true`, the Resource Authorization Server MUST reject unencrypted ID-JAGs as described in {{id-jag-encryption}}.
 
 # Client Metadata {#client-metadata}
 
@@ -1042,7 +1162,17 @@ The Resource Authorization Server MUST use a SAML NameID `sub_id` only when the 
 
 ## Subject Identifier Disclosure {#sub-id-disclosure}
 
-The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.
+The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server. Where additional identifiers cannot be omitted because the Resource Authorization Server requires them, the IdP Authorization Server SHOULD encrypt the ID-JAG to the Resource Authorization Server ({{id-jag-encryption}}) so that those identifiers are not disclosed to the Client.
+
+## Claim Confidentiality {#id-jag-claim-confidentiality}
+
+The claims an End-User has consented to release to a Client during SSO are not necessarily the same as the claims the IdP Authorization Server is permitted to release to the audience of an ID-JAG. An ID-JAG may carry attributes such as `email`, `phone_number`, `sub_id`, audience-scoped enterprise identifiers, or other claims that the Client should not be able to read. Encryption of the ID-JAG ({{id-jag-encryption}}) preserves this distinction by ensuring that only the Resource Authorization Server can decrypt the JWS.
+
+Encryption MUST be applied in addition to, not in place of, the signature on the ID-JAG (sign-then-encrypt). An unsigned but encrypted ID-JAG provides confidentiality without authenticity and is not an acceptable ID-JAG under this specification.
+
+IdP Authorization Servers SHOULD encrypt ID-JAGs whenever they include claims classified as sensitive for the requesting Client under local policy, when the Resource Authorization Server's metadata indicates that encryption is required, or when out-of-band agreements with a Resource Authorization Server call for encryption.
+
+Resource Authorization Servers SHOULD publish encryption keys (`use` set to `enc`) in their JWK Set, rotate them periodically, and remove retired keys from the JWK Set once they are no longer needed for decryption of in-flight ID-JAGs.
 
 ## Actor Delegation Extensions
 
@@ -1108,7 +1238,7 @@ The `cnf` claim format follows {{Section 6.1 of RFC9449}}:
       }
     }
 
-3. The token exchange response does not explicitly indicate whether key binding was successfully performed by the IdP.  The `token_type` response parameter for an ID-JAG is always `N_A` per {{Section 2.2.1 of RFC8693}}. The client SHOULD inspect the ID-JAG to determine if a `cnf` claim is present and whether it represents the same key as the DPoP proof.  This enables the client to detect if the IdP successfully processed the DPoP proof in the token exchange request and bound the issued ID-JAG, preventing the IdP from silently ignoring the DPoP proof and mitigating downgrade attacks.
+3. The token exchange response does not explicitly indicate whether key binding was successfully performed by the IdP.  The `token_type` response parameter for an ID-JAG is always `N_A` per {{Section 2.2.1 of RFC8693}}. When the ID-JAG is not encrypted, the client SHOULD inspect the ID-JAG to determine if a `cnf` claim is present and whether it represents the same key as the DPoP proof.  This enables the client to detect if the IdP successfully processed the DPoP proof in the token exchange request and bound the issued ID-JAG, preventing the IdP from silently ignoring the DPoP proof and mitigating downgrade attacks. When the ID-JAG is encrypted to the Resource Authorization Server ({{id-jag-encryption}}), the client cannot perform this self-check because the JWS payload is not readable by the client; this is a loss of a client-side diagnostic and not a weakening of proof-of-possession itself, since the Resource Authorization Server still decrypts the ID-JAG and enforces the `cnf` binding when the access token is requested. Clients that require this diagnostic SHOULD select Resource Authorization Servers that do not require ID-JAG encryption, or rely on the Resource Authorization Server's enforcement.
 
 4. If no DPoP proof is presented, the IdP issues an ID-JAG without a `cnf` claim.
 
@@ -1224,12 +1354,27 @@ This section registers `urn:ietf:params:oauth:grant-profile:id-jag` in the "OAut
 
 ## OAuth Authorization Server Metadata Registration
 
-This section registers `authorization_grant_profiles_supported` in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+This section registers the following metadata parameters in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
 
 * Metadata Name: `authorization_grant_profiles_supported`
 * Metadata Description: JSON array of supported authorization grant profile identifiers
 * Change Controller: IETF
 * Specification Document: This document
+
+* Metadata Name: `id_jag_encryption_alg_values_supported`
+* Metadata Description: JSON array of JWE `alg` values supported for encrypting or decrypting Identity Assertion JWT Authorization Grants
+* Change Controller: IETF
+* Specification Document: {{id-jag-encryption}}
+
+* Metadata Name: `id_jag_encryption_enc_values_supported`
+* Metadata Description: JSON array of JWE `enc` values supported for encrypting or decrypting Identity Assertion JWT Authorization Grants
+* Change Controller: IETF
+* Specification Document: {{id-jag-encryption}}
+
+* Metadata Name: `id_jag_encryption_required`
+* Metadata Description: Boolean indicating whether the Resource Authorization Server requires Identity Assertion JWT Authorization Grants to be encrypted
+* Change Controller: IETF
+* Specification Document: {{ras-metadata}}
 
 
 ## OAuth Dynamic Client Registration Metadata Registration
