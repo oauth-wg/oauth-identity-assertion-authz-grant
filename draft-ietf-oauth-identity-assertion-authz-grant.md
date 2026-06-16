@@ -102,6 +102,7 @@ informative:
   RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
+  I-D.ietf-jose-hpke-encrypt:
 
 --- abstract
 
@@ -284,7 +285,7 @@ It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud
 
 The ID-JAG MAY be encrypted using JSON Web Encryption (JWE) {{RFC7516}}. Encryption allows an IdP Authorization Server to convey claims that are sensitive or contain personal information (for example `email`, `phone_number`, `sub_id`, or other audience-scoped identity attributes) to a Resource Authorization Server without disclosing them to the Client that presents the ID-JAG. The claims an End-User has consented to release to a Client during SSO are not necessarily the same as the claims the IdP Authorization Server is permitted to release to the audience of an ID-JAG, and encryption preserves that distinction.
 
-When encryption is used, the ID-JAG is produced by signing the claims as a JWS using the IdP Authorization Server's signing key (as for an unencrypted ID-JAG), then encrypting the JWS as the plaintext of a JWE {{RFC7516}} using a content encryption key wrapped by an encryption key published by the Resource Authorization Server.
+When encryption is used, the ID-JAG is produced by signing the claims as a JWS using the IdP Authorization Server's signing key (as for an unencrypted ID-JAG), then encrypting the JWS as the plaintext of a JWE {{RFC7516}} addressed to an encryption key published by the Resource Authorization Server. The specific cryptographic structure (Key Encryption mode, Direct Encryption mode, or Integrated Encryption mode such as the HPKE modes defined in {{I-D.ietf-jose-hpke-encrypt}}) is determined by the chosen JWE `alg` value.
 
 Sign-then-encrypt is REQUIRED. An encrypted ID-JAG without an inner JWS signed by the IdP Authorization Server is invalid; encryption MUST NOT replace the signature.
 
@@ -294,10 +295,11 @@ The encrypted ID-JAG is a Nested JWT as described in {{Section 5.2 of RFC7519}}:
 
 - The outer JWE protected header MUST include:
 
-  - `alg`: the key management algorithm, registered in the "JSON Web Signature and Encryption Algorithms" registry {{RFC7518}}, that the IdP Authorization Server used to wrap the content encryption key. The IdP MUST select a value supported by the target Resource Authorization Server.
-  - `enc`: the content encryption algorithm, registered in the "JSON Web Signature and Encryption Algorithms" registry {{RFC7518}}, that the IdP Authorization Server used to encrypt the JWS plaintext. The IdP MUST select a value supported by the target Resource Authorization Server.
+  - `alg`: the algorithm used by the IdP Authorization Server to protect the encrypted ID-JAG, registered in the "JSON Web Signature and Encryption Algorithms" registry {{RFC7518}}. The IdP MUST select a value supported by the target Resource Authorization Server.
   - `cty`: `JWT`, indicating that the encrypted content is a JWT, per {{Section 5.2 of RFC7519}}.
-  - `kid`: the identifier of the encryption key from the Resource Authorization Server's JWK Set {{RFC7517}} used to wrap the content encryption key.
+  - `kid`: the identifier of the encryption key from the Resource Authorization Server's JWK Set {{RFC7517}} used by the IdP Authorization Server.
+
+- The `enc` header parameter MUST be present when the chosen `alg` is a Key Encryption mode (or other mode that uses a separate content encryption algorithm) under JWE {{RFC7516}}. When `enc` is present, the IdP MUST select a value supported by the target Resource Authorization Server from the "JSON Web Signature and Encryption Algorithms" registry {{RFC7518}}. The `enc` header parameter MUST NOT be present when the chosen `alg` is an Integrated Encryption mode that prohibits `enc`, for example the HPKE Integrated Encryption algorithms defined in {{I-D.ietf-jose-hpke-encrypt}}.
 
 - The outer JWE protected header SHOULD include `typ`: `oauth-id-jag+jwt`, identifying the object as an ID-JAG. The `typ` header on the inner JWS MUST also be `oauth-id-jag+jwt`.
 
@@ -313,7 +315,7 @@ The IdP Authorization Server SHOULD encrypt the ID-JAG when local policy classif
 When encrypting, the IdP Authorization Server MUST:
 
 1. Sign the ID-JAG claims as a JWS with `typ` `oauth-id-jag+jwt`, using the same signing key it would use for an unencrypted ID-JAG.
-2. Encrypt the resulting JWS using one of the `alg` values advertised in `id_jag_encryption_alg_values_supported` and one of the `enc` values advertised in `id_jag_encryption_enc_values_supported`.
+2. Encrypt the resulting JWS using one of the `alg` values advertised in `id_jag_encryption_alg_values_supported`. When the chosen `alg` requires a separate content encryption algorithm, the IdP MUST also select one of the `enc` values advertised in `id_jag_encryption_enc_values_supported`. When the chosen `alg` is an Integrated Encryption mode that prohibits `enc`, the IdP MUST NOT include the `enc` header parameter.
 3. Use a JWK with `use` set to `enc` from the Resource Authorization Server's JWK Set, identified in the outer JWE header by `kid`.
 
 ### Consumer Processing (Resource Authorization Server)
@@ -1062,12 +1064,12 @@ To advertise support for issuing an Identity Assertion JWT Authorization Grant v
 An IdP Authorization Server that can issue encrypted ID-JAGs ({{id-jag-encryption}}) SHOULD advertise the JWE algorithms it supports for that purpose:
 
 `id_jag_encryption_alg_values_supported`:
-: OPTIONAL - JSON array of JWE `alg` values {{RFC7518}} supported by the IdP Authorization Server for key management when encrypting ID-JAGs.
+: OPTIONAL - JSON array of JWE `alg` values {{RFC7518}} supported by the IdP Authorization Server when encrypting ID-JAGs.
 
 `id_jag_encryption_enc_values_supported`:
-: OPTIONAL - JSON array of JWE `enc` values {{RFC7518}} supported by the IdP Authorization Server for content encryption when encrypting ID-JAGs.
+: OPTIONAL - JSON array of JWE `enc` values {{RFC7518}} supported by the IdP Authorization Server for content encryption when encrypting ID-JAGs in modes that require a separate content encryption algorithm. MAY be omitted when the IdP Authorization Server only supports Integrated Encryption modes that prohibit `enc`.
 
-For a given target Resource Authorization Server, the IdP Authorization Server selects an `alg` and `enc` pair from the intersection of its own supported values and the Resource Authorization Server's `id_jag_encryption_alg_values_supported` and `id_jag_encryption_enc_values_supported` values ({{ras-metadata}}). If the intersection is empty and the Resource Authorization Server has signaled that encryption is required, the IdP Authorization Server SHOULD reject the Token Exchange request rather than issue an unencrypted ID-JAG.
+For a given target Resource Authorization Server, the IdP Authorization Server selects an `alg` from the intersection of its own `id_jag_encryption_alg_values_supported` and the Resource Authorization Server's `id_jag_encryption_alg_values_supported` values ({{ras-metadata}}). When the chosen `alg` requires `enc`, the IdP Authorization Server also selects an `enc` value from the intersection of the corresponding `id_jag_encryption_enc_values_supported` values. If no compatible algorithm selection is possible and the Resource Authorization Server has signaled that encryption is required, the IdP Authorization Server SHOULD reject the Token Exchange request rather than issue an unencrypted ID-JAG.
 
 ## Resource Authorization Server Metadata {#ras-metadata}
 
@@ -1086,17 +1088,17 @@ A Resource Authorization Server that includes `urn:ietf:params:oauth:grant-profi
 A Resource Authorization Server that accepts encrypted ID-JAGs ({{id-jag-encryption}}) SHOULD advertise the encryption algorithms it supports and publish at least one encryption key:
 
 `id_jag_encryption_alg_values_supported`:
-: OPTIONAL - JSON array of JWE `alg` values {{RFC7518}} supported by the Resource Authorization Server for key management of encrypted ID-JAGs.
+: OPTIONAL - JSON array of JWE `alg` values {{RFC7518}} supported by the Resource Authorization Server for encrypted ID-JAGs.
 
 `id_jag_encryption_enc_values_supported`:
-: OPTIONAL - JSON array of JWE `enc` values {{RFC7518}} supported by the Resource Authorization Server for content encryption of encrypted ID-JAGs.
+: OPTIONAL - JSON array of JWE `enc` values {{RFC7518}} supported by the Resource Authorization Server for content encryption of encrypted ID-JAGs in modes that require a separate content encryption algorithm. MAY be omitted when the Resource Authorization Server only supports Integrated Encryption modes that prohibit `enc`.
 
 `id_jag_encryption_required`:
 : OPTIONAL - Boolean value indicating whether the Resource Authorization Server requires the ID-JAG to be encrypted. If omitted, the default is `false`.
 
-When any of `id_jag_encryption_alg_values_supported` or `id_jag_encryption_enc_values_supported` is present, the Resource Authorization Server MUST also publish at least one JWK with `use` set to `enc` in the JWK Set referenced by its `jwks_uri` metadata parameter {{RFC8414}}.
+When `id_jag_encryption_alg_values_supported` is present, the Resource Authorization Server MUST also publish at least one JWK with `use` set to `enc` in the JWK Set referenced by its `jwks_uri` metadata parameter {{RFC8414}}.
 
-Publication of `id_jag_encryption_alg_values_supported` and `id_jag_encryption_enc_values_supported` together with an encryption key in the published JWK Set constitutes a request that the IdP Authorization Server encrypt ID-JAGs issued for this Resource Authorization Server. When `id_jag_encryption_required` is `true`, the Resource Authorization Server MUST reject unencrypted ID-JAGs as described in {{id-jag-encryption}}.
+Publication of `id_jag_encryption_alg_values_supported` together with an encryption key in the published JWK Set constitutes a request that the IdP Authorization Server encrypt ID-JAGs issued for this Resource Authorization Server. When `id_jag_encryption_required` is `true`, the Resource Authorization Server MUST reject unencrypted ID-JAGs as described in {{id-jag-encryption}}.
 
 # Client Metadata {#client-metadata}
 
