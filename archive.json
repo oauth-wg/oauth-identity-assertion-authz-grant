@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-14T00:25:28.351107+00:00",
+  "timestamp": "2026-06-16T00:32:40.822944+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2600,6 +2600,22 @@
           "updatedAt": "2026-06-12T22:51:35Z"
         }
       ]
+    },
+    {
+      "number": 101,
+      "id": "I_kwDOKv5r-s8AAAABFjXing",
+      "title": "How can a client request a specific `aud_tenant`?",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/101",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "We have `aud_tenant` defined as an ID-JAG claim as follows:\n\n> aud_tenant:\n> OPTIONAL - A JSON string that represents a Resource Authorization Server tenant identifier. This claim is only included when the Resource Authorization Server is multi-tenant and the IdP knows the tenant identifier.\n\nFor the case where the IdP and Resource AS do not use tenanted identifiers, and there are multiple copies of the app behind the Resource AS installed in the IdP, this claim is the only thing that can identify the app.\n\nHow can a client request a particular app? We didn't want to add `aud_tenant` as a claim to the Token Exchange request. We do have text in the `audience` parameter of token exchange:\n\n> IdP Authorization Servers MAY also support implementation-specific audience values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the aud claim.\n\nI think two things need to happen:\n\n* We should define a standardized method for referencing `aud_tenant` here\n* Update the last part to \"...resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the aud claim and aud_tenant\"\n\nThoughts?\n",
+      "createdAt": "2026-06-15T18:00:34Z",
+      "updatedAt": "2026-06-15T18:00:34Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
