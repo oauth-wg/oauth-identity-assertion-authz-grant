@@ -1695,7 +1695,7 @@ signature
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-encrypted-id-jag" class="section-name selfRef">Encrypted ID-JAG</a>
         </h3>
 <p id="section-3.2-1">The ID-JAG <span class="bcp14">MAY</span> be encrypted using JSON Web Encryption (JWE) <span>[<a href="#RFC7516" class="cite xref">RFC7516</a>]</span>. Encryption allows an IdP Authorization Server to convey claims that are sensitive or contain personal information (for example <code>email</code>, <code>phone_number</code>, <code>sub_id</code>, or other audience-scoped identity attributes) to a Resource Authorization Server without disclosing them to the Client that presents the ID-JAG. The claims an End-User has consented to release to a Client during SSO are not necessarily the same as the claims the IdP Authorization Server is permitted to release to the audience of an ID-JAG, and encryption preserves that distinction.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">When encryption is used, the ID-JAG is produced by signing the claims as a JWS using the IdP Authorization Server's signing key (as for an unencrypted ID-JAG), then encrypting the JWS as the plaintext of a JWE <span>[<a href="#RFC7516" class="cite xref">RFC7516</a>]</span> using a content encryption key wrapped by an encryption key published by the Resource Authorization Server.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">When encryption is used, the ID-JAG is produced by signing the claims as a JWS using the IdP Authorization Server's signing key (as for an unencrypted ID-JAG), then encrypting the JWS as the plaintext of a JWE <span>[<a href="#RFC7516" class="cite xref">RFC7516</a>]</span> addressed to an encryption key published by the Resource Authorization Server. The specific cryptographic structure (Key Encryption mode, Direct Encryption mode, or Integrated Encryption mode such as the HPKE modes defined in <span>[<a href="#I-D.ietf-jose-hpke-encrypt" class="cite xref">I-D.ietf-jose-hpke-encrypt</a>]</span>) is determined by the chosen JWE <code>alg</code> value.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
 <p id="section-3.2-3">Sign-then-encrypt is <span class="bcp14">REQUIRED</span>. An encrypted ID-JAG without an inner JWS signed by the IdP Authorization Server is invalid; encryption <span class="bcp14">MUST NOT</span> replace the signature.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
 <div id="jwe-structure">
 <section id="section-3.2.1">
@@ -1708,21 +1708,21 @@ signature
               <p id="section-3.2.1-2.1.1">The outer JWE protected header <span class="bcp14">MUST</span> include:<a href="#section-3.2.1-2.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.2.1-2.1.2.1">
-                  <p id="section-3.2.1-2.1.2.1.1"><code>alg</code>: the key management algorithm, registered in the "JSON Web Signature and Encryption Algorithms" registry <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span>, that the IdP Authorization Server used to wrap the content encryption key. The IdP <span class="bcp14">MUST</span> select a value supported by the target Resource Authorization Server.<a href="#section-3.2.1-2.1.2.1.1" class="pilcrow">¶</a></p>
+                  <p id="section-3.2.1-2.1.2.1.1"><code>alg</code>: the algorithm used by the IdP Authorization Server to protect the encrypted ID-JAG, registered in the "JSON Web Signature and Encryption Algorithms" registry <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span>. The IdP <span class="bcp14">MUST</span> select a value supported by the target Resource Authorization Server.<a href="#section-3.2.1-2.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-3.2.1-2.1.2.2">
-                  <p id="section-3.2.1-2.1.2.2.1"><code>enc</code>: the content encryption algorithm, registered in the "JSON Web Signature and Encryption Algorithms" registry <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span>, that the IdP Authorization Server used to encrypt the JWS plaintext. The IdP <span class="bcp14">MUST</span> select a value supported by the target Resource Authorization Server.<a href="#section-3.2.1-2.1.2.2.1" class="pilcrow">¶</a></p>
+                  <p id="section-3.2.1-2.1.2.2.1"><code>cty</code>: <code>JWT</code>, indicating that the encrypted content is a JWT, per <span><a href="https://rfc-editor.org/rfc/rfc7519#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>.<a href="#section-3.2.1-2.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-3.2.1-2.1.2.3">
-                  <p id="section-3.2.1-2.1.2.3.1"><code>cty</code>: <code>JWT</code>, indicating that the encrypted content is a JWT, per <span><a href="https://rfc-editor.org/rfc/rfc7519#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC7519" class="cite xref">RFC7519</a>]</span>.<a href="#section-3.2.1-2.1.2.3.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-3.2.1-2.1.2.4">
-                  <p id="section-3.2.1-2.1.2.4.1"><code>kid</code>: the identifier of the encryption key from the Resource Authorization Server's JWK Set <span>[<a href="#RFC7517" class="cite xref">RFC7517</a>]</span> used to wrap the content encryption key.<a href="#section-3.2.1-2.1.2.4.1" class="pilcrow">¶</a></p>
+                  <p id="section-3.2.1-2.1.2.3.1"><code>kid</code>: the identifier of the encryption key from the Resource Authorization Server's JWK Set <span>[<a href="#RFC7517" class="cite xref">RFC7517</a>]</span> used by the IdP Authorization Server.<a href="#section-3.2.1-2.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
 </li>
             <li class="normal" id="section-3.2.1-2.2">
-              <p id="section-3.2.1-2.2.1">The outer JWE protected header <span class="bcp14">SHOULD</span> include <code>typ</code>: <code>oauth-id-jag+jwt</code>, identifying the object as an ID-JAG. The <code>typ</code> header on the inner JWS <span class="bcp14">MUST</span> also be <code>oauth-id-jag+jwt</code>.<a href="#section-3.2.1-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.1-2.2.1">The <code>enc</code> header parameter <span class="bcp14">MUST</span> be present when the chosen <code>alg</code> is a Key Encryption mode (or other mode that uses a separate content encryption algorithm) under JWE <span>[<a href="#RFC7516" class="cite xref">RFC7516</a>]</span>. When <code>enc</code> is present, the IdP <span class="bcp14">MUST</span> select a value supported by the target Resource Authorization Server from the "JSON Web Signature and Encryption Algorithms" registry <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span>. The <code>enc</code> header parameter <span class="bcp14">MUST NOT</span> be present when the chosen <code>alg</code> is an Integrated Encryption mode that prohibits <code>enc</code>, for example the HPKE Integrated Encryption algorithms defined in <span>[<a href="#I-D.ietf-jose-hpke-encrypt" class="cite xref">I-D.ietf-jose-hpke-encrypt</a>]</span>.<a href="#section-3.2.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-3.2.1-2.3">
+              <p id="section-3.2.1-2.3.1">The outer JWE protected header <span class="bcp14">SHOULD</span> include <code>typ</code>: <code>oauth-id-jag+jwt</code>, identifying the object as an ID-JAG. The <code>typ</code> header on the inner JWS <span class="bcp14">MUST</span> also be <code>oauth-id-jag+jwt</code>.<a href="#section-3.2.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -1748,7 +1748,7 @@ signature
               <p id="section-3.2.2-5.1.1">Sign the ID-JAG claims as a JWS with <code>typ</code> <code>oauth-id-jag+jwt</code>, using the same signing key it would use for an unencrypted ID-JAG.<a href="#section-3.2.2-5.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-3.2.2-5.2">
-              <p id="section-3.2.2-5.2.1">Encrypt the resulting JWS using one of the <code>alg</code> values advertised in <code>id_jag_encryption_alg_values_supported</code> and one of the <code>enc</code> values advertised in <code>id_jag_encryption_enc_values_supported</code>.<a href="#section-3.2.2-5.2.1" class="pilcrow">¶</a></p>
+              <p id="section-3.2.2-5.2.1">Encrypt the resulting JWS using one of the <code>alg</code> values advertised in <code>id_jag_encryption_alg_values_supported</code>. When the chosen <code>alg</code> requires a separate content encryption algorithm, the IdP <span class="bcp14">MUST</span> also select one of the <code>enc</code> values advertised in <code>id_jag_encryption_enc_values_supported</code>. When the chosen <code>alg</code> is an Integrated Encryption mode that prohibits <code>enc</code>, the IdP <span class="bcp14">MUST NOT</span> include the <code>enc</code> header parameter.<a href="#section-3.2.2-5.2.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-3.2.2-5.3">
               <p id="section-3.2.2-5.3.1">Use a JWK with <code>use</code> set to <code>enc</code> from the Resource Authorization Server's JWK Set, identified in the outer JWE header by <code>kid</code>.<a href="#section-3.2.2-5.3.1" class="pilcrow">¶</a></p>
@@ -2846,17 +2846,17 @@ Pragma: no-cache
           <dt id="section-7.1-5.1">
 <code>id_jag_encryption_alg_values_supported</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-7.1-5.2">
-            <p id="section-7.1-5.2.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>alg</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the IdP Authorization Server for key management when encrypting ID-JAGs.<a href="#section-7.1-5.2.1" class="pilcrow">¶</a></p>
+            <p id="section-7.1-5.2.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>alg</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the IdP Authorization Server when encrypting ID-JAGs.<a href="#section-7.1-5.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-7.1-5.3">
 <code>id_jag_encryption_enc_values_supported</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-7.1-5.4">
-            <p id="section-7.1-5.4.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>enc</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the IdP Authorization Server for content encryption when encrypting ID-JAGs.<a href="#section-7.1-5.4.1" class="pilcrow">¶</a></p>
+            <p id="section-7.1-5.4.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>enc</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the IdP Authorization Server for content encryption when encrypting ID-JAGs in modes that require a separate content encryption algorithm. <span class="bcp14">MAY</span> be omitted when the IdP Authorization Server only supports Integrated Encryption modes that prohibit <code>enc</code>.<a href="#section-7.1-5.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 </dl>
-<p id="section-7.1-6">For a given target Resource Authorization Server, the IdP Authorization Server selects an <code>alg</code> and <code>enc</code> pair from the intersection of its own supported values and the Resource Authorization Server's <code>id_jag_encryption_alg_values_supported</code> and <code>id_jag_encryption_enc_values_supported</code> values (<a href="#ras-metadata" class="auto internal xref">Section 7.2</a>). If the intersection is empty and the Resource Authorization Server has signaled that encryption is required, the IdP Authorization Server <span class="bcp14">SHOULD</span> reject the Token Exchange request rather than issue an unencrypted ID-JAG.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
+<p id="section-7.1-6">For a given target Resource Authorization Server, the IdP Authorization Server selects an <code>alg</code> from the intersection of its own <code>id_jag_encryption_alg_values_supported</code> and the Resource Authorization Server's <code>id_jag_encryption_alg_values_supported</code> values (<a href="#ras-metadata" class="auto internal xref">Section 7.2</a>). When the chosen <code>alg</code> requires <code>enc</code>, the IdP Authorization Server also selects an <code>enc</code> value from the intersection of the corresponding <code>id_jag_encryption_enc_values_supported</code> values. If no compatible algorithm selection is possible and the Resource Authorization Server has signaled that encryption is required, the IdP Authorization Server <span class="bcp14">SHOULD</span> reject the Token Exchange request rather than issue an unencrypted ID-JAG.<a href="#section-7.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ras-metadata">
@@ -2875,13 +2875,13 @@ Pragma: no-cache
           <dt id="section-7.2-8.1">
 <code>id_jag_encryption_alg_values_supported</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-7.2-8.2">
-            <p id="section-7.2-8.2.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>alg</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the Resource Authorization Server for key management of encrypted ID-JAGs.<a href="#section-7.2-8.2.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-8.2.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>alg</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the Resource Authorization Server for encrypted ID-JAGs.<a href="#section-7.2-8.2.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-7.2-8.3">
 <code>id_jag_encryption_enc_values_supported</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-7.2-8.4">
-            <p id="section-7.2-8.4.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>enc</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the Resource Authorization Server for content encryption of encrypted ID-JAGs.<a href="#section-7.2-8.4.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-8.4.1"><span class="bcp14">OPTIONAL</span> - JSON array of JWE <code>enc</code> values <span>[<a href="#RFC7518" class="cite xref">RFC7518</a>]</span> supported by the Resource Authorization Server for content encryption of encrypted ID-JAGs in modes that require a separate content encryption algorithm. <span class="bcp14">MAY</span> be omitted when the Resource Authorization Server only supports Integrated Encryption modes that prohibit <code>enc</code>.<a href="#section-7.2-8.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-7.2-8.5">
@@ -2891,8 +2891,8 @@ Pragma: no-cache
 </dd>
         <dd class="break"></dd>
 </dl>
-<p id="section-7.2-9">When any of <code>id_jag_encryption_alg_values_supported</code> or <code>id_jag_encryption_enc_values_supported</code> is present, the Resource Authorization Server <span class="bcp14">MUST</span> also publish at least one JWK with <code>use</code> set to <code>enc</code> in the JWK Set referenced by its <code>jwks_uri</code> metadata parameter <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>.<a href="#section-7.2-9" class="pilcrow">¶</a></p>
-<p id="section-7.2-10">Publication of <code>id_jag_encryption_alg_values_supported</code> and <code>id_jag_encryption_enc_values_supported</code> together with an encryption key in the published JWK Set constitutes a request that the IdP Authorization Server encrypt ID-JAGs issued for this Resource Authorization Server. When <code>id_jag_encryption_required</code> is <code>true</code>, the Resource Authorization Server <span class="bcp14">MUST</span> reject unencrypted ID-JAGs as described in <a href="#id-jag-encryption" class="auto internal xref">Section 3.2</a>.<a href="#section-7.2-10" class="pilcrow">¶</a></p>
+<p id="section-7.2-9">When <code>id_jag_encryption_alg_values_supported</code> is present, the Resource Authorization Server <span class="bcp14">MUST</span> also publish at least one JWK with <code>use</code> set to <code>enc</code> in the JWK Set referenced by its <code>jwks_uri</code> metadata parameter <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>.<a href="#section-7.2-9" class="pilcrow">¶</a></p>
+<p id="section-7.2-10">Publication of <code>id_jag_encryption_alg_values_supported</code> together with an encryption key in the published JWK Set constitutes a request that the IdP Authorization Server encrypt ID-JAGs issued for this Resource Authorization Server. When <code>id_jag_encryption_required</code> is <code>true</code>, the Resource Authorization Server <span class="bcp14">MUST</span> reject unencrypted ID-JAGs as described in <a href="#id-jag-encryption" class="auto internal xref">Section 3.2</a>.<a href="#section-7.2-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3543,6 +3543,10 @@ Cache-Control: no-store
 <a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="I-D.ietf-jose-hpke-encrypt">[I-D.ietf-jose-hpke-encrypt]</dt>
+        <dd>
+<span class="refAuthor">Reddy.K, T.</span>, <span class="refAuthor">Tschofenig, H.</span>, <span class="refAuthor">Banerjee, A.</span>, <span class="refAuthor">Steele, O.</span>, and <span class="refAuthor">M. B. Jones</span>, <span class="refTitle">"Use of Hybrid Public Key Encryption (HPKE) with JSON Web Encryption (JWE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-jose-hpke-encrypt-20</span>, <time datetime="2026-06-15" class="refDate">15 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-jose-hpke-encrypt-20">https://datatracker.ietf.org/doc/html/draft-ietf-jose-hpke-encrypt-20</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="I-D.ietf-oauth-client-id-metadata-document">[I-D.ietf-oauth-client-id-metadata-document]</dt>
         <dd>
 <span class="refAuthor">Parecki, A.</span> and <span class="refAuthor">E. Smith</span>, <span class="refTitle">"OAuth Client ID Metadata Document"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-client-id-metadata-document-01</span>, <time datetime="2026-03-01" class="refDate">1 March 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-01">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-01</a>&gt;</span>. </dd>
