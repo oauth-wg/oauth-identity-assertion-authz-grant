@@ -578,7 +578,7 @@ Table of Contents
       Section 8.3.8 of [OASIS.saml-core-2.0-os]) MUST NOT be used,
       because their values change across sessions and cannot serve as a
       cross-trust-domain identifier.  Other Formats (including
-      emailAddress and persistent) MAY be used; the SAML NameID Subject
+      emailAddress and persistent) MAY be used.  The SAML NameID Subject
       Identifier inherits the lifecycle and subject-resolution
       properties of the underlying Format.  For example, when
       emailAddress is used, the same considerations that apply to SAML
@@ -609,21 +609,21 @@ Table of Contents
       example, an attribute in the <AttributeStatement> such as the
       http://schemas.microsoft.com/identity/claims/objectidentifier
       attribute used by Microsoft Entra ID).  In those deployments, the
-      SAML NameID Subject Identifier is not the correct vehicle; the IdP
-      Authorization Server SHOULD convey the relevant attribute value as
-      an additional claim in the ID-JAG so the Resource Authorization
-      Server can perform subject resolution.  The choice of attribute
-      and identifier type is deployment-specific: a SAML Service
-      Provider and Resource Authorization Server may use either pairwise
-      (different values per Service Provider) or public (a single value
-      across Service Providers) identifiers, depending on local needs.
-      Immutable identifiers are preferred.  Mutable identifiers (such as
-      emailAddress) MAY be used for subject resolution, subject to the
-      considerations described in the Stability requirement above.  When
-      the attribute is pairwise per Service Provider, the IdP
-      Authorization Server MUST use the value scoped to the SAML Service
-      Provider corresponding to the target Resource Authorization
-      Server.
+      SAML NameID Subject Identifier is not the correct vehicle.  The
+      IdP Authorization Server SHOULD convey the relevant attribute
+      value as an additional claim in the ID-JAG so the Resource
+      Authorization Server can perform subject resolution.  The choice
+      of attribute and identifier type is deployment-specific: a SAML
+      Service Provider and Resource Authorization Server may use either
+      pairwise (different values per Service Provider) or public (a
+      single value across Service Providers) identifiers, depending on
+      local needs.  Immutable identifiers are preferred.  Mutable
+      identifiers (such as emailAddress) MAY be used for subject
+      resolution, subject to the considerations described in the
+      Stability requirement above.  When the attribute is pairwise per
+      Service Provider, the IdP Authorization Server MUST use the value
+      scoped to the SAML Service Provider corresponding to the target
+      Resource Authorization Server.
 
    The Resource Authorization Server MAY use sub_id for subject
    resolution when it supports the indicated Subject Identifier Format.
