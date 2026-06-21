@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-18T00:28:58.808915+00:00",
+  "timestamp": "2026-06-21T00:25:51.277000+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2395,7 +2395,7 @@
       "labels": [],
       "body": "Hi Everyone, \n\nI've been slowly reviewing the standard document and came across a couple of cases I wanted to bring up:\n\nFirst:\n>    resource:  OPTIONAL - The Resource Identifier (Section 2 of\n      [RFC8707]) of the Resource Server (either a single URI or an array\n      of URIs).\n\nCan we change this claim description to always be an array of URIs? I understand the recommendation is very nit-picky, although it would be much easier for ID_JAG consumers to handle 'resource' claim validation if it's included.\n\nSecond: \n>    client_id:  REQUIRED - The client identifier of the OAuth 2.0\n      [RFC6749] client at the Resource Authorization Server that will\n      act on behalf of the resource owner (sub).  This identifier MAY be\n      different that client identifier of the OAuth 2.0 client\n      requesting an ID-JAG from the IdP Section 4.3 of [RFC8693] as it\n      represents and independent client relationship to another\n      Authorization Server in a different trust domain.  See Section 5\n      for additional considerations.\n\nI understand the purpose of this claim and it makes sense, although maintenance of these client_id's can become very cumbersome in large scale deployments, I envision the client_id should be manually set at the AS and there isn't any dynamic relationship between the AS and the Resource Authorization Server. Also perhaps dpop can be used to accomplish the same outcome.\n\nI want to suggest to change the type from \"REQUIRED\" to \"RECOMMENDED\". The change would potentially help with the large scale maintenance issues.\n\nThanks,\nJamshid",
       "createdAt": "2026-04-27T17:31:48Z",
-      "updatedAt": "2026-06-02T23:41:55Z",
+      "updatedAt": "2026-06-19T05:28:53Z",
       "closedAt": null,
       "comments": [
         {
@@ -2411,6 +2411,20 @@
           "body": "fwiw [Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-ietf-oauth-client-id-metadata-document/) also solves the client ID management problem at scale.\n\nAs for the `resource` parameter, I recognize some programming languages don't like dynamically typed values, but I'm not sure that's enough of a reason to restrict this to always be an array. ",
           "createdAt": "2026-06-02T23:41:55Z",
           "updatedAt": "2026-06-02T23:41:55Z"
+        },
+        {
+          "author": "sdesen",
+          "authorAssociation": "NONE",
+          "body": "making client id optional would conflict with the 4.4.1 processing rules with dictate it must match the client authentication ",
+          "createdAt": "2026-06-19T05:21:53Z",
+          "updatedAt": "2026-06-19T05:21:53Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@sdesen #85 has a proposal to relax that constraint for sender-constrained assertions.  There isn't consensus on the issue and there real security tradeoffs but advantages for deployability. ",
+          "createdAt": "2026-06-19T05:28:53Z",
+          "updatedAt": "2026-06-19T05:28:53Z"
         }
       ]
     },
@@ -2725,6 +2739,30 @@
           "body": "Yes my apologies it was a malformed issue and too broad. \n\nThe immutability of the subject identifier in the identity assertion which the idp consumes is critical to the trust relationships here because it is used to map a user across multiple trust domains.\n\nIn the following section, I could imagine even where the NameId is mapped to the version used for sso initial account creation (compliant with the MUST statement), a certain saml Implmemtation might not break if the NameId is modified. For example, NameId is modified in the assertion but sso succeeds for the same user and target app. Additionally NameId does not need to be globally unique to an idp and only to the relying party.for example here in these msft docs, the sso uses a different claim than NameId. https://learn.microsoft.com/en-us/entra/identity-platform/single-sign-on-saml-protocol\n\n\nSo my suggestion is that at a minimum, in this section, also mention the assumptions about uniqueness and immutability to the NameId claim, or to suggest a claim mapping\n\nhttps://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-subject-identifier-processi\n",
           "createdAt": "2026-06-16T22:19:36Z",
           "updatedAt": "2026-06-16T22:19:36Z"
+        }
+      ]
+    },
+    {
+      "number": 106,
+      "id": "I_kwDOKv5r-s8AAAABF-hLpQ",
+      "title": "What should this spec say about DPoP server-provided nonces and replay protection?",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/106",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "Is there anything this spec needs to say about server-provided nonces? \n\n* [authorization server provided nonce](https://datatracker.ietf.org/doc/html/rfc9449#name-authorization-server-provid)\n* [resource server provided nonce](https://datatracker.ietf.org/doc/html/rfc9449#name-resource-server-provided-no)\n* [replay considerations](https://datatracker.ietf.org/doc/html/rfc9449#name-dpop-proof-replay)\n\nMy suspicion is that there isn't anything unique to this spec that would dictate whether these are required, and that they are still going to be up to implementations to decide whether are necessary. But it at least wouldn't hurt to mention these mechanisms for a reader of this spec who isn't familiar with the details of DPoP.\n\n",
+      "createdAt": "2026-06-18T21:24:30Z",
+      "updatedAt": "2026-06-19T05:55:12Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Agree with your instinct. DPoP nonces and proof-replay are RFC 9449 mechanics that this spec doesn't need to mandate or constrain. \n\nThere are two things I think might be worth saying explicitly for a reader who isn't deep in DPoP\n\n1. The AS-provided-nonce mechanism (RFC 9449 \u00a78) applies at two endpoints in this flow: the IdP's Token Exchange endpoint and the RAS's JWT-bearer token endpoint. Each maintains its own nonce state; nothing crosses between them.\n2. DPoP proof replay protection (RFC 9449 \u00a711.1) is per-recipient. `htm`/`htu` ensure each proof is scoped to a single endpoint, so the IdP and RAS track DPoP `jti` independently.",
+          "createdAt": "2026-06-19T05:55:12Z",
+          "updatedAt": "2026-06-19T05:55:12Z"
         }
       ]
     }
@@ -7470,7 +7508,7 @@
       "labels": [],
       "body": "Closes #104.\n\n## Summary\n\nAddresses @sdesen's feedback in #104 that the SAML NameID Subject Identifier section did not make its assumptions about immutability and uniqueness of the NameID explicit, and did not acknowledge that some real-world IdP deployments (for example Microsoft Entra ID) resolve users by a SAML attribute outside the `<Subject>` element rather than by the `<NameID>` itself.\n\n## What changed\n\n1. **Format intro tightening.** The Format section's \"intended for deployments\" sentence now refers specifically to \"a SAML `<NameID>` from its SSO trust relationship with the IdP Authorization Server\" instead of the vague \"SAML SSO subject identifiers.\"\n\n2. **New requirements block in Subject Identifier Processing**, inserted between the IdP construction rule and the Resource Authorization Server consumption rules. The block adds three normative bullets covering the assumptions the format depends on: stability of the NameID value (banning transient NameID Formats, allowing `emailAddress` and `persistent` with caveats inherited from the underlying Format), uniqueness scope (per SAML issuer plus Service Provider, with explicit handling of pairwise vs public NameIDs and the OAuth `client_id` to SAML SP entity ID mapping the IdP must maintain), and non-NameID subject resolution (citing Microsoft Entra ID's `objectidentifier` attribute as a real-world example, directing IdPs to convey the relevant attribute as an additional claim in the ID-JAG when SSO does not resolve by the `<NameID>`).\n\n## How this responds to #104\n\n| Issue concern | Resolution |\n|---|---|\n| Immutability of the NameID is critical but the spec did not require it | Stability requirement bans transient NameIDs and anchors stability to the Resource Authorization Server's SSO subject-resolution behavior |\n| A SAML implementation might not break if the NameID is modified | Stability requirement notes the SAML NameID Subject Identifier inherits the underlying Format's mutability properties; the same `emailAddress` caveats apply to ID-JAG as to SAML SSO |\n| NameID is not globally unique to an IdP, only to the relying party | Identifier scope requirement states this explicitly, requires the IdP to use the per-SP value for pairwise NameIDs, and requires the OAuth `client_id` to SAML SP entity ID mapping |\n| Microsoft docs show SSO can use a different claim than NameID | Non-NameID subject resolution requirement acknowledges this case, cites Entra ID's `objectidentifier`, and directs IdPs to use an additional ID-JAG claim instead of forcing the value into the SAML NameID Subject Identifier Format |\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm the new bullets render correctly\n- [ ] Confirm cross-references (`{{OASIS.saml-core-2.0-os}}`, `{{saml-nameid-format}}`, etc.) all resolve\n- [ ] Confirm no anchor IDs changed",
       "createdAt": "2026-06-17T22:23:58Z",
-      "updatedAt": "2026-06-17T22:23:58Z",
+      "updatedAt": "2026-06-19T05:25:33Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
@@ -7482,7 +7520,48 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABDev6kQ",
+          "commit": {
+            "abbreviatedOid": "873b8ab"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-18T21:10:26Z",
+          "updatedAt": "2026-06-18T21:10:26Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "I don't love the suggestion of including arbitrary new claims in the ID-JAG that mirror the custom SAML attributes. If anything, there should be a single ID-JAG claim that all the custom claims live under to mirror the namespace of SAML attributes, otherwise there may be conflicts with other ID-JAG claims.",
+              "createdAt": "2026-06-18T21:10:26Z",
+              "updatedAt": "2026-06-18T21:10:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABDgbViw",
+          "commit": {
+            "abbreviatedOid": "873b8ab"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-06-19T05:25:33Z",
+          "updatedAt": "2026-06-19T05:25:33Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "There is overlap here with #100\r\n\r\nThe IdP AS may already need to map SAML Attributes to OIDC standard JWT and ID Token claims when a client exchanges a SAML Assertion for an ID Token and/or Refresh Token (which can be refreshed for an ID Token). \r\n\r\nAdditionally an IdP AS IdP could issue any number of  SAML Attribute Statements that may be used for subject resolution (e.g customerId, accountId, partnerId, externalId, etc).   SAML Attribute Statements have namespaces and can also be complex types that don't have 1:1 mappings to JSON values. \r\n\r\nIn my SAML to OIDC migration profile I had to define how to map SAML Attribute Statements to standard ID Token/UserInfo claims as well as private claims\r\n\r\nhttps://mcguinness.github.io/connect-saml-profiles/draft-connect-saml-migration-profile.html#section-12.2\r\n\r\nI think we may need to pull in some of this language here.\r\n\r\nI don't think it makes sense to have the ID-JAG reflect full SAML Attribute Statements like I did for introspection\r\n\r\nhttps://mcguinness.github.io/connect-saml-profiles/draft-connect-saml-migration-profile.html#name-delegate-saml-validation-wi\r\n\r\nIts the IdP's job to transform/map the claims to an ID-JAG when needed and the claims will already be specific to the IdP.   Outside of a few federations like InCommon there isn't standardized attributes for SAML.\r\n\r\n",
+              "createdAt": "2026-06-19T05:25:33Z",
+              "updatedAt": "2026-06-19T05:25:34Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
