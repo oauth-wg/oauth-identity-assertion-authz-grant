@@ -275,6 +275,35 @@ A non-normative example JWT with expanded header and payload claims is below:
 
 The ID-JAG may contain additional authentication, identity, or authorization claims that are valid for an ID Token {{OpenID.Core}} as the grant functions as both an Identity Assertion and authorization delegation for the Resource Authorization Server.
 
+The ID-JAG MAY also contain claims that are specific to the Resource Authorization Server identified by `aud` and that the IdP Authorization Server would not include in an ID Token released to a Client during SSO. Examples include audience-scoped authorization context (such as roles or entitlements the End-User holds at the target application), Resource Authorization Server-specific identifiers, and other claims that the IdP Authorization Server and the Resource Authorization Server have agreed to convey through the ID-JAG. This audience-specific claim release supports the design that the claims released to a Client during SSO are not necessarily the same as the claims released to the audience of an ID-JAG.
+
+It is RECOMMENDED that collision-resistant names be used for additional Claim Names, as described in {{Section 4.2 of RFC7519}}. Alternatively, Private Claim Names can be safely used when the IdP Authorization Server and Resource Authorization Server have an out-of-band agreement and naming conflicts are unlikely to arise. If specific additional claims will have broad and general applicability, they can be registered with Registered Claim Names, per {{Section 4.2 of RFC7519}}, in the "JSON Web Token Claims" registry {{IANA.jwt}}.
+
+The following is a non-normative example of an ID-JAG payload that includes Resource Authorization Server-specific claims using each of the naming conventions:
+
+```json
+{
+  "jti": "9e43f81b64a33f20116179",
+  "iss": "https://acme.idp.example",
+  "sub": "U019488227",
+  "aud": "https://acme.chat.example/",
+  "client_id": "f53f191f9311af35",
+  "exp": 1311281970,
+  "iat": 1311280970,
+  "scope": "chat.read chat.history",
+  "https://acme.idp.example/claims/employee_id": "E-019488227",
+  "authorization_details": [
+    {
+      "type": "acme-chat-roles",
+      "roles": ["member", "channel_admin"]
+    }
+  ],
+  "chat_workspace_id": "ws_8a3f2b1c"
+}
+```
+
+In this example, `https://acme.idp.example/claims/employee_id` is a collision-resistant Claim Name using a URI under the IdP Authorization Server's namespace, `authorization_details` ({{RFC9396}}) is a Registered Claim Name carrying Resource Authorization Server-specific authorization context, and `chat_workspace_id` is a Private Claim Name shared between this IdP Authorization Server and this Resource Authorization Server by out-of-band agreement.
+
 It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim. The Resource Authorization Server MAY use these claims for subject resolution, including JIT provisioning, for example when the user has not yet SSO'd into the Resource Authorization Server. Additional Resource Authorization Server specific identity claims MAY be needed for subject resolution.
 
 ## SAML NameID Subject Identifier {#saml-nameid-subject-identifier}
