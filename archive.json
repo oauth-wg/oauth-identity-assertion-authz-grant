@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-21T00:25:51.277000+00:00",
+  "timestamp": "2026-06-23T00:25:02.584774+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2363,9 +2363,17 @@
       ],
       "body": "The current draft generally assumes confidential clients at the Resource Authorization Server (RAS), and the Security Considerations say that this specification `SHOULD` only be supported for confidential clients. The draft also notes in Cross-Domain Client ID Handling that requiring a confidential client at the RAS helps prevent the IdP from delegating access to any valid client at the RAS.\n\nAt the same time, the draft now defines proof-of-possession / key-binding for ID-JAG using `cnf` and DPoP. That raises a question about whether the spec should allow an explicit tradeoff here.\n\n**Deployment model to discuss**\n\n- The client is confidential at the IdP.\n- The client is public at the RAS, or the RAS otherwise does not require confidential client authentication for this exchange.\n- The client includes DPoP in the token exchange to the IdP.\n- The IdP issues a key-bound ID-JAG with a `cnf` / `jkt`.\n- The client presents DPoP when exchanging the ID-JAG at the RAS.\n- The RAS verifies that the DPoP key matches the `cnf` in the ID-JAG.\n\n**Why allow this**\n\n- Credential lifecycle can be centralized at the IdP.\n- The client does not need to maintain separate credentials with each RAS.\n- This may be useful in ecosystems with many downstream RAS deployments.\n- Client ID Metadata Document (CIMD) helps address part of this problem when adopted, but it will not always be available immediately.\n- This could make the deployment model possible until CIMD becomes more widely deployed.\n\n**Tradeoff**\n\nThis is not equivalent to requiring a confidential client at the RAS.\n\nWhat is preserved:\n\n- Replay resistance for the ID-JAG, assuming the RAS requires proof-of-possession and validates `cnf` against the proof token.\n- Stronger protection than an unconstrained bearer-style exchange.\n\nWhat is reduced:\n\n- The RAS no longer gets the same client-authentication assurance it gets from a confidential registration at the RAS.\n- The anti-client-substitution property is weaker unless the spec explicitly defines how public-client identification is handled in this profile.\n\n**Question**\n\nShould the specification explicitly allow this tradeoff?\n\nPossible direction:\n\n- Keep confidential registration at the RAS as the recommended/default model.\n- Allow RAS deployments to accept public clients for ID-JAG exchange when the ID-JAG is key-bound and the proof token presented to the RAS matches the `cnf`.\n- Clarify that this does not require any RAS to support public clients.\n- A RAS, or the administrator/operator of that RAS, can always decide to require confidential registration instead.\n- In that sense, this change would make the model possible, not mandatory, until CIMD is more widely deployed.\n\nIf the spec does allow this, it would likely need explicit processing rules for this profile, for example:\n\n- `cnf` in the ID-JAG is required.\n- Proof-of-possession at the RAS is required.\n- The proof key MUST match the `cnf` in the ID-JAG.\n- The RAS SHOULD issue only sender-constrained access tokens in this case.\n- The client identification / `client_id` matching rules need to be defined for public clients at the RAS.\n\nThe main question is whether the spec should permit this as an optional deployment tradeoff, while still allowing any RAS to require confidential registration.",
       "createdAt": "2026-04-20T23:01:03Z",
-      "updatedAt": "2026-05-21T21:01:54Z",
+      "updatedAt": "2026-06-22T16:53:08Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "Allowing public client with DPoP provides flexibility at the RAS, in case it is not already supporting CIMD, or wants to selectively support CIMD. This ventures into RAS policy, but I think the advantages are significant enough to add to the spec. \nCIMD may not always be implemented by the client, and manual client registration involves some effort for the client and IdP to maintain the external registration. I think even with the known downsides, public client with DPoP should be available as an option.",
+          "createdAt": "2026-06-22T16:50:31Z",
+          "updatedAt": "2026-06-22T16:53:08Z"
+        }
+      ]
     },
     {
       "number": 90,
@@ -2765,6 +2773,22 @@
           "updatedAt": "2026-06-19T05:55:12Z"
         }
       ]
+    },
+    {
+      "number": 107,
+      "id": "I_kwDOKv5r-s8AAAABGWAreQ",
+      "title": "Custom claim",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/107",
+      "state": "OPEN",
+      "author": "meghnadubey",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Can we include text in the spec and an example for custom_claim, example `rs_auth_context`. I believe we still have gaps in weaving complete AS context for the RAS, even with `aud_tenant`. Allowing for an optional custom claim in id-jag JWT will go along way to address this gap. I the custom claim is an object that has a flexible (key, value) or (format_specifier, key, value) presentation, it can be based on resource app config that is customized for the specific RAS. ",
+      "createdAt": "2026-06-22T21:32:05Z",
+      "updatedAt": "2026-06-22T21:32:44Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -7562,6 +7586,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 108,
+      "id": "PR_kwDOKv5r-s7pZAzr",
+      "title": "Add guidance on RAS-specific and private claims in the ID-JAG",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/108",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #107.\n\n## Summary\n\nAddresses @meghnadubey's request in #107 for explicit spec text and an example covering custom/private claims an IdP Authorization Server can include in the ID-JAG to convey Resource Authorization Server-specific context (for example RBAC roles, tenant context, or other audience-scoped authorization information) that is not part of an ID Token released to a Client during SSO.\n\n## What changed\n\nThree additions to the ID-JAG Claims section, placed after the existing \"may contain additional claims valid for an ID Token\" paragraph and before the `email`/`aud_sub` recommendation:\n\n1. **RAS-specific claims paragraph.** Makes it explicit that the IdP Authorization Server MAY include claims that are specific to the Resource Authorization Server identified by `aud` and that would not appear in an ID Token released to a Client during SSO. Names the categories: audience-scoped authorization context (roles or entitlements at the target application), Resource Authorization Server-specific identifiers, and other claims agreed out-of-band between the IdP and the RAS. Ties the addition to the design that SSO claim release and ID-JAG claim release can differ.\n\n2. **Claim naming guidance paragraph.** Adopts the OpenID Connect Core 1.0 Additional Claims naming guidance for ID-JAG, referencing Section 4.2 of RFC 7519: collision-resistant names RECOMMENDED, Private Claim Names acceptable when the IdP and RAS have an out-of-band agreement and naming conflicts are unlikely, and Registered Claim Names appropriate for claims with broad and general applicability.\n\n3. **Non-normative example payload.** A single JSON example showing all three naming conventions in one ID-JAG:\n\n   - `https://acme.idp.example/claims/employee_id` \u2014 collision-resistant Claim Name using a URI under the IdP's namespace.\n   - `authorization_details` (RFC 9396) \u2014 Registered Claim Name carrying a RAS-specific RAR type (`acme-chat-roles`) with role values.\n   - `chat_workspace_id` \u2014 Private Claim Name shared between the IdP and this specific RAS by out-of-band agreement.\n\nA short prose explanation follows the example, mapping each Claim Name back to its naming convention.\n\n## How this responds to #107\n\n@meghnadubey asked for \"text in the spec and an example for custom_claim... allowing for an optional custom claim in id-jag JWT [to] go a long way to address this gap\" for conveying RAS-specific context beyond `aud_tenant`.\n\nThe PR responds by:\n\n- Explicitly permitting RAS-specific custom claims in the spec (the first new paragraph).\n- Providing the naming conventions an IdP should use when defining such claims (the second new paragraph).\n- Demonstrating a concrete example with multiple custom-claim shapes side by side (the non-normative example).\n\nThe flexible `(key, value)` and `(format_specifier, key, value)` patterns the issue requested are accommodated by the three naming conventions plus the existing `authorization_details` (RFC 9396) carrier, which already supports structured `type`-discriminated objects. No new claim or registry is required.\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm the new paragraphs and JSON example render correctly\n- [ ] Confirm cross-references (`{{Section 4.2 of RFC7519}}`, `{{IANA.jwt}}`, `{{RFC9396}}`, `{{OpenID.Core}}`, `{{OpenID.Enterprise}}`) all resolve\n- [ ] Confirm no existing anchors changed",
+      "createdAt": "2026-06-22T22:08:36Z",
+      "updatedAt": "2026-06-22T22:08:36Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "private_claims",
+      "headRefOid": "ab02e4bc350fa2e1e25982f74482f5886f1a5918",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
