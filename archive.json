@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-06-23T00:25:02.584774+00:00",
+  "timestamp": "2026-06-25T00:24:55.717535+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2712,10 +2712,12 @@
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-126"
+      ],
       "body": "## Gap\n\nOAuth 2.0 Token Exchange (RFC 8693 \u00a72.2.1) requires the `token_type` response parameter to be `N_A` when the issued token is not used directly as an access token, which is the case for an ID-JAG. This removes the signal that elsewhere in OAuth tells the client which sender-constraint binding (if any) was applied to the issued token. RFC 9449 (DPoP), for example, uses `token_type: \"DPoP\"` for normal access token responses, but that path is not available for ID-JAGs.\n\nToday the client's only path to detect sender-constraint binding on an ID-JAG is to inspect the ID-JAG itself for an RFC 7800 `cnf` claim. This works for JWS ID-JAGs but fails in two cases:\n\n1. **Encrypted ID-JAGs.** With the JWE-encryption support added in #102, the inner JWS is encrypted to the Resource Authorization Server and is opaque to the client.\n\n2. **Opaque issued tokens generally.** Any future profile that issues opaque tokens via Token Exchange faces the same problem.\n\nThe current draft acknowledges this in the DPoP section by recommending the client inspect the ID-JAG for `cnf`, with a caveat (added in #102) that the inspection is impossible when the ID-JAG is encrypted. The result is that a client requesting DPoP binding cannot detect a silent downgrade by the IdP Authorization Server when encryption is in use.\n\n## Why this matters\n\nWithout a Token Exchange response-level signal, an IdP Authorization Server that silently fails to apply sender-constraining (by error or by misbehavior) can downgrade the issued ID-JAG without the client noticing. The detection path that exists for unencrypted ID-JAGs (client introspects the JWS) is unavailable for encrypted ID-JAGs, and it never existed for opaque tokens.\n\nThis gap is not specific to ID-JAG. Any Token Exchange flow that issues a sender-constrained token where `token_type: \"N_A\"` is required has the same problem.\n\n## Possible solution\n\nA small extension to RFC 8693 that adds an optional `cnf` parameter to the Token Exchange response. The value reuses the RFC 7800 confirmation structure (`jkt` for DPoP, `x5t#S256` for mTLS, etc.). The authorization server includes it when sender-constraining was applied; the client validates it against the key or certificate it provided in the request. Absence (when binding was expected) is treated as downgrade.\n\nSketched as an individual draft for working group feedback:\n\nhttps://mcguinness.github.io/draft-mcguinness-oauth-token-exchange-cnf/draft-mcguinness-oauth-token-exchange-cnf.html\n\nIf adopted, the ID-JAG draft could simplify its current DPoP and encryption text by deferring to the response parameter rather than prescribing client-side token introspection.\n\n## Asking for\n\nFeedback on whether a Token Exchange response parameter is the right shape for closing this gap, and whether the sketched draft covers the requirements ID-JAG needs.",
       "createdAt": "2026-06-16T19:48:36Z",
-      "updatedAt": "2026-06-16T19:48:36Z",
+      "updatedAt": "2026-06-23T18:48:41Z",
       "closedAt": null,
       "comments": []
     },
@@ -2783,10 +2785,28 @@
       "author": "meghnadubey",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-126"
+      ],
       "body": "Can we include text in the spec and an example for custom_claim, example `rs_auth_context`. I believe we still have gaps in weaving complete AS context for the RAS, even with `aud_tenant`. Allowing for an optional custom claim in id-jag JWT will go along way to address this gap. I the custom claim is an object that has a flexible (key, value) or (format_specifier, key, value) presentation, it can be based on resource app config that is customized for the specific RAS. ",
       "createdAt": "2026-06-22T21:32:05Z",
-      "updatedAt": "2026-06-22T21:32:44Z",
+      "updatedAt": "2026-06-24T15:59:23Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 109,
+      "id": "I_kwDOKv5r-s8AAAABGn4e7A",
+      "title": "multi tenancy clarification of required jwt claims and processing rules",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/109",
+      "state": "OPEN",
+      "author": "sdesen",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "the section that addresses multi tenancy implies that the optional claims related to multi tenancy are required and must be appropriately verified when processing the id jag in exchange for an access token - but listing those claims as optional earlier in the spec might be confusing. thoughts? is this worth calling this out in the section where the claims are defined? for instance aud_tenant implies tenant must exist and be verified \n\nis it possible to follow the spec as is in a multi tenant scenario and fail to explicitly check the tenant claims during processing by the RAS?\n\nhowever, it doesn\u2019t seem common to list a claim as \u201coptional except in xyz scenario\u201d ",
+      "createdAt": "2026-06-25T00:11:31Z",
+      "updatedAt": "2026-06-25T00:11:31Z",
       "closedAt": null,
       "comments": []
     }
