@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-05T00:20:45.187979+00:00",
+  "timestamp": "2026-07-14T00:15:51.704220+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -1632,10 +1632,12 @@
       "author": "dlozlla",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "ietf-126"
+      ],
       "body": "As raised in issue https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/51, a seamless user experience requires that Requesting Apps have a way to discover which applications, and their specific instances, a user is allowed to access. This would allow mirroring the experience of SSO dashboards, where users can simply select the app instance they want to use.\n\nThis raises several questions:\n- Should the IdP expose an \"Accessible Resources API\" to list the available Resource Apps and their instances for an authenticated user?\n- How should such an API structure its data to clearly differentiate between multiple instances of the same application?\n- **Should this API be standardized?**",
       "createdAt": "2025-10-10T09:22:45Z",
-      "updatedAt": "2025-12-16T22:57:43Z",
+      "updatedAt": "2026-07-13T19:00:02Z",
       "closedAt": null,
       "comments": [
         {
@@ -2823,6 +2825,54 @@
       "updatedAt": "2026-06-25T00:11:31Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 110,
+      "id": "I_kwDOKv5r-s8AAAABIju8EA",
+      "title": "Usage of \"resource\" request parameter incompatible with oauth-identity-chaining",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/110",
+      "state": "OPEN",
+      "author": "randomstuff",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "oauth-identity-assertion-authz-grant is expected to be a profile of [identity chaining](https://datatracker.ietf.org/doc/draft-ietf-oauth-identity-chaining/):\n\n> Identity Chaining intentionally leaves many details unspecified in order to support multiple use cases. **This specification profiles it [Identity Chaining]** [\u2026]\n\nHowever, their definition of the `resource` parameter in the token Exchange Request is incompatible:\n\n* For identity chaining, this identifies the *authorization server* for trust domain B (i.e. the *resource authorization server*)\n* For identity assertion authz grant, this identified the *resource server*\n\n***\n\nIn identity chaining, we have:\n\n> Token Exchange Request\n>\n> [\u2026]\n>\n> resource, URI of **authorization server** for trust domain B\n\nIn oauth-identity-assertion-authz-grant:\n\n> The Client makes a Token Exchange [[RFC8693](https://www.rfc-editor.org/rfc/rfc8693)] request to the IdP Authorization Server's Token Endpoint with the following parameters:\n>\n> [\u2026]\n>\n> resource: OPTIONAL - The Resource Identifier of the **Resource Server** as defined in [Section 2](https://rfc-editor.org/rfc/rfc8707#section-2) of [[RFC8707](https://www.rfc-editor.org/rfc/rfc8707)].\n\n***\n\nI would claim oauth-identity-chaining is more consistent with the definition of `resource` because as per RFC 8693, they are supposed to have the [same semantic meaning](https://datatracker.ietf.org/doc/html/rfc8693#name-request).",
+      "createdAt": "2026-07-13T00:03:26Z",
+      "updatedAt": "2026-07-13T20:11:42Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Identity Chaining draft-19 (latest) says\n\n> One of resource or audience is REQUIRED to indicate the intended authorization server in trust domain B.\n\nhttps://www.ietf.org/archive/id/draft-ietf-oauth-identity-chaining-16.html#section-2.3.1\n\nMy read was ID-JAG profile MAY use `audience` to identify the RAS in token exchange request parameter and allow `resource`  to be the Resource Identifier of the Resource Server.  ID-JAG does allow an IdP specific identifier for the RAS which may be considered as a logical identifier.  \n\n@aaronpk what is your take here?\n\n\n",
+          "createdAt": "2026-07-13T20:11:42Z",
+          "updatedAt": "2026-07-13T20:11:42Z"
+        }
+      ]
+    },
+    {
+      "number": 111,
+      "id": "I_kwDOKv5r-s8AAAABIqyz3A",
+      "title": "Standardize error code for \"user does not have a license\" - today we get `invalid_grant`",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/111",
+      "state": "OPEN",
+      "author": "pcarleton",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "On the final leg of the ID-JAG flow, we often get back `invalid_grant` when a user does not have a license (i.e. it's a 100 person company, and only 50 people have a Figma license). This causes problems because it's difficult to know when to retry and what to tell the user for how to get access to the app.  `invalid_grant` is indistinguishable from a misconfiguration.\n\nRelated, but separate issue from discussion, is the user might have a license in the resource server, but it's not configured in the IdP.\n\n",
+      "createdAt": "2026-07-13T18:59:12Z",
+      "updatedAt": "2026-07-13T19:47:49Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "A see a couple path are available for this scenario\n\n1. Since this is an entitlement issue and not specific to ID-JAG processing the RAS could return `access_denied` error instead of `invalid_grant`.  This would enable the client to know that the requesting a new ID-JAG won't resolve the issue and the end-user needs to remediate using a company specific access request approval process. \n2. The RAS could return `interaction_required` per draft spec https://datatracker.ietf.org/doc/draft-parecki-oauth-jwt-grant-interaction-response/.  This would enable the client to switch to front channel to remediate the error such as kicking off an access request workflow from the resource app if the app supports a requestable denial pattern. \n3. If the entitlement is a claim from the IdP, the RAS could challenge the client for the required claim per draft https://datatracker.ietf.org/doc/draft-mcguinness-oauth-insufficient-claims/.  This is the scenario #83 issue is tracking.\n\nIn short, an end-user not being entitled to an app but be granted \"SSO\" by the IdP is a scenario that already exists today.  The delta is they land on a error screen in the browser at the app that has an error message and its up to the end-user to know the process to request access. \n\n@aaronpk if you agree that `access_denied` is valid for this scenario then I can get a PR up that clarifies this. \n\nAs for the IdP, I submitted https://github.com/aaronpk/draft-parecki-oauth-jwt-grant-interaction-response/issues/1 to enable `interaction_required` to also be supported for Token Exchange.  The IdP should also be able to return `access_denied` for authorization scenarios where the client+user are not granted access to the RAS.  ",
+          "createdAt": "2026-07-13T19:47:49Z",
+          "updatedAt": "2026-07-13T19:47:49Z"
+        }
+      ]
     }
   ],
   "pulls": [
