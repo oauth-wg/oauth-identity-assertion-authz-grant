@@ -732,18 +732,23 @@ Access Token Response:
       ]
     }
 
-#### Error Response
+#### Error Response {#token-exchange-error-response}
 
-On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}, e.g:
+On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following two codes for interoperability:
 
-    HTTP/1.1 400 Bad Request
-    Content-Type: application/json
-    Cache-Control: no-store
+* `invalid_grant`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked). A re-issued subject token may resolve the error.
 
-    {
-      "error": "invalid_grant",
-      "error_description": "Audience validation failed"
-    }
+      {
+        "error": "invalid_grant",
+        "error_description": "Audience validation failed"
+      }
+
+* `access_denied`: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow.
+
+      {
+        "error": "access_denied",
+        "error_description": "Client is not authorized to broker access to the target Resource Authorization Server"
+      }
 
 
 ## Access Token Request {#token-request}
@@ -810,6 +815,24 @@ The Resource Authorization Server's token endpoint responds with an OAuth 2.0 To
       "expires_in": 86400,
       "scope": "chat.read chat.history"
     }
+
+### Error Response {#access-token-error-response}
+
+On error, the Resource Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following two codes for interoperability:
+
+* `invalid_grant`: the ID-JAG failed a validation rule in {{token-request}} (for example signature, `aud`, `client_id`, `exp`, `typ`, decryption, or `cnf` binding). A re-issued ID-JAG may resolve the error.
+
+      {
+        "error": "invalid_grant",
+        "error_description": "Audience validation failed"
+      }
+
+* `access_denied`: the ID-JAG is valid but the End-User or Client is not authorized at the Resource Authorization Server (for example the End-User lacks a license, entitlement, or provisioning record, or is denied by the Resource Authorization Server's policy or role/permission assignments). A re-issued ID-JAG will not resolve the error. Remediation is defined by the Resource Authorization Server operator's access-request, entitlement, or provisioning process, such as an Identity Governance and Administration (IGA) workflow.
+
+      {
+        "error": "access_denied",
+        "error_description": "The end-user is not licensed for this application"
+      }
 
 ### Refresh Token
 
