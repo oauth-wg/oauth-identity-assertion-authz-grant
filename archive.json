@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-14T00:15:51.704220+00:00",
+  "timestamp": "2026-07-21T00:18:24.488707+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2862,7 +2862,7 @@
       "labels": [],
       "body": "On the final leg of the ID-JAG flow, we often get back `invalid_grant` when a user does not have a license (i.e. it's a 100 person company, and only 50 people have a Figma license). This causes problems because it's difficult to know when to retry and what to tell the user for how to get access to the app.  `invalid_grant` is indistinguishable from a misconfiguration.\n\nRelated, but separate issue from discussion, is the user might have a license in the resource server, but it's not configured in the IdP.\n\n",
       "createdAt": "2026-07-13T18:59:12Z",
-      "updatedAt": "2026-07-13T19:47:49Z",
+      "updatedAt": "2026-07-20T20:29:10Z",
       "closedAt": null,
       "comments": [
         {
@@ -2871,6 +2871,13 @@
           "body": "A see a couple path are available for this scenario\n\n1. Since this is an entitlement issue and not specific to ID-JAG processing the RAS could return `access_denied` error instead of `invalid_grant`.  This would enable the client to know that the requesting a new ID-JAG won't resolve the issue and the end-user needs to remediate using a company specific access request approval process. \n2. The RAS could return `interaction_required` per draft spec https://datatracker.ietf.org/doc/draft-parecki-oauth-jwt-grant-interaction-response/.  This would enable the client to switch to front channel to remediate the error such as kicking off an access request workflow from the resource app if the app supports a requestable denial pattern. \n3. If the entitlement is a claim from the IdP, the RAS could challenge the client for the required claim per draft https://datatracker.ietf.org/doc/draft-mcguinness-oauth-insufficient-claims/.  This is the scenario #83 issue is tracking.\n\nIn short, an end-user not being entitled to an app but be granted \"SSO\" by the IdP is a scenario that already exists today.  The delta is they land on a error screen in the browser at the app that has an error message and its up to the end-user to know the process to request access. \n\n@aaronpk if you agree that `access_denied` is valid for this scenario then I can get a PR up that clarifies this. \n\nAs for the IdP, I submitted https://github.com/aaronpk/draft-parecki-oauth-jwt-grant-interaction-response/issues/1 to enable `interaction_required` to also be supported for Token Exchange.  The IdP should also be able to return `access_denied` for authorization scenarios where the client+user are not granted access to the RAS.  ",
           "createdAt": "2026-07-13T19:47:49Z",
           "updatedAt": "2026-07-13T19:47:49Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Yeah `access_denied` feels like the right error code to use here.",
+          "createdAt": "2026-07-20T20:29:10Z",
+          "updatedAt": "2026-07-20T20:29:10Z"
         }
       ]
     }
