@@ -1360,11 +1360,13 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 *  access_denied: the ID-JAG is valid but the End-User or Client is
    not authorized at the Resource Authorization Server (for example
-   the End-User is not licensed, entitled, or provisioned).  A re-
-   issued ID-JAG will not resolve the error.  Remediation is defined
-   by the Resource Authorization Server operator's access-request,
-   entitlement, or provisioning process, such as an Identity
-   Governance and Administration (IGA) workflow.
+   the End-User lacks a license, entitlement, or provisioning record,
+   or is denied by the Resource Authorization Server's policy or
+   role/permission assignments).  A re-issued ID-JAG will not resolve
+   the error.  Remediation is defined by the Resource Authorization
+   Server operator's access-request, entitlement, or provisioning
+   process, such as an Identity Governance and Administration (IGA)
+   workflow.
 
 {
   "error": "access_denied",
