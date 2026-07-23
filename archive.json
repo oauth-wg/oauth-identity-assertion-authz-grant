@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-21T00:18:24.488707+00:00",
+  "timestamp": "2026-07-23T00:18:48.972145+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2419,7 +2419,7 @@
       "labels": [],
       "body": "Hi Everyone, \n\nI've been slowly reviewing the standard document and came across a couple of cases I wanted to bring up:\n\nFirst:\n>    resource:  OPTIONAL - The Resource Identifier (Section 2 of\n      [RFC8707]) of the Resource Server (either a single URI or an array\n      of URIs).\n\nCan we change this claim description to always be an array of URIs? I understand the recommendation is very nit-picky, although it would be much easier for ID_JAG consumers to handle 'resource' claim validation if it's included.\n\nSecond: \n>    client_id:  REQUIRED - The client identifier of the OAuth 2.0\n      [RFC6749] client at the Resource Authorization Server that will\n      act on behalf of the resource owner (sub).  This identifier MAY be\n      different that client identifier of the OAuth 2.0 client\n      requesting an ID-JAG from the IdP Section 4.3 of [RFC8693] as it\n      represents and independent client relationship to another\n      Authorization Server in a different trust domain.  See Section 5\n      for additional considerations.\n\nI understand the purpose of this claim and it makes sense, although maintenance of these client_id's can become very cumbersome in large scale deployments, I envision the client_id should be manually set at the AS and there isn't any dynamic relationship between the AS and the Resource Authorization Server. Also perhaps dpop can be used to accomplish the same outcome.\n\nI want to suggest to change the type from \"REQUIRED\" to \"RECOMMENDED\". The change would potentially help with the large scale maintenance issues.\n\nThanks,\nJamshid",
       "createdAt": "2026-04-27T17:31:48Z",
-      "updatedAt": "2026-06-19T05:28:53Z",
+      "updatedAt": "2026-07-21T22:05:51Z",
       "closedAt": null,
       "comments": [
         {
@@ -2449,6 +2449,13 @@
           "body": "@sdesen #85 has a proposal to relax that constraint for sender-constrained assertions.  There isn't consensus on the issue and there real security tradeoffs but advantages for deployability. ",
           "createdAt": "2026-06-19T05:28:53Z",
           "updatedAt": "2026-06-19T05:28:53Z"
+        },
+        {
+          "author": "khosravian",
+          "authorAssociation": "NONE",
+          "body": "Thank you for your feedback everyone, \n\n@aaronpk regarding the `resource` change suggestion, i get it, it's a personal preference from a java developer perspective. ",
+          "createdAt": "2026-07-21T22:05:51Z",
+          "updatedAt": "2026-07-21T22:05:51Z"
         }
       ]
     },
@@ -2733,9 +2740,17 @@
       ],
       "body": "## Gap\n\nOAuth 2.0 Token Exchange (RFC 8693 \u00a72.2.1) requires the `token_type` response parameter to be `N_A` when the issued token is not used directly as an access token, which is the case for an ID-JAG. This removes the signal that elsewhere in OAuth tells the client which sender-constraint binding (if any) was applied to the issued token. RFC 9449 (DPoP), for example, uses `token_type: \"DPoP\"` for normal access token responses, but that path is not available for ID-JAGs.\n\nToday the client's only path to detect sender-constraint binding on an ID-JAG is to inspect the ID-JAG itself for an RFC 7800 `cnf` claim. This works for JWS ID-JAGs but fails in two cases:\n\n1. **Encrypted ID-JAGs.** With the JWE-encryption support added in #102, the inner JWS is encrypted to the Resource Authorization Server and is opaque to the client.\n\n2. **Opaque issued tokens generally.** Any future profile that issues opaque tokens via Token Exchange faces the same problem.\n\nThe current draft acknowledges this in the DPoP section by recommending the client inspect the ID-JAG for `cnf`, with a caveat (added in #102) that the inspection is impossible when the ID-JAG is encrypted. The result is that a client requesting DPoP binding cannot detect a silent downgrade by the IdP Authorization Server when encryption is in use.\n\n## Why this matters\n\nWithout a Token Exchange response-level signal, an IdP Authorization Server that silently fails to apply sender-constraining (by error or by misbehavior) can downgrade the issued ID-JAG without the client noticing. The detection path that exists for unencrypted ID-JAGs (client introspects the JWS) is unavailable for encrypted ID-JAGs, and it never existed for opaque tokens.\n\nThis gap is not specific to ID-JAG. Any Token Exchange flow that issues a sender-constrained token where `token_type: \"N_A\"` is required has the same problem.\n\n## Possible solution\n\nA small extension to RFC 8693 that adds an optional `cnf` parameter to the Token Exchange response. The value reuses the RFC 7800 confirmation structure (`jkt` for DPoP, `x5t#S256` for mTLS, etc.). The authorization server includes it when sender-constraining was applied; the client validates it against the key or certificate it provided in the request. Absence (when binding was expected) is treated as downgrade.\n\nSketched as an individual draft for working group feedback:\n\nhttps://mcguinness.github.io/draft-mcguinness-oauth-token-exchange-cnf/draft-mcguinness-oauth-token-exchange-cnf.html\n\nIf adopted, the ID-JAG draft could simplify its current DPoP and encryption text by deferring to the response parameter rather than prescribing client-side token introspection.\n\n## Asking for\n\nFeedback on whether a Token Exchange response parameter is the right shape for closing this gap, and whether the sketched draft covers the requirements ID-JAG needs.",
       "createdAt": "2026-06-16T19:48:36Z",
-      "updatedAt": "2026-06-23T18:48:41Z",
+      "updatedAt": "2026-07-21T16:46:20Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I submitted https://datatracker.ietf.org/doc/draft-mcguinness-oauth-token-exchange-cnf/ to address this gap, linking here for reference ",
+          "createdAt": "2026-07-21T16:46:20Z",
+          "updatedAt": "2026-07-21T16:46:20Z"
+        }
+      ]
     },
     {
       "number": 104,
@@ -2838,7 +2853,7 @@
       "labels": [],
       "body": "oauth-identity-assertion-authz-grant is expected to be a profile of [identity chaining](https://datatracker.ietf.org/doc/draft-ietf-oauth-identity-chaining/):\n\n> Identity Chaining intentionally leaves many details unspecified in order to support multiple use cases. **This specification profiles it [Identity Chaining]** [\u2026]\n\nHowever, their definition of the `resource` parameter in the token Exchange Request is incompatible:\n\n* For identity chaining, this identifies the *authorization server* for trust domain B (i.e. the *resource authorization server*)\n* For identity assertion authz grant, this identified the *resource server*\n\n***\n\nIn identity chaining, we have:\n\n> Token Exchange Request\n>\n> [\u2026]\n>\n> resource, URI of **authorization server** for trust domain B\n\nIn oauth-identity-assertion-authz-grant:\n\n> The Client makes a Token Exchange [[RFC8693](https://www.rfc-editor.org/rfc/rfc8693)] request to the IdP Authorization Server's Token Endpoint with the following parameters:\n>\n> [\u2026]\n>\n> resource: OPTIONAL - The Resource Identifier of the **Resource Server** as defined in [Section 2](https://rfc-editor.org/rfc/rfc8707#section-2) of [[RFC8707](https://www.rfc-editor.org/rfc/rfc8707)].\n\n***\n\nI would claim oauth-identity-chaining is more consistent with the definition of `resource` because as per RFC 8693, they are supposed to have the [same semantic meaning](https://datatracker.ietf.org/doc/html/rfc8693#name-request).",
       "createdAt": "2026-07-13T00:03:26Z",
-      "updatedAt": "2026-07-13T20:11:42Z",
+      "updatedAt": "2026-07-22T08:43:34Z",
       "closedAt": null,
       "comments": [
         {
@@ -2847,6 +2862,13 @@
           "body": "Identity Chaining draft-19 (latest) says\n\n> One of resource or audience is REQUIRED to indicate the intended authorization server in trust domain B.\n\nhttps://www.ietf.org/archive/id/draft-ietf-oauth-identity-chaining-16.html#section-2.3.1\n\nMy read was ID-JAG profile MAY use `audience` to identify the RAS in token exchange request parameter and allow `resource`  to be the Resource Identifier of the Resource Server.  ID-JAG does allow an IdP specific identifier for the RAS which may be considered as a logical identifier.  \n\n@aaronpk what is your take here?\n\n\n",
           "createdAt": "2026-07-13T20:11:42Z",
           "updatedAt": "2026-07-13T20:11:42Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "I had been similarly thinking of the identity chaining definition as using the `audience` to identify the RAS freeing up the `resource` for other purposes. \n\nThe Token Exchange definition of the terms does not limit the parameters to identify the authorization server, it says \"target service or resource\", and a \"service\" can be the combination of the resource AS and RS.\n",
+          "createdAt": "2026-07-22T08:43:34Z",
+          "updatedAt": "2026-07-22T08:43:34Z"
         }
       ]
     },
@@ -2880,6 +2902,22 @@
           "updatedAt": "2026-07-20T20:29:10Z"
         }
       ]
+    },
+    {
+      "number": 113,
+      "id": "I_kwDOKv5r-s8AAAABJxrpBA",
+      "title": "Relax confidential client requirement when the ID Token is key-bound (OpenID Connect Key Binding 1.0)",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/113",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "## Context\n\nThe current draft says in Security Considerations that this specification SHOULD only be supported for confidential clients, and Cross-Domain Client ID Handling notes that requiring a confidential client at the Resource Authorization Server helps prevent the IdP from delegating access to any valid client at the Resource Authorization Server.\n\nIssue #85 asks whether this constraint can be relaxed when the ID-JAG itself is key-bound via `cnf`/DPoP, on the theory that proof-of-possession at the RAS provides an alternative to confidential client authentication at the RAS.\n\nThis issue proposes a related but distinct relaxation, one layer earlier: when the ID Token used as the `subject_token` is key-bound via OpenID Connect Key Binding 1.0 (https://openid.github.io/connect-key-binding/main.html), the authentication assurance for the client is anchored in the ID Token itself, and the confidential-client requirement can be reconsidered on that basis.\n\n## Proposal\n\nAllow the Client at the IdP to be a public client, or otherwise not required to present confidential client credentials at the Token Exchange endpoint, when all of the following hold:\n\n- The `subject_token` is a key-bound ID Token per OpenID Connect Key Binding 1.0.\n- The IdP validates the key binding of the ID Token per that spec.\n- The IdP issues a key-bound ID-JAG whose `cnf` is derived from (or otherwise chained to) the ID Token's binding key or an explicit DPoP proof presented alongside.\n- The Client presents proof-of-possession when redeeming the ID-JAG at the Resource Authorization Server, and the RAS validates the `cnf` against that proof per the existing DPoP processing rules.\n\nThe Resource Authorization Server-side confidential requirement would remain a deployment choice as discussed in #85; this issue focuses on the IdP-side Token Exchange step where the ID Token's key binding is the anchoring credential.\n\n## How this relates to #85\n\n- **#85** is about the RAS accepting public clients when the ID-JAG is key-bound at the RAS boundary. The anchoring credential there is the ID-JAG's `cnf` plus a proof presented to the RAS.\n- **This issue** is about the IdP accepting a non-confidential client at Token Exchange when the ID Token itself is key-bound. The anchoring credential is the ID Token's own binding.\n\nThey can be adopted independently or together. Together, they enable an end-to-end model where the client's device (or the client's attestation-provided key) carries authentication assurance from SSO issuance through ID-JAG issuance to access token exchange, without requiring the client to maintain separate confidential credentials at either authorization server.\n\n## Tradeoffs\n\nPreserved:\n- Sender-constraint on the ID Token, ID-JAG, and (if the RAS opts in) the access token.\n- Prevention of casual replay by parties without the binding key.\n\nReduced or requiring explicit spec handling:\n- Anti-substitution properties that rely on confidential client authentication at the IdP need to be reproved via the key-binding chain. Specifically: how the IdP validates that the Client presenting the ID Token is the same party the ID Token was issued to (this is exactly what OpenID Connect Key Binding covers, but the ID-JAG draft would need to say so and reference it).\n- The Client's `client_id` at the IdP for Token Exchange still needs to be identified; the ID Token's `azp`/`aud` are the natural candidates, but the draft would need to state this normatively for the public-client-plus-key-bound case.\n\n## Asking for\n\nFeedback on whether this relaxation belongs in the base spec, or in a separate profile that stacks with #85's relaxation. If the working group is broadly comfortable with the direction, I'm happy to PR the required processing rules (validation, `client_id` derivation, cross-referencing OpenID Connect Key Binding 1.0).",
+      "createdAt": "2026-07-22T16:30:47Z",
+      "updatedAt": "2026-07-22T16:30:47Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -7812,6 +7850,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 112,
+      "id": "PR_kwDOKv5r-s70eGuq",
+      "title": "Profile access_denied for authorization failures at IdP and RAS",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/112",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #111.\n\n## Summary\n\nAddresses @pcarleton's report in #111 that RAS-side authorization failures (for example \"the End-User does not have a license\", or a policy or role check that denies access) today return `invalid_grant`, which is indistinguishable from grant validation failures such as signature or audience mismatches. Clients cannot tell whether a fresh ID-JAG would resolve the error or whether the End-User needs to remediate through an entitlement or access-request process.\n\nPer the discussion on #111, this PR adopts the path @aaronpk agreed to: profile `access_denied` for authorization failures at both the IdP Token Exchange endpoint and the RAS ID-JAG-to-access-token exchange, keeping `invalid_grant` for grant validation failures.\n\n## What changed\n\nAdds an Error Response subsection under Access Token Request and expands the existing Error Response subsection under Token Exchange. Each section:\n\n- Opens with a one-sentence framing noting that any OAuth token endpoint error code MAY be returned and that these two codes are profiled specifically for interoperability.\n- Defines `invalid_grant` as the grant validation failure code (signature, `aud`, `client_id`, `exp`, `typ`, decryption, `cnf` binding, subject token expiration at the IdP, etc.). A re-issued grant may resolve the error.\n- Defines `access_denied` as the authorization failure code (the grant is valid but the End-User or Client is not authorized). Covers licensing, entitlement, and provisioning gaps as well as policy or role/permission denials. A re-issued grant will not resolve the error.\n- Points at operator-defined remediation. Both bullets frame this as the \"operator's access-request, entitlement, or provisioning process\" (IdP-side adds \"app assignment\" as the leading example), with Identity Governance and Administration (IGA) workflows called out as a concrete enterprise deployment shape.\n\nThe two sections stay parallel and self-contained so readers of either endpoint's flow can consume the full error semantics without cross-referencing.\n\n## How this responds to #111\n\n| Concern | Resolution |\n|---|---|\n| RAS-side \"user does not have a license\" returns `invalid_grant`, indistinguishable from misconfiguration | New `access_denied` bullet at the RAS with explicit license, entitlement, provisioning, and policy/role denial examples |\n| Client cannot tell when to retry vs when to send the user through an access-request process | Each bullet states whether re-issuing the grant will resolve the error, giving the client a clear retry signal |\n| Same class of failure exists at the IdP side | Parallel `access_denied` bullet at the IdP for \"Client or End-User not authorized to obtain an ID-JAG for the target Resource Authorization Server\" |\n| Remediation is deployment-specific (enterprise IGA, or other operator processes) | Remediation sentence points to the operator's process and names IGA as a concrete example without foreclosing other deployment shapes |\n\n## Not in this PR (for future work)\n\nThe #111 discussion also mentioned:\n\n- `insufficient_user_authentication` \u2014 already covered in PR #88, so intentionally not touched here.\n- `insufficient_claims` (`draft-mcguinness-oauth-insufficient-claims`) \u2014 separate individual draft; would land as a follow-up if adopted.\n- `interaction_required` (`draft-parecki-oauth-jwt-grant-interaction-response`) \u2014 separate individual draft; would land as a follow-up if adopted.\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm the new Error Response sections render correctly\n- [ ] Confirm cross-references (`{{Section 5.2 of RFC6749}}`, `{{token-request}}`) resolve\n- [ ] Confirm the new `{#token-exchange-error-response}` and `{#access-token-error-response}` anchors are unique and available for later specs to reference",
+      "createdAt": "2026-07-21T16:51:15Z",
+      "updatedAt": "2026-07-21T16:51:15Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "access_denied_error",
+      "headRefOid": "9c3e6b579acdb5763608fcaead247b25afae5b60",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
