@@ -200,7 +200,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}.
 
 `client_id`:
-: REQUIRED - The client identifier of the OAuth 2.0 {{RFC6749}} client at the Resource Authorization Server that will act on behalf of the resource owner (`sub`).  This identifier MAY be different that client identifier of the OAuth 2.0 client requesting an ID-JAG from the IdP {{Section 4.3 of RFC8693}} as it represents and independent client relationship to another Authorization Server in a different trust domain.  See {{client-id-mapping}} for additional considerations.
+: REQUIRED - The client identifier of the OAuth 2.0 {{RFC6749}} client at the Resource Authorization Server that will act on behalf of the resource owner (`sub`).  This identifier MAY be different from the client identifier of the OAuth 2.0 client requesting an ID-JAG from the IdP {{Section 4.3 of RFC8693}}, as it represents an independent client relationship with another Authorization Server in a different trust domain.  See {{client-id-mapping}} for additional considerations.
 
 `jti`:
 : REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}.
@@ -345,7 +345,7 @@ The example flow is for an enterprise `acme`, which uses a multi-tenant wiki app
 | Role     | App URL | Tenant URL   | Description |
 | -------- | -------- | -------- | ----------- |
 | Client | `https://wiki.example` | `https://acme.wiki.example` | Wiki app that embeds content from one or more resource servers |
-| Resource Authorization Server   | `https://chat.example` | `https://acme.chat.example` | Authorization Server for an chat and communication app |
+| Resource Authorization Server   | `https://chat.example` | `https://acme.chat.example` | Authorization Server for a chat and communication app |
 | Identity Provider Authorization Server | `https://idp.example`   | `https://acme.idp.example` | Enterprise Identity Provider
 | Resource Server | `https://api.chat.example`   | `https://api.chat.example` |  Public API for the chat and communications app
 
@@ -425,7 +425,7 @@ Note: The IdP Authorization Server may enforce security controls such as multi-f
       "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
       "token_type": "Bearer",
       "access_token": "7SliwCQP1brGdjBtsaMnXo",
-      "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA"
+      "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
       "scope": "openid offline_access"
     }
 
@@ -813,11 +813,11 @@ The Resource Authorization Server's token endpoint responds with an OAuth 2.0 To
 
 ### Refresh Token
 
-The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
+The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
 
 When the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server.
 
-If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g ID Token)
+If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the IdP Authorization Server using the original Identity Assertion from the IdP (e.g., an ID Token) before presenting it to the Resource Authorization Server.
 
 If the ID Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
@@ -1277,7 +1277,7 @@ The following use cases are illustrative and not exhaustive. Enterprise workforc
 
 Enterprises often have hundreds of SaaS applications.  SaaS applications often have integrations to other SaaS applications that are critical to the application experience and jobs to be done.  When a SaaS app needs to request an access token on behalf of a user to a 3rd party SaaS integration's API, the end-user typically needs to complete an interactive delegated OAuth 2.0 flow, as the SaaS application is not in the same security or policy domain as the 3rd party SaaS integration.
 
-It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilities for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.
+It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilities for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such as multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.
 
 This specification can be used to extend the SSO relationship of multiple SaaS applications to include API access between these applications as well. This specification enables federation for Authorization Servers across policy or administrative boundaries. The same enterprise IdP that is trusted by applications for SSO can be extended to broker access to APIs.  This enables the enterprise to centralize more access decisions across their SaaS ecosystem and provides better end-user experience for users that need to connect multiple applications via OAuth 2.0.
 
@@ -1486,7 +1486,7 @@ AI Agent discovers the External Tool Resource Authorization Server (`authorizati
     Host: authorization-server.saas-tool.example
     Accept: application/json
 
-    HTTP/1.1 200 Ok
+    HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
