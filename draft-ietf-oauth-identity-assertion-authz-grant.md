@@ -1259,7 +1259,7 @@ The `cnf` claim format follows {{Section 3.1 of RFC8705}}:
 
 3. The token exchange response does not explicitly indicate whether certificate binding was successfully performed by the IdP.  The `token_type` response parameter for an ID-JAG is always `N_A` per {{Section 2.2.1 of RFC8693}}. The client SHOULD inspect the ID-JAG to determine if a `cnf` claim is present and whether the `x5t#S256` thumbprint matches the certificate used to authenticate the Token Exchange request.  This enables the client to detect if the IdP successfully processed the certificate binding in the token exchange request and bound the issued ID-JAG, mitigating downgrade attacks.
 
-4. If no client certificate is presented (or the IdP does not accept the presented certificate for certificate-bound issuance), the IdP issues an ID-JAG without a `cnf` claim from certificate binding.
+4. If no client certificate is presented (or the IdP does not accept the presented certificate for binding), the IdP issues an ID-JAG without an `x5t#S256` `cnf` claim.
 
 #### mTLS Certificate Binding During ID-JAG Exchange
 
