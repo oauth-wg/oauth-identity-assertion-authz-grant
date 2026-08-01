@@ -1828,9 +1828,9 @@ Cache-Control: no-store
       x5t#S256 property with the SHA-256 thumbprint of the DER encoding
       of the bound X.509 certificate.
 
-   An IdP MUST NOT bind the same ID-JAG to both a DPoP key and an X.509
-   certificate.  If both a DPoP proof and a certificate suitable for
-   binding are presented on the same Token Exchange request, the IdP
+   An IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an
+   X.509 certificate.  If both a DPoP proof and a certificate suitable
+   for binding are presented on the same Token Exchange request, the IdP
    selects a single binding mechanism according to local policy for the
    target Resource Authorization Server.
 
