@@ -1064,7 +1064,7 @@ This specification defines two sender-constraining mechanisms for the ID-JAG:
 * **DPoP Key Binding** ({{sec-dpop-binding}}): binding via a DPoP proof JWT as defined by {{RFC9449}}. The `cnf` claim carries a `jkt` property with the JWK SHA-256 Thumbprint of the bound key.
 * **mTLS Certificate Binding** ({{sec-mtls-binding}}): binding via a mutually authenticated TLS session using an X.509 client certificate as defined by {{Section 3 of RFC8705}}. The `cnf` claim carries an `x5t#S256` property with the SHA-256 thumbprint of the DER encoding of the bound X.509 certificate.
 
-An IdP MUST NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. If both a DPoP proof and a certificate suitable for binding are presented on the same Token Exchange request, the IdP selects a single binding mechanism according to local policy for the target Resource Authorization Server.
+An IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. If both a DPoP proof and a certificate suitable for binding are presented on the same Token Exchange request, the IdP selects a single binding mechanism according to local policy for the target Resource Authorization Server.
 
 The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a key or certificate to a JWT. When an ID-JAG contains a `cnf` claim, proof of possession of the corresponding private key or X.509 certificate MUST be demonstrated when using the ID-JAG at the Resource Authorization Server.
 
