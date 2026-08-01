@@ -3076,7 +3076,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
                 <p id="section-9.8.2.1-8.1.1">The token exchange response does not explicitly indicate whether certificate binding was successfully performed by the IdP.  The <code>token_type</code> response parameter for an ID-JAG is always <code>N_A</code> per <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.1" class="relref">Section 2.2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. The client <span class="bcp14">SHOULD</span> inspect the ID-JAG to determine if a <code>cnf</code> claim is present and whether the <code>x5t#S256</code> thumbprint matches the certificate used to authenticate the Token Exchange request.  This enables the client to detect if the IdP successfully processed the certificate binding in the token exchange request and bound the issued ID-JAG, mitigating downgrade attacks.<a href="#section-9.8.2.1-8.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-9.8.2.1-8.2">
-                <p id="section-9.8.2.1-8.2.1">If no client certificate is presented (or the IdP does not accept the presented certificate for certificate-bound issuance), the IdP issues an ID-JAG without a <code>cnf</code> claim from certificate binding.<a href="#section-9.8.2.1-8.2.1" class="pilcrow">¶</a></p>
+                <p id="section-9.8.2.1-8.2.1">If no client certificate is presented (or the IdP does not accept the presented certificate for binding), the IdP issues an ID-JAG without an <code>x5t#S256</code> <code>cnf</code> claim.<a href="#section-9.8.2.1-8.2.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
 </section>

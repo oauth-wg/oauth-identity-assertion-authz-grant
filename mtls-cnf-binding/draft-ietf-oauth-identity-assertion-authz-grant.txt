@@ -2128,9 +2128,8 @@ Cache-Control: no-store
        downgrade attacks.
 
    2.  If no client certificate is presented (or the IdP does not accept
-       the presented certificate for certificate-bound issuance), the
-       IdP issues an ID-JAG without a cnf claim from certificate
-       binding.
+       the presented certificate for binding), the IdP issues an ID-JAG
+       without an x5t#S256 cnf claim.
 
 9.8.2.2.  mTLS Certificate Binding During ID-JAG Exchange
 
