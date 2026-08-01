@@ -3018,67 +3018,23 @@ Cache-Control: no-store
           <h4 id="name-mtls-certificate-binding">
 <a href="#section-9.8.2" class="section-number selfRef">9.8.2. </a><a href="#name-mtls-certificate-binding" class="section-name selfRef">mTLS Certificate Binding</a>
           </h4>
-<p id="section-9.8.2-1">mTLS certificate binding is demonstrated by the client establishing a mutually authenticated TLS session using an X.509 client certificate, as defined by <span>[<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>. The certificate presented during the TLS handshake can be bound to tokens, ensuring that only the holder of the corresponding private key (and matching certificate) can use those tokens.<a href="#section-9.8.2-1" class="pilcrow">¶</a></p>
-<p id="section-9.8.2-2">When an ID-JAG contains a <code>cnf</code> claim with an <code>x5t#S256</code> property as defined in <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>, it indicates that the ID-JAG is bound to that specific X.509 certificate (identified by the SHA-256 thumbprint of the certificate's DER encoding), and proof of possession of the certificate <span class="bcp14">MUST</span> be demonstrated by presenting it in an mTLS session when using the ID-JAG.<a href="#section-9.8.2-2" class="pilcrow">¶</a></p>
-<p id="section-9.8.2-3">The certificate used for binding is the X.509 client certificate the client presents during the mutually authenticated TLS handshake, validated per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are the same certificate.<a href="#section-9.8.2-3" class="pilcrow">¶</a></p>
+<p id="section-9.8.2-1">An IdP <span class="bcp14">MAY</span> bind an ID-JAG to a client's X.509 certificate per <span>[<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>. When bound, the <code>cnf</code> claim carries an <code>x5t#S256</code> property containing the SHA-256 thumbprint of the DER encoding of the certificate, as defined by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.8.2-2">The certificate used for binding is the certificate the client presents during the mutually authenticated TLS handshake, validated per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are the same certificate.<a href="#section-9.8.2-2" class="pilcrow">¶</a></p>
 <div id="mtls-certificate-binding-during-token-exchange">
 <section id="section-9.8.2.1">
             <h5 id="name-mtls-certificate-binding-du">
 <a href="#section-9.8.2.1" class="section-number selfRef">9.8.2.1. </a><a href="#name-mtls-certificate-binding-du" class="section-name selfRef">mTLS Certificate Binding During Token Exchange</a>
             </h5>
-<p id="section-9.8.2.1-1">When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange over a mutually authenticated TLS session, the IdP <span class="bcp14">MAY</span> bind the issued ID-JAG to the client's X.509 certificate.<a href="#section-9.8.2.1-1" class="pilcrow">¶</a></p>
-<p id="section-9.8.2.1-2">The client establishes a mutually authenticated TLS session to the IdP token endpoint using a client certificate. The Token Exchange request itself is otherwise unchanged:<a href="#section-9.8.2.1-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-9.8.2.1-3">
+<p id="section-9.8.2.1-1">When the client presents an X.509 client certificate on the mTLS session to the IdP token endpoint and local policy permits certificate-bound issuance, the IdP validates the certificate per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span> and includes an <code>x5t#S256</code> <code>cnf</code> claim in the issued ID-JAG per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>:<a href="#section-9.8.2.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.8.2.1-2">
 <pre>
-POST /oauth2/token HTTP/1.1
-Host: acme.idp.example
-Content-Type: application/x-www-form-urlencoded
-
-grant_type=urn:ietf:params:oauth:grant-type:token-exchange
-&amp;requested_token_type=urn:ietf:params:oauth:token-type:id-jag
-&amp;audience=https://acme.chat.example/
-&amp;resource=https://api.chat.example/
-&amp;scope=chat.read+chat.history
-&amp;subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
-&amp;subject_token_type=urn:ietf:params:oauth:token-type:id_token
-</pre><a href="#section-9.8.2.1-3" class="pilcrow">¶</a>
-</div>
-<p id="section-9.8.2.1-4">The IdP Authorization Server processes the request as follows:<a href="#section-9.8.2.1-4" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-9.8.2.1-5">
-<li id="section-9.8.2.1-5.1">
-                <p id="section-9.8.2.1-5.1.1">The IdP <span class="bcp14">MUST</span> validate the client certificate presented during the mTLS handshake according to its configured trust anchors and any client-authentication binding required by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.1-5.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li id="section-9.8.2.1-5.2">
-                <p id="section-9.8.2.1-5.2.1">If the client certificate is valid and local policy permits certificate-bound issuance for the requesting client, the IdP <span class="bcp14">MUST</span> include a <code>cnf</code> claim in the issued ID-JAG containing an <code>x5t#S256</code> property with the SHA-256 thumbprint of the DER encoding of the client certificate, as defined by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.  This enables the Resource Authorization Server to validate the certificate binding for the ID-JAG using simple string comparison of the certificate thumbprint.<a href="#section-9.8.2.1-5.2.1" class="pilcrow">¶</a></p>
-</li>
-            </ol>
-<p id="section-9.8.2.1-6">The <code>cnf</code> claim format follows <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>:<a href="#section-9.8.2.1-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-9.8.2.1-7">
-<pre>
-{
-  "jti": "9e43f81b64a33f20116179",
-  "iss": "https://acme.idp.example",
-  "sub": "U019488227",
-  "aud": "https://acme.chat.example/",
-  "client_id": "f53f191f9311af35",
-  "exp": 1311281970,
-  "iat": 1311280970,
-  "resource": "https://api.chat.example/",
-  "scope": "chat.read chat.history",
-  "cnf": {
-    "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
-  }
+"cnf": {
+  "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
 }
-</pre><a href="#section-9.8.2.1-7" class="pilcrow">¶</a>
+</pre><a href="#section-9.8.2.1-2" class="pilcrow">¶</a>
 </div>
-<ol start="1" type="1" class="normal type-1" id="section-9.8.2.1-8">
-<li id="section-9.8.2.1-8.1">
-                <p id="section-9.8.2.1-8.1.1">The token exchange response does not explicitly indicate whether certificate binding was successfully performed by the IdP.  The <code>token_type</code> response parameter for an ID-JAG is always <code>N_A</code> per <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.1" class="relref">Section 2.2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. The client <span class="bcp14">SHOULD</span> inspect the ID-JAG to determine if a <code>cnf</code> claim is present and whether the <code>x5t#S256</code> thumbprint matches the certificate used to authenticate the Token Exchange request.  This enables the client to detect if the IdP successfully processed the certificate binding in the token exchange request and bound the issued ID-JAG, mitigating downgrade attacks.<a href="#section-9.8.2.1-8.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li id="section-9.8.2.1-8.2">
-                <p id="section-9.8.2.1-8.2.1">If no client certificate is presented (or the IdP does not accept the presented certificate for binding), the IdP issues an ID-JAG without an <code>x5t#S256</code> <code>cnf</code> claim.<a href="#section-9.8.2.1-8.2.1" class="pilcrow">¶</a></p>
-</li>
-            </ol>
+<p id="section-9.8.2.1-3">The <code>token_type</code> response parameter for an ID-JAG is always <code>N_A</code> per <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.1" class="relref">Section 2.2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. The client <span class="bcp14">SHOULD</span> verify that the returned ID-JAG contains an <code>x5t#S256</code> <code>cnf</code> claim matching the certificate it presented, to detect a silent downgrade.<a href="#section-9.8.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-9.8.2.1-4">If no client certificate is presented (or is not accepted for binding), the IdP issues an ID-JAG without an <code>x5t#S256</code> <code>cnf</code> claim.<a href="#section-9.8.2.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="mtls-certificate-binding-during-id-jag-exchange">
@@ -3086,32 +3042,23 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
             <h5 id="name-mtls-certificate-binding-dur">
 <a href="#section-9.8.2.2" class="section-number selfRef">9.8.2.2. </a><a href="#name-mtls-certificate-binding-dur" class="section-name selfRef">mTLS Certificate Binding During ID-JAG Exchange</a>
             </h5>
-<p id="section-9.8.2.2-1">When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a <code>cnf</code> claim with an <code>x5t#S256</code> property and whether the client establishes a mutually authenticated TLS session with a matching certificate.<a href="#section-9.8.2.2-1" class="pilcrow">¶</a></p>
-<div id="id-jag-contains-cnf-claim-with-x5ts256-and-client-presents-mtls-certificate">
-<section id="section-9.8.2.2.1">
-              <h6 id="name-id-jag-contains-cnf-claim-w">
-<a href="#section-9.8.2.2.1" class="section-number selfRef">9.8.2.2.1. </a><a href="#name-id-jag-contains-cnf-claim-w" class="section-name selfRef">ID-JAG Contains <code>cnf</code> Claim with <code>x5t#S256</code> and Client Presents mTLS Certificate</a>
-              </h6>
-<p id="section-9.8.2.2.1-1">If the ID-JAG contains a <code>cnf</code> claim with an <code>x5t#S256</code> property and the client establishes an mTLS session using a client certificate, the Resource Authorization Server <span class="bcp14">MUST</span>:<a href="#section-9.8.2.2.1-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-9.8.2.2.1-2">
-<li id="section-9.8.2.2.1-2.1">
-                  <p id="section-9.8.2.2.1-2.1.1">Validate the client certificate presented during the mTLS handshake according to its configured trust anchors and any client-authentication binding required by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2.1-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-9.8.2.2-1">When the client exchanges the ID-JAG at the Resource Authorization Server, processing depends on whether the ID-JAG contains an <code>x5t#S256</code> <code>cnf</code> claim and whether the client establishes an mTLS session:<a href="#section-9.8.2.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.8.2.2-2.1">
+                <p id="section-9.8.2.2-2.1.1"><strong><code>cnf.x5t#S256</code> present and mTLS certificate presented:</strong> The Resource Authorization Server <span class="bcp14">MUST</span> validate the certificate per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>, compute its SHA-256 thumbprint per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>, and compare against <code>cnf.x5t#S256</code>. Mismatch <span class="bcp14">MUST</span> fail with <code>invalid_grant</code>. On match, the Resource Authorization Server <span class="bcp14">MAY</span> issue a certificate-bound access token per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3" class="relref">Section 3</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-9.8.2.2.1-2.2">
-                  <p id="section-9.8.2.2.1-2.2.1">Compute the SHA-256 thumbprint of the DER encoding of the client certificate as defined by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2.1-2.2.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-9.8.2.2-2.2">
+                <p id="section-9.8.2.2-2.2.1"><strong><code>cnf.x5t#S256</code> present, no mTLS certificate:</strong> <span class="bcp14">MUST</span> fail with <code>invalid_grant</code>.<a href="#section-9.8.2.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-9.8.2.2.1-2.3">
-                  <p id="section-9.8.2.2.1-2.3.1">Extract the certificate thumbprint from the <code>x5t#S256</code> property of the <code>cnf</code> claim in the ID-JAG.<a href="#section-9.8.2.2.1-2.3.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-9.8.2.2-2.3">
+                <p id="section-9.8.2.2-2.3.1"><strong>No <code>cnf.x5t#S256</code>, mTLS certificate presented:</strong> The Resource Authorization Server <span class="bcp14">MAY</span> validate the certificate per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span> and issue a certificate-bound access token per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3" class="relref">Section 3</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-9.8.2.2.1-2.4">
-                  <p id="section-9.8.2.2.1-2.4.1">Compare the two thumbprints. They <span class="bcp14">MUST</span> match exactly. If they do not match, the request <span class="bcp14">MUST</span> fail with an <code>invalid_grant</code> error.<a href="#section-9.8.2.2.1-2.4.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-9.8.2.2-2.4">
+                <p id="section-9.8.2.2-2.4.1"><strong>No <code>cnf.x5t#S256</code>, no mTLS certificate:</strong> The Resource Authorization Server <span class="bcp14">MAY</span> issue an unconstrained Bearer token; if Resource Server configuration requires sender-constrained tokens, <span class="bcp14">MUST</span> fail with <code>invalid_grant</code>.<a href="#section-9.8.2.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
-                <li id="section-9.8.2.2.1-2.5">
-                  <p id="section-9.8.2.2.1-2.5.1">If the thumbprints match, the Resource Authorization Server <span class="bcp14">MAY</span> issue a sender-constrained access token per the Resource Server configuration. The issued access token <span class="bcp14">SHOULD</span> be bound to the same certificate as defined by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3" class="relref">Section 3</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2.1-2.5.1" class="pilcrow">¶</a></p>
-</li>
-              </ol>
-<p id="section-9.8.2.2.1-3">Example request (mTLS session established at the TLS layer, certificate not shown in the HTTP body):<a href="#section-9.8.2.2.1-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-9.8.2.2.1-4">
+            </ul>
+<p id="section-9.8.2.2-3">Example request (mTLS session established at the TLS layer) and successful response with a certificate-bound access token:<a href="#section-9.8.2.2-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.8.2.2-4">
 <pre>
 POST /oauth2/token HTTP/1.1
 Host: acme.chat.example
@@ -3119,15 +3066,10 @@ Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
 &amp;assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
-</pre><a href="#section-9.8.2.2.1-4" class="pilcrow">¶</a>
-</div>
-<p id="section-9.8.2.2.1-5">Example successful response with a certificate-bound access token:<a href="#section-9.8.2.2.1-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-9.8.2.2.1-6">
-<pre>
+
+
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
-Cache-Control: no-store
-Pragma: no-cache
 
 {
   "token_type": "Bearer",
@@ -3135,79 +3077,7 @@ Pragma: no-cache
   "expires_in": 86400,
   "scope": "chat.read chat.history"
 }
-</pre><a href="#section-9.8.2.2.1-6" class="pilcrow">¶</a>
-</div>
-<p id="section-9.8.2.2.1-7">Note: certificate-bound access tokens issued per <span>[<a href="#RFC8705" class="cite xref">RFC8705</a>]</span> use the <code>Bearer</code> token type in the response. The binding is validated by the Resource Server against the client certificate presented on subsequent mTLS-authenticated requests.<a href="#section-9.8.2.2.1-7" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="id-jag-contains-cnf-claim-with-x5ts256-but-no-mtls-certificate-presented">
-<section id="section-9.8.2.2.2">
-              <h6 id="name-id-jag-contains-cnf-claim-wi">
-<a href="#section-9.8.2.2.2" class="section-number selfRef">9.8.2.2.2. </a><a href="#name-id-jag-contains-cnf-claim-wi" class="section-name selfRef">ID-JAG Contains <code>cnf</code> Claim with <code>x5t#S256</code> but No mTLS Certificate Presented</a>
-              </h6>
-<p id="section-9.8.2.2.2-1">If the ID-JAG contains a <code>cnf</code> claim with an <code>x5t#S256</code> property but the client does not establish an mTLS session with a matching client certificate, the Resource Authorization Server <span class="bcp14">MUST</span> reject the request with an <code>invalid_grant</code> error, as the ID-JAG requires proof of possession of the bound certificate.<a href="#section-9.8.2.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-9.8.2.2.2-2">Example error response:<a href="#section-9.8.2.2.2-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-9.8.2.2.2-3">
-<pre>
-HTTP/1.1 400 Bad Request
-Content-Type: application/json
-Cache-Control: no-store
-
-{
-  "error": "invalid_grant",
-  "error_description": "Proof of possession required for this authorization grant"
-}
-</pre><a href="#section-9.8.2.2.2-3" class="pilcrow">¶</a>
-</div>
-</section>
-</div>
-<div id="id-jag-does-not-contain-cnf-claim-and-client-presents-mtls-certificate">
-<section id="section-9.8.2.2.3">
-              <h6 id="name-id-jag-does-not-contain-cnf-c">
-<a href="#section-9.8.2.2.3" class="section-number selfRef">9.8.2.2.3. </a><a href="#name-id-jag-does-not-contain-cnf-c" class="section-name selfRef">ID-JAG Does Not Contain <code>cnf</code> Claim and Client Presents mTLS Certificate</a>
-              </h6>
-<p id="section-9.8.2.2.3-1">If the ID-JAG does not contain a <code>cnf</code> claim but the client establishes an mTLS session with a client certificate, the Resource Authorization Server:<a href="#section-9.8.2.2.3-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-9.8.2.2.3-2">
-<li id="section-9.8.2.2.3-2.1">
-                  <p id="section-9.8.2.2.3-2.1.1"><span class="bcp14">MUST</span> validate the client certificate according to <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2.3-2.1.1" class="pilcrow">¶</a></p>
-</li>
-                <li id="section-9.8.2.2.3-2.2">
-                  <p id="section-9.8.2.2.3-2.2.1"><span class="bcp14">MAY</span> issue a sender-constrained access token per the Resource Server configuration at the Authorization Server, binding the access token to the client certificate presented on the mTLS session as defined by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3" class="relref">Section 3</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2.3-2.2.1" class="pilcrow">¶</a></p>
-</li>
-                <li id="section-9.8.2.2.3-2.3">
-                  <p id="section-9.8.2.2.3-2.3.1">The access token response uses the <code>Bearer</code> token type per <span>[<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.8.2.2.3-2.3.1" class="pilcrow">¶</a></p>
-</li>
-              </ol>
-</section>
-</div>
-<div id="id-jag-does-not-contain-cnf-claim-and-no-mtls-certificate-presented">
-<section id="section-9.8.2.2.4">
-              <h6 id="name-id-jag-does-not-contain-cnf-cl">
-<a href="#section-9.8.2.2.4" class="section-number selfRef">9.8.2.2.4. </a><a href="#name-id-jag-does-not-contain-cnf-cl" class="section-name selfRef">ID-JAG Does Not Contain <code>cnf</code> Claim and No mTLS Certificate Presented</a>
-              </h6>
-<p id="section-9.8.2.2.4-1">If the ID-JAG does not contain a <code>cnf</code> claim and the client does not establish an mTLS session with a client certificate:<a href="#section-9.8.2.2.4-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-9.8.2.2.4-2">
-<li id="section-9.8.2.2.4-2.1">
-                  <p id="section-9.8.2.2.4-2.1.1">The Resource Authorization Server <span class="bcp14">MAY</span> issue an unconstrained Bearer token.<a href="#section-9.8.2.2.4-2.1.1" class="pilcrow">¶</a></p>
-</li>
-                <li id="section-9.8.2.2.4-2.2">
-                  <p id="section-9.8.2.2.4-2.2.1">However, if the Resource Server configuration at the Authorization Server requires constrained tokens for that Resource Server, the request <span class="bcp14">MUST</span> fail with an <code>invalid_grant</code> error.<a href="#section-9.8.2.2.4-2.2.1" class="pilcrow">¶</a></p>
-</li>
-              </ol>
-<p id="section-9.8.2.2.4-3">Example error response when constrained tokens are required:<a href="#section-9.8.2.2.4-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-9.8.2.2.4-4">
-<pre>
-HTTP/1.1 400 Bad Request
-Content-Type: application/json
-Cache-Control: no-store
-
-{
-  "error": "invalid_grant",
-  "error_description": "Sender-constrained tokens required for this resource server"
-}
-</pre><a href="#section-9.8.2.2.4-4" class="pilcrow">¶</a>
-</div>
-</section>
+</pre><a href="#section-9.8.2.2-4" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
