@@ -1214,7 +1214,7 @@ mTLS certificate binding is demonstrated by the client establishing a mutually a
 
 When an ID-JAG contains a `cnf` claim with an `x5t#S256` property as defined in {{Section 3.1 of RFC8705}}, it indicates that the ID-JAG is bound to that specific X.509 certificate (identified by the SHA-256 thumbprint of the certificate's DER encoding), and proof of possession of the certificate MUST be demonstrated by presenting it in an mTLS session when using the ID-JAG.
 
-The certificate used for binding MAY be the same certificate the client uses to authenticate to the IdP or Resource Authorization Server per {{Section 2 of RFC8705}}, or a distinct certificate used solely for binding.
+The certificate used for binding is the X.509 client certificate the client presents during the mutually authenticated TLS handshake, validated per {{Section 2 of RFC8705}}. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are the same certificate.
 
 #### mTLS Certificate Binding During Token Exchange
 
