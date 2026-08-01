@@ -50,6 +50,7 @@ normative:
   RFC7800:
   RFC7638:
   RFC9449:
+  RFC8705:
   RFC9396:
   RFC9493:
   RFC7591:
@@ -1056,17 +1057,26 @@ When such profiles or extensions use an `act` claim, they should preserve the di
 
 ## Sender Constraining Tokens
 
-### Proof-of-Possession
+Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 4 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.
 
-Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 4 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key, preventing reuse by parties that do not have access to the private key.
+This specification defines two sender-constraining mechanisms for the ID-JAG:
 
-Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in {{RFC9449}}) in a `DPoP` HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.
+* **DPoP Key Binding** ({{sec-dpop-binding}}): binding via a DPoP proof JWT as defined by {{RFC9449}}. The `cnf` claim carries a `jkt` property with the JWK SHA-256 Thumbprint of the bound key.
+* **mTLS Certificate Binding** ({{sec-mtls-binding}}): binding via a mutually authenticated TLS session using an X.509 client certificate as defined by {{Section 3 of RFC8705}}. The `cnf` claim carries an `x5t#S256` property with the SHA-256 thumbprint of the DER encoding of the bound X.509 certificate.
 
-The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jkt` property as defined in {{RFC9449}}, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
+An IdP MUST NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. If both a DPoP proof and a certificate suitable for binding are presented on the same Token Exchange request, the IdP selects a single binding mechanism according to local policy for the target Resource Authorization Server.
 
-The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
+The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a key or certificate to a JWT. When an ID-JAG contains a `cnf` claim, proof of possession of the corresponding private key or X.509 certificate MUST be demonstrated when using the ID-JAG at the Resource Authorization Server.
 
-#### Proof-of-Possession During Token Exchange
+The following sections describe the processing rules for each mechanism at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
+
+### DPoP Key Binding {#sec-dpop-binding}
+
+DPoP key binding is demonstrated by the client presenting a DPoP proof JWT (as defined in {{RFC9449}}) in a `DPoP` HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.
+
+When an ID-JAG contains a `cnf` claim with a `jkt` property as defined in {{RFC9449}}, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
+
+#### DPoP Key Binding During Token Exchange
 
 When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange, the client MAY include a DPoP proof in the request. This demonstrates possession of a key that can be bound to the ID-JAG.
 
@@ -1112,7 +1122,7 @@ The `cnf` claim format follows {{Section 6.1 of RFC9449}}:
 
 4. If no DPoP proof is presented, the IdP issues an ID-JAG without a `cnf` claim.
 
-#### Proof-of-Possession During ID-JAG Exchange
+#### DPoP Key Binding During ID-JAG Exchange
 
 When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a `cnf` claim and whether the client presents a DPoP proof.
 
@@ -1182,6 +1192,146 @@ If the ID-JAG does not contain a `cnf` claim but the client presents a DPoP proo
 ##### ID-JAG Does Not Contain `cnf` Claim and DPoP Proof is Not Presented
 
 If the ID-JAG does not contain a `cnf` claim and the client does not present a DPoP proof:
+
+1. The Resource Authorization Server MAY issue an unconstrained Bearer token.
+
+2. However, if the Resource Server configuration at the Authorization Server requires constrained tokens for that Resource Server, the request MUST fail with an `invalid_grant` error.
+
+Example error response when constrained tokens are required:
+
+    HTTP/1.1 400 Bad Request
+    Content-Type: application/json
+    Cache-Control: no-store
+
+    {
+      "error": "invalid_grant",
+      "error_description": "Sender-constrained tokens required for this resource server"
+    }
+
+### mTLS Certificate Binding {#sec-mtls-binding}
+
+mTLS certificate binding is demonstrated by the client establishing a mutually authenticated TLS session using an X.509 client certificate, as defined by {{RFC8705}}. The certificate presented during the TLS handshake can be bound to tokens, ensuring that only the holder of the corresponding private key (and matching certificate) can use those tokens.
+
+When an ID-JAG contains a `cnf` claim with an `x5t#S256` property as defined in {{Section 3.1 of RFC8705}}, it indicates that the ID-JAG is bound to that specific X.509 certificate (identified by the SHA-256 thumbprint of the certificate's DER encoding), and proof of possession of the certificate MUST be demonstrated by presenting it in an mTLS session when using the ID-JAG.
+
+The certificate used for binding MAY be the same certificate the client uses to authenticate to the IdP or Resource Authorization Server per {{Section 2 of RFC8705}}, or a distinct certificate used solely for binding.
+
+#### mTLS Certificate Binding During Token Exchange
+
+When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange over a mutually authenticated TLS session, the IdP MAY bind the issued ID-JAG to the client's X.509 certificate.
+
+The client establishes a mutually authenticated TLS session to the IdP token endpoint using a client certificate. The Token Exchange request itself is otherwise unchanged:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.idp.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange
+    &requested_token_type=urn:ietf:params:oauth:token-type:id-jag
+    &audience=https://acme.chat.example/
+    &resource=https://api.chat.example/
+    &scope=chat.read+chat.history
+    &subject_token=eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...
+    &subject_token_type=urn:ietf:params:oauth:token-type:id_token
+
+The IdP Authorization Server processes the request as follows:
+
+1. The IdP MUST validate the client certificate presented during the mTLS handshake according to its configured trust anchors and any client-authentication binding required by {{Section 2 of RFC8705}}.
+
+2. If the client certificate is valid and local policy permits certificate-bound issuance for the requesting client, the IdP MUST include a `cnf` claim in the issued ID-JAG containing an `x5t#S256` property with the SHA-256 thumbprint of the DER encoding of the client certificate, as defined by {{Section 3.1 of RFC8705}}.  This enables the Resource Authorization Server to validate the certificate binding for the ID-JAG using simple string comparison of the certificate thumbprint.
+
+The `cnf` claim format follows {{Section 3.1 of RFC8705}}:
+
+    {
+      "jti": "9e43f81b64a33f20116179",
+      "iss": "https://acme.idp.example",
+      "sub": "U019488227",
+      "aud": "https://acme.chat.example/",
+      "client_id": "f53f191f9311af35",
+      "exp": 1311281970,
+      "iat": 1311280970,
+      "resource": "https://api.chat.example/",
+      "scope": "chat.read chat.history",
+      "cnf": {
+        "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
+      }
+    }
+
+3. The token exchange response does not explicitly indicate whether certificate binding was successfully performed by the IdP.  The `token_type` response parameter for an ID-JAG is always `N_A` per {{Section 2.2.1 of RFC8693}}. The client SHOULD inspect the ID-JAG to determine if a `cnf` claim is present and whether the `x5t#S256` thumbprint matches the certificate used to authenticate the Token Exchange request.  This enables the client to detect if the IdP successfully processed the certificate binding in the token exchange request and bound the issued ID-JAG, mitigating downgrade attacks.
+
+4. If no client certificate is presented (or the IdP does not accept the presented certificate for certificate-bound issuance), the IdP issues an ID-JAG without a `cnf` claim from certificate binding.
+
+#### mTLS Certificate Binding During ID-JAG Exchange
+
+When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a `cnf` claim with an `x5t#S256` property and whether the client establishes a mutually authenticated TLS session with a matching certificate.
+
+##### ID-JAG Contains `cnf` Claim with `x5t#S256` and Client Presents mTLS Certificate
+
+If the ID-JAG contains a `cnf` claim with an `x5t#S256` property and the client establishes an mTLS session using a client certificate, the Resource Authorization Server MUST:
+
+1. Validate the client certificate presented during the mTLS handshake according to its configured trust anchors and any client-authentication binding required by {{Section 2 of RFC8705}}.
+
+2. Compute the SHA-256 thumbprint of the DER encoding of the client certificate as defined by {{Section 3.1 of RFC8705}}.
+
+3. Extract the certificate thumbprint from the `x5t#S256` property of the `cnf` claim in the ID-JAG.
+
+4. Compare the two thumbprints. They MUST match exactly. If they do not match, the request MUST fail with an `invalid_grant` error.
+
+5. If the thumbprints match, the Resource Authorization Server MAY issue a sender-constrained access token per the Resource Server configuration. The issued access token SHOULD be bound to the same certificate as defined by {{Section 3 of RFC8705}}.
+
+Example request (mTLS session established at the TLS layer, certificate not shown in the HTTP body):
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.chat.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+    &assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+
+Example successful response with a certificate-bound access token:
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json;charset=UTF-8
+    Cache-Control: no-store
+    Pragma: no-cache
+
+    {
+      "token_type": "Bearer",
+      "access_token": "2YotnFZFEjr1zCsicMWpAA",
+      "expires_in": 86400,
+      "scope": "chat.read chat.history"
+    }
+
+Note: certificate-bound access tokens issued per {{RFC8705}} use the `Bearer` token type in the response. The binding is validated by the Resource Server against the client certificate presented on subsequent mTLS-authenticated requests.
+
+##### ID-JAG Contains `cnf` Claim with `x5t#S256` but No mTLS Certificate Presented
+
+If the ID-JAG contains a `cnf` claim with an `x5t#S256` property but the client does not establish an mTLS session with a matching client certificate, the Resource Authorization Server MUST reject the request with an `invalid_grant` error, as the ID-JAG requires proof of possession of the bound certificate.
+
+Example error response:
+
+    HTTP/1.1 400 Bad Request
+    Content-Type: application/json
+    Cache-Control: no-store
+
+    {
+      "error": "invalid_grant",
+      "error_description": "Proof of possession required for this authorization grant"
+    }
+
+##### ID-JAG Does Not Contain `cnf` Claim and Client Presents mTLS Certificate
+
+If the ID-JAG does not contain a `cnf` claim but the client establishes an mTLS session with a client certificate, the Resource Authorization Server:
+
+1. MUST validate the client certificate according to {{Section 2 of RFC8705}}.
+
+2. MAY issue a sender-constrained access token per the Resource Server configuration at the Authorization Server, binding the access token to the client certificate presented on the mTLS session as defined by {{Section 3 of RFC8705}}.
+
+3. The access token response uses the `Bearer` token type per {{RFC8705}}.
+
+##### ID-JAG Does Not Contain `cnf` Claim and No mTLS Certificate Presented
+
+If the ID-JAG does not contain a `cnf` claim and the client does not establish an mTLS session with a client certificate:
 
 1. The Resource Authorization Server MAY issue an unconstrained Bearer token.
 
@@ -1619,6 +1769,10 @@ The authors would like to thank the following people for their contributions and
 {:numbered="false"}
 
 \[\[ To be removed from the final specification ]]
+
+-05
+
+* Added mTLS certificate binding as an alternative sender-constraining mechanism for the ID-JAG, alongside DPoP
 
 -04
 
