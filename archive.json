@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-30T00:17:58.716523+00:00",
+  "timestamp": "2026-08-02T00:19:37.025367+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2273,7 +2273,7 @@
       ],
       "body": "# Problem\n\nSection 2.1 of the draft currently says:\n\n> It is RECOMMENDED that the ID-JAG contain an `email` and/or `aud_sub` claim. The Resource Authorization Server MAY use these claims for account resolution or just-in-time (JIT) account creation... Additional Resource Authorization Server specific identity claims MAY be needed for account resolution or JIT account creation.\n\nThis language acknowledges the JIT problem but does not solve it. There is no interoperable mechanism for a Resource Authorization Server (RAS) to signal which identity claims it requires, or for a Client to convey that signal back to the IdP so it can include them in the ID-JAG. The result requires out-of-band coordination between every IdP/RAS pair, which undermines the composability goal of the spec.\n\n## Specific failure modes\n\n1. **What claims does the IdP put in the ID-JAG?** The spec provides a fixed optional set (`email`, `aud_sub`) but gives no mechanism for the RAS to express its requirements. IdPs must either over-include claims (privacy risk) or guess conservatively and leave JIT broken.\n\n2. **What claims does the RAS need to JIT?** RAS-specific claims (department, cost center, license tier, custom identifiers) may not be OIDC standard claims. Even for OIDC-defined claims, different RASes need different subsets. There is no way to express this per-RAS, per-deployment requirement today.\n\n3. **How does the IdP know to issue the right claims?** The IdP has no standardized signal from the Client about what the target RAS needs. The Client knows the RAS endpoint (from discovery) but cannot ask the IdP to tailor the ID-JAG for that RAS's JIT requirements.\n\n4. **The UserInfo dead end.** When the RAS receives the ID-JAG it has no Access Token and cannot reach back to the IdP's UserInfo endpoint or any other IdP-hosted endpoint to fetch additional claims. The ID-JAG exchange must succeed or fail on the claims already present in the token. This is not a fixable limitation; it is a structural constraint of the grant flow.\n\n# Proposed Solution\n\nStandardize exactly three things.\n\n## 1. Error code: `insufficient_identity_claims`\n\nIf the RAS determines that the identity assertion is cryptographically valid and the grant type is accepted, but the token does not contain sufficient identity claims to perform account resolution or JIT account creation, it SHOULD return an error response per RFC 6749 Section 5.2:\n\n```\nHTTP/1.1 400 Bad Request\nContent-Type: application/json\n\n{\n  \"error\": \"insufficient_identity_claims\",\n  \"error_description\": \"The identity assertion is missing required claims for account resolution.\"\n}\n```\n\nThe name follows the `insufficient_*` pattern established by RFC 9470 (`insufficient_user_authentication`). It signals \"valid but not enough\", distinguishing this condition from `invalid_grant`, which would indicate the token itself is rejected. \n\n## 2. Error response parameter: `required_claims`\n\nThe error response SHOULD include a `required_claims` parameter: a space-separated list of the claim names the RAS requires, following the same format as `scope` (RFC 6749 Section 3.3):\n\n```json\n{\n  \"error\": \"insufficient_identity_claims\",\n  \"error_description\": \"The identity assertion is missing required claims for account resolution.\",\n  \"required_claims\": \"email department employee_number\"\n}\n```\n\nSpace-separated is the right format here. Claim names are JSON member names and cannot contain spaces, so the delimiter is unambiguous. This is consistent with `scope` and avoids the framework-parsing ambiguity of a JSON array in a form-encoded body (cf. RFC 9396 `authorization_details`, which uses JSON because its values are structured objects; claim names are flat tokens and do not warrant that complexity).\n\n`required_claims` is intentionally defined as a flat list of names. Value constraints, type hints, and schema references are deferred pending real deployment experience.\n\n## 3. Token Exchange request extension parameter: `required_claims`\n\nA Client receiving an `insufficient_identity_claims` error MAY retry the Token Exchange request to the IdP Authorization Server, including the `required_claims` parameter with the value carried directly from the RAS error response:\n\n```\nPOST /oauth2/token\nContent-Type: application/x-www-form-urlencoded\n\ngrant_type=urn:ietf:params:oauth:grant-type:token-exchange\n&requested_token_type=urn:ietf:params:oauth:token-type:id-jag\n&subject_token=<id_token>\n&subject_token_type=urn:ietf:params:oauth:token-type:id_token\n&audience=https://api.example.com/\n&required_claims=email+department+employee_number\n```\n\nThe symmetric naming (`required_claims` in both the error response and the Token Exchange request) means the Client can pass the value through without transformation. \"Required\" reflects the RAS's perspective, which is authoritative: these claims are required for the flow to succeed. It does not obligate the IdP to provide all of them; the IdP SHOULD include the requested claims subject to its own policy (consent, availability, privacy controls), and MAY decline to include specific claims.\n\n## End-to-end flow\n\n```\nClient \u2192 IdP:    Token Exchange \u2192 ID-JAG (minimal claims)\nClient \u2192 RAS:    Token Exchange with ID-JAG\nRAS \u2192 Client:    400 insufficient_identity_claims\n                     required_claims=email department employee_number\nClient \u2192 IdP:    Token Exchange + required_claims=email department employee_number\nIdP \u2192 Client:    ID-JAG with additional claims included\nClient \u2192 RAS:    Token Exchange with enriched ID-JAG\nRAS \u2192 Client:    200 OK, access_token\n```\n\n# Editorial: relax `email` and `aud_sub` to plain OPTIONAL\n\nWith `required_claims` providing the negotiation mechanism, the RECOMMENDED status of `email` and `aud_sub` in Section 2.1 should be downgraded to OPTIONAL. These claims become examples of what a RAS might request rather than a standing recommendation that every IdP include them. The existing guidance language should be replaced with a pointer to the `required_claims` mechanism as the interoperable way to express and negotiate claim requirements, and an example end-to-end flow demonstrating the retry pattern.\n\n# Advanced use case: RAS Token Exchange to IdP\n\nFor deployments where the identity data needed cannot reasonably be pre-embedded in a signed token (because it is large, sensitive, or needs to be fresher than the ID-JAG allows), the RAS MAY perform its own Token Exchange: presenting the received ID-JAG as the subject token to the IdP's token endpoint and requesting an Access Token scoped to the IdP's identity APIs.\n\nThis covers the UserInfo-equivalent pattern without burdening the Client as intermediary, and without embedding what is effectively a profile API response inside the ID-JAG. It should be acknowledged in the spec as a valid deployment pattern with the IdP-side API contract left to a future profile. This keeps the core ID-JAG spec clean and avoids scope creep.\n\n# Optional / future: claim requirements discovery at the RAS\n\nTo allow IdPs to import a RAS's claim requirements at onboarding time rather than waiting for a runtime error, the RAS could advertise the claims it needs for JIT provisioning via its Authorization Server metadata (RFC 8414), using a new metadata parameter scoped to this profile (to avoid collision with base OAuth or other profiles).\n\nThis is an optimization for IdP onboarding UX, not a correctness requirement. The runtime `insufficient_identity_claims` negotiation works without it. Worth raising for debate; not a blocker for the core proposal.\n\n---\n\n# Questions for the group\n\n1. **Error name:** `insufficient_identity_claims` (cause, RFC 9470 pattern)  or alternative?\n2. **IdP acknowledgment:** Should the IdP be required to indicate in the ID-JAG which claims from `required_claims` it was able to include, or is the Client expected to inspect the resulting token before retrying at the RAS?\n3. **RAS-to-IdP Token Exchange:** Should the advanced pattern be noted in Security Considerations? The RAS acting as an OAuth client to the IdP has trust and SSRF implications worth calling out even if the pattern itself is out of scope.",
       "createdAt": "2026-04-14T22:49:22Z",
-      "updatedAt": "2026-05-27T18:11:01Z",
+      "updatedAt": "2026-08-01T22:04:29Z",
       "closedAt": null,
       "comments": [
         {
@@ -2345,6 +2345,55 @@
           "body": "https://datatracker.ietf.org/doc/draft-mcguinness-oauth-insufficient-claims/",
           "createdAt": "2026-05-27T18:11:01Z",
           "updatedAt": "2026-05-27T18:11:01Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "I think interoperable JIT is an essential requirement.\nReading the issue I reached the same security concern Aaron raised, and even more concerning is that IDP has no way of knowing if client's JIT claims request is based on RAS requirements. Client could over-ask and obtain an ID JAG revealing private information.\n\nI think this should be solved and the solution:\n- Should be metadata discovery based. For example a RAS can publish it's JIT required claims.\n- An IDP can discover the audienced RAS' JIT claims, so client signaling would not be required (prevents unauthorized \"step-ups\" of requested data.\n- The JIT claims should not be included in the ID JAG, rather provided to RAS using token introspection. This ensures data privacy.\n\nThe challenge that remains is whether claim names have the same meaning for IDP and RAS.\nWhen Standard OIDC claims are used, the meaning is clear.\nWhen custom claims are used, their meaning could conflict in different domains.",
+          "createdAt": "2026-08-01T19:58:13Z",
+          "updatedAt": "2026-08-01T19:58:13Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The required claims may be contextual to the user, client, resource, tenant, etc.  A static claims list per RAS published in global metadata may not be sufficient.  IdPs already need tenant specific dictionaries for groups, roles, etc for example.   There may also be different claims needed for API access with ID-JAG vs traditional SSO.   Discovering the full set of claims needed for JIT that includes account profile, roles, entitlements, authorization, etc is a larger surface area than just static list of claims such as `claims_supported` in OIDC metadata.\n\nOIDC already supports an open claims request mechanism https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter.  Entra ID already uses this with claims challenge using WWW-Authenticate challenges https://learn.microsoft.com/en-us/entra/identity-platform/claims-challenge?tabs=dotnet.   The insufficient claims challenge is modeled similarly https://datatracker.ietf.org/doc/draft-mcguinness-oauth-insufficient-claims/ as patterns that have already been deployed.\n\nIf we really want to solve for privacy, then an alternative solution would be a flow similar to https://datatracker.ietf.org/doc/draft-rosomakho-oauth-txn-challenge/ where a claims challenge can be signed an optionally encrypted by the RAS and carried back to the IdP.  I think this is overkill personally. \n\nThe end-to-end solution will more than likely require the IdP to use SCIM/OpenID Provider Commands and potentially vendor-specific APIs to populate the attributes needed to JIT users across a wide range of app types, tenant models, etc.   A more generic app-boarding control plane like FastFed would be more suited to address this challenge I believe than public AS metadata. ",
+          "createdAt": "2026-08-01T20:33:40Z",
+          "updatedAt": "2026-08-01T20:33:40Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "Okay, but then to support dynamic sets of attributes required by RAS, while maintaining privacy and preventing unauthorized step-up, perhaps IDP should issue its ID-JAG with a default set of claims and if RAS if requires more, it shall make a token introspection request adding `required_claims` as request parameter..\nRFC 7662 supports optional request parameters, IDP identifies the token as an ID JAG it issued and so perhaps dynamic claim negotiation could be performed directly between RAS and IDP, without failure signaling and without involving the client.",
+          "createdAt": "2026-08-01T20:54:29Z",
+          "updatedAt": "2026-08-01T20:54:58Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Can you elaborate on the flow you are thinking off.  I'm not following where token introspection fits. ",
+          "createdAt": "2026-08-01T20:59:00Z",
+          "updatedAt": "2026-08-01T20:59:00Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "With pleasure:\n\n- Client requests IDP for ID JAG and obtains one with (IDP profiled) standard set of claims (e.g sub, name and email)\n- Client presents ID JAG to RAS\n- RAS validates and evaluates ID JAG, determines the token is valid but the identity claims are insufficient. (e.g: department & employee_number are required).\n- RAS calls IDPs token introspection endpoint for the ID JAG and adds a required_claims request parameter: `required_claims=department%20employee_number`, with appropriate client authentication.\n- IDP validates ID JAG, and that caller is the RAS the audience of the ID JAG.\n- IDP evaluates the required claims and provides them over TLS in the token introspection response.\n\net voila!\nDynamic claims negotiation without relying on static metadata contracts, completely transparent to clients and without security risks from clients (unauthorized requests for more claims, privacy).",
+          "createdAt": "2026-08-01T21:12:12Z",
+          "updatedAt": "2026-08-01T21:24:14Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for elaboration it helps.\n\n1) Is access token issuance blocked for the client while steps 4-6 are happening?  This will have scale issues for high volume RAS deployments. You would more than likely introduce a dependency on DTR and lots of polling.  Having an external network dependency during token issuance has known operational concerns.  \n2) The ID-JAG is issued to the client and ideally bound to the client's key for proof-of-possession key.  The RAS is not the client the token was issued for.  How does the IdP know its the RAS making the introspection request in an interoperable way (the ID-JAG audience value doesn't match as CIMD url for the RAS as a client for example)? \n3) The IdP still needs a policy to determine whether the RAS can request specific claims. \n4) The IdP may not be accessible the the RAS.  The client is the only actor that needed to reach the IdP. \n\nSince the IdP still needs a policy to determine what claims can be requested for given subject/client/audience/resource tuple,   I feel like JWE encryption of the ID-JAG addresses the P0 for privacy concerns with all the complexity.  See https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/102\n\nThis also starts to look like a token exchange by RAS for an access token for UserInfo endpoint that I mentioned in some channel (can't find it) which would mirror OIDC for getting claims in the backchannel.  \n",
+          "createdAt": "2026-08-01T21:37:21Z",
+          "updatedAt": "2026-08-01T21:37:21Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "Agree with the latency concerns but not sure how much they'll impact users as XAA flows run in the background, so perhaps better have client synch wait on the token exchange call than defer with DTR.\n\nDisagree on points 3 & 4:\n\n- IdP needs a per-RAS policy also in the original proposal, to process audience + required_claims pairs in the token exchange request.\n- IdP needs to be accessible to RAS for obtaining jwks to validate the ID JAG.\n\nAgree error signaling + JWE can solve all of this without RAS adding a network dependency.\nIf not opting for JWE for whatever reason, combining both my proposals could lower latency:\n\n- IdP shall consider RAS published required claims profile when issuing ID JAG's, raising the chance they satisfy JIT requirements.\n- RAS may dynamically request additional claims through introspection.",
+          "createdAt": "2026-08-01T21:55:10Z",
+          "updatedAt": "2026-08-01T22:04:29Z"
         }
       ]
     },
@@ -3035,6 +3084,37 @@
       "updatedAt": "2026-07-26T04:22:58Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 117,
+      "id": "I_kwDOKv5r-s8AAAABK_o4rg",
+      "title": "Sender constraining the ID-JAG via mTLS-cert binding",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/117",
+      "state": "OPEN",
+      "author": "kenmccracken-google",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In the [Sender constraining tokens](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-sender-constraining-tokens) section of the draft, it mentions DPoP-binding semantics for the ID-JAG.\n\nIn one of the referenced docs in the [Delegated key binding section](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-12), support for mTLS binding the token is mentioned.  \"The client in trust domain A that presents the access token must use the key matching the \"cnf\" claim to generate a DPoP proof or set up a MTLS session when presenting the access token to a resource server in trust domain B.\"\n\nWould the authors of this ID-JAG spec consider support for similar mTLS session binding in a new Section 9.8.2?",
+      "createdAt": "2026-07-31T19:35:23Z",
+      "updatedAt": "2026-08-01T01:41:36Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Definitely, let me work it out to make sure there isn't any issues but there wasn'y any specific reason to exclude assuming the same key can be used across both ASes which is unique to this spec.",
+          "createdAt": "2026-07-31T20:59:52Z",
+          "updatedAt": "2026-07-31T20:59:52Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks @kenmccracken-google. Pushed #118 to address this. Would appreciate your review when you have a moment.",
+          "createdAt": "2026-08-01T01:41:36Z",
+          "updatedAt": "2026-08-01T01:41:36Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -8013,6 +8093,32 @@
       "headRepository": "mlajkim/oauth-identity-assertion-authz-grant",
       "headRefName": "fix/minor-typos",
       "headRefOid": "cfcc70e25d84922b2bab8c6f7573b32d7fb518c9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 118,
+      "id": "PR_kwDOKv5r-s75Qq5f",
+      "title": "Add mTLS certificate binding for ID-JAG sender constraining",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/118",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\n- Adds Section 9.8.2 **mTLS Certificate Binding** as a sibling to the existing DPoP binding, following [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705).\n- Renames the existing `### Proof-of-Possession` subsection to `### DPoP Key Binding` for parallelism. DPoP processing rules are unchanged.\n- Adds guidance that an IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. When both a DPoP proof and a suitable certificate are presented on the same Token Exchange request, the IdP selects a single binding mechanism per local policy for the target Resource Authorization Server.\n- The new mTLS subsection mirrors the DPoP treatment with parallel \"During Token Exchange\" and \"During ID-JAG Exchange\" sub-subsections, including the same four-case `cnf`/mTLS processing matrix.\n- Adds RFC 8705 to normative references and a `-05` document history entry.\n\n### Note on the binding certificate\n\nThe certificate used for binding is the X.509 client certificate the client presents during the mutually authenticated TLS handshake, validated per RFC 8705 \u00a72. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are necessarily the same certificate.\n\nCloses #117.\n\n## Test plan\n\n- [ ] CI builds the draft (kramdown-rfc render succeeds)\n- [ ] Internal anchors resolve (`sec-dpop-binding`, `sec-mtls-binding`)\n- [ ] Rendered HTML shows Section 9.8 with 9.8.1 (DPoP) and 9.8.2 (mTLS) at the same level\n- [ ] Document history `-05` entry appears",
+      "createdAt": "2026-08-01T01:24:34Z",
+      "updatedAt": "2026-08-01T04:11:55Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "mtls-cnf-binding",
+      "headRefOid": "660dd92481aa7a391531c6eb67ce14cde44a89d0",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
