@@ -99,8 +99,6 @@ informative:
   RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
-  I-D.ietf-oauth-attestation-based-client-auth:
-  I-D.mcguinness-oauth-client-instance-assertion:
 
 --- abstract
 
@@ -159,10 +157,10 @@ Principal
 : The entity the Identity Assertion is issued for. The Principal may be an End-User, a workload, or an autonomous agent.
 
 Identity Assertion
-: A security token that conveys claims about a Principal and can be used as the `subject_token` input to Token Exchange. In this specification, an Identity Assertion is one of:
+: A security token that conveys claims about a Principal and can be used as the `subject_token` input to Token Exchange. In this specification, an Identity Assertion is:
 
-  * an OpenID Connect ID Token or a SAML 2.0 assertion issued by the IdP Authorization Server for an End-User Principal;
-  * a Client Assertion per {{RFC7523}}, a Client Attestation per {{I-D.ietf-oauth-attestation-based-client-auth}}, or a Client Instance Assertion per {{I-D.mcguinness-oauth-client-instance-assertion}} for a workload or autonomous agent Principal.
+  * an OpenID Connect ID Token or a SAML 2.0 assertion issued by the IdP Authorization Server for an End-User Principal; or
+  * a JWT credential the workload or agent presents to authenticate as the Principal to the IdP Authorization Server, for a workload or autonomous agent Principal. Any JWT-based client authentication method the IdP Authorization Server accepts for that Principal MAY be used, including those registered under the `token_endpoint_auth_methods_supported` authorization server metadata parameter. See {{workload-agent-principal}}.
 
 Trust Domain
 : A deployment-specific security and administrative boundary within which a set of entities, identifiers, credentials, and policy decisions are mutually trusted according to established trust relationships. In this specification, the IdP Authorization Server operates in trust domain A, while the Resource Authorization Server and Resource Server operate in trust domain B.
@@ -350,10 +348,23 @@ An ID-JAG MAY represent a workload or autonomous agent Principal in addition to 
 
 When the Principal is a workload or autonomous agent:
 
-* The `subject_token` used in the Token Exchange is a Client Assertion per {{RFC7523}}, a Client Attestation per {{I-D.ietf-oauth-attestation-based-client-auth}}, or a Client Instance Assertion per {{I-D.mcguinness-oauth-client-instance-assertion}}. Its `subject_token_type` is `urn:ietf:params:oauth:token-type:jwt`.
+* The `subject_token` is a JWT credential the workload or agent uses to authenticate as the Principal to the IdP Authorization Server. Any JWT-based client authentication method the IdP Authorization Server accepts for that Principal MAY be used, including those registered under `token_endpoint_auth_methods_supported`. The same JWT MAY serve as both the client authentication credential and the `subject_token`. Its `subject_token_type` is `urn:ietf:params:oauth:token-type:jwt`.
 * The `sub` claim of the resulting ID-JAG is the workload or agent identifier the IdP Authorization Server assigns to the Principal.
 * Claims specific to End-User authentication (`auth_time`, `acr`, `amr`, `email`) are typically absent.
 * The Resource Authorization Server resolves the workload or agent as a first-class Principal, not as a delegated actor for an End-User.
+
+A JWT presented as a workload or autonomous agent Identity Assertion MUST contain the following claims:
+
+* `iss` (issuer): identifies the party that issued the JWT (for example, the workload itself for a self-signed client assertion, an attestation authority for an attested credential, or a SPIFFE trust domain).
+* `sub` (subject): identifies the workload or autonomous agent Principal.
+* `aud` (audience): identifies the IdP Authorization Server, typically its token endpoint URL or its issuer identifier.
+* `exp` (expiration time): the JWT's expiration time. The IdP MUST reject expired credentials.
+
+A JWT SHOULD additionally contain `iat` (issued at) and `jti` (JWT ID) for replay detection.
+
+The IdP Authorization Server determines what forms of workload or agent Identity Assertion it accepts based on local policy. Deployments MAY require credentials that convey runtime attestation (for example, workload attestation or TEE attestation), a specific trusted issuer (such as a SPIFFE trust domain or a client backend attestation service), or other trust-establishment properties in addition to identifying the Principal. The IdP MUST validate the credential per the applicable client authentication specification before minting the ID-JAG.
+
+Client authentication methods that do not produce a JWT body artifact (for example, mTLS-based mechanisms) do not directly yield a `subject_token` for this profile; a companion profile MAY define how such a mechanism produces an equivalent JWT Identity Assertion.
 
 The Resource Authorization Server determines whether it accepts an ID-JAG whose Principal is a workload or autonomous agent based on local policy for the issuer and the requested audience. See {{workload-principal-security}} for additional security considerations.
 
@@ -470,7 +481,7 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : OPTIONAL - A JSON string containing a JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This parameter enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
 
 `subject_token`:
-: REQUIRED - An Identity Assertion for the Principal that will be represented by the ID-JAG, or a Refresh Token previously issued by the IdP Authorization Server for that Principal. The Identity Assertion is an OpenID Connect ID Token or a SAML 2.0 Assertion for an End-User Principal, or a Client Assertion per {{RFC7523}}, a Client Attestation per {{I-D.ietf-oauth-attestation-based-client-auth}}, or a Client Instance Assertion per {{I-D.mcguinness-oauth-client-instance-assertion}} for a workload or autonomous agent Principal. Implementations of this specification MUST accept OpenID Connect ID Tokens as Identity Assertions. They MAY additionally accept SAML 2.0 Assertions, workload or agent Identity Assertions, and Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.
+: REQUIRED - An Identity Assertion for the Principal that will be represented by the ID-JAG, or a Refresh Token previously issued by the IdP Authorization Server for that Principal. The Identity Assertion is an OpenID Connect ID Token or a SAML 2.0 Assertion for an End-User Principal, or a JWT credential the workload or agent presents to authenticate as the Principal (see {{workload-agent-principal}}) for a workload or autonomous agent Principal. Implementations of this specification MUST accept OpenID Connect ID Tokens as Identity Assertions. They MAY additionally accept SAML 2.0 Assertions, workload or agent Identity Assertions, and Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.
 
 `subject_token_type`:
 : REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`, for a Client Assertion, Client Attestation, or Client Instance Assertion (when supported): `urn:ietf:params:oauth:token-type:jwt`, and for a Refresh Token (when supported): `urn:ietf:params:oauth:token-type:refresh_token`.
@@ -552,7 +563,7 @@ This non-normative example shows using a Refresh Token as the `subject_token` (w
 The IdP MUST validate the subject token:
 
 * If the subject token is an End-User Identity Assertion (OpenID Connect ID Token or SAML 2.0 assertion), the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g. the `aud` claim of the ID Token or SAML Audience) matches the `client_id` of the client authentication of the request.
-* If the subject token is a workload or autonomous agent Identity Assertion (Client Assertion, Client Attestation, or Client Instance Assertion), the IdP MUST validate the assertion per the applicable specification and MUST resolve the Principal identified by the assertion to a workload or agent registration the IdP administers. The audience of these assertions is the IdP Authorization Server (typically its token endpoint) rather than the `client_id`; the mapping between the authenticated OAuth client and the workload or agent Principal is a policy decision at the IdP.
+* If the subject token is a workload or autonomous agent Identity Assertion, the IdP MUST validate the JWT per the applicable client authentication specification, verify the required claims per {{workload-agent-principal}}, and resolve the Principal identified by the credential to a workload or agent registration the IdP administers. The audience of these assertions is the IdP Authorization Server (typically its token endpoint) rather than the `client_id`; the mapping between the authenticated OAuth client and the workload or agent Principal is a policy decision at the IdP.
 * If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
 * If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
 
@@ -1080,7 +1091,7 @@ When such profiles or extensions use an `act` claim, they should preserve the di
 
 When an ID-JAG represents a workload or autonomous agent Principal, the End-User consent semantics that normally apply to cross-app access ({{OpenID.Core}}) do not apply. The IdP Authorization Server MUST have an administratively established authorization basis (registration, policy, or attestation trust) for issuing ID-JAGs on behalf of the workload or agent, in place of an End-User consent event.
 
-The IdP Authorization Server SHOULD validate the workload or agent Identity Assertion (Client Assertion, Client Attestation, or Client Instance Assertion) using the same trust anchors and validation rules it would apply for the equivalent client authentication or client attestation.
+The IdP Authorization Server SHOULD validate the workload or agent Identity Assertion using the same trust anchors and validation rules it would apply for the equivalent client authentication method, including any attestation, instance-binding, or issuer-trust requirements the IdP has configured for that Principal.
 
 The Resource Authorization Server SHOULD apply local policy to decide whether the workload or agent Principal identified by an ID-JAG is authorized for the requested audience, resource, scope, and authorization details. In particular, the Resource Authorization Server SHOULD NOT infer End-User attributes from a workload or agent ID-JAG, and SHOULD NOT rely on the presence of End-User claims (`auth_time`, `acr`, `amr`, `email`) which will typically be absent.
 
@@ -1654,7 +1665,7 @@ The authors would like to thank the following people for their contributions and
 
 -05
 
-* Added native support for workload and autonomous agent Principals: broadened the definition of Identity Assertion to include Client Assertion, Client Attestation, and Client Instance Assertion; broadened the `sub` claim to identify a Principal (End-User, workload, or agent); added Section 3.3 describing Workload and Autonomous Agent Principals; extended Token Exchange processing rules to validate workload and agent Identity Assertions; added a Security Considerations subsection on workload and agent Principals.
+* Added native support for workload and autonomous agent Principals: introduced the Principal term; broadened the Identity Assertion definition to include any JWT-based client authentication credential the IdP Authorization Server accepts for a workload or agent Principal (including those registered under `token_endpoint_auth_methods_supported`); broadened the `sub` claim to identify a Principal (End-User, workload, or agent); added Section 3.3 describing Workload and Autonomous Agent Principals with JWT invariants (`iss`, `sub`, `aud`, `exp` REQUIRED; `iat`, `jti` SHOULD) and guidance on IdP policy for attestation and trusted issuers; extended Token Exchange processing rules to validate workload and agent Identity Assertions; added a Security Considerations subsection on workload and agent Principals.
 
 -04
 
