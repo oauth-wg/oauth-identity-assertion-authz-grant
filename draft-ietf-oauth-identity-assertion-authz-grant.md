@@ -366,6 +366,8 @@ The IdP Authorization Server determines what forms of workload or agent Identity
 
 Client authentication methods that do not produce a JWT body artifact (for example, mTLS-based mechanisms) do not directly yield a `subject_token` for this profile; a companion profile MAY define how such a mechanism produces an equivalent JWT Identity Assertion.
 
+Except as noted above, the ID-JAG for a workload or autonomous agent Principal is issued using the same mechanics as for an End-User Principal. The IdP Authorization Server MAY map the workload or agent identifier presented in the `subject_token` to a different outbound `sub`, and MAY include `sub_id` and/or `aud_sub` to convey identifiers in namespaces the Resource Authorization Server uses for subject resolution (see {{id-jag}} and {{saml-nameid-subject-identifier}}). The IdP Authorization Server evaluates administrator-defined policy over the requested `audience`, `resource`, `scope`, and `authorization_details` and reflects the granted values in the issued ID-JAG. Subject resolution and JIT provisioning at the Resource Authorization Server follow the same model as for End-User Principals.
+
 The Resource Authorization Server determines whether it accepts an ID-JAG whose Principal is a workload or autonomous agent based on local policy for the issuer and the requested audience. See {{workload-principal-security}} for additional security considerations.
 
 # Cross-Domain Access
