@@ -99,6 +99,8 @@ informative:
   RFC9470:
   RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
+  I-D.ietf-oauth-attestation-based-client-auth:
+  I-D.mcguinness-oauth-client-instance-assertion:
 
 --- abstract
 
@@ -153,8 +155,14 @@ Common OAuth and token processing terms such as client, authorization server, re
 
 OpenID Connect terms such as end-user, Relying Party, OpenID Provider, ID Token, subject identifier, and pairwise subject identifier are used as defined in OpenID Connect Core 1.0 {{OpenID.Core}}, unless otherwise specified by this document.
 
+Principal
+: The entity the Identity Assertion is issued for. The Principal may be an End-User, a workload, or an autonomous agent.
+
 Identity Assertion
-: A security token issued by the IdP Authorization Server that conveys claims about the End-User and can be used as the `subject_token` input to Token Exchange. In this specification, the Identity Assertion is typically an OpenID Connect ID Token or a SAML 2.0 assertion.
+: A security token that conveys claims about a Principal and can be used as the `subject_token` input to Token Exchange. In this specification, an Identity Assertion is one of:
+
+  * an OpenID Connect ID Token or a SAML 2.0 assertion issued by the IdP Authorization Server for an End-User Principal;
+  * a Client Assertion per {{RFC7523}}, a Client Attestation per {{I-D.ietf-oauth-attestation-based-client-auth}}, or a Client Instance Assertion per {{I-D.mcguinness-oauth-client-instance-assertion}} for a workload or autonomous agent Principal.
 
 Trust Domain
 : A deployment-specific security and administrative boundary within which a set of entities, identifiers, credentials, and policy decisions are mutually trusted according to established trust relationships. In this specification, the IdP Authorization Server operates in trust domain A, while the Resource Authorization Server and Resource Server operate in trust domain B.
@@ -177,7 +185,7 @@ Tenant
 
 # Identity Assertion JWT Authorization Grant {#id-jag}
 
-The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
+The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a Principal (End-User, workload, or autonomous agent) without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
 
 An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.
 
@@ -191,7 +199,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the IdP Authorization Server as defined in {{RFC8414}}.
 
 `sub`:
-: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
+: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the Principal represented by this ID-JAG. For an End-User Principal, `sub` is the Subject Identifier as defined in {{OpenID.Core}}. For a workload or autonomous agent Principal, `sub` is the identifier the IdP Authorization Server assigns to that workload or agent. The `sub` claim identifies the Principal in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same Principal. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
 
 `sub_id`:
 : OPTIONAL - Subject Identifier as defined in {{RFC9493}}. The `sub_id` claim MAY be used to identify the same End-User as the `sub` claim using a different identifier namespace from the ID-JAG `iss` and `sub`. This is useful when the Resource Authorization Server resolves users by a non-JWT subject identifier, such as a SAML Assertion Subject `<NameID>`, in its SSO trust relationship with the IdP Authorization Server. See {{saml-nameid-format}} for the SAML NameID Subject Identifier Format defined by this specification, and {{saml-nameid-sub-id-processing}} for processing rules.
@@ -336,6 +344,19 @@ If the Resource Authorization Server requires a SAML NameID Subject Identifier f
 
 See {{sub-id-trust}} and {{sub-id-disclosure}} for security considerations on the `sub_id` claim.
 
+## Workload and Autonomous Agent Principals {#workload-agent-principal}
+
+An ID-JAG MAY represent a workload or autonomous agent Principal in addition to an End-User Principal. This supports cross-domain single sign-on for services and autonomous agents that act as themselves, without an End-User in the loop.
+
+When the Principal is a workload or autonomous agent:
+
+* The `subject_token` used in the Token Exchange is a Client Assertion per {{RFC7523}}, a Client Attestation per {{I-D.ietf-oauth-attestation-based-client-auth}}, or a Client Instance Assertion per {{I-D.mcguinness-oauth-client-instance-assertion}}. Its `subject_token_type` is `urn:ietf:params:oauth:token-type:jwt`.
+* The `sub` claim of the resulting ID-JAG is the workload or agent identifier the IdP Authorization Server assigns to the Principal.
+* Claims specific to End-User authentication (`auth_time`, `acr`, `amr`, `email`) are typically absent.
+* The Resource Authorization Server resolves the workload or agent as a first-class Principal, not as a delegated actor for an End-User.
+
+The Resource Authorization Server determines whether it accepts an ID-JAG whose Principal is a workload or autonomous agent based on local policy for the issuer and the requested audience. See {{workload-principal-security}} for additional security considerations.
+
 # Cross-Domain Access
 
 ## Overview
@@ -449,10 +470,10 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : OPTIONAL - A JSON string containing a JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This parameter enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
 
 `subject_token`:
-: REQUIRED - Either the Identity Assertion (e.g. the OpenID Connect ID Token or SAML 2.0 Assertion) for the target resource owner, or a Refresh Token previously issued by the IdP Authorization Server for that resource owner. Implementations of this specification MUST accept Identity Assertions. They MAY additionally accept Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.
+: REQUIRED - An Identity Assertion for the Principal that will be represented by the ID-JAG, or a Refresh Token previously issued by the IdP Authorization Server for that Principal. The Identity Assertion is an OpenID Connect ID Token or a SAML 2.0 Assertion for an End-User Principal, or a Client Assertion per {{RFC7523}}, a Client Attestation per {{I-D.ietf-oauth-attestation-based-client-auth}}, or a Client Instance Assertion per {{I-D.mcguinness-oauth-client-instance-assertion}} for a workload or autonomous agent Principal. Implementations of this specification MUST accept OpenID Connect ID Tokens as Identity Assertions. They MAY additionally accept SAML 2.0 Assertions, workload or agent Identity Assertions, and Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.
 
 `subject_token_type`:
-: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`, and for a Refresh Token (when supported): `urn:ietf:params:oauth:token-type:refresh_token`.
+: REQUIRED - An identifier, as described in {{Section 3 of RFC8693}}, that indicates the type of the security token in the `subject_token` parameter. For an OpenID Connect ID Token: `urn:ietf:params:oauth:token-type:id_token`, for a SAML 2.0 Assertion: `urn:ietf:params:oauth:token-type:saml2`, for a Client Assertion, Client Attestation, or Client Instance Assertion (when supported): `urn:ietf:params:oauth:token-type:jwt`, and for a Refresh Token (when supported): `urn:ietf:params:oauth:token-type:refresh_token`.
 
 When a Refresh Token is used as the subject token, the client still requests `requested_token_type=urn:ietf:params:oauth:token-type:id-jag`; this allows the client to refresh an Identity Assertion JWT Authorization Grant without fetching a new Identity Assertion from the user-facing SSO flow.
 
@@ -530,7 +551,8 @@ This non-normative example shows using a Refresh Token as the `subject_token` (w
 
 The IdP MUST validate the subject token:
 
-* If the subject token is an Identity Assertion, the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g. the `aud` claim of the ID Token or SAML Audience) matches the `client_id` of the client authentication of the request.
+* If the subject token is an End-User Identity Assertion (OpenID Connect ID Token or SAML 2.0 assertion), the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g. the `aud` claim of the ID Token or SAML Audience) matches the `client_id` of the client authentication of the request.
+* If the subject token is a workload or autonomous agent Identity Assertion (Client Assertion, Client Attestation, or Client Instance Assertion), the IdP MUST validate the assertion per the applicable specification and MUST resolve the Principal identified by the assertion to a workload or agent registration the IdP administers. The audience of these assertions is the IdP Authorization Server (typically its token endpoint) rather than the `client_id`; the mapping between the authenticated OAuth client and the workload or agent Principal is a policy decision at the IdP.
 * If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
 * If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
 
@@ -1053,6 +1075,16 @@ Profiles or extensions that define use of `actor_token` need to consider delegat
 Such profiles or extensions should define how `actor_token` is validated, how the relationship between the authenticated client, subject, and actor is authorized, how any resulting `act` claim is derived, and how unnecessary disclosure of actor identity or attributes is minimized across trust domains.
 
 When such profiles or extensions use an `act` claim, they should preserve the distinction between the actor identified by `act` and the resource owner identified by `sub`. The authenticated client identity is also not a substitute for actor identity.
+
+## Workload and Autonomous Agent Principals {#workload-principal-security}
+
+When an ID-JAG represents a workload or autonomous agent Principal, the End-User consent semantics that normally apply to cross-app access ({{OpenID.Core}}) do not apply. The IdP Authorization Server MUST have an administratively established authorization basis (registration, policy, or attestation trust) for issuing ID-JAGs on behalf of the workload or agent, in place of an End-User consent event.
+
+The IdP Authorization Server SHOULD validate the workload or agent Identity Assertion (Client Assertion, Client Attestation, or Client Instance Assertion) using the same trust anchors and validation rules it would apply for the equivalent client authentication or client attestation.
+
+The Resource Authorization Server SHOULD apply local policy to decide whether the workload or agent Principal identified by an ID-JAG is authorized for the requested audience, resource, scope, and authorization details. In particular, the Resource Authorization Server SHOULD NOT infer End-User attributes from a workload or agent ID-JAG, and SHOULD NOT rely on the presence of End-User claims (`auth_time`, `acr`, `amr`, `email`) which will typically be absent.
+
+Because workload and agent Principals are not associated with an End-User consent event, deployments SHOULD apply sender constraining to ID-JAGs representing these Principals.
 
 ## Sender Constraining Tokens
 
@@ -1619,6 +1651,10 @@ The authors would like to thank the following people for their contributions and
 {:numbered="false"}
 
 \[\[ To be removed from the final specification ]]
+
+-05
+
+* Added native support for workload and autonomous agent Principals: broadened the definition of Identity Assertion to include Client Assertion, Client Attestation, and Client Instance Assertion; broadened the `sub` claim to identify a Principal (End-User, workload, or agent); added Section 3.3 describing Workload and Autonomous Agent Principals; extended Token Exchange processing rules to validate workload and agent Identity Assertions; added a Security Considerations subsection on workload and agent Principals.
 
 -04
 
