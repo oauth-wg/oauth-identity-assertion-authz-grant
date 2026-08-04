@@ -1476,13 +1476,13 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
           <dd class="break"></dd>
 <dt id="section-2.2-4.3">Identity Assertion</dt>
           <dd style="margin-left: 1.5em" id="section-2.2-4.4">
-            <p id="section-2.2-4.4.1">A security token that conveys claims about a Principal and can be used as the <code>subject_token</code> input to Token Exchange. In this specification, an Identity Assertion is one of:<a href="#section-2.2-4.4.1" class="pilcrow">¶</a></p>
+            <p id="section-2.2-4.4.1">A security token that conveys claims about a Principal and can be used as the <code>subject_token</code> input to Token Exchange. In this specification, an Identity Assertion is:<a href="#section-2.2-4.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2.2-4.4.2.1">
-                <p id="section-2.2-4.4.2.1.1">an OpenID Connect ID Token or a SAML 2.0 assertion issued by the IdP Authorization Server for an End-User Principal;<a href="#section-2.2-4.4.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-2.2-4.4.2.1.1">an OpenID Connect ID Token or a SAML 2.0 assertion issued by the IdP Authorization Server for an End-User Principal; or<a href="#section-2.2-4.4.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-2.2-4.4.2.2">
-                <p id="section-2.2-4.4.2.2.1">a Client Assertion per <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>, a Client Attestation per <span>[<a href="#I-D.ietf-oauth-attestation-based-client-auth" class="cite xref">I-D.ietf-oauth-attestation-based-client-auth</a>]</span>, or a Client Instance Assertion per <span>[<a href="#I-D.mcguinness-oauth-client-instance-assertion" class="cite xref">I-D.mcguinness-oauth-client-instance-assertion</a>]</span> for a workload or autonomous agent Principal.<a href="#section-2.2-4.4.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-2.2-4.4.2.2.1">a JWT credential the workload or agent presents to authenticate as the Principal to the IdP Authorization Server, for a workload or autonomous agent Principal. Any JWT-based client authentication method the IdP Authorization Server accepts for that Principal <span class="bcp14">MAY</span> be used, including those registered under the <code>token_endpoint_auth_methods_supported</code> authorization server metadata parameter. See <a href="#workload-agent-principal" class="auto internal xref">Section 3.3</a>.<a href="#section-2.2-4.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </dd>
@@ -1794,7 +1794,7 @@ signature
 <p id="section-3.3-2">When the Principal is a workload or autonomous agent:<a href="#section-3.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.3-3.1">
-            <p id="section-3.3-3.1.1">The <code>subject_token</code> used in the Token Exchange is a Client Assertion per <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>, a Client Attestation per <span>[<a href="#I-D.ietf-oauth-attestation-based-client-auth" class="cite xref">I-D.ietf-oauth-attestation-based-client-auth</a>]</span>, or a Client Instance Assertion per <span>[<a href="#I-D.mcguinness-oauth-client-instance-assertion" class="cite xref">I-D.mcguinness-oauth-client-instance-assertion</a>]</span>. Its <code>subject_token_type</code> is <code>urn:ietf:params:oauth:token-type:jwt</code>.<a href="#section-3.3-3.1.1" class="pilcrow">¶</a></p>
+            <p id="section-3.3-3.1.1">The <code>subject_token</code> is a JWT credential the workload or agent uses to authenticate as the Principal to the IdP Authorization Server. Any JWT-based client authentication method the IdP Authorization Server accepts for that Principal <span class="bcp14">MAY</span> be used, including those registered under <code>token_endpoint_auth_methods_supported</code>. The same JWT <span class="bcp14">MAY</span> serve as both the client authentication credential and the <code>subject_token</code>. Its <code>subject_token_type</code> is <code>urn:ietf:params:oauth:token-type:jwt</code>.<a href="#section-3.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-3.3-3.2">
             <p id="section-3.3-3.2.1">The <code>sub</code> claim of the resulting ID-JAG is the workload or agent identifier the IdP Authorization Server assigns to the Principal.<a href="#section-3.3-3.2.1" class="pilcrow">¶</a></p>
@@ -1806,7 +1806,25 @@ signature
             <p id="section-3.3-3.4.1">The Resource Authorization Server resolves the workload or agent as a first-class Principal, not as a delegated actor for an End-User.<a href="#section-3.3-3.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-3.3-4">The Resource Authorization Server determines whether it accepts an ID-JAG whose Principal is a workload or autonomous agent based on local policy for the issuer and the requested audience. See <a href="#workload-principal-security" class="auto internal xref">Section 9.8</a> for additional security considerations.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<p id="section-3.3-4">A JWT presented as a workload or autonomous agent Identity Assertion <span class="bcp14">MUST</span> contain the following claims:<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.3-5.1">
+            <p id="section-3.3-5.1.1"><code>iss</code> (issuer): identifies the party that issued the JWT (for example, the workload itself for a self-signed client assertion, an attestation authority for an attested credential, or a SPIFFE trust domain).<a href="#section-3.3-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.3-5.2">
+            <p id="section-3.3-5.2.1"><code>sub</code> (subject): identifies the workload or autonomous agent Principal.<a href="#section-3.3-5.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.3-5.3">
+            <p id="section-3.3-5.3.1"><code>aud</code> (audience): identifies the IdP Authorization Server, typically its token endpoint URL or its issuer identifier.<a href="#section-3.3-5.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-3.3-5.4">
+            <p id="section-3.3-5.4.1"><code>exp</code> (expiration time): the JWT's expiration time. The IdP <span class="bcp14">MUST</span> reject expired credentials.<a href="#section-3.3-5.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-3.3-6">A JWT <span class="bcp14">SHOULD</span> additionally contain <code>iat</code> (issued at) and <code>jti</code> (JWT ID) for replay detection.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<p id="section-3.3-7">The IdP Authorization Server determines what forms of workload or agent Identity Assertion it accepts based on local policy. Deployments <span class="bcp14">MAY</span> require credentials that convey runtime attestation (for example, workload attestation or TEE attestation), a specific trusted issuer (such as a SPIFFE trust domain or a client backend attestation service), or other trust-establishment properties in addition to identifying the Principal. The IdP <span class="bcp14">MUST</span> validate the credential per the applicable client authentication specification before minting the ID-JAG.<a href="#section-3.3-7" class="pilcrow">¶</a></p>
+<p id="section-3.3-8">Client authentication methods that do not produce a JWT body artifact (for example, mTLS-based mechanisms) do not directly yield a <code>subject_token</code> for this profile; a companion profile <span class="bcp14">MAY</span> define how such a mechanism produces an equivalent JWT Identity Assertion.<a href="#section-3.3-8" class="pilcrow">¶</a></p>
+<p id="section-3.3-9">The Resource Authorization Server determines whether it accepts an ID-JAG whose Principal is a workload or autonomous agent based on local policy for the issuer and the requested audience. See <a href="#workload-principal-security" class="auto internal xref">Section 9.8</a> for additional security considerations.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2014,7 +2032,7 @@ Content-Type: application/json
 <dt id="section-4.3-2.11">
 <code>subject_token</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.12">
-            <p id="section-4.3-2.12.1"><span class="bcp14">REQUIRED</span> - An Identity Assertion for the Principal that will be represented by the ID-JAG, or a Refresh Token previously issued by the IdP Authorization Server for that Principal. The Identity Assertion is an OpenID Connect ID Token or a SAML 2.0 Assertion for an End-User Principal, or a Client Assertion per <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>, a Client Attestation per <span>[<a href="#I-D.ietf-oauth-attestation-based-client-auth" class="cite xref">I-D.ietf-oauth-attestation-based-client-auth</a>]</span>, or a Client Instance Assertion per <span>[<a href="#I-D.mcguinness-oauth-client-instance-assertion" class="cite xref">I-D.mcguinness-oauth-client-instance-assertion</a>]</span> for a workload or autonomous agent Principal. Implementations of this specification <span class="bcp14">MUST</span> accept OpenID Connect ID Tokens as Identity Assertions. They <span class="bcp14">MAY</span> additionally accept SAML 2.0 Assertions, workload or agent Identity Assertions, and Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.<a href="#section-4.3-2.12.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.12.1"><span class="bcp14">REQUIRED</span> - An Identity Assertion for the Principal that will be represented by the ID-JAG, or a Refresh Token previously issued by the IdP Authorization Server for that Principal. The Identity Assertion is an OpenID Connect ID Token or a SAML 2.0 Assertion for an End-User Principal, or a JWT credential the workload or agent presents to authenticate as the Principal (see <a href="#workload-agent-principal" class="auto internal xref">Section 3.3</a>) for a workload or autonomous agent Principal. Implementations of this specification <span class="bcp14">MUST</span> accept OpenID Connect ID Tokens as Identity Assertions. They <span class="bcp14">MAY</span> additionally accept SAML 2.0 Assertions, workload or agent Identity Assertions, and Refresh Tokens to allow the client to obtain a new ID-JAG without performing a new single sign-on round trip when the Identity Assertion has expired.<a href="#section-4.3-2.12.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.3-2.13">
@@ -2132,7 +2150,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
               <p id="section-4.3.3-2.1.1">If the subject token is an End-User Identity Assertion (OpenID Connect ID Token or SAML 2.0 assertion), the IdP <span class="bcp14">MUST</span> validate the assertion and <span class="bcp14">MUST</span> validate that the audience of the assertion (e.g. the <code>aud</code> claim of the ID Token or SAML Audience) matches the <code>client_id</code> of the client authentication of the request.<a href="#section-4.3.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.3-2.2">
-              <p id="section-4.3.3-2.2.1">If the subject token is a workload or autonomous agent Identity Assertion (Client Assertion, Client Attestation, or Client Instance Assertion), the IdP <span class="bcp14">MUST</span> validate the assertion per the applicable specification and <span class="bcp14">MUST</span> resolve the Principal identified by the assertion to a workload or agent registration the IdP administers. The audience of these assertions is the IdP Authorization Server (typically its token endpoint) rather than the <code>client_id</code>; the mapping between the authenticated OAuth client and the workload or agent Principal is a policy decision at the IdP.<a href="#section-4.3.3-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.3-2.2.1">If the subject token is a workload or autonomous agent Identity Assertion, the IdP <span class="bcp14">MUST</span> validate the JWT per the applicable client authentication specification, verify the required claims per <a href="#workload-agent-principal" class="auto internal xref">Section 3.3</a>, and resolve the Principal identified by the credential to a workload or agent registration the IdP administers. The audience of these assertions is the IdP Authorization Server (typically its token endpoint) rather than the <code>client_id</code>; the mapping between the authenticated OAuth client and the workload or agent Principal is a policy decision at the IdP.<a href="#section-4.3.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.3-2.3">
               <p id="section-4.3.3-2.3.1">If the subject token is a Refresh Token, the IdP <span class="bcp14">MUST</span> validate it the same way it would for a standard <code>refresh_token</code> grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.<a href="#section-4.3.3-2.3.1" class="pilcrow">¶</a></p>
@@ -2844,7 +2862,7 @@ Cache-Control: no-store
 <a href="#section-9.8" class="section-number selfRef">9.8. </a><a href="#name-workload-and-autonomous-agen" class="section-name selfRef">Workload and Autonomous Agent Principals</a>
         </h3>
 <p id="section-9.8-1">When an ID-JAG represents a workload or autonomous agent Principal, the End-User consent semantics that normally apply to cross-app access (<span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) do not apply. The IdP Authorization Server <span class="bcp14">MUST</span> have an administratively established authorization basis (registration, policy, or attestation trust) for issuing ID-JAGs on behalf of the workload or agent, in place of an End-User consent event.<a href="#section-9.8-1" class="pilcrow">¶</a></p>
-<p id="section-9.8-2">The IdP Authorization Server <span class="bcp14">SHOULD</span> validate the workload or agent Identity Assertion (Client Assertion, Client Attestation, or Client Instance Assertion) using the same trust anchors and validation rules it would apply for the equivalent client authentication or client attestation.<a href="#section-9.8-2" class="pilcrow">¶</a></p>
+<p id="section-9.8-2">The IdP Authorization Server <span class="bcp14">SHOULD</span> validate the workload or agent Identity Assertion using the same trust anchors and validation rules it would apply for the equivalent client authentication method, including any attestation, instance-binding, or issuer-trust requirements the IdP has configured for that Principal.<a href="#section-9.8-2" class="pilcrow">¶</a></p>
 <p id="section-9.8-3">The Resource Authorization Server <span class="bcp14">SHOULD</span> apply local policy to decide whether the workload or agent Principal identified by an ID-JAG is authorized for the requested audience, resource, scope, and authorization details. In particular, the Resource Authorization Server <span class="bcp14">SHOULD NOT</span> infer End-User attributes from a workload or agent ID-JAG, and <span class="bcp14">SHOULD NOT</span> rely on the presence of End-User claims (<code>auth_time</code>, <code>acr</code>, <code>amr</code>, <code>email</code>) which will typically be absent.<a href="#section-9.8-3" class="pilcrow">¶</a></p>
 <p id="section-9.8-4">Because workload and agent Principals are not associated with an End-User consent event, deployments <span class="bcp14">SHOULD</span> apply sender constraining to ID-JAGs representing these Principals.<a href="#section-9.8-4" class="pilcrow">¶</a></p>
 </section>
@@ -3340,17 +3358,9 @@ Cache-Control: no-store
 <a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
-<dt id="I-D.ietf-oauth-attestation-based-client-auth">[I-D.ietf-oauth-attestation-based-client-auth]</dt>
-        <dd>
-<span class="refAuthor">Looker, T.</span>, <span class="refAuthor">Bastian, P.</span>, and <span class="refAuthor">C. Bormann</span>, <span class="refTitle">"OAuth 2.0 Attestation-Based Client Authentication"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-attestation-based-client-auth-10</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-10">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-attestation-based-client-auth-10</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="I-D.ietf-oauth-client-id-metadata-document">[I-D.ietf-oauth-client-id-metadata-document]</dt>
         <dd>
 <span class="refAuthor">Parecki, A.</span> and <span class="refAuthor">E. Smith</span>, <span class="refTitle">"OAuth Client ID Metadata Document"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-client-id-metadata-document-02</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-02</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="I-D.mcguinness-oauth-client-instance-assertion">[I-D.mcguinness-oauth-client-instance-assertion]</dt>
-        <dd>
-<span class="refAuthor">McGuinness, K.</span>, <span class="refTitle">"OAuth 2.0 Client Instance Assertion"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-mcguinness-oauth-client-instance-assertion-01</span>, <time datetime="2026-06-24" class="refDate">24 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-mcguinness-oauth-client-instance-assertion-01">https://datatracker.ietf.org/doc/html/draft-mcguinness-oauth-client-instance-assertion-01</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9068">[RFC9068]</dt>
         <dd>
@@ -3906,7 +3916,7 @@ Content-Type: application/json
 <p id="appendix-C-2">-05<a href="#appendix-C-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-C-3.1">
-          <p id="appendix-C-3.1.1">Added native support for workload and autonomous agent Principals: broadened the definition of Identity Assertion to include Client Assertion, Client Attestation, and Client Instance Assertion; broadened the <code>sub</code> claim to identify a Principal (End-User, workload, or agent); added Section 3.3 describing Workload and Autonomous Agent Principals; extended Token Exchange processing rules to validate workload and agent Identity Assertions; added a Security Considerations subsection on workload and agent Principals.<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.1.1">Added native support for workload and autonomous agent Principals: introduced the Principal term; broadened the Identity Assertion definition to include any JWT-based client authentication credential the IdP Authorization Server accepts for a workload or agent Principal (including those registered under <code>token_endpoint_auth_methods_supported</code>); broadened the <code>sub</code> claim to identify a Principal (End-User, workload, or agent); added Section 3.3 describing Workload and Autonomous Agent Principals with JWT invariants (<code>iss</code>, <code>sub</code>, <code>aud</code>, <code>exp</code> <span class="bcp14">REQUIRED</span>; <code>iat</code>, <code>jti</code> <span class="bcp14">SHOULD</span>) and guidance on IdP policy for attestation and trusted issuers; extended Token Exchange processing rules to validate workload and agent Identity Assertions; added a Security Considerations subsection on workload and agent Principals.<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-C-4">-04<a href="#appendix-C-4" class="pilcrow">¶</a></p>
