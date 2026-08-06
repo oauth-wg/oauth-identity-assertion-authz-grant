@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-04T00:19:43.804293+00:00",
+  "timestamp": "2026-08-06T00:16:44.556842+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3008,7 +3008,7 @@
       "labels": [],
       "body": "## Problem Summary\nIn emerging **Agentic AI / Model Context Protocol (MCP)** architectures, a public client (e.g., a CLI tool or local agent) connects to a central API Gateway/Proxy, which then proxies requests to upstream services protected by distinct Resource Authorization Servers (AS). \n\nUnder the current rules of `draft-ietf-oauth-identity-assertion-authz-grant` (Section 4.3.3), this multi-hop topology cannot legally execute the ID-JAG Token Exchange because:\n1. The **Public Client** is the subject/audience of the initial OpenID Connect ID Token, but cannot (and should not) perform the ID-JAG Token Exchange.\n2. The **Gateway** is the confidential client performing the Token Exchange, but its `client_id` fails the mandatory `aud` validation check against the ID Token presented in the request.\n\n---\n\n## Topology Overview\n\n```mermaid\nsequenceDiagram\n    autonumber\n    actor User\n    participant Agent as Public Client<br/>(AI Agent / CLI)\n    participant IdP as Enterprise IdP\n    participant Gateway as MCP Gateway<br/>(Confidential Client)\n    participant UpstreamAS as Upstream AS<br/>(Resource AS)\n\n    User->>Agent: Initiate action\n    Agent->>IdP: OIDC Auth (PKCE)\n    IdP-->>Agent: ID Token (aud = Agent client_id)<br/>& Gateway Access Token\n    \n    Agent->>Gateway: Request tool call + ID Token\n    \n    Note over Gateway,IdP: ID-JAG Token Exchange Blocked\n    Gateway->>IdP: Token Exchange Request<br/>(subject_token = Agent ID Token)\n    IdP--xGateway: \u274c REJECTED (Section 4.3.3)<br/>aud (Agent) != client_id (Gateway)\n\n    opt If Exchange Succeeded\n        Gateway->>UpstreamAS: JWT-Bearer Redemption (ID-JAG)\n        UpstreamAS-->>Gateway: Upstream Access Token\n    end\n```\n\n1. **Client Setup:** An AI coding agent acts as a public client (native/CLI app, PKCE, no client secret) and authenticates at the enterprise IdP.\n2. **Initial Tokens:** As per OpenID Connect Core, the issued ID Token's `aud` claim is set to the agent's own `client_id`. In the same flow, the agent receives an access token scoped for an **MCP Gateway**.\n3. **Gateway Aggregation:** The Gateway aggregates multiple upstream MCP servers. Each upstream server is protected by its own Resource Authorization Server (AS) that independently trusts the enterprise IdP.\n4. **Target Flow (ID-JAG):** Per ID-JAG, to call an upstream server, the Gateway needs to redeem an access token by first calling Token Exchange (`grant_type=urn:ietf:params:oauth:grant-type:token-exchange`) at the IdP to obtain an ID-JAG (`aud = upstream_AS`), then executing a JWT-Bearer grant (`RFC 7523`) at that AS.\n\n---\n\n## Specification Conflict\n\n### 1. Section 4.3.3 Processing Rules Violation\nSection 4.3.3 (*IdP Token Exchange Processing Rules*) states:\n> *\"When the subject_token presented in the Token Exchange call is an identity assertion (ID Token), the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g., the aud claim of the ID Token or SAML Audience) matches the client_id of the client authentication of the request.\"*\n\nIn the Gateway topology, this requirement creates a deadlock:\n\n* **The Agent cannot call Token Exchange:** \n  * The agent's `client_id` matches the ID Token `aud`, but the agent does not know which upstream AS/audience a specific MCP tool call will require dynamically.\n  * The agent is a **public client**, whereas Section 4 explicitly notes: *\"This specification SHOULD only be supported for confidential clients.\"*\n  * Giving public clients direct capability to mint cross-domain assertions breaches principle-of-least-privilege boundaries.\n\n* **The Gateway cannot call Token Exchange:** \n  * The Gateway is a **confidential client** and knows which upstream AS to target.\n  * However, when the Gateway authenticates the Token Exchange request using its own `client_id`, the IdP **MUST reject** the call because the ID Token's `aud` contains the Agent's `client_id`, not the Gateway's `client_id`.\n\n---\n\n## Questions & Possible Paths Forward\n\n1. **Role of RFC 8693 Actor Tokens / Identity Chaining:**\n   Should ID-JAG explicitly address delegation/proxy patterns where the Gateway acts as an intermediary (e.g., utilizing `actor_token` [RFC 8693]) to relax the strict 1:1 `aud == authenticated_client_id` requirement for confidential proxies?\n\n2. **Public Client + Gateway/Proxy Guidance:**\n   As Agentic/MCP and API Gateway patterns become mainstream, is there an intended profile or recommended flow where an enterprise IdP allows a trusted confidential gateway to exchange a public client's ID Token on their behalf?\n\nI would appreciate the Working Group's perspective on whether this topology is considered out-of-scope, or if the specification could accommodate intermediate confidential proxies.",
       "createdAt": "2026-07-23T09:08:51Z",
-      "updatedAt": "2026-08-03T17:41:44Z",
+      "updatedAt": "2026-08-05T20:17:17Z",
       "closedAt": null,
       "comments": [
         {
@@ -3101,6 +3101,13 @@
           "body": "Thanks @gffletch, I updated the solution sketches https://gist.github.com/mcguinness/aa44d94a0ed45827985e7f3ade17852c#cross-client-delegation-for-oauth-20-token-exchange to include a new token exchange flow for OAT for use with a gateway.  Hopefully the solution makes sense and I captured the pros/cons correctly.   ",
           "createdAt": "2026-08-03T17:41:44Z",
           "updatedAt": "2026-08-03T17:41:44Z"
+        },
+        {
+          "author": "zekth",
+          "authorAssociation": "NONE",
+          "body": "@gffletch the difference that i drew was more about the `audience` matching. Like in MDM you can predict the audience you're going to accept because you're the owner of the deployment - when your clients are deployed using DCR the `id_token` has an unpredictable `audience` claim value which makes your gateway not supposed to accept that `id_token`\n\nClient trust is one thing but it's more client trust on behalf of another client. Which in the arch would be the gateway acts as an actor in the id-jag flow.\n\nNot sure if it fully explains my statement.\n\n@mcguinness thanks for keeping track of all of this",
+          "createdAt": "2026-08-05T20:17:17Z",
+          "updatedAt": "2026-08-05T20:17:17Z"
         }
       ]
     },
@@ -3148,6 +3155,30 @@
           "body": "Thanks @kenmccracken-google. Pushed #118 to address this. Would appreciate your review when you have a moment.",
           "createdAt": "2026-08-01T01:41:36Z",
           "updatedAt": "2026-08-01T01:41:36Z"
+        }
+      ]
+    },
+    {
+      "number": 120,
+      "id": "I_kwDOKv5r-s8AAAABLfxaSQ",
+      "title": "Constraints on `resource` parameter in Token Exchange",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/120",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "If a Resource AS defines 3 `resource` values: `A`, `B`, and `C`, what are the expectations for the values a client can include in the `resource` parameters in Token Exchange?\n\nMy assumption is the client would be able to ask for any combination of the 3:\n\n* `A`\n* `B`\n* `A`, `B`\n* `B`, `C`\n* `A`, `C`\n* `A`, `B`, `C`\n\nand if the client includes one that is not defined `D`, that is an error.\n\nThis isn't explicit in Token Exchange:\n\n> An authorization server can use the invalid_target error code, defined in [Section 2.2.2](https://www.rfc-editor.org/info/rfc8693/#ErrorResponse), to inform a client that it requested access to too many target services simultaneously.\n\nbut since this has come up in implementation discussions of this spec, we should probably include some guidance. Ideally normative language, but at least something informative.",
+      "createdAt": "2026-08-05T01:50:18Z",
+      "updatedAt": "2026-08-05T04:07:44Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Good catch, I agree with your assumption.  \n\nI think it makes sense to adopt `invalid_target` from [RFC 8707\nResource Indicators for OAuth 2.0](https://www.rfc-editor.org/rfc/rfc8707.html) in this spec for when the client asks for a resource outside of the allowed set.   We also need to define behavior for the IdP AS  when it only accepts a subset of the requested resources or provides a default resource.  This was the premise in https://datatracker.ietf.org/doc/draft-mcguinness-oauth-resource-token-resp/ as the security gap in RFC 8707.",
+          "createdAt": "2026-08-05T04:07:44Z",
+          "updatedAt": "2026-08-05T04:07:44Z"
         }
       ]
     }
@@ -8154,6 +8185,32 @@
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "mtls-cnf-binding",
       "headRefOid": "660dd92481aa7a391531c6eb67ce14cde44a89d0",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 119,
+      "id": "PR_kwDOKv5r-s76yLT4",
+      "title": "Add native support for workload and autonomous agent Principals",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/119",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\nAddresses [#73](https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/73) (workload/agent as principal). Adds native support in ID-JAG for a Principal that is a workload or autonomous agent, in addition to the existing End-User Principal.\n\nAligns with the function-based `subject_token` selection framing in [#115](https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/115): a JWT credential the workload or agent presents to authenticate as the Principal is an Identity Assertion for that Principal, and is a valid `subject_token` under this profile.\n\n## Design\n\nThe Principal a workload or agent authenticates as is the same Principal the ID-JAG's `sub` identifies. Rather than enumerating specific client authentication specs (Client Assertion, Client Attestation, Client Instance Assertion, SPIFFE, WIMSE, ...), the profile defines the Identity Assertion for a workload/agent Principal by function:\n\n> *\"A JWT credential the workload or agent presents to authenticate as the Principal to the IdP Authorization Server. Any JWT-based client authentication method the IdP Authorization Server accepts for that Principal MAY be used, including those registered under the `token_endpoint_auth_methods_supported` authorization server metadata parameter.\"*\n\nThis scales to future client authentication methods without listing each by hand.\n\n## Changes\n\n- **Terminology (\u00a72.2)**: introduces the **Principal** term (End-User, workload, or autonomous agent) and broadens the **Identity Assertion** definition to be function-based, pointing at `token_endpoint_auth_methods_supported` as the mechanism registry.\n- **\u00a73 Intro**: broadens \"on behalf of a user\" to \"on behalf of a Principal (End-User, workload, or autonomous agent)\".\n- **\u00a73.1 `sub` claim**: broadens from End-User Subject Identifier to Principal Identifier.\n- **\u00a73.3 Workload and Autonomous Agent Principals** (new): describes when the Principal is a workload or agent; defines JWT invariants (`iss`, `sub`, `aud`, `exp` REQUIRED; `iat`, `jti` SHOULD); and calls out that IdP policy MAY require attestation, specific trusted issuers (e.g., SPIFFE trust domain, WIMSE Identity Server, client backend attestation service), or other trust-establishment properties.\n- **\u00a74.3 `subject_token` / `subject_token_type`**: extended to accept workload/agent Identity Assertions with token type `urn:ietf:params:oauth:token-type:jwt`.\n- **\u00a74.3 Processing Rules**: adds a rule for validating workload/agent Identity Assertions. The audience of these assertions is the IdP token endpoint (not the `client_id`), and the mapping from authenticated OAuth client to Principal is IdP policy.\n- **\u00a79 Security Considerations**: adds a subsection on Workload and Autonomous Agent Principals \u2014 absence of End-User consent semantics, validation requirements (including attestation and issuer-trust), RAS-side policy expectations, and a sender-constraining recommendation.\n- **-05** document history entry.\n\n## Alignment with existing work\n\n- **[#115](https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/115) (subject_token type selection)**: This PR is a direct application of the function-based framing in #115. Where #115 excludes access tokens because they are resource authorization credentials rather than identity assertions, this PR includes workload/agent client authentication credentials because they ARE identity assertions for the workload or agent Principal. Same primitive, extended to a new Principal type.\n- **Composition with `draft-carleton-workload-authz-grant`**: The composition anticipated by draft-carleton \u00a76 \u2014 *\"the authorization grant's issuer is the customer's Enterprise IdP ... obtained, e.g., by token exchange with the IdP\"* \u2014 is what this branch enables. ID-JAG covers the Enterprise IdP \u2192 cross-domain Resource Authorization Server topology; draft-carleton's platform-direct-issuance topology is complementary rather than subsumed by this PR.\n- **Actor delegation** (workload acting on behalf of a user via `act`): out of scope here. See the Actor Profile work.\n\n## Open design questions\n\n### 1. Should ID-JAG support a `sub_profile` claim (from OAuth Entity Profiles) to help RAS processing?\n\nUnder this PR, the Principal type (End-User vs. workload vs. autonomous agent) is not carried as an explicit claim. A Resource Authorization Server infers Principal type from context \u2014 presence or absence of End-User claims (`auth_time`, `acr`, `amr`, `email`), local policy for the audience, or the shape of the `sub` value.\n\nAn explicit `sub_profile` claim (as defined in `draft-mora-oauth-entity-profiles`) would let the RAS branch its processing on the Principal type without inference. Values like `user`, `service`, `ai-agent` would be normative.\n\n**Trade-offs:**\n\n- **For inclusion**: eliminates inference at the RAS; makes Principal type explicit and audit-friendly; aligns with the Entity Profiles direction.\n- **Against inclusion**: introduces a dependency on `draft-mora-oauth-entity-profiles` (individual submission, not WG-adopted); adds a new normative claim; the RAS can already infer type from context in most deployments.\n\n**Options:**\n\n1. Leave out (current PR) \u2014 Principal type is implicit; RAS infers.\n2. Add `sub_profile` as OPTIONAL \u2014 deployments that want explicit signaling can use it.\n3. Add `sub_profile` as RECOMMENDED \u2014 normative signaling with defined values.\n\n### 2. Should ID-JAG add a `subject_token_types_supported` discovery parameter?\n\nThe accepted `subject_token_type` values are described in \u00a74.3 as normative text. There is currently no discovery mechanism for a client to learn which types a specific IdP Authorization Server accepts before attempting a Token Exchange request.\n\nFor workload/agent Principals this becomes more variable: an IdP might accept ID Tokens and SAML for End-Users but not workload JWT credentials, or vice versa. A workload has no clean way to check without attempting the exchange.\n\nA new AS metadata parameter would signal support explicitly:\n\n```json\n{\n  \"subject_token_types_supported\": [\n    \"urn:ietf:params:oauth:token-type:id_token\",\n    \"urn:ietf:params:oauth:token-type:saml2\",\n    \"urn:ietf:params:oauth:token-type:refresh_token\",\n    \"urn:ietf:params:oauth:token-type:jwt\"\n  ]\n}\n```\n\n**Trade-offs:**\n\n- **For inclusion**: runtime discovery avoids failed exchanges; explicit about workload/agent support; scales cleanly if additional `subject_token` types are added later; consistent naming with existing `_supported`-suffixed metadata parameters.\n- **Against inclusion**: a new metadata parameter to register and maintain; may duplicate what deployments already communicate out-of-band; overlaps in intent with `authorization_grant_profiles_supported` if per-profile token type info is added there.\n\n**Options:**\n\n1. Leave out (current PR) \u2014 no discovery; clients infer from documentation or trial.\n2. Add `subject_token_types_supported` \u2014 new AS metadata parameter for ID-JAG.\n3. Extend `authorization_grant_profiles_supported` with per-profile subject token type info instead of a separate parameter.\n\nReviewer input on both design questions welcome.\n\nCloses #73.\n\n## Test plan\n\n- [ ] CI builds the draft (kramdown-rfc render succeeds)\n- [ ] Internal anchors resolve (`workload-agent-principal`, `workload-principal-security`)\n- [ ] Rendered HTML shows \u00a73.3 Workload and Autonomous Agent Principals under the ID-JAG chapter\n- [ ] Rendered HTML shows Security Considerations subsection on Workload and Autonomous Agent Principals\n- [ ] Document history `-05` entry appears",
+      "createdAt": "2026-08-04T21:59:40Z",
+      "updatedAt": "2026-08-04T22:03:30Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "workload-agent-principal",
+      "headRefOid": "dc71c9370ef9dd21566a1509740aff97de4be8e2",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
