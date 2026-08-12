@@ -1879,6 +1879,16 @@ Cache-Control: no-store
    can misrepresent the resource identifier and redirect the client
    toward an Authorization Server unrelated to the intended resource.
 
+   Clients that use Protected Resource Metadata for dynamic discovery
+   MUST include the resource identifier from that metadata as the
+   resource parameter in the Token Exchange request to the IdP
+   Authorization Server (Section 4.3).  This ensures that the IdP's
+   audience/resource consistency check is exercised whenever the client
+   relies on dynamic discovery, closing the gap where a compromised
+   Authorization Server metadata document could otherwise redirect ID-
+   JAG issuance without any resource-level constraint the IdP can
+   verify.
+
    Independently, the client MUST verify that the resource identifier
    returned in the access token response (Section 4.4.2) identifies the
    protected resource the client intended to access, and if the ID-JAG
