@@ -806,7 +806,7 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 When processing authorization information from the ID-JAG:
 
-* If the `resource` claim is present, the Resource Authorization Server MUST process it according to {{Section 2 of RFC8707}}. Each identifier MUST be a protected resource governed by this Resource Authorization Server; if any is not, or if none are acceptable to policy, it MUST reject the request with `invalid_target` as defined in {{Section 2 of RFC8707}}. Otherwise, the granted resources MAY be a subset of the resources in the ID-JAG.
+* If the `resource` claim is present, each identifier MUST be a protected resource governed by this Resource Authorization Server. If any identifier is not, the Resource Authorization Server MUST reject the request with `invalid_grant` as defined in {{Section 5.2 of RFC6749}}, because the ID-JAG was not issued for resources it governs. The Resource Authorization Server MAY issue an access token restricted to a subset of the resources in the `resource` claim based on local policy.
 
 * If the `resource` claim is absent, the Resource Authorization Server MAY select one or more default resources based on policy, client configuration, or other request context. It MAY require the ID-JAG to contain a `resource` claim; if the claim is required and absent, it MUST reject the request with `invalid_grant` as defined in {{Section 5.2 of RFC6749}}.
 
