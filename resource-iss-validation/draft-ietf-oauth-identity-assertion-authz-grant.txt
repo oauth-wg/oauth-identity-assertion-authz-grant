@@ -112,12 +112,14 @@ Table of Contents
      9.2.  Step-Up Authentication
      9.3.  Cross-Domain Use
      9.4.  Authorization Server Metadata Validation
-     9.5.  Metadata Disclosure
-     9.6.  Subject Identifier Trust
-     9.7.  Subject Identifier Disclosure
-     9.8.  Actor Delegation Extensions
-     9.9.  Sender Constraining Tokens
-       9.9.1.  Proof-of-Possession
+     9.5.  Protected Resource Metadata and Access Token Resource
+            Verification
+     9.6.  Metadata Disclosure
+     9.7.  Subject Identifier Trust
+     9.8.  Subject Identifier Disclosure
+     9.9.  Actor Delegation Extensions
+     9.10. Sender Constraining Tokens
+       9.10.1.  Proof-of-Possession
    10. IANA Considerations
      10.1.  Media Types
      10.2.  OAuth URI Registration
@@ -597,7 +599,7 @@ Table of Contents
    *  the sub_id claim is not authorized by local policy for the
       validated ID-JAG issuer.
 
-   See Section 9.6 and Section 9.7 for security considerations on the
+   See Section 9.7 and Section 9.8 for security considerations on the
    sub_id claim.
 
 4.  Cross-Domain Access
@@ -1866,7 +1868,31 @@ Cache-Control: no-store
    further check that the returned identifiers match the client's
    intended resource.
 
-9.5.  Metadata Disclosure
+9.5.  Protected Resource Metadata and Access Token Resource Verification
+
+   Clients that discover the Resource Authorization Server for a
+   protected resource via Protected Resource Metadata [RFC9728] MUST
+   validate that metadata as required by Section 3.3 of [RFC9728],
+   including verifying that the resource identifier in the metadata is
+   the same as the URL from which the metadata was retrieved.  Without
+   this check, an attacker who publishes metadata at their own resource
+   can misrepresent the resource identifier and redirect the client
+   toward an Authorization Server unrelated to the intended resource.
+
+   Independently, the client MUST verify that the resource identifier
+   returned in the access token response (Section 4.4.2) identifies the
+   protected resource the client intended to access, and if the ID-JAG
+   contained a resource claim, that the returned identifier(s) are a
+   non-empty subset of that claim.  This check ensures that a token
+   bound to an unintended resource is not accepted by the client or
+   presented to the wrong Resource Server, even if discovery or grant
+   issuance is compromised.
+
+   Together with the Authorization Server metadata issuer check in
+   Section 9.4, these validations bind discovery, grant, and issued
+   access token back to the resource the user intended to authorize.
+
+9.6.  Metadata Disclosure
 
    Advertising issuer-specific trust relationships in publicly
    accessible metadata can disclose federation topology, business
@@ -1886,7 +1912,7 @@ Cache-Control: no-store
    response MUST be specific to the authenticated client and MAY also be
    scoped by tenant, resource, or other local policy context.
 
-9.6.  Subject Identifier Trust
+9.7.  Subject Identifier Trust
 
    When the ID-JAG includes a sub_id claim, the Resource Authorization
    Server MUST NOT use the sub_id.issuer value to establish trust in the
@@ -1899,7 +1925,7 @@ Cache-Control: no-store
    SAML issuer identified by sub_id.issuer through local configuration
    or trusted federation metadata.
 
-9.7.  Subject Identifier Disclosure
+9.8.  Subject Identifier Disclosure
 
    The IdP Authorization Server SHOULD include sub_id only when needed
    by the target Resource Authorization Server for subject resolution.
@@ -1910,7 +1936,7 @@ Cache-Control: no-store
    minimize the subject identifiers included in the ID-JAG to those
    required by the Resource Authorization Server.
 
-9.8.  Actor Delegation Extensions
+9.9.  Actor Delegation Extensions
 
    This specification allows Token Exchange requests for ID-JAG to carry
    actor_token, but it does not define normative processing requirements
@@ -1935,9 +1961,9 @@ Cache-Control: no-store
    resource owner identified by sub.  The authenticated client identity
    is also not a substitute for actor identity.
 
-9.9.  Sender Constraining Tokens
+9.10.  Sender Constraining Tokens
 
-9.9.1.  Proof-of-Possession
+9.10.1.  Proof-of-Possession
 
    Identity Assertion JWT Authorization Grant may support key binding to
    enable sender-constrained tokens as described in Section 4 of
@@ -1967,7 +1993,7 @@ Cache-Control: no-store
    exchanging the ID-JAG for an access token at the Resource
    Authorization Server).
 
-9.9.1.1.  Proof-of-Possession During Token Exchange
+9.10.1.1.  Proof-of-Possession During Token Exchange
 
    When a client requests an ID-JAG from the IdP Authorization Server
    via Token Exchange, the client MAY include a DPoP proof in the
@@ -2034,14 +2060,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
        cnf claim.
 
-9.9.1.2.  Proof-of-Possession During ID-JAG Exchange
+9.10.1.2.  Proof-of-Possession During ID-JAG Exchange
 
    When a client exchanges an ID-JAG for an access token at the Resource
    Authorization Server, the processing rules depend on whether the ID-
    JAG contains a cnf claim and whether the client presents a DPoP
    proof.
 
-9.9.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
+9.10.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
 
    If the ID-JAG contains a cnf claim and the client presents a DPoP
    proof, the Resource Authorization Server MUST:
@@ -2087,7 +2113,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
      "scope": "chat.read chat.history"
    }
 
-9.9.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
+9.10.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
 
    If the ID-JAG contains a cnf claim but the client does not present a
    DPoP proof, the Resource Authorization Server MUST reject the request
@@ -2105,8 +2131,8 @@ Cache-Control: no-store
   "error_description": "Proof of possession required for this authorization grant"
 }
 
-9.9.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
-            Presented
+9.10.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
+             Presented
 
    If the ID-JAG does not contain a cnf claim but the client presents a
    DPoP proof, the Resource Authorization Server:
@@ -2121,8 +2147,8 @@ Cache-Control: no-store
    3.  The access token response will indicate the token type (e.g.,
        DPoP for DPoP-bound tokens, or Bearer for unconstrained tokens).
 
-9.9.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
-            Presented
+9.10.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
+             Presented
 
    If the ID-JAG does not contain a cnf claim and the client does not
    present a DPoP proof:
