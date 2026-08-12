@@ -1059,13 +1059,21 @@ This specification is intended for cross-domain uses where the Client, Resource 
 
 An ID-JAG is specific to the trust relationship between the issuing IdP Authorization Server and the Resource Authorization Server identified by the `aud` claim. When a deployment involves additional downstream hops, the same ID-JAG MUST NOT be reused as the authorization grant for a different downstream Resource Authorization Server. For each subsequent hop, a new ID-JAG MAY be issued by the IdP Authorization Server trusted by that downstream Resource Authorization Server for SSO and subject resolution, or other mechanisms MAY be used.
 
-## Authorization Server Metadata Validation
+## Authorization Server Metadata Validation {#as-metadata-validation}
 
 Clients that discover an Authorization Server's metadata using OAuth 2.0 Authorization Server Metadata {{RFC8414}} MUST validate that the `issuer` value in the metadata document is identical to the Authorization Server issuer identifier used to construct the metadata retrieval URL, as required by {{Section 3.3 of RFC8414}}. If the values are not identical, the client MUST NOT use the metadata. This validation is particularly important for this specification because more steps happen without user interaction than in an interactive OAuth flow, and a mismatch can enable an attacker who controls an Authorization Server metadata document to redirect ID-JAG issuance toward an Authorization Server the user did not intend to authorize.
 
 For example, an attacker's protected resource references an attacker-controlled Authorization Server whose metadata declares an `issuer` value matching a legitimate Resource Authorization Server the user's IdP already trusts. A client that skips the `issuer` check treats the malicious metadata as authoritative for the legitimate Authorization Server and requests an ID-JAG with `audience` set to that server. Presenting the ID-JAG to the attacker's token endpoint lets the attacker relay it to the legitimate Resource Authorization Server and obtain an access token for a resource the user did not intend to authorize.
 
 The client-side `issuer` check required by {{Section 3.3 of RFC8414}} is the primary defense. Defense in depth comes from the `resource` parameter processing in {{token-exchange}}: when the client includes `resource`, the IdP MUST verify each requested identifier is governed by the `audience` Resource Authorization Server and MUST reject with `invalid_target` otherwise. Clients SHOULD include `resource` in Token Exchange requests, and the response validation in {{token-request}} adds a further check that the returned identifiers match the client's intended resource.
+
+## Protected Resource Metadata and Access Token Resource Verification
+
+Clients that discover the Resource Authorization Server for a protected resource via Protected Resource Metadata {{RFC9728}} MUST validate that metadata as required by {{Section 3.3 of RFC9728}}, including verifying that the `resource` identifier in the metadata is the same as the URL from which the metadata was retrieved. Without this check, an attacker who publishes metadata at their own resource can misrepresent the resource identifier and redirect the client toward an Authorization Server unrelated to the intended resource.
+
+Independently, the client MUST verify that the `resource` identifier returned in the access token response ({{access-token-response}}) identifies the protected resource the client intended to access, and if the ID-JAG contained a `resource` claim, that the returned identifier(s) are a non-empty subset of that claim. This check ensures that a token bound to an unintended resource is not accepted by the client or presented to the wrong Resource Server, even if discovery or grant issuance is compromised.
+
+Together with the Authorization Server metadata `issuer` check in {{as-metadata-validation}}, these validations bind discovery, grant, and issued access token back to the resource the user intended to authorize.
 
 ## Metadata Disclosure
 
