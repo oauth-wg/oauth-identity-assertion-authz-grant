@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-09T00:05:58.116192+00:00",
+  "timestamp": "2026-08-13T00:11:42.042913+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3170,7 +3170,7 @@
       "labels": [],
       "body": "If a Resource AS defines 3 `resource` values: `A`, `B`, and `C`, what are the expectations for the values a client can include in the `resource` parameters in Token Exchange?\n\nMy assumption is the client would be able to ask for any combination of the 3:\n\n* `A`\n* `B`\n* `A`, `B`\n* `B`, `C`\n* `A`, `C`\n* `A`, `B`, `C`\n\nand if the client includes one that is not defined `D`, that is an error.\n\nThis isn't explicit in Token Exchange:\n\n> An authorization server can use the invalid_target error code, defined in [Section 2.2.2](https://www.rfc-editor.org/info/rfc8693/#ErrorResponse), to inform a client that it requested access to too many target services simultaneously.\n\nbut since this has come up in implementation discussions of this spec, we should probably include some guidance. Ideally normative language, but at least something informative.",
       "createdAt": "2026-08-05T01:50:18Z",
-      "updatedAt": "2026-08-05T04:07:44Z",
+      "updatedAt": "2026-08-12T00:37:48Z",
       "closedAt": null,
       "comments": [
         {
@@ -3179,6 +3179,13 @@
           "body": "Good catch, I agree with your assumption.  \n\nI think it makes sense to adopt `invalid_target` from [RFC 8707\nResource Indicators for OAuth 2.0](https://www.rfc-editor.org/rfc/rfc8707.html) in this spec for when the client asks for a resource outside of the allowed set.   We also need to define behavior for the IdP AS  when it only accepts a subset of the requested resources or provides a default resource.  This was the premise in https://datatracker.ietf.org/doc/draft-mcguinness-oauth-resource-token-resp/ as the security gap in RFC 8707.",
           "createdAt": "2026-08-05T04:07:44Z",
           "updatedAt": "2026-08-05T04:07:44Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Related to #122. Aaron's scenario there depends on the IdP not enforcing a `resource` parameter, which is exactly the gap this issue closes. The response-confirmation piece is already specified in [draft-mcguinness-oauth-resource-token-resp](https://datatracker.ietf.org/doc/draft-mcguinness-oauth-resource-token-resp/) (cited in my earlier comment); ID-JAG can either reference it normatively or inline the minimum needed (`invalid_target`, response `resource` confirmation) and cite it as informative. Either resolution lets #122's security consideration cite the same source and present the client-side `iss` check and the IdP-side `resource` check as a pair.",
+          "createdAt": "2026-08-12T00:37:48Z",
+          "updatedAt": "2026-08-12T00:37:48Z"
         }
       ]
     },
@@ -3197,6 +3204,37 @@
       "updatedAt": "2026-08-06T03:50:14Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 122,
+      "id": "I_kwDOKv5r-s8AAAABMYWzYQ",
+      "title": "add security consideration about the extra importance of validating the AS issuer URL",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/122",
+      "state": "OPEN",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "RFC8414 [already includes](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3) language about validating that the `iss` in the AS metadata matches the URL it was fetched from. However, it's extra important to validate that in the context of this spec, since more things are happening without user interaction.\n\nWe should add a new security consideration section that discusses the validation required and the reason for doing so.\n\nBelow is a scenario that can trivially lead to account takeovers if the validation step is not done by the client.\n\n---\n\nThe attacker's hosts an MCP server at `https://mcp.attacker.com/`, and its Protected Resource Metadata points to the attacker's AS `https://auth.attacker.com/`\n\nThe attacker hosts AS metadata at `https://auth.attacker.com/.well-known/oauth-authorization-server` with the following contents:\n\n```\n{\n  \"iss\": \"https://auth.example.com/\",\n  \"authorization_endpoint\": \"https://auth.attacker.com/authorize\",\n  \"token_endpoint\": \"https://auth.attacker.com/token\",\n  ...\n}\n```\n\nThis is invalid according to RFC8414 because the `iss` value in this metadata doesn't match the URL it was requested from. However if the client continues, it would make a request for an ID-JAG with the issuer of a real MCP server `https://auth.example.com/`.\n\nThe attack occurs starting with getting a user to connect the malicious MCP server.\n\nWithout a `resource` parameter, the IDP wouldn't be able to tell that the request for the ID-JAG with `iss=https://auth.example.com` is starting from a malicious MCP server, so the IDP would issue an ID-JAG with the audience of `https://auth.example.com`. At that point, the client sends the ID-JAG to the attacker's token endpoint, and the attacker can forward it on to the real MCP AS and get the access token for the real MCP server.\n\n---\n\nThis is not a new attack, the same thing is possible in an interactive OAuth flow. But I think it's worth reminding people about again here because of how subtle this kind of thing can be.\n\n\n",
+      "createdAt": "2026-08-12T00:18:30Z",
+      "updatedAt": "2026-08-12T01:37:16Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Related to #120. The attack here leans on the absence of a validated `resource` parameter (\"Without a `resource` parameter, the IDP wouldn't be able to tell...\"), which is what #120 is scoped to constrain.\n\nNot a duplicate; they compose:\n\n- **#122**: client-side obligation to validate AS metadata `iss` matches the URL it was fetched from (RFC 8414 \u00a73.3), landing as a new security consideration.\n- **#120**: server-side normative behavior for the `resource` parameter (`invalid_target` on out-of-set, partial-accept, default resource) plus response confirmation. The behavior is already specified in [draft-mcguinness-oauth-resource-token-resp](https://datatracker.ietf.org/doc/draft-mcguinness-oauth-resource-token-resp/); ID-JAG can either normatively reference it, or inline the minimum needed (`invalid_target`, response `resource` confirmation) and cite it as informative.\n\nEither way, the security consideration here should cross-reference #120 so the client-side `iss` check and the IdP-side `resource` check read as a pair rather than as alternatives.",
+          "createdAt": "2026-08-12T00:37:45Z",
+          "updatedAt": "2026-08-12T00:37:45Z"
+        },
+        {
+          "author": "KevinLuo2000",
+          "authorAssociation": "NONE",
+          "body": "This is a good call-out. The authenticity of AS metadata (and in fact of all metadata documents in OAuth) MUST be strictly validated; failing to do so would greatly impact the security of _downstream specs_ dependent on them, yet their implementers may overlook such validation. For example, IMO it's a bit unfortunate that RFC9207 did not restate RFC8414 Section 3.3. \n\nBut at least in the MCP world, I added a [note](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468#discussion_r3139014444) on this in the MCP iss validation PR, and it now stands in the [AS metadata discovery section](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/authorization-server-discovery#authorization-server-metadata-discovery) in the MCP authorization spec, independent of the mix-up defense (and hopefully a reminder to ID-JAG/Enterprise-Managed Auth implementers as well?).",
+          "createdAt": "2026-08-12T01:19:41Z",
+          "updatedAt": "2026-08-12T01:37:16Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -8241,6 +8279,53 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 123,
+      "id": "PR_kwDOKv5r-s795NsY",
+      "title": "Constrain resource parameter and require AS metadata iss validation",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/123",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\nAddress issues #120 and #122 in a single PR.\n\n**#120 \u2014 `resource` parameter constraints in Token Exchange**\n\n- IdP MUST verify each requested resource identifier is governed by the `audience` Resource Authorization Server, and reject with `invalid_target` when it is not or when none is acceptable to policy.\n- RAS MUST apply the same check on the ID-JAG `resource` claim and reject with `invalid_target` on governance mismatch; missing required claim \u2192 `invalid_grant`.\n- New `resource` response parameter on both the Token Exchange response and the Access Token response, carrying the granted resource set with URI syntax and comparison rules per RFC 3986. Fixes the dangling RFC 8707 \u00a72 citation on the RAS response format.\n- Tightened the ID-JAG `resource` claim grammar (single string or non-empty JSON array of unique absolute URIs) to match the response grammar so the claim and the response can never disagree.\n- New IANA action registering `token response` as a Parameter Usage Location for the `resource` parameter so ID-JAG adoption is not gated on draft-mcguinness-oauth-resource-token-resp.\n\n**#122 \u2014 AS metadata `issuer` validation**\n\n- New security consideration requiring clients to validate the `issuer` value in Authorization Server metadata against the identifier used to construct the retrieval URL, per RFC 8414 \u00a73.3.\n- Describes the account-takeover scenario (attacker AS metadata claiming a legitimate `iss`) and identifies the RFC 8414 \u00a73.3 check as the primary defense.\n- Cross-references the IdP-side `resource` parameter governance rule from #120 as defense in depth: when the client includes `resource`, the IdP catches an audience/resource inconsistency that the attacker cannot satisfy.\n\n## Test plan\n\n- [ ] `make` builds the draft cleanly (verified locally: kramdown-rfc, xml2rfc-txt, xml2rfc-html all OK)\n- [ ] References resolve: RFC 3986 added to normative, draft-mcguinness-oauth-resource-token-resp added to informative\n- [ ] Anchors `{#token-exchange}`, `{#token-exchange-response}`, `{#access-token-response}` do not collide with existing anchors\n- [ ] WG review of the invalid_target vs invalid_grant split (IdP: request-parameter \u2192 `invalid_target`; RAS: grant-content \u2192 `invalid_grant`; either: resource governance \u2192 `invalid_target`)\n- [ ] WG review of the ID-JAG doing the `resource` `token response` Parameter Usage Location registration on behalf of the generic OAuth registry\n\nCloses #120\nCloses #122",
+      "createdAt": "2026-08-12T06:12:04Z",
+      "updatedAt": "2026-08-12T21:22:31Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "resource-iss-validation",
+      "headRefOid": "4fe9ada68a8ce19c67efb73bf6deeb8cb3b9d0f6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABJR5yKw",
+          "commit": {
+            "abbreviatedOid": "df6e766"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-12T14:36:57Z",
+          "updatedAt": "2026-08-12T14:36:57Z",
+          "comments": [
+            {
+              "originalPosition": 41,
+              "body": "good argument that absent but required is `invalid_request`",
+              "createdAt": "2026-08-12T14:36:57Z",
+              "updatedAt": "2026-08-12T14:36:57Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
