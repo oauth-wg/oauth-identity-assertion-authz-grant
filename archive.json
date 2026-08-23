@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-20T00:03:04.808623+00:00",
+  "timestamp": "2026-08-23T00:02:54.982702+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -8232,7 +8232,7 @@
       "labels": [],
       "body": "## Summary\n\n- Adds Section 9.8.2 **mTLS Certificate Binding** as a sibling to the existing DPoP binding, following [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705).\n- Renames the existing `### Proof-of-Possession` subsection to `### DPoP Key Binding` for parallelism. DPoP processing rules are unchanged.\n- Adds guidance that an IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. When both a DPoP proof and a suitable certificate are presented on the same Token Exchange request, the IdP selects a single binding mechanism per local policy for the target Resource Authorization Server.\n- The new mTLS subsection mirrors the DPoP treatment with parallel \"During Token Exchange\" and \"During ID-JAG Exchange\" sub-subsections, including the same four-case `cnf`/mTLS processing matrix.\n- Adds RFC 8705 to normative references and a `-05` document history entry.\n\n### Note on the binding certificate\n\nThe certificate used for binding is the X.509 client certificate the client presents during the mutually authenticated TLS handshake, validated per RFC 8705 \u00a72. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are necessarily the same certificate.\n\nCloses #117.\n\n## Test plan\n\n- [ ] CI builds the draft (kramdown-rfc render succeeds)\n- [ ] Internal anchors resolve (`sec-dpop-binding`, `sec-mtls-binding`)\n- [ ] Rendered HTML shows Section 9.8 with 9.8.1 (DPoP) and 9.8.2 (mTLS) at the same level\n- [ ] Document history `-05` entry appears",
       "createdAt": "2026-08-01T01:24:34Z",
-      "updatedAt": "2026-08-07T22:36:13Z",
+      "updatedAt": "2026-08-22T00:35:44Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
@@ -8252,7 +8252,21 @@
           "updatedAt": "2026-08-07T22:36:13Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABKe01Rw",
+          "commit": {
+            "abbreviatedOid": "660dd92"
+          },
+          "author": "kenmccracken-google",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "LGTM",
+          "createdAt": "2026-08-22T00:35:44Z",
+          "updatedAt": "2026-08-22T00:35:44Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 119,
