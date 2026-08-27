@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-25T00:03:27.728102+00:00",
+  "timestamp": "2026-08-27T01:09:04.809706+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3208,9 +3208,17 @@
       "labels": [],
       "body": "## Problem\n\nID-JAG lets an IdP that both domains already trust assert a user's identity and a client's delegated authorization to a Resource Authorization Server (RAS). That trust gives the RAS a strong reason to believe the user and the delegation. It says nothing about the *client's metadata*: its name, `redirect_uris`, key material, and other registration attributes. The draft assumes the client is \"already known\" to the RAS, established out of band or via a client metadata document, and #113 notes that even the client's `client_id` at the boundary needs a normative identification story.\n\nWhere the client is identified by a Client ID Metadata Document (CIMD) URL, this leaves an open question the CIMD trust model does not itself answer: *who reviewed and vouches for this client's metadata?* CIMD anchors that the metadata authentically came from whoever controls the URL. It does not tell the RAS that a trusted party evaluated that metadata. In the ID-JAG deployment model the RAS already trusts exactly such a party: the IdP.\n\n## Solution sketch\n\nLet the IdP bind a digest of the client's CIMD document into the assertion it already signs, so the RAS can trust the client's metadata on the IdP's signature and provision the client just in time. Details are for the working group to choose:\n\n- Define an OPTIONAL `cimd_digest` claim carried in the ID-JAG, or established through the ID Token to ID-JAG chain. Its value is the unpadded base64url-encoded SHA-256 hash ([RFC 6234](https://www.rfc-editor.org/rfc/rfc6234.html)) of the client's retrieved CIMD representation body, taken after any content coding is removed and with no transcoding or normalization, so no JSON canonicalization is involved. Other drafts in the working group have defined this same `cimd_digest` binding; reusing the claim and its computation keeps it interoperable.\n- The `client_id` is the CIMD URL, consistent with CIMD and with the client-identification gap #113 raises.\n- The IdP is already relying on this document. When the client is CIMD-identified at the IdP, the IdP has already fetched and trusted the same CIMD, including its keys and `redirect_uris`, to authenticate the client and issue the ID Token and refresh token that underlie the identity assertion. Signing a `cimd_digest` attests a document the IdP already consumed and trusted for this exchange; it is the digest of what the IdP saw, not a new review it must run. The keys #113 relies on to key-bind the ID Token are the same keys carried in that vouched CIMD.\n- On redemption, a RAS that does not already know the client MAY provision it just in time: fetch the CIMD URL, verify the document's `client_id` equals the URL, recompute the digest, and compare it to the IdP-asserted `cimd_digest`. On a match, it provisions a client from that metadata and trusts it because the IdP it already trusts signed over that exact snapshot.\n- If the RAS must complete anything asynchronously first, for example a first-sighting review of a client it has never seen, it can defer the token response and let the client poll rather than defining new async machinery here. [Deferred Token Response](https://www.ietf.org/archive/id/draft-gerber-oauth-deferred-token-response-00.html) already defines this at the token endpoint: the server answers with `authorization_pending`, a `deferral_code`, and a polling interval, and the client polls a deferred grant until the token is ready. Because redeeming an ID-JAG is itself a token-endpoint exchange, it composes directly, with no addition to this draft.\n\nThe effect is that an ID-JAG carrying `cimd_digest` acts, for the client's metadata, almost like a software statement over the CIMD: the IdP signs over the digest, and the RAS gets trusted metadata plus a just-in-time client without a separate registration call or a separate issuer to configure.\n\n## Benefits\n\n- **Answers \"who vouches for the client's metadata\" inside the existing trust model.** The RAS already trusts the IdP for SSO and subject resolution; this lets the same trust cover the client's metadata, with no new issuer relationship to establish.\n- **Just-in-time provisioning of unknown clients.** A RAS can accept a client it has never registered, cross-domain, because the metadata arrives vouched for by the IdP and bound by digest to a CIMD the RAS can fetch and verify.\n- **Minimal, and built on existing reliance.** One optional claim on a JWT the IdP already issues, over a CIMD the IdP already fetched and trusted to issue the ID Token and refresh token. No new endpoint, artifact, or round trip, and no new review obligation for the CIMD-identified case.\n- **Composes** with CIMD (`client_id` = URL, digest binds the reviewed snapshot) and with [Deferred Token Response](https://www.ietf.org/archive/id/draft-gerber-oauth-deferred-token-response-00.html) for any asynchronous completion at the RAS.\n- **Reinforces #113.** That issue removes the confidential-client requirement when the client is key-bound and flags that the `client_id` still needs a normative identity. A CIMD URL vouched for by `cimd_digest` gives that identity a trusted, fetchable, IdP-attested form. Together, a key-bound public client (#113) whose CIMD the IdP vouches for (this issue) can be provisioned at the RAS with both authenticated key binding and trusted metadata.\n\n## Tradeoffs\n\n- **The IdP vouches for client metadata, not just user identity.** Where the client is CIMD-identified this formalizes reliance the IdP already had, but the assurance is still bounded by the IdP's process: a light \"we recognize this client\" is weaker than a real review, and the RAS can conclude only what the IdP actually did. The spec should name any review beyond the IdP's existing client authentication as deployment policy.\n- **It couples a client-metadata attestation onto a user-authorization grant.** Some deployments may prefer to keep \"who is the user\" and \"what is the client software\" in separate artifacts. A standalone establishment artifact is the better fit when there is no user in the loop or no shared IdP, which is out of scope here and is where other drafts' trust binding applies. This proposal is specifically for the case ID-JAG already serves.\n- **Digest-change semantics need a rule.** The digest is over the whole document, so a benign change (a fixed typo) and a material one (a new redirect URI) both break it. The draft would need to say whether a mismatch is a hard failure or a policy input, ideally distinguishing changes to attested versus unattested metadata.\n- **Trust must anchor to the configured IdP, not the CIMD's own keys.** Standard issuer-trust discipline; the cross-domain client ID handling caution in the draft and #113 applies.\n\n## Relation to #113\n\n#113 is about *authentication assurance*: relaxing the confidential-client requirement when the ID Token or ID-JAG is key-bound. This issue is about *metadata trust and provisioning*: letting the IdP vouch for the client's CIMD so the RAS can trust and JIT-provision it. They are independent but complementary and strongest together: #113 lets the client be public and key-bound; this lets the RAS know and trust that client's metadata without prior registration. #113 also leaves open how the `client_id` is identified in the public-client case, and a CIMD URL carried with `cimd_digest` is a concrete answer.\n\n## Asking for\n\nFeedback on whether this belongs in the base spec or a profile, whether `cimd_digest` should ride the ID-JAG or be established in the ID Token chain, and how strict RAS-side digest-mismatch handling should be. If the direction has interest, I am happy to work the processing rules (digest computation, JIT-provisioning validation, mismatch policy) into a PR.\n",
       "createdAt": "2026-08-06T03:50:14Z",
-      "updatedAt": "2026-08-06T03:50:14Z",
+      "updatedAt": "2026-08-26T14:40:25Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "meghnadubey",
+          "authorAssociation": "NONE",
+          "body": "I think this belongs in the CIMD profile for the IdP and for the RAS. For the IdP, whether the IdP undertakes the responsibility of validating/managing/computing the cimd_digest and adding it to id-jag for all CIMD clients. For the RAS, whether it validates/trusts the CIMD digest in id-jag for granting granular policy based access. \nThe CIMD profile can also propose well-known CIMD metadata object update for both the IdP and the RAS to publish `cimd_digest` support. \n",
+          "createdAt": "2026-08-26T14:39:17Z",
+          "updatedAt": "2026-08-26T14:40:25Z"
+        }
+      ]
     },
     {
       "number": 122,
@@ -3242,6 +3250,38 @@
           "updatedAt": "2026-08-12T01:37:16Z"
         }
       ]
+    },
+    {
+      "number": 124,
+      "id": "I_kwDOKv5r-s8AAAABOWzGaQ",
+      "title": "Empty scope claim in id-jag can be ambiguous, the spec needs a section on scope variance and recommendation for RAS and IdP.",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/124",
+      "state": "OPEN",
+      "author": "meghnadubey",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The id-jag claim may eliminate scope or have empty scope parameter, what does it mean: The client did not ask for scope in the request to IdP, or the IdP did not have any scopes configured in policy(or it does not support scope enforcement), or the scopes the client asked for are not configured in IdP. This leads to ambiguity for RAS about how to interpret an empty scope parameter.\n\nSimilarly, an RAS may ignore scope claim in id-jag by policy, and require scope parameter in AT request. I think that case needs to be talked about in the spec , and this RAS behavior/stance should be added to the id-jag related well-known metadata for the RAS.\n\n\n",
+      "createdAt": "2026-08-26T14:46:58Z",
+      "updatedAt": "2026-08-26T14:50:48Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 125,
+      "id": "I_kwDOKv5r-s8AAAABOW57vQ",
+      "title": "JIT user provisioning in RAS will benefit from RAS well-known metadata",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/125",
+      "state": "OPEN",
+      "author": "meghnadubey",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "JIT user provisioning in RAS will benefit from related RAS well-known metadata. The metadata can define the exact id-jag claims, whether custom or standard OIDC, that have to be present in the id-jag. That way the additional data that is added to the id-jag is dictated by the consumer of that data, the RAS. The information sharing is limited to the RAS's new user requirement, no oversharing happens. This JIT-provisioning metadata can be used to model the RAS profile in the IdP, and the error in case of insufficient claims can be made more intuitive/prodictable.",
+      "createdAt": "2026-08-26T14:58:06Z",
+      "updatedAt": "2026-08-26T14:58:06Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -8187,7 +8227,7 @@
       "labels": [],
       "body": "Closes #111.\n\n## Summary\n\nAddresses @pcarleton's report in #111 that RAS-side authorization failures (for example \"the End-User does not have a license\", or a policy or role check that denies access) today return `invalid_grant`, which is indistinguishable from grant validation failures such as signature or audience mismatches. Clients cannot tell whether a fresh ID-JAG would resolve the error or whether the End-User needs to remediate through an entitlement or access-request process.\n\nPer the discussion on #111, this PR adopts the path @aaronpk agreed to: profile `access_denied` for authorization failures at both the IdP Token Exchange endpoint and the RAS ID-JAG-to-access-token exchange, keeping `invalid_grant` for grant validation failures.\n\n## What changed\n\nAdds an Error Response subsection under Access Token Request and expands the existing Error Response subsection under Token Exchange. Each section:\n\n- Opens with a one-sentence framing noting that any OAuth token endpoint error code MAY be returned and that these two codes are profiled specifically for interoperability.\n- Defines `invalid_grant` as the grant validation failure code (signature, `aud`, `client_id`, `exp`, `typ`, decryption, `cnf` binding, subject token expiration at the IdP, etc.). A re-issued grant may resolve the error.\n- Defines `access_denied` as the authorization failure code (the grant is valid but the End-User or Client is not authorized). Covers licensing, entitlement, and provisioning gaps as well as policy or role/permission denials. A re-issued grant will not resolve the error.\n- Points at operator-defined remediation. Both bullets frame this as the \"operator's access-request, entitlement, or provisioning process\" (IdP-side adds \"app assignment\" as the leading example), with Identity Governance and Administration (IGA) workflows called out as a concrete enterprise deployment shape.\n\nThe two sections stay parallel and self-contained so readers of either endpoint's flow can consume the full error semantics without cross-referencing.\n\n## How this responds to #111\n\n| Concern | Resolution |\n|---|---|\n| RAS-side \"user does not have a license\" returns `invalid_grant`, indistinguishable from misconfiguration | New `access_denied` bullet at the RAS with explicit license, entitlement, provisioning, and policy/role denial examples |\n| Client cannot tell when to retry vs when to send the user through an access-request process | Each bullet states whether re-issuing the grant will resolve the error, giving the client a clear retry signal |\n| Same class of failure exists at the IdP side | Parallel `access_denied` bullet at the IdP for \"Client or End-User not authorized to obtain an ID-JAG for the target Resource Authorization Server\" |\n| Remediation is deployment-specific (enterprise IGA, or other operator processes) | Remediation sentence points to the operator's process and names IGA as a concrete example without foreclosing other deployment shapes |\n\n## Not in this PR (for future work)\n\nThe #111 discussion also mentioned:\n\n- `insufficient_user_authentication` \u2014 already covered in PR #88, so intentionally not touched here.\n- `insufficient_claims` (`draft-mcguinness-oauth-insufficient-claims`) \u2014 separate individual draft; would land as a follow-up if adopted.\n- `interaction_required` (`draft-parecki-oauth-jwt-grant-interaction-response`) \u2014 separate individual draft; would land as a follow-up if adopted.\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm the new Error Response sections render correctly\n- [ ] Confirm cross-references (`{{Section 5.2 of RFC6749}}`, `{{token-request}}`) resolve\n- [ ] Confirm the new `{#token-exchange-error-response}` and `{#access-token-error-response}` anchors are unique and available for later specs to reference",
       "createdAt": "2026-07-21T16:51:15Z",
-      "updatedAt": "2026-07-21T16:51:15Z",
+      "updatedAt": "2026-08-25T19:44:17Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
@@ -8239,7 +8279,7 @@
       "labels": [],
       "body": "## Summary\n\n- Adds Section 9.8.2 **mTLS Certificate Binding** as a sibling to the existing DPoP binding, following [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705).\n- Renames the existing `### Proof-of-Possession` subsection to `### DPoP Key Binding` for parallelism. DPoP processing rules are unchanged.\n- Adds guidance that an IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. When both a DPoP proof and a suitable certificate are presented on the same Token Exchange request, the IdP selects a single binding mechanism per local policy for the target Resource Authorization Server.\n- The new mTLS subsection mirrors the DPoP treatment with parallel \"During Token Exchange\" and \"During ID-JAG Exchange\" sub-subsections, including the same four-case `cnf`/mTLS processing matrix.\n- Adds RFC 8705 to normative references and a `-05` document history entry.\n\n### Note on the binding certificate\n\nThe certificate used for binding is the X.509 client certificate the client presents during the mutually authenticated TLS handshake, validated per RFC 8705 \u00a72. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are necessarily the same certificate.\n\nCloses #117.\n\n## Test plan\n\n- [ ] CI builds the draft (kramdown-rfc render succeeds)\n- [ ] Internal anchors resolve (`sec-dpop-binding`, `sec-mtls-binding`)\n- [ ] Rendered HTML shows Section 9.8 with 9.8.1 (DPoP) and 9.8.2 (mTLS) at the same level\n- [ ] Document history `-05` entry appears",
       "createdAt": "2026-08-01T01:24:34Z",
-      "updatedAt": "2026-08-22T00:35:44Z",
+      "updatedAt": "2026-08-25T19:41:51Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
@@ -8257,6 +8297,13 @@
           "body": "Thank you for the quick response.  #118 looks good to me.\r\n\r\nFeel free to close this Issue as Fixed. I don't see the button.",
           "createdAt": "2026-08-07T22:35:31Z",
           "updatedAt": "2026-08-07T22:36:13Z"
+        },
+        {
+          "author": "kenmccracken-google",
+          "authorAssociation": "NONE",
+          "body": "Hi @mcguinness , what are the next steps here to get this PR approved and merged?  I am happy to provide additional follow up as needed.  Can you assign a reviewer with write access to the repo?",
+          "createdAt": "2026-08-25T19:35:11Z",
+          "updatedAt": "2026-08-25T19:35:50Z"
         }
       ],
       "reviews": [
@@ -8342,7 +8389,7 @@
       "labels": [],
       "body": "## Summary\n\nAddress issues #120 and #122 in a single PR.\n\n**#120 \u2014 `resource` parameter constraints in Token Exchange**\n\n- IdP MUST verify each requested resource identifier is governed by the `audience` Resource Authorization Server, and reject with `invalid_target` when it is not or when none is acceptable to policy.\n- RAS MUST apply the same check on the ID-JAG `resource` claim and reject with `invalid_target` on governance mismatch; missing required claim \u2192 `invalid_grant`.\n- New `resource` response parameter on both the Token Exchange response and the Access Token response, carrying the granted resource set with URI syntax and comparison rules per RFC 3986. Fixes the dangling RFC 8707 \u00a72 citation on the RAS response format.\n- Tightened the ID-JAG `resource` claim grammar (single string or non-empty JSON array of unique absolute URIs) to match the response grammar so the claim and the response can never disagree.\n- New IANA action registering `token response` as a Parameter Usage Location for the `resource` parameter so ID-JAG adoption is not gated on draft-mcguinness-oauth-resource-token-resp.\n\n**#122 \u2014 AS metadata `issuer` validation**\n\n- New security consideration requiring clients to validate the `issuer` value in Authorization Server metadata against the identifier used to construct the retrieval URL, per RFC 8414 \u00a73.3.\n- Describes the account-takeover scenario (attacker AS metadata claiming a legitimate `iss`) and identifies the RFC 8414 \u00a73.3 check as the primary defense.\n- Cross-references the IdP-side `resource` parameter governance rule from #120 as defense in depth: when the client includes `resource`, the IdP catches an audience/resource inconsistency that the attacker cannot satisfy.\n\n## Test plan\n\n- [ ] `make` builds the draft cleanly (verified locally: kramdown-rfc, xml2rfc-txt, xml2rfc-html all OK)\n- [ ] References resolve: RFC 3986 added to normative, draft-mcguinness-oauth-resource-token-resp added to informative\n- [ ] Anchors `{#token-exchange}`, `{#token-exchange-response}`, `{#access-token-response}` do not collide with existing anchors\n- [ ] WG review of the invalid_target vs invalid_grant split (IdP: request-parameter \u2192 `invalid_target`; RAS: grant-content \u2192 `invalid_grant`; either: resource governance \u2192 `invalid_target`)\n- [ ] WG review of the ID-JAG doing the `resource` `token response` Parameter Usage Location registration on behalf of the generic OAuth registry\n\nCloses #120\nCloses #122",
       "createdAt": "2026-08-12T06:12:04Z",
-      "updatedAt": "2026-08-12T21:22:31Z",
+      "updatedAt": "2026-08-25T19:44:00Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
