@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-30T00:04:57.099658+00:00",
+  "timestamp": "2026-09-01T00:05:22.290668+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3270,9 +3270,17 @@
       "labels": [],
       "body": "The id-jag claim may eliminate scope or have empty scope parameter, what does it mean: The client did not ask for scope in the request to IdP, or the IdP did not have any scopes configured in policy(or it does not support scope enforcement), or the scopes the client asked for are not configured in IdP. This leads to ambiguity for RAS about how to interpret an empty scope parameter.\n\nSimilarly, an RAS may ignore scope claim in id-jag by policy, and require scope parameter in AT request. I think that case needs to be talked about in the spec , and this RAS behavior/stance should be added to the id-jag related well-known metadata for the RAS.\n\n\n",
       "createdAt": "2026-08-26T14:46:58Z",
-      "updatedAt": "2026-08-26T14:50:48Z",
+      "updatedAt": "2026-08-31T15:55:13Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "I agree. This can lead to cases where the Requesting App may be able to bypass the XAA policy. \n\nFor the Resource App implementation it won't be uncommon to fallback to read the `scope` from the AT request body, for interoperability reasons with IdPs that don't support `scope` (in general, or only as part of the XAA policy). In those cases, it may be reasonable to fallback to use the Resource App AuthServer own access policy to authorize the `scope` sent by the requesting App in the body.\n\nAt the same time, some Resource Apps may not require to use oauth `scope` to access some of their protected API endpoints, so it may be a valid policy config to say a user can connect the Requesting App to the Resource App with no `scope` values. If the IdP then issues an `id-jag` omitting the `scope` parameter, then that case will be indistinguishable from the case where the IdP does not support `scope`, and therefore the Resource App may fallback to consider scopes directly sent by the Requesting App, thus allowing to do an escalation of privileges.  So, I think the problem is not that the `scope` is empty, but when it is missing in the `id-jag`.\n\nI think the spec should clearly indicate the `scope` param MUST be added to the `id-jag` always whenever the IdP support `scope`, even with an empty string value, to indicate the outcome of the XAA policy is to grant access to the Resource App with no `scope`.",
+          "createdAt": "2026-08-31T15:53:10Z",
+          "updatedAt": "2026-08-31T15:55:13Z"
+        }
+      ]
     },
     {
       "number": 125,
