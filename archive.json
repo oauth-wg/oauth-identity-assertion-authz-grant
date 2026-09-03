@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-01T00:05:22.290668+00:00",
+  "timestamp": "2026-09-03T00:04:43.214777+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3297,6 +3297,44 @@
       "updatedAt": "2026-08-26T14:58:06Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 126,
+      "id": "I_kwDOKv5r-s8AAAABPUcAhA",
+      "title": "Client delegation semantics",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/126",
+      "state": "OPEN",
+      "author": "yaron-zehavi",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "ID-JAG encodes \u201cwhich OAuth client may redeem this grant\u201d rather than \u201cwhich delegated actor may act.\u201d Those are practically related but semantically different.\nmay_act would have modeled the delegation more cleanly, while client_id optimizes for existing OAuth AS implementation and client policy machinery.\n\nWhy weren't RFC 8693 delegation semantics not used? e.g:\n\n- Name the approved delegated party using may_act, which could contain either a client_id (+ optional iss when not using CIMD), or a cnf claim referencing a public key the client controls, such as dpop key.\n```\n\"may_act\": {\n  \"client_id\": \"ras-client-id\",\n  \"iss\": \"https://ras.example.com\"\n}\n```\n\n```\n\"may_act\": {\n  \"cnf\": {\n    \"jkt\": \"...\"\n  }\n}\n```\n\n- Using cnf enables clients to exchange the JAG at the RAS while proving legitimate sender constraining but without having to be its client.",
+      "createdAt": "2026-09-02T11:00:29Z",
+      "updatedAt": "2026-09-02T21:54:24Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Issue #85 is related.  You are correct that we originally optimized for existing OAuth AS implementation and client policy machinery and required strong client continuity across the domains.  `may_act` suffers many of the same interop gaps as `act`.  This is why the current spec required confidential client at both the IdP AS and RAS.     ",
+          "createdAt": "2026-09-02T14:59:49Z",
+          "updatedAt": "2026-09-02T14:59:49Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "Thanks for the quick response.\n\n1. I'd like to question the decision to forego established mechanisms as may_act / act and use instead the less accurate client_id claim. Maybe leave it to the IdP's choice and offer client_id as a fallback option?\n2. Currently client_id is REQUIRED. This dictates RAS must only support confidential clients. Why make that choice for them? I can imagine RAS whose policy is trust certain IdPs without caring which client that is as long as IdP trusts that client, and no desire to manage and authenticate these clients.\n3. cnf claim in ID JAG can sender-constrain ID-JAGs to prove to RAS the presenter is the legitimate actor, without requiring confidential client relationship.",
+          "createdAt": "2026-09-02T20:39:57Z",
+          "updatedAt": "2026-09-02T20:57:14Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "2 & 3 are being tracked in #85. I read your comment as support for allowing the RAS, as a deployment and policy choice, to accept a sender-constrained ID-JAG without requiring confidential client authentication.\n\nFor 1, I think `client_id`, `may_act`, and `act` answer different questions rather than being alternatives. In base ID-JAG, `client_id` identifies the OAuth client registration at the RAS to which the grant is bound. `may_act` identifies a party eligible to become an actor; it does not establish that the party actually acted. `act` identifies the actor when explicit delegation is represented\n\nThis distinction led from the implicit-versus-explicit delegation discussion in #73 to factoring explicit delegation into the [OAuth Actor Profile for Delegation](https://datatracker.ietf.org/doc/draft-mcguinness-oauth-actor-profile/). Base ID-JAG models the conventional OAuth case in which a client obtains and redeems a grant on behalf of a user without asserting a separate actor principal. When a distinct actor needs to be represented, the Actor Profile composes with ID-JAG and uses `act`; `client_id` remains available to identify the OAuth client registration.\n\nFor that reason, I would not make `client_id` a fallback selected by the IdP. Base ID-JAG should retain stable client-binding semantics, while explicit actor representation should be introduced through an extension profile understood by both the IdP and the RAS.\n\n@aaronpk may have additional thoughts here.",
+          "createdAt": "2026-09-02T21:54:24Z",
+          "updatedAt": "2026-09-02T21:54:24Z"
+        }
+      ]
     }
   ],
   "pulls": [
