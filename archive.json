@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-03T00:04:43.214777+00:00",
+  "timestamp": "2026-09-06T00:05:00.687479+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2463,7 +2463,7 @@
       ],
       "body": "The current draft generally assumes confidential clients at the Resource Authorization Server (RAS), and the Security Considerations say that this specification `SHOULD` only be supported for confidential clients. The draft also notes in Cross-Domain Client ID Handling that requiring a confidential client at the RAS helps prevent the IdP from delegating access to any valid client at the RAS.\n\nAt the same time, the draft now defines proof-of-possession / key-binding for ID-JAG using `cnf` and DPoP. That raises a question about whether the spec should allow an explicit tradeoff here.\n\n**Deployment model to discuss**\n\n- The client is confidential at the IdP.\n- The client is public at the RAS, or the RAS otherwise does not require confidential client authentication for this exchange.\n- The client includes DPoP in the token exchange to the IdP.\n- The IdP issues a key-bound ID-JAG with a `cnf` / `jkt`.\n- The client presents DPoP when exchanging the ID-JAG at the RAS.\n- The RAS verifies that the DPoP key matches the `cnf` in the ID-JAG.\n\n**Why allow this**\n\n- Credential lifecycle can be centralized at the IdP.\n- The client does not need to maintain separate credentials with each RAS.\n- This may be useful in ecosystems with many downstream RAS deployments.\n- Client ID Metadata Document (CIMD) helps address part of this problem when adopted, but it will not always be available immediately.\n- This could make the deployment model possible until CIMD becomes more widely deployed.\n\n**Tradeoff**\n\nThis is not equivalent to requiring a confidential client at the RAS.\n\nWhat is preserved:\n\n- Replay resistance for the ID-JAG, assuming the RAS requires proof-of-possession and validates `cnf` against the proof token.\n- Stronger protection than an unconstrained bearer-style exchange.\n\nWhat is reduced:\n\n- The RAS no longer gets the same client-authentication assurance it gets from a confidential registration at the RAS.\n- The anti-client-substitution property is weaker unless the spec explicitly defines how public-client identification is handled in this profile.\n\n**Question**\n\nShould the specification explicitly allow this tradeoff?\n\nPossible direction:\n\n- Keep confidential registration at the RAS as the recommended/default model.\n- Allow RAS deployments to accept public clients for ID-JAG exchange when the ID-JAG is key-bound and the proof token presented to the RAS matches the `cnf`.\n- Clarify that this does not require any RAS to support public clients.\n- A RAS, or the administrator/operator of that RAS, can always decide to require confidential registration instead.\n- In that sense, this change would make the model possible, not mandatory, until CIMD is more widely deployed.\n\nIf the spec does allow this, it would likely need explicit processing rules for this profile, for example:\n\n- `cnf` in the ID-JAG is required.\n- Proof-of-possession at the RAS is required.\n- The proof key MUST match the `cnf` in the ID-JAG.\n- The RAS SHOULD issue only sender-constrained access tokens in this case.\n- The client identification / `client_id` matching rules need to be defined for public clients at the RAS.\n\nThe main question is whether the spec should permit this as an optional deployment tradeoff, while still allowing any RAS to require confidential registration.",
       "createdAt": "2026-04-20T23:01:03Z",
-      "updatedAt": "2026-06-22T16:53:08Z",
+      "updatedAt": "2026-09-03T06:04:46Z",
       "closedAt": null,
       "comments": [
         {
@@ -2472,6 +2472,13 @@
           "body": "Allowing public client with DPoP provides flexibility at the RAS, in case it is not already supporting CIMD, or wants to selectively support CIMD. This ventures into RAS policy, but I think the advantages are significant enough to add to the spec. \nCIMD may not always be implemented by the client, and manual client registration involves some effort for the client and IdP to maintain the external registration. I think even with the known downsides, public client with DPoP should be available as an option.",
           "createdAt": "2026-06-22T16:50:31Z",
           "updatedAt": "2026-06-22T16:53:08Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Now that an IdP-issued Refresh Token is the primary `subject_token` for ID-JAG for current deployments, I think this issue can be reframed around preserving its existing sender constraint.\n\nThe client establishes a key or certificate binding during the original authorization flow and proves possession again when requesting an ID-JAG. The IdP validates that binding and carries it into the ID-JAG using the appropriate `cnf` confirmation method. When the ID-JAG is redeemed, the RAS verifies the same binding and issues a sender-constrained access token.\n\nID-JAG should require an existing `subject_token` binding to be preserved. The IdP must not silently replace it with a different key, certificate, or sender-constraining mechanism. The choice between DPoP and mTLS described in [#118](https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/118) should apply only when the input token does not already require a particular binding, unless an explicit mechanism authorizes rebinding.\n\nThis would let deployments permit public clients when the selected sender-constraining mechanism supports them, while allowing either the IdP or RAS to require confidential client authentication. Sender constraint proves possession of a key or certificate; it does not replace client identification or authorization, so normal `client_id` and authorization policy still apply.\n\nKey-bound ID Tokens and SAML Holder-of-Key assertions could also be supported as optional inputs, with profiles defining how their bindings are validated and carried into the ID-JAG.",
+          "createdAt": "2026-09-03T06:04:34Z",
+          "updatedAt": "2026-09-03T06:04:46Z"
         }
       ]
     },
@@ -2756,7 +2763,7 @@
       "labels": [],
       "body": "We have `aud_tenant` defined as an ID-JAG claim as follows:\n\n> aud_tenant:\n> OPTIONAL - A JSON string that represents a Resource Authorization Server tenant identifier. This claim is only included when the Resource Authorization Server is multi-tenant and the IdP knows the tenant identifier.\n\nFor the case where the IdP and Resource AS do not use tenanted identifiers, and there are multiple copies of the app behind the Resource AS installed in the IdP, this claim is the only thing that can identify the app.\n\nHow can a client request a particular app? We didn't want to add `aud_tenant` as a claim to the Token Exchange request. We do have text in the `audience` parameter of token exchange:\n\n> IdP Authorization Servers MAY also support implementation-specific audience values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the aud claim.\n\nI think two things need to happen:\n\n* We should define a standardized method for referencing `aud_tenant` here\n* Update the last part to \"...resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the aud claim and aud_tenant\"\n\nThoughts?\n",
       "createdAt": "2026-06-15T18:00:34Z",
-      "updatedAt": "2026-06-16T23:11:19Z",
+      "updatedAt": "2026-09-04T21:42:20Z",
       "closedAt": null,
       "comments": [
         {
@@ -2807,6 +2814,13 @@
           "body": "I updated editor's draft of https://mcguinness.github.io/draft-mcguinness-token-xchg-target-svc-disco/draft-mcguinness-token-xchg-target-svc-disco.html#name-multi-tenant-target-service to include additional discovery metadata and have a logical identifier for the audience+tenant or client relationship.  This would enable a client to select the correct audience value and use that for the token exchange request.  \n\nID-JAG spec already enables `audience` to be a IdP-specific identifier.  This eliminated the need to add additional token exchange requests params.  ",
           "createdAt": "2026-06-16T23:11:19Z",
           "updatedAt": "2026-06-16T23:11:19Z"
+        },
+        {
+          "author": "hpsin",
+          "authorAssociation": "NONE",
+          "body": "We stumbled on this when sketching out accepting an ID JAG on GitHub, glad there's already a discussion on it. \n\nAs an RAS we're a multi-tenant issuer, where a single IdP issuer is connected to multiple tenants within the RAS. Naively the information in the token exchange request is insufficient to identify the target RAS tenant - the requested JAG audience will always be 'https://github.com/login/oauth`, which doesn't help the IdP AS figure out which tenant to target. And we do not want to use `resource` here to indicate the tenant, as that will eventually be used to indicate eg a token for just the MCP server. \n\nIt sounds like the suggested path forward is to do a custom audience in the IdP, which is then translated during the token exchange request into the standard `audience` and `aud_tenant` claims? \n\nIf so, I think that could be a useful explicit addition in section 6.4, as it currently reads as if the standard audience parameter value should determine _if_ a tenant claim is required, while it seems the suggested pattern is that the audience parameter determines _which_ audience and tenant claims to use. \n\nAdding the tenant to the service discovery response feels like the right first step towards funneling it from the client back to the IdP during the token exchange request as an additional parameter. \n",
+          "createdAt": "2026-09-04T21:41:38Z",
+          "updatedAt": "2026-09-04T21:42:20Z"
         }
       ]
     },
@@ -3310,7 +3324,7 @@
       "labels": [],
       "body": "ID-JAG encodes \u201cwhich OAuth client may redeem this grant\u201d rather than \u201cwhich delegated actor may act.\u201d Those are practically related but semantically different.\nmay_act would have modeled the delegation more cleanly, while client_id optimizes for existing OAuth AS implementation and client policy machinery.\n\nWhy weren't RFC 8693 delegation semantics not used? e.g:\n\n- Name the approved delegated party using may_act, which could contain either a client_id (+ optional iss when not using CIMD), or a cnf claim referencing a public key the client controls, such as dpop key.\n```\n\"may_act\": {\n  \"client_id\": \"ras-client-id\",\n  \"iss\": \"https://ras.example.com\"\n}\n```\n\n```\n\"may_act\": {\n  \"cnf\": {\n    \"jkt\": \"...\"\n  }\n}\n```\n\n- Using cnf enables clients to exchange the JAG at the RAS while proving legitimate sender constraining but without having to be its client.",
       "createdAt": "2026-09-02T11:00:29Z",
-      "updatedAt": "2026-09-02T21:54:24Z",
+      "updatedAt": "2026-09-03T20:05:35Z",
       "closedAt": null,
       "comments": [
         {
@@ -3333,6 +3347,34 @@
           "body": "2 & 3 are being tracked in #85. I read your comment as support for allowing the RAS, as a deployment and policy choice, to accept a sender-constrained ID-JAG without requiring confidential client authentication.\n\nFor 1, I think `client_id`, `may_act`, and `act` answer different questions rather than being alternatives. In base ID-JAG, `client_id` identifies the OAuth client registration at the RAS to which the grant is bound. `may_act` identifies a party eligible to become an actor; it does not establish that the party actually acted. `act` identifies the actor when explicit delegation is represented\n\nThis distinction led from the implicit-versus-explicit delegation discussion in #73 to factoring explicit delegation into the [OAuth Actor Profile for Delegation](https://datatracker.ietf.org/doc/draft-mcguinness-oauth-actor-profile/). Base ID-JAG models the conventional OAuth case in which a client obtains and redeems a grant on behalf of a user without asserting a separate actor principal. When a distinct actor needs to be represented, the Actor Profile composes with ID-JAG and uses `act`; `client_id` remains available to identify the OAuth client registration.\n\nFor that reason, I would not make `client_id` a fallback selected by the IdP. Base ID-JAG should retain stable client-binding semantics, while explicit actor representation should be introduced through an extension profile understood by both the IdP and the RAS.\n\n@aaronpk may have additional thoughts here.",
           "createdAt": "2026-09-02T21:54:24Z",
           "updatedAt": "2026-09-02T21:54:24Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "So for #2 does IdP need a mapping from its client_id + aud to RAS client_id?",
+          "createdAt": "2026-09-03T06:23:18Z",
+          "updatedAt": "2026-09-03T06:23:18Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "Another question, client_id in JAG is an overloading of its original meaning, in the sense that it's provided by IdP but doesn't describe a client in its namespace but an external client.\nHave you considered a different claim name (avoids confusion at the cost of diminished interoperability) such as ext_client_id or ras_client_id?",
+          "createdAt": "2026-09-03T12:53:41Z",
+          "updatedAt": "2026-09-03T12:53:41Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think `client_id` is still the right semantic starting point and aligns with RFC 8693, where it identifies the OAuth client that requested the token.\n\nID-JAG requires continuity of the same **logical client**, not delegation to another actor. Because the IdP and RAS are different trust domains, the same client may have different local registrations or identifiers, so yes, the IdP needs to know that mapping (see Cross-Domain Client ID Handling) unless CIMD gives both sides the same identifier.\n\nThis is what distinguishes ID-JAG from generic identity chaining: the IdP is the SSO trust anchor for both the client and the RAS, so it can assert client continuity across the boundary the same way it already maps subject identifiers. `client_id` still identifies the requesting client, just expressed in the audience's namespace since the RAS consumes the claim. `may_act` seems less appropriate because it expresses authorization for another party to become the actor, whereas this is continuity of the same client across namespaces.",
+          "createdAt": "2026-09-03T18:30:58Z",
+          "updatedAt": "2026-09-03T18:30:58Z"
+        },
+        {
+          "author": "yaron-zehavi",
+          "authorAssociation": "NONE",
+          "body": "Agree this is not a may_act fitting use-case as it's not delegation.\n\"client_id still identifies the requesting client, just **expressed in the audience's namespace** since the RAS consumes the claim\"\nMy point is doesn't this justify a different claim name, denoting this is the same logical client but in the ras_ or ext_ namespace?\nI totally understand if despite seeing it this way in principal, ID-JAG would opt to reuse client_id for interoperability reasons.",
+          "createdAt": "2026-09-03T20:05:34Z",
+          "updatedAt": "2026-09-03T20:05:34Z"
         }
       ]
     }
