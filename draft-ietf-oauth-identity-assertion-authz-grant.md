@@ -1000,6 +1000,24 @@ A client that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authoriz
 
 This specification SHOULD only be supported for confidential clients.  Public clients SHOULD use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.
 
+## Storage of Subject Tokens {#subject-token-storage}
+
+The subject tokens used with this specification, whether an OpenID Connect ID Token, a SAML 2.0 Assertion, or a Refresh Token issued by the IdP Authorization Server, are high-value artifacts. A client that holds one of these can obtain an ID-JAG for any Resource Authorization Server the IdP policy permits, and can then redeem each ID-JAG for an access token at the corresponding Resource Authorization Server. A compromised subject token therefore exposes not only the IdP, but potentially every downstream resource reachable through it, and does so without further interaction with the user.
+
+Exploiting a stolen subject token also requires the attacker to authenticate to the IdP Authorization Server's token endpoint as the client, since the Token Exchange request requires client authentication. This means the client's credentials are the only remaining barrier, and both the subject token and the client credentials are typically held by the same deployment. An attacker who obtains access to the client's storage, backup, logs, or process memory is likely to obtain both. Deployments SHOULD NOT rely on client authentication alone to mitigate the theft of subject tokens.
+
+Clients that retain subject tokens beyond the immediate Token Exchange request:
+
+* SHOULD protect them at rest with at least the same protections applied to the client's own credentials, and SHOULD store them in a separate protection domain from the client credentials, for example by keeping client authentication keys in a hardware security module or key management service so that both cannot be exfiltrated together.
+* SHOULD NOT write them to application logs, error reports, telemetry, traces, or crash dumps, and SHOULD NOT include them in HTTP request URIs where they may be recorded by intermediaries.
+* SHOULD scope stored subject tokens to the individual user session or task they were obtained for, rather than pooling them in a shared cache that any part of the client can read.
+* SHOULD discard them as soon as they are no longer needed, and SHOULD NOT cache an Identity Assertion beyond its expiration.
+* SHOULD prefer requesting a new ID-JAG when needed over caching issued ID-JAGs and access tokens, since the ID-JAG and any resulting access tokens are themselves credentials subject to the same handling requirements.
+
+IdP Authorization Servers SHOULD limit exposure from a compromised subject token by issuing Identity Assertions with short lifetimes, and, when Refresh Tokens are accepted as subject tokens, by sender-constraining those Refresh Tokens as described in {{sender-constraining-tokens}}, rotating them on use, and binding them to the client that they were issued to. IdP Authorization Servers SHOULD also provide a mechanism to revoke Refresh Tokens and to invalidate outstanding sessions for a subject, so that a detected compromise can be contained before the affected subject tokens expire.
+
+Because a single subject token can be exchanged for ID-JAGs targeting many different Resource Authorization Servers, IdP Authorization Servers SHOULD record the `audience`, `resource`, `scope`, and authenticated client of each Token Exchange request, which allows unusual patterns, such as a client requesting ID-JAGs for audiences it does not normally access, to be detected.
+
 ## Step-Up Authentication
 
 In the initial token exchange request, the IdP may require step-up authentication for the subject if the authentication context in the subject's assertion does not meet policy requirements. An `insufficient_user_authentication` OAuth error response may be returned to convey the authentication requirements back to the client similar to OAuth 2.0 Step-up Authentication Challenge Protocol {{RFC9470}}.
@@ -1054,7 +1072,7 @@ Such profiles or extensions should define how `actor_token` is validated, how th
 
 When such profiles or extensions use an `act` claim, they should preserve the distinction between the actor identified by `act` and the resource owner identified by `sub`. The authenticated client identity is also not a substitute for actor identity.
 
-## Sender Constraining Tokens
+## Sender Constraining Tokens {#sender-constraining-tokens}
 
 ### Proof-of-Possession
 
@@ -1613,12 +1631,16 @@ AI Agent (`https://ai-agent-app.example/`) calls the External Tool API (Resource
 # Acknowledgments
 {:numbered="false"}
 
-The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Kai Lehmann, Dean H. Saxe, Filip Skokan, Phil Whipps.
+The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Kai Lehmann, Anuj Mistry, Dean H. Saxe, Filip Skokan, Phil Whipps.
 
 # Document History
 {:numbered="false"}
 
 \[\[ To be removed from the final specification ]]
+
+-05
+
+* Added security considerations on storage and caching of subject tokens (ID Token, SAML Assertion, Refresh Token)
 
 -04
 
