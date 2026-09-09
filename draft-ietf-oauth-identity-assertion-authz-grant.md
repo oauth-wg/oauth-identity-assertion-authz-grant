@@ -530,9 +530,12 @@ This non-normative example shows using a Refresh Token as the `subject_token` (w
 
 The IdP MUST validate the subject token:
 
+* The IdP MUST determine that the `subject_token` is in fact a token of the type indicated by `subject_token_type`, and that the IdP issued it for that purpose. A token that the IdP issued for a different purpose, such as an access token, an ID-JAG, or a client assertion, MUST NOT be accepted as an Identity Assertion.
 * If the subject token is an Identity Assertion, the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g. the `aud` claim of the ID Token or SAML Audience) matches the `client_id` of the client authentication of the request.
 * If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
 * If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
+
+Determining that a JWT is an ID Token requires care, because OpenID Connect Core {{OpenID.Core}} does not define an explicit `typ` header value for ID Tokens, so an ID Token cannot be positively identified from its header alone. The IdP MUST reject the request if the `subject_token` carries a `typ` header that identifies a different type of token, such as the access token type defined in {{RFC9068}} or the ID-JAG type defined in {{id-jag}}. Because the IdP issued the `subject_token` itself, this determination is made entirely within the IdP's own trust domain and does not depend on interoperable agreement with any other party, so the IdP MAY use deployment-specific means to positively identify the token as an ID Token, such as a claim that the IdP includes in the ID Tokens it issues, a signing key or key set reserved for ID Tokens, or an internal record of the type of each token it issued. Explicit typing of JWTs, as recommended in {{Section 3.11 of RFC8725}}, avoids this ambiguity where an explicit type is defined. For a SAML 2.0 Assertion, the IdP MUST likewise confirm that the assertion is one it issued as an authentication assertion for the subject, and not a SAML assertion or protocol message it issued for a different purpose.
 
 If an `actor_token` is present, any processing of it is outside the scope of this specification. Future profiles or extensions MAY define validation requirements, policy evaluation rules, and issued token content related to `actor_token`.
 
@@ -1619,6 +1622,10 @@ The authors would like to thank the following people for their contributions and
 {:numbered="false"}
 
 \[\[ To be removed from the final specification ]]
+
+-05
+
+* Added requirement that the IdP confirm the subject token is actually a token of the indicated type
 
 -04
 
