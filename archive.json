@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-13T00:04:43.829024+00:00",
+  "timestamp": "2026-09-15T00:04:32.813386+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3406,6 +3406,22 @@
           "updatedAt": "2026-09-03T20:05:34Z"
         }
       ]
+    },
+    {
+      "number": 129,
+      "id": "I_kwDOKv5r-s8AAAABREzRIA",
+      "title": "tenant claim",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/129",
+      "state": "OPEN",
+      "author": "bc-pi",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-assertion-authz-grant-04#section-3.1-2.26.1 has\n\n<img width=\"704\" height=\"111\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/00e71637-d3d4-4b13-9abf-a5ab7d26d6e2\" />\n\nwhile that reference https://openid.net/specs/openid-connect-enterprise-extensions-1_0-01.html#section-2.2-1 has\n\n<img width=\"759\" height=\"190\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/8e5346cf-2cc6-4774-b1ab-e8426d4dbe75\" /> \n\nwhich is, I dunno how to articulate it, let's just say not very good. \n\nThis draft needs a sensible definition. So it can sever the reference to openid-connect-enterprise-extensions-1_0 and just define it inline and do the IANA request (which enterprise-extensions also doesn't do). Or get enterprise-extensions fixed/improved. \n\n",
+      "createdAt": "2026-09-13T15:09:51Z",
+      "updatedAt": "2026-09-13T15:09:51Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
