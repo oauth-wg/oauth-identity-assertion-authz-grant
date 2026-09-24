@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-15T00:04:32.813386+00:00",
+  "timestamp": "2026-09-24T00:04:09.399879+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3420,6 +3420,22 @@
       "body": "\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-assertion-authz-grant-04#section-3.1-2.26.1 has\n\n<img width=\"704\" height=\"111\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/00e71637-d3d4-4b13-9abf-a5ab7d26d6e2\" />\n\nwhile that reference https://openid.net/specs/openid-connect-enterprise-extensions-1_0-01.html#section-2.2-1 has\n\n<img width=\"759\" height=\"190\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/8e5346cf-2cc6-4774-b1ab-e8426d4dbe75\" /> \n\nwhich is, I dunno how to articulate it, let's just say not very good. \n\nThis draft needs a sensible definition. So it can sever the reference to openid-connect-enterprise-extensions-1_0 and just define it inline and do the IANA request (which enterprise-extensions also doesn't do). Or get enterprise-extensions fixed/improved. \n\n",
       "createdAt": "2026-09-13T15:09:51Z",
       "updatedAt": "2026-09-13T15:09:51Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 130,
+      "id": "I_kwDOKv5r-s8AAAABSjqBrw",
+      "title": "Best practices on id-jag expiration and reuse",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/130",
+      "state": "OPEN",
+      "author": "dlozlla",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently the [spec](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-refresh-token) states RTs should not be generated but instead `id-jags` can be re-used several times to get new `access_tokens`, as long as they are not expired. \n\nFor scenarios where access needs to be revoked for a requesting app, the enterprise IdP still keeps control of how fast the revokation will happen, simply by controlling the expiration time of the `id-jag` it issues. If quick revokation is important, then it can use short (few minutes) expiration times. \n\nWith this context, which is the best practice for the Resource App AS:\n- should it always honour the expiration of the `id-jag` or is it reasonable to enforce a maximum expiration period for `id-jag`? this latter may be reasonable for public clients when sender constraining is not used, in order to limit problems with leaked `id-jags`\n- is it reasonable to enforce `id-jag` are used only once?  allowing for reuse can actually help with transient error situations and the problem with leaked id-jags can already be tackled by setting a max expiration time or better by using DPoP.\n\nEven when this seems to be part of the Resource App AS policy, or even the IdP police, we propose clearly stating best practices / recommended behaviour in the spec",
+      "createdAt": "2026-09-22T13:32:06Z",
+      "updatedAt": "2026-09-22T13:32:06Z",
       "closedAt": null,
       "comments": []
     }
