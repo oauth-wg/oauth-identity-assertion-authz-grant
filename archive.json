@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-29T00:05:22.225102+00:00",
+  "timestamp": "2026-10-01T00:05:22.750010+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3451,9 +3451,24 @@
       "labels": [],
       "body": "The spec currently states that [id-jags are for cross-domain use cases](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-cross-domain-use) only, but we are starting to see cases where the same external requesting App (e.g. Claude) needs to get access to both 1) MCP servers protected by the same IdP issuing the id-jag and 2) MCP server protected by external authorization servers. It seems much simpler in those cases to always stick to using XAA (i.e. EMA in the scope for MCP)\n\nAre there specific security issues identified to forbid this behaviour? Should we relax the recommendation for an IdP to reject id-jags issued by itself in the same domain?",
       "createdAt": "2026-09-28T15:07:36Z",
-      "updatedAt": "2026-09-28T15:07:36Z",
+      "updatedAt": "2026-09-30T03:01:50Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks @dlozlla. Here's the problem as I understand it:\n\nA client such as Claude signs the user in with the enterprise IdP and needs access tokens for MCP servers. What matters is the authorization server in each server's Protected Resource Metadata, not who runs the server:\n\n1. **The IdP's own issuer**, including third-party MCP servers that simply accept the IdP's access tokens.\n2. **A separate authorization server that trusts the IdP for SSO**, usually the vendor's. This is what ID-JAG (and EMA) is for.\n\nA different tenant of the same IdP product is already cross-domain and allowed today (#84).\n\nYou'd like to use ID-JAG for both, but Section 9.3 of -04 blocks the first case with a MUST NOT (not a recommendation), so today the client needs a second path. Let me know if I've got that wrong.\n\n### The security concern\n\nThe MUST NOT in Section 9.3 came from #6, which pointed out that an identity assertion does not, by itself, establish the permissions granted to the client for the requested API. A client granted narrow access at sign-in can exchange its identity assertion for an ID-JAG addressed to the IdP and redeem it there for whatever scopes the IdP's policy allows, so access can expand without anyone intending it. Your first case is exactly that round trip.\n\nFor a refresh token as the `subject_token`, the draft already constrains the exchange to the token's authorization context (Section 4.3.3). How that context covers XAA audiences and permissions deserves clarification, and the safeguards below should apply regardless of subject-token type.\n\nThat's an authorization-policy risk, though, not proof that self-redemption (the IdP accepting an ID-JAG it issued itself) is inherently unsafe. Issue #6 also raised the possibility of obtaining broader access through a second domain, and noted that in enterprise deployments scope comes from IdP policy. Direct issuance raises the same question (may this client access this resource with these scopes?), and policy that answers it safely there can answer it for an ID-JAG too. One practical risk: an IdP that already accepts ID-JAGs from other tenants could accept its own by mistake; explicit enablement guards against that.\n\n### My recommendation\n\nI'd support relaxing the rule, though that's my view and it needs WG discussion. Concretely, I'd replace the unconditional MUST NOT with a conditional one:\n\n- The IdP MUST NOT issue access tokens in response to an ID-JAG it issued itself in the same domain unless an administrator has explicitly enabled it.\n- When enabled, the IdP MUST enforce authorization policy for the client, subject, target resource, and requested permissions, including any applicable consent and authentication requirements. Its own signature on the ID-JAG MUST NOT establish that authorization by itself.\n- The existing guidance against returning a refresh token (Section 4.4.3) still applies.\n\nThis would be a limited extension of the supported deployment models. Cross-domain access would remain the profile's primary purpose, but the applicability text would need to permit this exception explicitly: besides 9.3, the ID-JAG definition and the `audience` parameter both say \"another trust domain\". The IdP would fill both authorization-server roles and enforce the requirements for each.\n\nDeployments that enable self-redemption can use the same ID-JAG flow for both of your cases. It would also help if an IdP that doesn't allow it rejected the ID-JAG request up front (for example with `invalid_target`, RFC 8693 Section 2.2.2), so the client fails before redemption. Otherwise the client still needs another path: token exchange at the IdP for an access token, a refresh with `resource` (where IdP policy permits the resource and the required scopes are already granted), or the regular authorization code flow.\n\nCould you share a concrete example of your first case, including whether the MCP server's authorization server is the IdP's own issuer or a separate one in the IdP product?",
+          "createdAt": "2026-09-29T17:27:33Z",
+          "updatedAt": "2026-09-29T17:27:33Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "if I understand the use case, it's that a customer has an IdP for SSO and they are also building internal MCP servers that validate access tokens issued by the same IdP. The access token audience would be the MCP server, not the IdP.\n\nThis seems fine to me, because the \"domain\" boundary being crossed is the IdP vs MCP server. \n\nMaybe we can be more explicit about what scenario we are trying to prevent with this language, rather than finding additional language to carve out exceptions.\n\nFrom #6:\n\n> Usually a client receives an access token alongside the ID Token and the client can use Token Exchange to get additional access tokens with equal or narrowed down scope.\n\nThis actually seems like a relatively narrow use case, so can we find better language that prevents the workaround for this particular scenario? Maybe something like:\n\n\"If the IdP issues access tokens for a resource to a client, then the IdP MUST NOT issue access tokens for that resource in response to an ID-JAG it issued itself.\" Although now that I'm thinking about this, maybe this really is just up to the decision of the deployment and that's actually a fine thing to do if they have enough other policy checks in place to be okay with it.",
+          "createdAt": "2026-09-30T03:01:50Z",
+          "updatedAt": "2026-09-30T03:01:50Z"
+        }
+      ]
     },
     {
       "number": 132,
