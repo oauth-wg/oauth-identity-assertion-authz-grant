@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-01T00:05:22.750010+00:00",
+  "timestamp": "2026-10-04T00:49:42.686942+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3451,7 +3451,7 @@
       "labels": [],
       "body": "The spec currently states that [id-jags are for cross-domain use cases](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-cross-domain-use) only, but we are starting to see cases where the same external requesting App (e.g. Claude) needs to get access to both 1) MCP servers protected by the same IdP issuing the id-jag and 2) MCP server protected by external authorization servers. It seems much simpler in those cases to always stick to using XAA (i.e. EMA in the scope for MCP)\n\nAre there specific security issues identified to forbid this behaviour? Should we relax the recommendation for an IdP to reject id-jags issued by itself in the same domain?",
       "createdAt": "2026-09-28T15:07:36Z",
-      "updatedAt": "2026-09-30T03:01:50Z",
+      "updatedAt": "2026-10-01T16:40:44Z",
       "closedAt": null,
       "comments": [
         {
@@ -3467,6 +3467,27 @@
           "body": "if I understand the use case, it's that a customer has an IdP for SSO and they are also building internal MCP servers that validate access tokens issued by the same IdP. The access token audience would be the MCP server, not the IdP.\n\nThis seems fine to me, because the \"domain\" boundary being crossed is the IdP vs MCP server. \n\nMaybe we can be more explicit about what scenario we are trying to prevent with this language, rather than finding additional language to carve out exceptions.\n\nFrom #6:\n\n> Usually a client receives an access token alongside the ID Token and the client can use Token Exchange to get additional access tokens with equal or narrowed down scope.\n\nThis actually seems like a relatively narrow use case, so can we find better language that prevents the workaround for this particular scenario? Maybe something like:\n\n\"If the IdP issues access tokens for a resource to a client, then the IdP MUST NOT issue access tokens for that resource in response to an ID-JAG it issued itself.\" Although now that I'm thinking about this, maybe this really is just up to the decision of the deployment and that's actually a fine thing to do if they have enough other policy checks in place to be okay with it.",
           "createdAt": "2026-09-30T03:01:50Z",
           "updatedAt": "2026-09-30T03:01:50Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "Yes, that's the use case: I have an IdP (`iss: https://interop-testing.eu.auth0.com/`) that protects an API/MCP server (`aud: https://mcplay-gamma.vercel.app/saas0/mcp`). The problem is getting an ID-JAG to get an access token to access the API/MCP server, so the ID-JAG would have:\n* `iss: https://interop-testing.eu.auth0.com/`\n* `aud: https://interop-testing.eu.auth0.com/`\n\nI understand the concern as bypassing an existing authorization boundary, rather than self-redemption being inherently unsafe.\n\nFor example, a user authenticates without MFA, and the client receives an access token limited to scope1. If the client can then exchange the accompanying ID token for an ID-JAG and redeem it at the same AS for scope2, which requires MFA, that would be a problem if the exchange path fails to enforce the authentication-assurance requirement.\n\nHowever, I do not see why accepting an externally issued ID-JAG inherently avoids that class of problem. The receiving AS still needs to apply its authorization policy to the client, subject, resource, and requested permissions, including authentication assurance and freshness where relevant. A valid ID-JAG signature is not, by itself, authorization for every requested permission.\n\nThe important condition is that the ID-JAG path must not bypass requirements that apply to access to that resource, so why do we need to treat the same-domain case differently in the spec?",
+          "createdAt": "2026-10-01T15:38:59Z",
+          "updatedAt": "2026-10-01T15:39:47Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "Also, another question that comes to mind is whether there is a way to now the LoA from the ID-JAG to apply, if needed, authorization based on that information on the resource AS before issuing the `access_token`. ",
+          "createdAt": "2026-10-01T15:44:11Z",
+          "updatedAt": "2026-10-01T15:44:11Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Since the ID-JAG's `iss` and `aud` would both be your Auth0 tenant, this is the case 9.3 rules out today. @aaronpk, I think of the domain boundary as sitting between authorization servers rather than between the IdP and the MCP server, so I don't think the current text allows this without a change.\n\nYou're right that the ID-JAG path shouldn't let a client get around the policy for that resource, and that's true for every authorization server that accepts ID-JAGs, not just this case. A valid signature is never enough on its own.\n\nWhere I think the same-domain case differs is in who opts in. When a separate authorization server accepts ID-JAGs, someone has configured it to trust that IdP and decided the IdP's policy is good enough. When the IdP redeems its own, nobody has to make that call:\n\n- It already trusts its own signing key, so an IdP that accepts ID-JAGs from other tenants could end up accepting its own by accident.\n- It's checking a grant it just approved, so it's easy for it to honor whatever its token exchange policy allowed rather than what it would require for that resource directly. The ID Token doesn't say what the client was granted at sign-in, which is where the scope-broadening concern from #6 comes in.\n\nTo me that argues for guardrails rather than a ban. Aaron, I think your suggested sentence is getting at the same thing, but depending on how it's read, it could rule out David's case, since the Auth0 tenant already issues tokens for that MCP server. I agree with your second thought that this can be left to the deployment, as long as it's a deliberate choice.\n\nSo for 9.3, I'd suggest something along these lines:\n\n- An IdP doesn't accept ID-JAGs it issued for its own domain unless an admin has turned it on/explicitly configured.\n- When it does, it applies the same policy it would for issuing that client a token for that resource directly (consent, MFA, and so on), and its own signature doesn't count toward that.\n\nThe definitions that say an ID-JAG is for \"another trust domain\" would also need to be revisited. ",
+          "createdAt": "2026-10-01T16:40:44Z",
+          "updatedAt": "2026-10-01T16:40:44Z"
         }
       ]
     },
