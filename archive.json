@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-04T00:49:42.686942+00:00",
+  "timestamp": "2026-10-08T00:04:43.612285+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3504,6 +3504,22 @@
       "body": "Section 3.1 currently describes the sub claim as identifying the End-User \u201cwhich is intended to be consumed by the Client.\u201d\n\nIssue #59 attempted to clarify this but was not sufficient.  This was raised on the mailing list https://mailarchive.ietf.org/arch/msg/oauth/4edOgB7CxPzKIfMOQlWeT13Ss4A/.  \n\nThe Resource Authorization Server is the intended audience and consumer of the ID-JAG. The Client obtains and presents the ID-JAG, but it does not need to interpret the sub claim.\n\nMore importantly, the sub value is audience-specific. The IdP determines the subject identifier appropriate for the Resource AS identified by the aud claim. Where pairwise subject identifiers are used, the IdP maps the audience to the corresponding pairwise sub.\n\nSuggested text:\n\n```\nsub: REQUIRED - Subject Identifier. An identifier for the End-User determined by the IdP AS for the audience identified by the `aud` claim, including the use of a pairwise subject identifier where applicable. \n```\n\nThis makes explicit that the Resource AS, rather than the Client, is the consumer of sub, and that sub is selected in the context of the ID-JAG audience.\n\nIt may also make sense to refactor subject mapping into its own section and reference in the claim defintiion. ",
       "createdAt": "2026-09-28T16:52:13Z",
       "updatedAt": "2026-09-28T16:52:13Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 133,
+      "id": "I_kwDOKv5r-s8AAAABVaa4oQ",
+      "title": "Specify how the Resource Authorization Server finds the IdP's signing keys and algorithm",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/133",
+      "state": "OPEN",
+      "author": "ksinder",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "## Problem\n\n[\u00a74.4.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.4.1) requires the Resource Authorization Server to validate the ID-JAG's signature, and [\u00a79.5](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-9.5) lists signature as part of validating the issuer. Neither section says where the keys come from. [RFC 7523 \u00a75](https://www.rfc-editor.org/rfc/rfc7523#section-5) calls key exchange \"explicitly out of scope\" and leaves it to profiles, so this draft is the place to say it.\n\nThe intent is to use the `iss` to find the IdP's [OpenID Connect](https://openid.net/specs/openid-connect-discovery-1_0.html) or [OAuth Authorization Server Metadata](https://www.rfc-editor.org/rfc/rfc8414) and use its [`jwks_uri`](https://www.rfc-editor.org/rfc/rfc8414#section-2) (per discussion in [modelcontextprotocol/ext-auth#34](https://github.com/modelcontextprotocol/ext-auth/issues/34)). Writing it down would keep implementations from each picking their own approach, such as hand-configured keys.\n\n**A related gap**: nothing says which algorithm the IdP uses to sign ID-JAGs. While testing an MCP server against several IdPs, we found one that signs ID-JAGs with ES256 only. Our server accepted only RS256, so every exchange failed, and the error didn't make the cause obvious. [`id_token_signing_alg_values_supported`](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) describes ID tokens, which an IdP may sign differently.\n\n## Proposal\n\n1. In [\u00a74.4.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.4.1), or near [\u00a77.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-7.1): the Resource Authorization Server SHOULD get the IdP's signing keys from the `jwks_uri` in the metadata for the ID-JAG's `iss`, found with [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) or [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414).\n2. One of:\n   - a new IdP metadata parameter, such as `id_jag_signing_alg_values_supported`; or\n   - a recommendation that Resource Authorization Servers accept at least RS256 and ES256.\n\nI'm happy to send a PR once there's a preferred direction for item 2!",
+      "createdAt": "2026-10-06T16:33:00Z",
+      "updatedAt": "2026-10-06T16:33:00Z",
       "closedAt": null,
       "comments": []
     }
