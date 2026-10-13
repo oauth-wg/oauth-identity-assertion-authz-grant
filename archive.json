@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-08T00:04:43.612285+00:00",
+  "timestamp": "2026-10-13T00:05:11.381676+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3451,7 +3451,7 @@
       "labels": [],
       "body": "The spec currently states that [id-jags are for cross-domain use cases](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-cross-domain-use) only, but we are starting to see cases where the same external requesting App (e.g. Claude) needs to get access to both 1) MCP servers protected by the same IdP issuing the id-jag and 2) MCP server protected by external authorization servers. It seems much simpler in those cases to always stick to using XAA (i.e. EMA in the scope for MCP)\n\nAre there specific security issues identified to forbid this behaviour? Should we relax the recommendation for an IdP to reject id-jags issued by itself in the same domain?",
       "createdAt": "2026-09-28T15:07:36Z",
-      "updatedAt": "2026-10-01T16:40:44Z",
+      "updatedAt": "2026-10-12T13:54:49Z",
       "closedAt": null,
       "comments": [
         {
@@ -3488,6 +3488,13 @@
           "body": "Since the ID-JAG's `iss` and `aud` would both be your Auth0 tenant, this is the case 9.3 rules out today. @aaronpk, I think of the domain boundary as sitting between authorization servers rather than between the IdP and the MCP server, so I don't think the current text allows this without a change.\n\nYou're right that the ID-JAG path shouldn't let a client get around the policy for that resource, and that's true for every authorization server that accepts ID-JAGs, not just this case. A valid signature is never enough on its own.\n\nWhere I think the same-domain case differs is in who opts in. When a separate authorization server accepts ID-JAGs, someone has configured it to trust that IdP and decided the IdP's policy is good enough. When the IdP redeems its own, nobody has to make that call:\n\n- It already trusts its own signing key, so an IdP that accepts ID-JAGs from other tenants could end up accepting its own by accident.\n- It's checking a grant it just approved, so it's easy for it to honor whatever its token exchange policy allowed rather than what it would require for that resource directly. The ID Token doesn't say what the client was granted at sign-in, which is where the scope-broadening concern from #6 comes in.\n\nTo me that argues for guardrails rather than a ban. Aaron, I think your suggested sentence is getting at the same thing, but depending on how it's read, it could rule out David's case, since the Auth0 tenant already issues tokens for that MCP server. I agree with your second thought that this can be left to the deployment, as long as it's a deliberate choice.\n\nSo for 9.3, I'd suggest something along these lines:\n\n- An IdP doesn't accept ID-JAGs it issued for its own domain unless an admin has turned it on/explicitly configured.\n- When it does, it applies the same policy it would for issuing that client a token for that resource directly (consent, MFA, and so on), and its own signature doesn't count toward that.\n\nThe definitions that say an ID-JAG is for \"another trust domain\" would also need to be revisited. ",
           "createdAt": "2026-10-01T16:40:44Z",
           "updatedAt": "2026-10-01T16:40:44Z"
+        },
+        {
+          "author": "dlozlla",
+          "authorAssociation": "NONE",
+          "body": "@mcguinness I agree with your analysis. We should add the need for the explicit opt-in to accept incoming id-jags issued by itself. \n\nThe part that is still unclear to me is where the IdP should really run the policy to decide what can be granted for the authenticated user + the requesting client_id. In my mind that should happen in the initial token exchange request, before issuing the id-jag, in the same way it would happen for cases where the resource is protected by a third party AS. That is the operation that is currently able to respond with a step-up required error, etc. The id-jag exchange itself is essentially non-interactive so the need to step-up or consent would actually result in an error. In fact, the consent should not be needed if the app can get an id-jag for the requested resource, so checking that would need to happen in the first token exchange request processing. In some sense, I think the fine-grained control should happen in the first token exchange processing, while the incoming id-jag processing would only need to validate the boundaries, i.e. the client_id and the user never get access outside of the max scopes they are configured to access. This would mean first-party and third-party scenarios are symmetrical when it comes to issuing and accepting id-jags\n\n\u2026 all this to say the second bullet of your suggestion should really apply for issuing the id-jag rather than accepting it. What do you think?",
+          "createdAt": "2026-10-12T13:53:16Z",
+          "updatedAt": "2026-10-12T13:54:49Z"
         }
       ]
     },
