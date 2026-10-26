@@ -11,7 +11,7 @@
 <meta content="
        This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange   and JWT Profile for OAuth 2.0 Authorization Grants  . This pattern is informally referred to as Cross-App Access (XAA). 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="cross-domain" name="keyword">
 <meta content="authorization" name="keyword">
 <meta content="authz" name="keyword">
@@ -19,19 +19,19 @@
 <meta content="enterprise" name="keyword">
 <meta content="draft-ietf-oauth-identity-assertion-authz-grant-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
-    Python 3.14.7
-    ConfigArgParse 1.7.5
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.7
+    platformdirs 4.13.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.3
+    wcwidth 0.9.2
 -->
 <link href="draft-ietf-oauth-identity-assertion-authz-grant.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1047,11 +1047,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">ID JWT Authz Grant</td>
-<td class="right">September 2026</td>
+<td class="right">October 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Parecki, et al.</td>
-<td class="center">Expires 13 March 2027</td>
+<td class="center">Expires 29 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,12 +1064,12 @@ svg {
 <dd class="internet-draft">draft-ietf-oauth-identity-assertion-authz-grant-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-09" class="published">9 September 2026</time>
+<time datetime="2026-10-26" class="published">26 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-13">13 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-29">29 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1127,7 +1127,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 13 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 29 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1508,8 +1508,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       <h2 id="name-identity-assertion-jwt-auth">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-identity-assertion-jwt-auth" class="section-name selfRef">Identity Assertion JWT Authorization Grant</a>
       </h2>
-<p id="section-3-1">The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>, allowing clients to request limited authorization using structured authorization details.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-1">The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span> that grants a client delegated access to a resource, typically in another trust domain, on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>, allowing clients to request limited authorization using structured authorization details.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server, typically in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.<a href="#section-3-2" class="pilcrow">¶</a></p>
 <p id="section-3-3">As described in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="id-jag-claims">
 <section id="section-3.1">
@@ -1947,7 +1947,7 @@ Content-Type: application/json
 <dt id="section-4.3-2.3">
 <code>audience</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-4.3-2.4">
-            <p id="section-4.3-2.4.1"><span class="bcp14">REQUIRED</span> - The identifier of the Resource Authorization Server in another trust domain as the intended audience for the ID-JAG. IdP Authorization Servers <span class="bcp14">MUST</span> support the issuer identifier of the Resource Authorization Server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-2" class="relref">Section 2</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. IdP Authorization Servers <span class="bcp14">MAY</span> also support implementation-specific <code>audience</code> values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the <code>aud</code> claim.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-4.3-2.4.1"><span class="bcp14">REQUIRED</span> - The identifier of the Resource Authorization Server, typically in another trust domain, as the intended audience for the ID-JAG. IdP Authorization Servers <span class="bcp14">MUST</span> support the issuer identifier of the Resource Authorization Server as defined in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-2" class="relref">Section 2</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. IdP Authorization Servers <span class="bcp14">MAY</span> also support implementation-specific <code>audience</code> values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the <code>aud</code> claim.<a href="#section-4.3-2.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-4.3-2.5">
@@ -2086,43 +2086,39 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 <p id="section-4.3.3-1">The IdP <span class="bcp14">MUST</span> validate the subject token:<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.3-2.1">
-              <p id="section-4.3.3-2.1.1">The IdP <span class="bcp14">MUST</span> determine that the <code>subject_token</code> is in fact a token of the type indicated by <code>subject_token_type</code>, and that the IdP issued it for that purpose. A token that the IdP issued for a different purpose, such as an access token, an ID-JAG, or a client assertion, <span class="bcp14">MUST NOT</span> be accepted as an Identity Assertion.<a href="#section-4.3.3-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.3-2.1.1">If the subject token is an Identity Assertion, the IdP <span class="bcp14">MUST</span> validate the assertion and <span class="bcp14">MUST</span> validate that the audience of the assertion (e.g. the <code>aud</code> claim of the ID Token or SAML Audience) matches the <code>client_id</code> of the client authentication of the request.<a href="#section-4.3.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.3-2.2">
-              <p id="section-4.3.3-2.2.1">If the subject token is an Identity Assertion, the IdP <span class="bcp14">MUST</span> validate the assertion and <span class="bcp14">MUST</span> validate that the audience of the assertion (e.g. the <code>aud</code> claim of the ID Token or SAML Audience) matches the <code>client_id</code> of the client authentication of the request.<a href="#section-4.3.3-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.3-2.2.1">If the subject token is a Refresh Token, the IdP <span class="bcp14">MUST</span> validate it the same way it would for a standard <code>refresh_token</code> grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.<a href="#section-4.3.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.3.3-2.3">
-              <p id="section-4.3.3-2.3.1">If the subject token is a Refresh Token, the IdP <span class="bcp14">MUST</span> validate it the same way it would for a standard <code>refresh_token</code> grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.<a href="#section-4.3.3-2.3.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-4.3.3-2.4">
-              <p id="section-4.3.3-2.4.1">If the subject token is a Refresh Token, the IdP Authorization Server <span class="bcp14">SHOULD</span> retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.<a href="#section-4.3.3-2.4.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.3-2.3.1">If the subject token is a Refresh Token, the IdP Authorization Server <span class="bcp14">SHOULD</span> retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.<a href="#section-4.3.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-4.3.3-3">Determining that a JWT is an ID Token requires care, because OpenID Connect Core <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span> does not define an explicit <code>typ</code> header value for ID Tokens, so an ID Token cannot be positively identified from its header alone. The IdP <span class="bcp14">MUST</span> reject the request if the <code>subject_token</code> carries a <code>typ</code> header that identifies a different type of token, such as the access token type defined in <span>[<a href="#RFC9068" class="cite xref">RFC9068</a>]</span> or the ID-JAG type defined in <a href="#id-jag" class="auto internal xref">Section 3</a>. Because the IdP issued the <code>subject_token</code> itself, this determination is made entirely within the IdP's own trust domain and does not depend on interoperable agreement with any other party, so the IdP <span class="bcp14">MAY</span> use deployment-specific means to positively identify the token as an ID Token, such as a claim that the IdP includes in the ID Tokens it issues, a signing key or key set reserved for ID Tokens, or an internal record of the type of each token it issued. Explicit typing of JWTs, as recommended in <span><a href="https://rfc-editor.org/rfc/rfc8725#section-3.11" class="relref">Section 3.11</a> of [<a href="#RFC8725" class="cite xref">RFC8725</a>]</span>, avoids this ambiguity where an explicit type is defined. For a SAML 2.0 Assertion, the IdP <span class="bcp14">MUST</span> likewise confirm that the assertion is one it issued as an authentication assertion for the subject, and not a SAML assertion or protocol message it issued for a different purpose.<a href="#section-4.3.3-3" class="pilcrow">¶</a></p>
-<p id="section-4.3.3-4">If an <code>actor_token</code> is present, any processing of it is outside the scope of this specification. Future profiles or extensions <span class="bcp14">MAY</span> define validation requirements, policy evaluation rules, and issued token content related to <code>actor_token</code>.<a href="#section-4.3.3-4" class="pilcrow">¶</a></p>
-<p id="section-4.3.3-5">The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.<a href="#section-4.3.3-5" class="pilcrow">¶</a></p>
-<p id="section-4.3.3-6">When processing the request:<a href="#section-4.3.3-6" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-3">If an <code>actor_token</code> is present, any processing of it is outside the scope of this specification. Future profiles or extensions <span class="bcp14">MAY</span> define validation requirements, policy evaluation rules, and issued token content related to <code>actor_token</code>.<a href="#section-4.3.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-4">The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.<a href="#section-4.3.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-5">When processing the request:<a href="#section-4.3.3-5" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.3.3-7.1">
-              <p id="section-4.3.3-7.1.1">If <code>resource</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span> and evaluate policy to determine the granted resources. The granted resources <span class="bcp14">MAY</span> be a subset of the requested resources based on policy.<a href="#section-4.3.3-7.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-4.3.3-6.1">
+              <p id="section-4.3.3-6.1.1">If <code>resource</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc8707#section-2" class="relref">Section 2</a> of [<a href="#RFC8707" class="cite xref">RFC8707</a>]</span> and evaluate policy to determine the granted resources. The granted resources <span class="bcp14">MAY</span> be a subset of the requested resources based on policy.<a href="#section-4.3.3-6.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.3.3-7.2">
-              <p id="section-4.3.3-7.2.1">If <code>scope</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc6749#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> and evaluate policy to determine the granted scopes. The granted scopes <span class="bcp14">MAY</span> be a subset of the requested scopes based on policy.<a href="#section-4.3.3-7.2.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.3.3-6.2">
+              <p id="section-4.3.3-6.2.1">If <code>scope</code> is present, the IdP <span class="bcp14">MUST</span> process it according to <span><a href="https://rfc-editor.org/rfc/rfc6749#section-3.3" class="relref">Section 3.3</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> and evaluate policy to determine the granted scopes. The granted scopes <span class="bcp14">MAY</span> be a subset of the requested scopes based on policy.<a href="#section-4.3.3-6.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.3.3-7.3">
-              <p id="section-4.3.3-7.3.1">If <code>authorization_details</code> is present, the IdP <span class="bcp14">MUST</span> parse it as a JSON array and process each authorization detail object according to <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. The IdP evaluates policy for each authorization detail and determines which authorization details to include in the issued ID-JAG. The IdP <span class="bcp14">MAY</span> modify, filter, or omit authorization details based on policy.<a href="#section-4.3.3-7.3.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.3.3-6.3">
+              <p id="section-4.3.3-6.3.1">If <code>authorization_details</code> is present, the IdP <span class="bcp14">MUST</span> parse it as a JSON array and process each authorization detail object according to <span>[<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. The IdP evaluates policy for each authorization detail and determines which authorization details to include in the issued ID-JAG. The IdP <span class="bcp14">MAY</span> modify, filter, or omit authorization details based on policy.<a href="#section-4.3.3-6.3.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.3.3-7.4">
-              <p id="section-4.3.3-7.4.1">If both <code>resource</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the resource identifiers and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive resource identifiers from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.3-7.4.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.3.3-6.4">
+              <p id="section-4.3.3-6.4.1">If both <code>resource</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the resource identifiers and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive resource identifiers from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.3-6.4.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.3.3-7.5">
-              <p id="section-4.3.3-7.5.1">If both <code>scope</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive scopes from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.3-7.5.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.3.3-6.5">
+              <p id="section-4.3.3-6.5.1">If both <code>scope</code> and <code>authorization_details</code> are present, the IdP <span class="bcp14">MUST</span> process both. The IdP <span class="bcp14">SHOULD</span> ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP <span class="bcp14">MAY</span> derive scopes from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.3.3-6.5.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.3.3-7.6">
-              <p id="section-4.3.3-7.6.1">The IdP <span class="bcp14">MUST</span> include the granted <code>resource</code> (if any), <code>scope</code> (if any), and <code>authorization_details</code> (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it <span class="bcp14">MUST</span> reflect the granted values in the ID-JAG.<a href="#section-4.3.3-7.6.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-4.3.3-6.6">
+              <p id="section-4.3.3-6.6.1">The IdP <span class="bcp14">MUST</span> include the granted <code>resource</code> (if any), <code>scope</code> (if any), and <code>authorization_details</code> (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it <span class="bcp14">MUST</span> reflect the granted values in the ID-JAG.<a href="#section-4.3.3-6.6.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-4.3.3-8">The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.<a href="#section-4.3.3-8" class="pilcrow">¶</a></p>
+<p id="section-4.3.3-7">The IdP may also introspect the authentication context described in the SSO assertion to determine if step-up authentication is required.<a href="#section-4.3.3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="response">
@@ -2754,7 +2750,7 @@ Cache-Control: no-store
         <h3 id="name-cross-domain-use">
 <a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-cross-domain-use" class="section-name selfRef">Cross-Domain Use</a>
         </h3>
-<p id="section-9.3-1">This specification is intended for cross-domain uses where the Client, Resource Authorization Server, and IdP are in different trust domains. In particular, the IdP <span class="bcp14">MUST NOT</span> issue access tokens in response to an ID-JAG it issued itself in the same domain. Doing so could lead to unintentional broadening of the scope of authorization. This does not preclude a single piece of software from being both an IdP issuing ID-JAGs as well as a Resource Authorization Server consuming ID-JAGs, as long as the ID-JAG crosses a trust domain such as a tenant or customer boundary.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-1">This specification is intended for cross-domain uses where the Client, Resource Authorization Server, and IdP are in different trust domains. In particular, the IdP <span class="bcp14">MUST NOT</span> issue access tokens in response to an ID-JAG it issued itself unless explicitly configured to do so, since this could lead to unintentional broadening of the scope of authorization. When so configured, the IdP <span class="bcp14">MUST NOT</span> grant the client more access than it would when issuing an access token for the same subject and resource directly, and evaluates any consent and authentication requirements when issuing the ID-JAG, since the access token request does not involve the user. This does not preclude a single piece of software from being both an IdP issuing ID-JAGs as well as a Resource Authorization Server consuming ID-JAGs, as long as the ID-JAG crosses a trust domain such as a tenant or customer boundary.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
 <p id="section-9.3-2">An ID-JAG is specific to the trust relationship between the issuing IdP Authorization Server and the Resource Authorization Server identified by the <code>aud</code> claim. When a deployment involves additional downstream hops, the same ID-JAG <span class="bcp14">MUST NOT</span> be reused as the authorization grant for a different downstream Resource Authorization Server. For each subsequent hop, a new ID-JAG <span class="bcp14">MAY</span> be issued by the IdP Authorization Server trusted by that downstream Resource Authorization Server for SSO and subject resolution, or other mechanisms <span class="bcp14">MAY</span> be used.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3845,7 +3841,7 @@ Content-Type: application/json
 <p id="appendix-C-2">-05<a href="#appendix-C-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-C-3.1">
-          <p id="appendix-C-3.1.1">Added requirement that the IdP confirm the subject token is actually a token of the indicated type<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.1.1">Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-C-4">-04<a href="#appendix-C-4" class="pilcrow">¶</a></p>
