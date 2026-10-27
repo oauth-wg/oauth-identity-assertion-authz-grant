@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-13T00:05:11.381676+00:00",
+  "timestamp": "2026-10-27T00:03:59.478561+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3451,7 +3451,7 @@
       "labels": [],
       "body": "The spec currently states that [id-jags are for cross-domain use cases](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-cross-domain-use) only, but we are starting to see cases where the same external requesting App (e.g. Claude) needs to get access to both 1) MCP servers protected by the same IdP issuing the id-jag and 2) MCP server protected by external authorization servers. It seems much simpler in those cases to always stick to using XAA (i.e. EMA in the scope for MCP)\n\nAre there specific security issues identified to forbid this behaviour? Should we relax the recommendation for an IdP to reject id-jags issued by itself in the same domain?",
       "createdAt": "2026-09-28T15:07:36Z",
-      "updatedAt": "2026-10-12T13:54:49Z",
+      "updatedAt": "2026-10-26T23:36:08Z",
       "closedAt": null,
       "comments": [
         {
@@ -3495,6 +3495,13 @@
           "body": "@mcguinness I agree with your analysis. We should add the need for the explicit opt-in to accept incoming id-jags issued by itself. \n\nThe part that is still unclear to me is where the IdP should really run the policy to decide what can be granted for the authenticated user + the requesting client_id. In my mind that should happen in the initial token exchange request, before issuing the id-jag, in the same way it would happen for cases where the resource is protected by a third party AS. That is the operation that is currently able to respond with a step-up required error, etc. The id-jag exchange itself is essentially non-interactive so the need to step-up or consent would actually result in an error. In fact, the consent should not be needed if the app can get an id-jag for the requested resource, so checking that would need to happen in the first token exchange request processing. In some sense, I think the fine-grained control should happen in the first token exchange processing, while the incoming id-jag processing would only need to validate the boundaries, i.e. the client_id and the user never get access outside of the max scopes they are configured to access. This would mean first-party and third-party scenarios are symmetrical when it comes to issuing and accepting id-jags\n\n\u2026 all this to say the second bullet of your suggestion should really apply for issuing the id-jag rather than accepting it. What do you think?",
           "createdAt": "2026-10-12T13:53:16Z",
           "updatedAt": "2026-10-12T13:54:49Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@dlozlla I agree the policy check belongs at issuance. The access token request doesn't involve the user, and in this case the IdP already knows the resource's requirements. Redemption then works as it does at any Resource Authorization Server, so the first-party and third-party cases stay symmetric.\n\nI opened #134. An IdP can be explicitly configured to accept its own ID-JAGs, and when it is, it grants no more than it would when issuing an access token directly. @aaronpk that leaves it to the deployment, as you suggested, but as an explicit choice.\n\nOn LoA, the ID-JAG can already carry `acr`, `amr`, and `auth_time` (Section 3.1).\n",
+          "createdAt": "2026-10-26T23:36:08Z",
+          "updatedAt": "2026-10-26T23:36:08Z"
         }
       ]
     },
@@ -3510,9 +3517,17 @@
       "labels": [],
       "body": "Section 3.1 currently describes the sub claim as identifying the End-User \u201cwhich is intended to be consumed by the Client.\u201d\n\nIssue #59 attempted to clarify this but was not sufficient.  This was raised on the mailing list https://mailarchive.ietf.org/arch/msg/oauth/4edOgB7CxPzKIfMOQlWeT13Ss4A/.  \n\nThe Resource Authorization Server is the intended audience and consumer of the ID-JAG. The Client obtains and presents the ID-JAG, but it does not need to interpret the sub claim.\n\nMore importantly, the sub value is audience-specific. The IdP determines the subject identifier appropriate for the Resource AS identified by the aud claim. Where pairwise subject identifiers are used, the IdP maps the audience to the corresponding pairwise sub.\n\nSuggested text:\n\n```\nsub: REQUIRED - Subject Identifier. An identifier for the End-User determined by the IdP AS for the audience identified by the `aud` claim, including the use of a pairwise subject identifier where applicable. \n```\n\nThis makes explicit that the Resource AS, rather than the Client, is the consumer of sub, and that sub is selected in the context of the ID-JAG audience.\n\nIt may also make sense to refactor subject mapping into its own section and reference in the claim defintiion. ",
       "createdAt": "2026-09-28T16:52:13Z",
-      "updatedAt": "2026-09-28T16:52:13Z",
+      "updatedAt": "2026-10-27T00:03:22Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I opened #135 for this. It moves the subject mapping rules into a new Section 5.2 and shortens the `sub` definition to point there. It also adds two requirements: the IdP uses the same `sub` for a user in every ID-JAG for a given Resource AS, whichever Client asks, and when the Resource AS uses OpenID Connect for SSO, that's the `sub` it would get in its own ID Token. Section 9.6 now notes that a pairwise `sub` is visible to the Client.\n",
+          "createdAt": "2026-10-27T00:03:22Z",
+          "updatedAt": "2026-10-27T00:03:22Z"
+        }
+      ]
     },
     {
       "number": 133,
@@ -8723,6 +8738,58 @@
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "aaronpk/subject-token-type",
       "headRefOid": "b2871c5ed366519cceb354abfdc22179a903725d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 134,
+      "id": "PR_kwDOKv5r-s8AAAABK5Z0Tw",
+      "title": "Allow IdP to accept its own ID-JAGs when explicitly configured",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/134",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Proposed change for #131.\n\nSection 9.3 currently forbids an IdP from issuing access tokens in response to an ID-JAG it issued itself. This replaces that with an explicit opt-in:\n\n- By default the MUST NOT still applies. An IdP can be explicitly configured to accept its own ID-JAGs.\n- When configured, the IdP MUST NOT grant the client more access than it would when issuing an access token for the same subject and resource directly. It evaluates consent and authentication requirements when issuing the ID-JAG, since the access token request does not involve the user.\n- The ID-JAG definition and the `audience` parameter now say \"typically in another trust domain\" so they don't contradict 9.3.\n\nThe second point follows the discussion with @dlozlla in #131: policy is applied at issuance, and redemption works the same way as at any Resource Authorization Server.",
+      "createdAt": "2026-10-26T23:34:15Z",
+      "updatedAt": "2026-10-26T23:34:15Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "self-issued-id-jag",
+      "headRefOid": "ce34419a310a45cae8d30ae547386f5f218a0704",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 135,
+      "id": "PR_kwDOKv5r-s8AAAABK5oDmg",
+      "title": "Clarify that sub is selected for the Resource Authorization Server",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/135",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Proposed change for #132.\n\nThe `sub` claim definition in Section 3.1 says the value is \"intended to be consumed by the Client\", which is carried over from the ID Token definition. Atul raised this on the list. The Resource Authorization Server is the consumer of the ID-JAG, and the `sub` value is specific to the audience.\n\nChanges:\n\n- **`sub` claim (3.1):** the value is selected by the IdP for the Resource Authorization Server identified by `aud`, as described in the new 5.2. I split the definition into two paragraphs: the value and its uniqueness rules, then `sub_id`.\n- **Section 5** is now \"Cross-Domain Client and Subject Identifier Handling\", with 5.1 Client ID Mapping (existing text) and 5.2 Subject Identifier Mapping (new). No other sections are renumbered.\n- **5.2 Subject Identifier Mapping** replaces the Note in Section 5:\n  - The IdP MUST use the same `sub` for a user in every ID-JAG it issues for the same Resource Authorization Server (and `aud_tenant`), regardless of which Client requested it.\n  - When the Resource Authorization Server uses OpenID Connect for SSO, that value MUST be the `sub` the IdP would put in an ID Token issued to it as a Relying Party.\n- **9.6 Subject Identifier Disclosure:** a pairwise `sub` selected for the Resource Authorization Server is visible to the Client, which can link it to the `sub` in its own ID Token.\n\nCompatibility: the Note said the IdP \"needs to ensure\" the ID-JAG `sub` matches what it would send the Resource Authorization Server for SSO. This makes that a MUST and adds the consistency rule. An IdP that copies `sub` from the `subject_token` into the ID-JAG won't meet these rules when pairwise identifiers are in use.\n\nNot in this PR: consolidating the duplicate uniqueness requirements in 3.1 and 6.3.",
+      "createdAt": "2026-10-27T00:01:20Z",
+      "updatedAt": "2026-10-27T00:01:20Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "sub-claim-audience",
+      "headRefOid": "9324345e9961ec359dd4f413d19b57af147dc4ca",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
