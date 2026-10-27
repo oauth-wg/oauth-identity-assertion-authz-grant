@@ -983,6 +983,11 @@ To advertise support for issuing an Identity Assertion JWT Authorization Grant v
 
 The IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located from its issuer identifier as described in {{Section 3 of RFC8414}} or Section 4 of {{OpenID.Discovery}}.
 
+The IdP Authorization Server can also advertise the algorithms it uses to sign ID-JAGs:
+
+`id_jag_signing_alg_values_supported`:
+: OPTIONAL. JSON array containing a list of the JWS signing algorithms (`alg` values) supported by the IdP Authorization Server for signing ID-JAGs. If present, the list MUST include RS256. `id_token_signing_alg_values_supported` {{OpenID.Discovery}} does not describe ID-JAGs, which the IdP Authorization Server can sign differently from ID Tokens.
+
 ## Resource Authorization Server Metadata {#ras-metadata}
 
 A Resource Authorization Server can advertise support for authorization grant profiles in its OAuth Authorization Server Metadata {{RFC8414}} using the `authorization_grant_profiles_supported` metadata parameter.
@@ -1241,10 +1246,15 @@ This section registers `urn:ietf:params:oauth:grant-profile:id-jag` in the "OAut
 
 ## OAuth Authorization Server Metadata Registration
 
-This section registers `authorization_grant_profiles_supported` in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+This section registers the following in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
 
 * Metadata Name: `authorization_grant_profiles_supported`
 * Metadata Description: JSON array of supported authorization grant profile identifiers
+* Change Controller: IETF
+* Specification Document: This document
+
+* Metadata Name: `id_jag_signing_alg_values_supported`
+* Metadata Description: JSON array of the JWS signing algorithms supported for signing Identity Assertion JWT Authorization Grants
 * Change Controller: IETF
 * Specification Document: This document
 
