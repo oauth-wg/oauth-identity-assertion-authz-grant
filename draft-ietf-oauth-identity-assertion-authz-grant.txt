@@ -395,9 +395,9 @@ Table of Contents
    client_id:  REQUIRED - The client identifier of the OAuth 2.0
       [RFC6749] client at the Resource Authorization Server that will
       act on behalf of the resource owner (sub).  This identifier MAY be
-      different that client identifier of the OAuth 2.0 client
-      requesting an ID-JAG from the IdP Section 4.3 of [RFC8693] as it
-      represents and independent client relationship to another
+      different from the client identifier of the OAuth 2.0 client
+      requesting an ID-JAG from the IdP Section 4.3 of [RFC8693], as it
+      represents an independent client relationship with another
       Authorization Server in a different trust domain.  See Section 5.1
       for additional considerations.
 
@@ -625,7 +625,7 @@ Table of Contents
    |             |                        |                         |servers       |
    +-------------+------------------------+-------------------------+--------------+
    |Resource     |https://chat.example    |https://acme.chat.example|Authorization |
-   |Authorization|                        |                         |Server for an |
+   |Authorization|                        |                         |Server for a  |
    |Server       |                        |                         |chat and      |
    |             |                        |                         |communication |
    |             |                        |                         |app           |
@@ -757,7 +757,7 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
      "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
      "token_type": "Bearer",
      "access_token": "7SliwCQP1brGdjBtsaMnXo",
-     "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA"
+     "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
      "scope": "openid offline_access"
    }
 
@@ -1377,8 +1377,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 4.4.3.  Refresh Token
 
    The Resource Authorization Server SHOULD NOT return a Refresh Token
-   when an Identity Assertion JWT Authorization is exchanged for an
-   Access Token per Section 5.2 of [I-D.ietf-oauth-identity-chaining].
+   when an Identity Assertion JWT Authorization Grant is exchanged for
+   an Access Token per Section 5.2 of
+   [I-D.ietf-oauth-identity-chaining].
 
    When the access token has expired, clients MAY re-submit the original
    Identity Assertion JWT Authorization Grant to obtain a new Access
@@ -1389,9 +1390,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    If the ID-JAG has expired, or the Resource Authorization Server
    rejects a re-submitted ID-JAG with an invalid_grant error, the Client
-   SHOULD request a new ID-JAG from the IdP Authorization Server before
-   presenting it to the Resource Authorization Server using the original
-   Identity Assertion from the IdP (e.g ID Token).  If the Resource
+   SHOULD request a new ID-JAG from the IdP Authorization Server using
+   the original Identity Assertion from the IdP (e.g ID Token) before
+   presenting it to the Resource Authorization Server.  If the Resource
    Authorization Server also rejects the new ID-JAG, requesting another
    will not resolve the error.
 
@@ -2602,7 +2603,7 @@ A.1.  Enterprise Deployment
    ecosystem of SaaS applications to their Identity Provider (IdP) to
    centralize identity and access management capabilities for the
    organization.  End-users get a better experience (SSO) and
-   administrators get better security outcomes such multi-factor
+   administrators get better security outcomes such as multi-factor
    authentication and zero-trust.  SaaS applications today enable the
    administrator to establish trust with an IdP for user authentication.
 
@@ -2958,7 +2959,7 @@ GET /.well-known/oauth-authorization-server
 Host: authorization-server.saas-tool.example
 Accept: application/json
 
-HTTP/1.1 200 Ok
+HTTP/1.1 200 OK
 Content-Type: application/json
 
 {
