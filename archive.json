@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-27T00:03:59.478561+00:00",
+  "timestamp": "2026-10-29T00:03:00.301287+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2694,7 +2694,7 @@
       "labels": [],
       "body": "Currently there is no mention of whether OpenID Connect scopes are allowed or not in the [Token Exchange step](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.3) of the flow.\n\nThe text says \n\n> The space-separated list of scopes at the Resource Server that is being requested.\n\nand OpenID Connect scopes are meant for client consumption, not resource server consumption, so it's kind of implied that they should not be accepted in the Token Exchange request.\n\nThoughts are welcome about which direction to go, but in either case we should mention that either they are acceptable in the request or they must not be included in the request.",
       "createdAt": "2026-06-02T23:44:29Z",
-      "updatedAt": "2026-06-02T23:49:28Z",
+      "updatedAt": "2026-10-27T03:53:56Z",
       "closedAt": null,
       "comments": [
         {
@@ -2703,6 +2703,13 @@
           "body": "If there a mechanism to address #83 then I'm included to keep these scopes restricted to OIDC semantics of ID Token and/or Access Token and not ID-JAG as there is other solutions to get claims into the ID-JAG.  Without a solution to #83 then folks will want a way to get additional user claims into the ID-JAG based on the token exchange request which would lead them to re-using OIDC scopes.",
           "createdAt": "2026-06-02T23:49:28Z",
           "updatedAt": "2026-06-02T23:49:28Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@aaronpk I opened #138, which goes with your reading: `scope` values in the Token Exchange request have the meaning the Resource Authorization Server defines (RFC 8693 Section 2.1), so `profile` or `email` don't request identity claims in the ID-JAG.\n\nThe main reason is that in OpenID Connect the Relying Party asks for the claims it consumes. Here the consumer is the Resource AS, not the Client, and the IdP already knows what the Resource AS needs from its own SSO registration. Overloading `scope` would also make a Resource AS scope named `email` ambiguous.\n\nIf the WG wants Clients to request claims, I think that belongs in a separate parameter, which is the open question in #83.\n",
+          "createdAt": "2026-10-27T03:53:56Z",
+          "updatedAt": "2026-10-27T03:53:56Z"
         }
       ]
     },
@@ -3435,9 +3442,17 @@
       "labels": [],
       "body": "Currently the [spec](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-refresh-token) states RTs should not be generated but instead `id-jags` can be re-used several times to get new `access_tokens`, as long as they are not expired. \n\nFor scenarios where access needs to be revoked for a requesting app, the enterprise IdP still keeps control of how fast the revokation will happen, simply by controlling the expiration time of the `id-jag` it issues. If quick revokation is important, then it can use short (few minutes) expiration times. \n\nWith this context, which is the best practice for the Resource App AS:\n- should it always honour the expiration of the `id-jag` or is it reasonable to enforce a maximum expiration period for `id-jag`? this latter may be reasonable for public clients when sender constraining is not used, in order to limit problems with leaked `id-jags`\n- is it reasonable to enforce `id-jag` are used only once?  allowing for reuse can actually help with transient error situations and the problem with leaked id-jags can already be tackled by setting a max expiration time or better by using DPoP.\n\nEven when this seems to be part of the Resource App AS policy, or even the IdP police, we propose clearly stating best practices / recommended behaviour in the spec",
       "createdAt": "2026-09-22T13:32:06Z",
-      "updatedAt": "2026-09-22T13:32:06Z",
+      "updatedAt": "2026-10-27T00:21:49Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@dlozlla I opened #136. The Resource AS can enforce a maximum ID-JAG lifetime or single use (both already allowed by RFC 7523), and a client whose re-submitted ID-JAG gets `invalid_grant` requests one new ID-JAG, then stops. #112 adds `access_denied` for policy denials so the client knows not to retry; reviews welcome. Public clients are already out of scope (Section 9.1).\n\nNote that revocation speed depends on the access token lifetime too, not just the ID-JAG's.\n",
+          "createdAt": "2026-10-27T00:21:49Z",
+          "updatedAt": "2026-10-27T00:21:49Z"
+        }
+      ]
     },
     {
       "number": 131,
@@ -3541,9 +3556,62 @@
       "labels": [],
       "body": "## Problem\n\n[\u00a74.4.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.4.1) requires the Resource Authorization Server to validate the ID-JAG's signature, and [\u00a79.5](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-9.5) lists signature as part of validating the issuer. Neither section says where the keys come from. [RFC 7523 \u00a75](https://www.rfc-editor.org/rfc/rfc7523#section-5) calls key exchange \"explicitly out of scope\" and leaves it to profiles, so this draft is the place to say it.\n\nThe intent is to use the `iss` to find the IdP's [OpenID Connect](https://openid.net/specs/openid-connect-discovery-1_0.html) or [OAuth Authorization Server Metadata](https://www.rfc-editor.org/rfc/rfc8414) and use its [`jwks_uri`](https://www.rfc-editor.org/rfc/rfc8414#section-2) (per discussion in [modelcontextprotocol/ext-auth#34](https://github.com/modelcontextprotocol/ext-auth/issues/34)). Writing it down would keep implementations from each picking their own approach, such as hand-configured keys.\n\n**A related gap**: nothing says which algorithm the IdP uses to sign ID-JAGs. While testing an MCP server against several IdPs, we found one that signs ID-JAGs with ES256 only. Our server accepted only RS256, so every exchange failed, and the error didn't make the cause obvious. [`id_token_signing_alg_values_supported`](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) describes ID tokens, which an IdP may sign differently.\n\n## Proposal\n\n1. In [\u00a74.4.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.4.1), or near [\u00a77.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-7.1): the Resource Authorization Server SHOULD get the IdP's signing keys from the `jwks_uri` in the metadata for the ID-JAG's `iss`, found with [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) or [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414).\n2. One of:\n   - a new IdP metadata parameter, such as `id_jag_signing_alg_values_supported`; or\n   - a recommendation that Resource Authorization Servers accept at least RS256 and ES256.\n\nI'm happy to send a PR once there's a preferred direction for item 2!",
       "createdAt": "2026-10-06T16:33:00Z",
-      "updatedAt": "2026-10-06T16:33:00Z",
+      "updatedAt": "2026-10-27T03:36:20Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@ksinder thanks for the clear write-up. I opened #137 along the lines you proposed. For item 2 it does both: RS256 is already mandatory to implement for RFC 7523 grants and Resource ASes SHOULD also support ES256, and a separate commit adds an OPTIONAL `id_jag_signing_alg_values_supported` so a mismatch shows up at setup time. It also requires the Resource AS to reject an ID-JAG whose `iss` it doesn't trust. Reviews welcome.\n",
+          "createdAt": "2026-10-27T03:36:20Z",
+          "updatedAt": "2026-10-27T03:36:20Z"
+        }
+      ]
+    },
+    {
+      "number": 139,
+      "id": "I_kwDOKv5r-s8AAAABaWJ-6g",
+      "title": "User consent for ID-JAG issuance",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/139",
+      "state": "OPEN",
+      "author": "tulshi",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In certain scenarios (probably more consumer scenarios), it might make sense for the user to consent to the creation of an ID-JAG, since their identity will be shared with an external party. \n\nI can think of ways in which this might be achieved, but is this a reasonable requirement?",
+      "createdAt": "2026-10-27T16:07:38Z",
+      "updatedAt": "2026-10-28T17:54:01Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "bc-pi",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think that the idea is that ID-JAGs will generally be issued and used in contexts where consent is implied or otherwise given out of band. But [DTR](https://datatracker.ietf.org/doc/draft-ietf-oauth-deferred-token-response/) could potentially be used in scenarios where that isn't the case. \n\nA slide from a recent(ish) presentation that speaks to that general idea:\n<img width=\"991\" height=\"602\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/a853292f-df2b-4840-ae2c-f47b9014196b\" />",
+          "createdAt": "2026-10-27T22:16:37Z",
+          "updatedAt": "2026-10-27T22:21:32Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Adding back user consent starts to sound a lot like how regular OAuth works. The premise of this spec is when the user consent is pre-arranged or implied. What's the use case? ",
+          "createdAt": "2026-10-27T23:13:19Z",
+          "updatedAt": "2026-10-27T23:13:19Z"
+        },
+        {
+          "author": "0xandybarlow",
+          "authorAssociation": "NONE",
+          "body": "As others mention, the target for ID-JAG issuance is a prearranged / implied consent model.\n\nThat being said I have long wanted more guidance on consent in the identity space - especially \"optional or dynamic consent\" from a standards pov so I also am interested in the use case \ud83d\udc40",
+          "createdAt": "2026-10-28T09:24:33Z",
+          "updatedAt": "2026-10-28T09:24:33Z"
+        },
+        {
+          "author": "tulshi",
+          "authorAssociation": "NONE",
+          "body": "If DTR works for ID-JAG issuance flows, then I don't think this is an issue that we need to do anything special about.",
+          "createdAt": "2026-10-28T17:54:01Z",
+          "updatedAt": "2026-10-28T17:54:01Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -8790,6 +8858,84 @@
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "sub-claim-audience",
       "headRefOid": "9324345e9961ec359dd4f413d19b57af147dc4ca",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 136,
+      "id": "PR_kwDOKv5r-s8AAAABK5wTqw",
+      "title": "Clarify ID-JAG reuse limits and when to request a new ID-JAG",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/136",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Proposed change for #130. Two sentences in 4.4.3 (Refresh Token):\n\n- **Reuse limits:** the Resource Authorization Server can reject an ID-JAG whose `exp` is later than its policy allows, or accept each ID-JAG only once by tracking its `jti`. Both are already allowed by Section 3 of RFC 7523; this states them where the draft describes reuse.\n- **Requesting a new ID-JAG:** the Client's SHOULD now also applies when the Resource Authorization Server rejects a re-submitted ID-JAG with `invalid_grant`, not only when the ID-JAG has expired. Because every rejection uses `invalid_grant`, the text also notes that if the new ID-JAG is rejected too, requesting another will not resolve the error. This limits the client to one retry without adding a new error code.\n\nAlso fixes the \"Sever\" typo in that sentence.",
+      "createdAt": "2026-10-27T00:17:29Z",
+      "updatedAt": "2026-10-27T00:17:29Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "id-jag-lifetime-reuse",
+      "headRefOid": "7d65692d0b32543223f03d67879a955d1c85f41b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 137,
+      "id": "PR_kwDOKv5r-s8AAAABK522AQ",
+      "title": "Specify how the Resource Authorization Server finds ID-JAG signing keys",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/137",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Proposed change for #133, following @ksinder's proposal. Two commits so the metadata parameter can be dropped on its own.\n\n**Keys** (first commit)\n- **4.4.1:** the Resource Authorization Server MUST reject an ID-JAG with `invalid_grant` if `iss` does not identify an IdP Authorization Server it trusts. It SHOULD obtain that issuer's keys from the `jwks_uri` in its metadata, and accepts only the algorithms it allows for that issuer (Section 3.1 of RFC 8725). The trust check means an ID-JAG from an `iss` an attacker controls is rejected, even if the attacker publishes matching keys.\n- **7.1:** the IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located via Section 3 of RFC 8414 or Section 4 of OpenID Connect Discovery. The two differ for issuers with a path component, so both are named.\n\n**Algorithm** (first commit)\n- **Section 3:** RS256 is already mandatory to implement for JWT authorization grants (Section 5 of RFC 7523). Resource Authorization Servers SHOULD also support ES256, which covers the IdP in #133 that signs ID-JAGs with ES256 only.\n\n**Metadata** (second commit)\n- **7.1:** new OPTIONAL `id_jag_signing_alg_values_supported` listing the algorithms the IdP uses for ID-JAGs, which MUST include RS256 when present. `id_token_signing_alg_values_supported` doesn't describe ID-JAGs. This lets a Resource Authorization Server detect a mismatch at setup time. It doesn't select an algorithm per Resource Authorization Server; that would need the Resource Authorization Server to advertise what it accepts, which is left for WG discussion.\n- **IANA:** registers the parameter in the OAuth Authorization Server Metadata registry.\n\nAdds RFC 7518 and OpenID Connect Discovery 1.0 as normative references. This follows the approach RFC 9068 Section 4 takes for JWT access tokens.",
+      "createdAt": "2026-10-27T00:30:44Z",
+      "updatedAt": "2026-10-27T00:36:03Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "id-jag-signing-keys",
+      "headRefOid": "cdc2c0342a60446cae38ace576276f3e971eaab0",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 138,
+      "id": "PR_kwDOKv5r-s8AAAABK7VpcA",
+      "title": "Clarify that Token Exchange scope values are not OpenID Connect scopes",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/138",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Proposed change for #99. One sentence added to the `scope` parameter of the ID-JAG Token Exchange request (Section 4.3):\n\n> As in Section 2.1 of RFC 8693, these values have the meaning defined by the Resource Authorization Server where the ID-JAG will be used, not their OpenID Connect meaning, so a value such as `profile` or `email` does not request identity claims (Section 5.4 of OpenID Connect Core).\n\nWhy this direction rather than allowing OpenID Connect scopes:\n\n- **Wrong requester.** In OpenID Connect the Relying Party asks for the claims it consumes. Here the consumer is the Resource Authorization Server, but the Client would be asking, without knowing what the Resource Authorization Server needs. The IdP already knows that from the Resource Authorization Server's own SSO registration.\n- **One namespace.** If `email` could mean either the OpenID Connect claim or a Resource Authorization Server scope of the same name, the IdP would have to tell them apart, and a wrong guess grants the Client a scope it never meant to request.\n- **Reversible.** If the WG later wants Clients to request claims (#83), a separate parameter can be added. Giving `scope` OpenID Connect semantics now could not be withdrawn later.\n- **RFC 8693.** Section 2.1 makes scope values specific to the service where the token will be used.\n\nThere is no new BCP 14 keyword. A Client MUST NOT would also forbid a Resource Authorization Server's own scope that happens to be named `email`.\n\nNot changed here: the Refresh Token bullet in 4.3.3 requires that \"the requested scopes and audience remain within the authorization context of the Refresh Token\", while the example Refresh Token has `openid offline_access` and requests `chat.read chat.history`. I think that needs its own PR.\n",
+      "createdAt": "2026-10-27T03:49:05Z",
+      "updatedAt": "2026-10-27T03:49:05Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "oidc-scopes-token-exchange",
+      "headRefOid": "31b9cb42747cd2bf28bc02291022b9603ac62da6",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
