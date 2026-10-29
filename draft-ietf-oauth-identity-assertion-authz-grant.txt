@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 22 November 2026                                    Independent
+Expires: 2 May 2027                                          Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                             21 May 2026
+                                                         29 October 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 November 2026.
+   This Internet-Draft will expire on 2 May 2027.
 
 Copyright Notice
 
@@ -346,6 +346,11 @@ Table of Contents
    processed by the Relying Party (indicated by the ID Token audience)
    or the Issuer (e.g. for revocation), and not by other actors in a
    different trust domain such as an Authorization Server.
+
+   Because an ID-JAG is a JWT authorization grant, RS256 is mandatory to
+   implement for both the IdP Authorization Server and the Resource
+   Authorization Server (Section 5 of [RFC7523]).  Resource
+   Authorization Servers SHOULD also support ES256 [RFC7518].
 
 3.1.  ID-JAG Claims
 
@@ -1233,6 +1238,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    *  Validate the JWT typ is oauth-id-jag+jwt (per Section 3.11 of
       [RFC8725])
 
+   *  The Resource Authorization Server MUST reject the ID-JAG with an
+      invalid_grant error if the iss claim does not identify an IdP
+      Authorization Server it trusts.  It SHOULD obtain that issuer's
+      keys from the jwks_uri in the issuer's metadata (Section 7.1).  It
+      validates the signature as required by Section 5.2 of [RFC7521],
+      accepting only the algorithms it allows for that issuer
+      (Section 3.1 of [RFC8725]).
+
    *  The Resource Authorization Server MUST validate the aud (audience)
       claim of the ID-JAG.  The aud claim MUST contain the issuer
       identifier of the Resource Authorization Server as defined in
@@ -1611,6 +1624,22 @@ Pragma: no-cache
    identity_chaining_requested_token_types_supported:
 
    urn:ietf:params:oauth:token-type:id-jag
+
+   The IdP Authorization Server SHOULD sign ID-JAGs with a key published
+   at the jwks_uri in its metadata, located from its issuer identifier
+   as described in Section 3 of [RFC8414] or Section 4 of
+   [OpenID.Discovery].
+
+   The IdP Authorization Server can also advertise the algorithms it
+   uses to sign ID-JAGs:
+
+   id_jag_signing_alg_values_supported:  OPTIONAL.  JSON array
+      containing a list of the JWS signing algorithms (alg values)
+      supported by the IdP Authorization Server for signing ID-JAGs.  If
+      present, the list MUST include RS256.
+      id_token_signing_alg_values_supported [OpenID.Discovery] does not
+      describe ID-JAGs, which the IdP Authorization Server can sign
+      differently from ID Tokens.
 
 7.2.  Resource Authorization Server Metadata
 
@@ -2054,14 +2083,23 @@ Cache-Control: no-store
 
 10.3.  OAuth Authorization Server Metadata Registration
 
-   This section registers authorization_grant_profiles_supported in the
-   "OAuth Authorization Server Metadata" registry of the "OAuth
-   Parameters" registry [IANA.oauth-parameters].
+   This section registers the following in the "OAuth Authorization
+   Server Metadata" registry of the "OAuth Parameters" registry
+   [IANA.oauth-parameters].
 
    *  Metadata Name: authorization_grant_profiles_supported
 
    *  Metadata Description: JSON array of supported authorization grant
       profile identifiers
+
+   *  Change Controller: IETF
+
+   *  Specification Document: This document
+
+   *  Metadata Name: id_jag_signing_alg_values_supported
+
+   *  Metadata Description: JSON array of the JWS signing algorithms
+      supported for signing Identity Assertion JWT Authorization Grants
 
    *  Change Controller: IETF
 
@@ -2128,9 +2166,9 @@ Cache-Control: no-store
               Schwenkschuster, A., Kasselman, P., Burgin, K., Jenkins,
               M. J., Campbell, B., and A. Parecki, "OAuth Identity and
               Authorization Chaining Across Domains", Work in Progress,
-              Internet-Draft, draft-ietf-oauth-identity-chaining-12, 11
-              May 2026, <https://datatracker.ietf.org/doc/html/draft-
-              ietf-oauth-identity-chaining-12>.
+              Internet-Draft, draft-ietf-oauth-identity-chaining-17, 19
+              July 2026, <https://datatracker.ietf.org/doc/html/draft-
+              ietf-oauth-identity-chaining-17>.
 
    [I-D.ietf-oauth-rfc7523bis]
               Jones, M. B., Campbell, B., Mortimore, C., and F. Skokan,
@@ -2172,6 +2210,12 @@ Cache-Control: no-store
               errata set 2", December 2023,
               <https://openid.net/specs/openid-connect-core-1_0.html>.
 
+   [OpenID.Discovery]
+              Sakimura, N., Bradley, J., Jones, M., and E. Jay, "OpenID
+              Connect Discovery 1.0 incorporating errata set 2",
+              December 2023, <https://openid.net/specs/openid-connect-
+              discovery-1_0.html>.
+
    [OpenID.Enterprise]
               Hardt, D. and K. McGuinness, "OpenID Connect Enterprise
               Extensions 1.0 - draft 01", September 2025,
@@ -2196,6 +2240,10 @@ Cache-Control: no-store
               Specifications and Registration Procedures", BCP 13,
               RFC 6838, DOI 10.17487/RFC6838, January 2013,
               <https://www.rfc-editor.org/rfc/rfc6838>.
+
+   [RFC7518]  Jones, M., "JSON Web Algorithms (JWA)", RFC 7518,
+              DOI 10.17487/RFC7518, May 2015,
+              <https://www.rfc-editor.org/rfc/rfc7518>.
 
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
@@ -2268,9 +2316,9 @@ Cache-Control: no-store
    [I-D.ietf-oauth-client-id-metadata-document]
               Parecki, A. and E. Smith, "OAuth Client ID Metadata
               Document", Work in Progress, Internet-Draft, draft-ietf-
-              oauth-client-id-metadata-document-01, 1 March 2026,
+              oauth-client-id-metadata-document-02, 6 July 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              client-id-metadata-document-01>.
+              client-id-metadata-document-02>.
 
    [RFC9068]  Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0
               Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October
