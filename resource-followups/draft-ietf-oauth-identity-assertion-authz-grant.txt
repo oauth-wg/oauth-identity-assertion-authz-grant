@@ -925,9 +925,7 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
    Resource identifiers in the resource parameter, in the resource
    claim, and of the protected resources a Resource Authorization Server
    governs are compared using Simple String Comparison (Section 6.2.1 of
-   [RFC3986]).  The IdP Authorization Server MUST copy each granted
-   resource identifier that the Client requested into the ID-JAG
-   unchanged.
+   [RFC3986]).
 
    For example, if a SaaS provider operates a Resource Authorization
    Server at https://authorization-server.saas-tool.example/ and
@@ -1120,7 +1118,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    *  The IdP MUST include the granted resource (if any), scope (if
       any), and authorization_details (if any) in the issued ID-JAG.  If
       the IdP modifies the requested resources, scopes, or authorization
-      details, it MUST reflect the granted values in the ID-JAG.
+      details, it MUST reflect the granted values in the ID-JAG.  Each
+      granted resource identifier that the Client requested MUST appear
+      in the resource claim unchanged.
 
    How the IdP learns which protected resources each Resource
    Authorization Server governs is out of scope for this specification.
