@@ -64,6 +64,7 @@ normative:
   RFC2046:
   RFC8414:
   RFC3986:
+  RFC9728:
   I-D.parecki-oauth-jwt-dpop-grant:
 
   OpenID.Core:
@@ -110,7 +111,6 @@ normative:
 informative:
   RFC9068:
   RFC9470:
-  RFC9728:
   I-D.ietf-oauth-client-id-metadata-document:
 
 --- abstract
@@ -229,7 +229,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - as defined in {{Section 4.1.6 of RFC7519}}.
 
 `resource`:
-: OPTIONAL - Identifies the protected resource(s) for which access is granted, using resource identifiers as defined in {{Section 2 of RFC8707}}. The value is a string for a single resource, or a non-empty JSON array of unique strings for multiple resources.
+: OPTIONAL - Identifies the protected resource(s) for which access is granted, using resource identifiers as defined in {{Section 2 of RFC8707}}. The value is a string for a single resource, or a non-empty JSON array of unique strings for multiple resources. Resource identifiers are compared as described in {{token-exchange}}.
 
 `scope`:
 : OPTIONAL - a JSON string containing a space-separated list of scopes associated with the token, in the format described in {{Section 3.3 of RFC6749}}.
@@ -277,7 +277,7 @@ A non-normative example JWT with expanded header and payload claims is below:
       "client_id": "f53f191f9311af35",
       "exp": 1311281970,
       "iat": 1311280970,
-      "resource": "https://api.chat.example/",
+      "resource": "https://acme.chat.example/api",
       "scope": "chat.read chat.history",
       "auth_time": 1311280970,
       "amr": [
@@ -465,7 +465,7 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : REQUIRED - The identifier of the Resource Authorization Server, typically in another trust domain, as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
 
 `resource`:
-: RECOMMENDED - The Resource Identifier(s) of the protected resource(s) as defined in {{Section 2 of RFC8707}}. A Client that discovered the Resource Authorization Server using Protected Resource Metadata {{RFC9728}} MUST include the `resource` value from that metadata unchanged ({{prm-validation}}).
+: RECOMMENDED - The Resource Identifier(s) of the protected resource(s), governed by the Resource Authorization Server identified by `audience`, for which access is requested, as defined in {{Section 2 of RFC8707}}. A Client that discovered the Resource Authorization Server using Protected Resource Metadata {{RFC9728}} MUST include the `resource` value from that metadata unchanged ({{prm-validation}}).
 
 `scope`:
 : OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested. As in {{Section 2.1 of RFC8693}}, these values have the meaning defined by the Resource Authorization Server where the ID-JAG will be used, not their OpenID Connect meaning, so a value such as `profile` or `email` does not request identity claims (Section 5.4 of {{OpenID.Core}}).
@@ -489,9 +489,9 @@ When a Refresh Token is used as the subject token, the client still requests `re
 
 This specification does not define normative processing requirements for `actor_token` or whether an `act` claim is included in the issued ID-JAG. Future profiles or extensions MAY define how `actor_token` is validated, how it influences policy evaluation, and whether it results in an `act` claim in the issued ID-JAG.
 
-This specification profiles the `audience` and `resource` parameters of OAuth 2.0 Token Exchange {{RFC8693}} for interoperable use with ID-JAG. In this profile, `audience` identifies the Resource Authorization Server to which the ID-JAG is issued, and `resource` identifies the protected resource for which access is requested. This profile uses `audience` for the Resource Authorization Server rather than defining a new parameter. The ID-JAG is issued by the IdP Authorization Server for processing by the Resource Authorization Server, and the Resource Authorization Server validates the `aud` claim to determine whether the ID-JAG was issued for it. The `resource` parameter continues to identify the protected resource, as defined in {{RFC8707}}. This convention provides a single interoperable interpretation of `audience` and `resource`, including deployments in which one Resource Authorization Server governs multiple protected resources or tenant-specific resources. A Resource Authorization Server governs a protected resource when it issues access tokens for that resource.
+This specification profiles the `audience` and `resource` parameters of OAuth 2.0 Token Exchange {{RFC8693}} for interoperable use with ID-JAG. In this profile, `audience` identifies the Resource Authorization Server to which the ID-JAG is issued, and `resource` identifies the protected resource for which access is requested. This profile uses `audience` for the Resource Authorization Server rather than defining a new parameter. The ID-JAG is issued by the IdP Authorization Server for processing by the Resource Authorization Server, and the Resource Authorization Server validates the `aud` claim to determine whether the ID-JAG was issued for it. The `resource` parameter continues to identify the protected resource, as defined in {{RFC8707}}. This convention provides a single interoperable interpretation of `audience` and `resource`, including deployments in which one Resource Authorization Server governs multiple protected resources or tenant-specific resources.
 
-Resource identifiers in the `resource` parameter and the `resource` claim are compared using Simple String Comparison ({{Section 6.2.1 of RFC3986}}). The IdP Authorization Server copies each granted resource identifier into the ID-JAG unchanged.
+Resource identifiers in the `resource` parameter, in the `resource` claim, and of the protected resources a Resource Authorization Server governs are compared using Simple String Comparison ({{Section 6.2.1 of RFC3986}}). The IdP Authorization Server MUST copy each granted resource identifier that the Client requested into the ID-JAG unchanged.
 
 For example, if a SaaS provider operates a Resource Authorization Server at `https://authorization-server.saas-tool.example/` and protected resources at `https://api.saas-tool.example/files` and `https://api.saas-tool.example/messages`, a client requesting access to the Files API uses:
 
@@ -620,13 +620,13 @@ If access is granted, the IdP creates a signed Identity Assertion JWT Authorizat
 `authorization_details`:
 : OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2.2 of RFC9396}}. This parameter MUST be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.
 
-The response does not indicate the granted resources. A Client can learn them from the `resource` claim of the ID-JAG.
-
 `expires_in`:
 : RECOMMENDED - The lifetime in seconds of the authorization grant.
 
 `refresh_token`:
 : OPTIONAL according to {{Section 2.2 of RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
+
+The response does not include the granted resources. Unless the ID-JAG is encrypted, the Client can read them from its `resource` claim.
 
 #### Issued Identity Assertion JWT Authorization Grant
 
@@ -837,7 +837,7 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 When processing authorization information from the ID-JAG:
 
-* If the `resource` claim is present, each identifier MUST be a protected resource governed by this Resource Authorization Server in the tenant context of the ID-JAG ({{tenant-relationships}}), compared as described in {{token-exchange}}. If any identifier is not, the Resource Authorization Server MUST reject the request with `invalid_grant` as defined in {{Section 5.2 of RFC6749}}, because the ID-JAG was not issued for resources it governs. The access token MUST be restricted to resources in the `resource` claim, and SHOULD be audience-restricted to them ({{Section 2 of RFC8707}}). The Resource Authorization Server MAY restrict it to a subset based on local policy, and MUST reject the request if none of the resources are acceptable.
+* If the `resource` claim is present, each identifier MUST be a protected resource governed by this Resource Authorization Server for the tenant identified by `aud_tenant` when present, otherwise for the tenant it associates with the issuing IdP ({{tenant-relationships}}), compared as described in {{token-exchange}}. If any identifier is not, the Resource Authorization Server MUST reject the request with `invalid_grant` as defined in {{Section 5.2 of RFC6749}}, because the ID-JAG was not issued for resources it governs. The access token MUST be restricted to resources in the `resource` claim, and SHOULD be audience-restricted to them ({{Section 2 of RFC8707}}). The Resource Authorization Server MAY restrict it to a subset based on local policy, and MUST reject the request with `access_denied` ({{access-token-error-response}}) if none of the resources are acceptable.
 
 * If the `resource` claim is absent, the Resource Authorization Server MAY select one or more default resources based on policy, client configuration, or other request context. It MAY require the ID-JAG to contain a `resource` claim; if the claim is required and absent, it MUST reject the request with `invalid_grant` as defined in {{Section 5.2 of RFC6749}}.
 
@@ -845,7 +845,7 @@ When processing authorization information from the ID-JAG:
 
 * If the `authorization_details` claim is present, the Resource Authorization Server MUST parse it as a JSON array and process each authorization detail object according to {{RFC9396}}. The Resource Authorization Server evaluates policy for each authorization detail and determines which authorization details to grant. The Resource Authorization Server MAY modify, filter, or omit authorization details based on policy.
 
-* If both `resource` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the resource identifiers and authorization details when issuing the access token. The Resource Authorization Server MAY derive resource identifiers from authorization details or vice versa, or process them independently based on policy.
+* If both `resource` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the resource identifiers and authorization details when issuing the access token. The Resource Authorization Server MAY derive resource identifiers from authorization details or vice versa, or process them independently based on policy. Any resource identifiers it derives MUST be among those in the `resource` claim.
 
 * If both `scope` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the scopes and authorization details when issuing the access token. The Resource Authorization Server MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
 
@@ -1139,13 +1139,13 @@ Clients that discover an Authorization Server's metadata using OAuth 2.0 Authori
 
 For example, an attacker's protected resource references an attacker-controlled Authorization Server whose metadata declares an `issuer` value matching a legitimate Resource Authorization Server the user's IdP already trusts. A client that skips the `issuer` check treats the malicious metadata as authoritative for the legitimate Authorization Server and requests an ID-JAG with `audience` set to that server. The client then presents the ID-JAG and its client authentication to the attacker's token endpoint. The attacker relays both to the legitimate Resource Authorization Server, authenticating as the client with the `client_secret` it received or with a client assertion whose `aud` is the legitimate issuer, and obtains an access token for the End-User.
 
-The client-side `issuer` check required by {{Section 3.3 of RFC8414}} is the primary defense. When the client has validated the attacker's Protected Resource Metadata ({{prm-validation}}) and includes its `resource` value ({{token-exchange}}), the ID-JAG names the attacker's resource, so the legitimate Resource Authorization Server rejects the relayed ID-JAG because it does not govern that resource ({{token-request}}). An IdP that knows which resources that Resource Authorization Server governs rejects the Token Exchange request instead, so the ID-JAG never reaches the attacker. A sender-constrained ID-JAG ({{sender-constraining-tokens}}) also defeats the relay, because the attacker cannot prove possession of the client's key.
+The client-side `issuer` check required by {{Section 3.3 of RFC8414}} is the primary defense. When the client has validated the attacker's Protected Resource Metadata ({{prm-validation}}) and includes its `resource` value ({{token-exchange}}), the ID-JAG names the attacker's resource, so the legitimate Resource Authorization Server rejects the relayed ID-JAG because it does not govern that resource ({{token-request}}). An IdP that checks which resources that Resource Authorization Server governs ({{token-exchange}}) rejects the Token Exchange request instead, so the ID-JAG never reaches the attacker. A sender-constrained ID-JAG ({{sender-constraining-tokens}}) also defeats the relay, because the attacker cannot prove possession of the client's key.
 
 ## Protected Resource Metadata Validation {#prm-validation}
 
 Clients that discover the Resource Authorization Server for a protected resource via Protected Resource Metadata {{RFC9728}} MUST validate that metadata as required by {{Section 3.3 of RFC9728}}, including verifying that the `resource` value is identical to the resource identifier used to construct the metadata URL or, when the metadata URL came from a `WWW-Authenticate` response, to the URL of the request that received that response. Without this check, an attacker who publishes metadata at their own resource can misrepresent the resource identifier and redirect the client toward an Authorization Server unrelated to the intended resource.
 
-Together with the Authorization Server metadata `issuer` check in {{as-metadata-validation}}, these validations bind discovery and the grant to the resource the client intended to access.
+Together with the Authorization Server metadata `issuer` check in {{as-metadata-validation}}, this validation binds discovery to the resource the client intended to access, and including the validated `resource` value in the Token Exchange request ({{token-exchange}}) binds the grant to it.
 
 ## Metadata Disclosure
 
