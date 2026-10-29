@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 30 April 2027                                       Independent
+Expires: 2 May 2027                                          Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         27 October 2026
+                                                         29 October 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 April 2027.
+   This Internet-Draft will expire on 2 May 2027.
 
 Copyright Notice
 
@@ -1336,7 +1336,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    Identity Assertion JWT Authorization Grant to obtain a new Access
    Token.  The ID-JAG replaces the use of Refresh Token for the Resource
    Authorization Server.  However, the Resource Authorization Server can
-   reject an ID-JAG whose exp is later than its policy allows, or accept
+   reject an ID-JAG with an exp longer than its policy allows, or accept
    each ID-JAG only once by tracking its jti (Section 3 of [RFC7523]).
 
    If the ID-JAG has expired, or the Resource Authorization Server
