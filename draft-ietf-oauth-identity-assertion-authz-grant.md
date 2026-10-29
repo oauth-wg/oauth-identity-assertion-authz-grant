@@ -51,6 +51,7 @@ normative:
   RFC7800:
   RFC7638:
   RFC9449:
+  RFC8705:
   RFC9396:
   RFC9493:
   RFC7591:
@@ -216,7 +217,7 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}.
 
 `client_id`:
-: REQUIRED - The client identifier of the OAuth 2.0 {{RFC6749}} client at the Resource Authorization Server that will act on behalf of the resource owner (`sub`).  This identifier MAY be different that client identifier of the OAuth 2.0 client requesting an ID-JAG from the IdP {{Section 4.3 of RFC8693}} as it represents and independent client relationship to another Authorization Server in a different trust domain.  See {{client-id-mapping}} for additional considerations.
+: REQUIRED - The client identifier of the OAuth 2.0 {{RFC6749}} client at the Resource Authorization Server that will act on behalf of the resource owner (`sub`).  This identifier MAY be different from the client identifier of the OAuth 2.0 client requesting an ID-JAG from the IdP {{Section 4.3 of RFC8693}}, as it represents an independent client relationship with another Authorization Server in a different trust domain.  See {{client-id-mapping}} for additional considerations.
 
 `jti`:
 : REQUIRED - Unique ID of this JWT as defined in {{Section 4.1.7 of RFC7519}}.
@@ -361,7 +362,7 @@ The example flow is for an enterprise `acme`, which uses a multi-tenant wiki app
 | Role     | App URL | Tenant URL   | Description |
 | -------- | -------- | -------- | ----------- |
 | Client | `https://wiki.example` | `https://acme.wiki.example` | Wiki app that embeds content from one or more resource servers |
-| Resource Authorization Server   | `https://chat.example` | `https://acme.chat.example` | Authorization Server for an chat and communication app |
+| Resource Authorization Server   | `https://chat.example` | `https://acme.chat.example` | Authorization Server for a chat and communication app |
 | Identity Provider Authorization Server | `https://idp.example`   | `https://acme.idp.example` | Enterprise Identity Provider
 | Resource Server | `https://api.chat.example`   | `https://api.chat.example` |  Public API for the chat and communications app
 
@@ -441,7 +442,7 @@ Note: The IdP Authorization Server may enforce security controls such as multi-f
       "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
       "token_type": "Bearer",
       "access_token": "7SliwCQP1brGdjBtsaMnXo",
-      "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA"
+      "refresh_token": "tGzv3JOkF0XG5Qx2TlKWIA",
       "scope": "openid offline_access"
     }
 
@@ -755,18 +756,23 @@ Access Token Response:
       ]
     }
 
-#### Error Response
+#### Error Response {#token-exchange-error-response}
 
-On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}, e.g:
+On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following two codes for interoperability:
 
-    HTTP/1.1 400 Bad Request
-    Content-Type: application/json
-    Cache-Control: no-store
+* `invalid_grant`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked). A re-issued subject token may resolve the error.
 
-    {
-      "error": "invalid_grant",
-      "error_description": "Audience validation failed"
-    }
+      {
+        "error": "invalid_grant",
+        "error_description": "Audience validation failed"
+      }
+
+* `access_denied`: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow.
+
+      {
+        "error": "access_denied",
+        "error_description": "Client is not authorized to access the target Resource Authorization Server"
+      }
 
 For example, the IdP responds with `invalid_target` when a requested resource is not governed by the `audience` Resource Authorization Server:
 
@@ -849,13 +855,31 @@ The Resource Authorization Server's token endpoint responds with an OAuth 2.0 To
       "scope": "chat.read chat.history"
     }
 
+### Error Response {#access-token-error-response}
+
+On error, the Resource Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following two codes for interoperability:
+
+* `invalid_grant`: the ID-JAG failed a validation rule in {{token-request}} (for example signature, `aud`, `client_id`, `exp`, `typ`, decryption, or `cnf` binding). A re-issued ID-JAG may resolve the error.
+
+      {
+        "error": "invalid_grant",
+        "error_description": "Audience validation failed"
+      }
+
+* `access_denied`: the ID-JAG is valid but the End-User or Client is not authorized at the Resource Authorization Server (for example the End-User lacks a license, entitlement, or provisioning record, or is denied by the Resource Authorization Server's policy or role/permission assignments). A re-issued ID-JAG will not resolve the error. Remediation is defined by the Resource Authorization Server operator's access-request, entitlement, or provisioning process, such as an Identity Governance and Administration (IGA) workflow.
+
+      {
+        "error": "access_denied",
+        "error_description": "The end-user is not licensed for this application"
+      }
+
 ### Refresh Token
 
-The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
+The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
 
 When the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server. However, the Resource Authorization Server can reject an ID-JAG with an `exp` longer than its policy allows, or accept each ID-JAG only once by tracking its `jti` ({{Section 3 of RFC7523}}).
 
-If the ID-JAG has expired, or the Resource Authorization Server rejects a re-submitted ID-JAG with an `invalid_grant` error, the Client SHOULD request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Server using the original Identity Assertion from the IdP (e.g ID Token). If the Resource Authorization Server also rejects the new ID-JAG, requesting another will not resolve the error.
+If the ID-JAG has expired, or the Resource Authorization Server rejects a re-submitted ID-JAG with an `invalid_grant` error, the Client SHOULD request a new ID-JAG from the IdP Authorization Server using the original Identity Assertion from the IdP (e.g ID Token) before presenting it to the Resource Authorization Server. If the Resource Authorization Server also rejects the new ID-JAG, requesting another will not resolve the error.
 
 If the ID Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
@@ -1143,17 +1167,26 @@ When such profiles or extensions use an `act` claim, they should preserve the di
 
 ## Sender Constraining Tokens {#sender-constraining-tokens}
 
-### Proof-of-Possession
+Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 4 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.
 
-Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 4 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key, preventing reuse by parties that do not have access to the private key.
+This specification defines two sender-constraining mechanisms for the ID-JAG:
 
-Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in {{RFC9449}}) in a `DPoP` HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.
+* **DPoP Key Binding** ({{sec-dpop-binding}}): binding via a DPoP proof JWT as defined by {{RFC9449}}. The `cnf` claim carries a `jkt` property with the JWK SHA-256 Thumbprint of the bound key.
+* **mTLS Certificate Binding** ({{sec-mtls-binding}}): binding via a mutually authenticated TLS session using an X.509 client certificate as defined by {{Section 3 of RFC8705}}. The `cnf` claim carries an `x5t#S256` property with the SHA-256 thumbprint of the DER encoding of the bound X.509 certificate.
 
-The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a public key to a JWT. When an ID-JAG contains a `cnf` claim with a `jkt` property as defined in {{RFC9449}}, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
+An IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. If both a DPoP proof and a certificate suitable for binding are presented on the same Token Exchange request, the IdP selects a single binding mechanism according to local policy for the target Resource Authorization Server.
 
-The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
+The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a key or certificate to a JWT. When an ID-JAG contains a `cnf` claim, proof of possession of the corresponding private key or X.509 certificate MUST be demonstrated when using the ID-JAG at the Resource Authorization Server.
 
-#### Proof-of-Possession During Token Exchange
+The following sections describe the processing rules for each mechanism at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
+
+### DPoP Key Binding {#sec-dpop-binding}
+
+DPoP key binding is demonstrated by the client presenting a DPoP proof JWT (as defined in {{RFC9449}}) in a `DPoP` HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.
+
+When an ID-JAG contains a `cnf` claim with a `jkt` property as defined in {{RFC9449}}, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key MUST be demonstrated when using the ID-JAG.
+
+#### DPoP Key Binding During Token Exchange
 
 When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange, the client MAY include a DPoP proof in the request. This demonstrates possession of a key that can be bound to the ID-JAG.
 
@@ -1199,7 +1232,7 @@ The `cnf` claim format follows {{Section 6.1 of RFC9449}}:
 
 4. If no DPoP proof is presented, the IdP issues an ID-JAG without a `cnf` claim.
 
-#### Proof-of-Possession During ID-JAG Exchange
+#### DPoP Key Binding During ID-JAG Exchange
 
 When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a `cnf` claim and whether the client presents a DPoP proof.
 
@@ -1283,6 +1316,56 @@ Example error response when constrained tokens are required:
     {
       "error": "invalid_grant",
       "error_description": "Sender-constrained tokens required for this resource server"
+    }
+
+### mTLS Certificate Binding {#sec-mtls-binding}
+
+An IdP MAY bind an ID-JAG to a client's X.509 certificate per {{RFC8705}}. When bound, the `cnf` claim carries an `x5t#S256` property containing the SHA-256 thumbprint of the DER encoding of the certificate, as defined by {{Section 3.1 of RFC8705}}.
+
+The certificate used for binding is the certificate the client presents during the mutually authenticated TLS handshake, validated per {{Section 2 of RFC8705}}. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are the same certificate.
+
+#### mTLS Certificate Binding During Token Exchange
+
+When the client presents an X.509 client certificate on the mTLS session to the IdP token endpoint and local policy permits certificate-bound issuance, the IdP validates the certificate per {{Section 2 of RFC8705}} and includes an `x5t#S256` `cnf` claim in the issued ID-JAG per {{Section 3.1 of RFC8705}}:
+
+    "cnf": {
+      "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
+    }
+
+The `token_type` response parameter for an ID-JAG is always `N_A` per {{Section 2.2.1 of RFC8693}}. The client SHOULD verify that the returned ID-JAG contains an `x5t#S256` `cnf` claim matching the certificate it presented, to detect a silent downgrade.
+
+If no client certificate is presented (or is not accepted for binding), the IdP issues an ID-JAG without an `x5t#S256` `cnf` claim.
+
+#### mTLS Certificate Binding During ID-JAG Exchange
+
+When the client exchanges the ID-JAG at the Resource Authorization Server, processing depends on whether the ID-JAG contains an `x5t#S256` `cnf` claim and whether the client establishes an mTLS session:
+
+* **`cnf.x5t#S256` present and mTLS certificate presented:** The Resource Authorization Server MUST validate the certificate per {{Section 2 of RFC8705}}, compute its SHA-256 thumbprint per {{Section 3.1 of RFC8705}}, and compare against `cnf.x5t#S256`. Mismatch MUST fail with `invalid_grant`. On match, the Resource Authorization Server MAY issue a certificate-bound access token per {{Section 3 of RFC8705}}.
+
+* **`cnf.x5t#S256` present, no mTLS certificate:** MUST fail with `invalid_grant`.
+
+* **No `cnf.x5t#S256`, mTLS certificate presented:** The Resource Authorization Server MAY validate the certificate per {{Section 2 of RFC8705}} and issue a certificate-bound access token per {{Section 3 of RFC8705}}.
+
+* **No `cnf.x5t#S256`, no mTLS certificate:** The Resource Authorization Server MAY issue an unconstrained Bearer token; if Resource Server configuration requires sender-constrained tokens, MUST fail with `invalid_grant`.
+
+Example request (mTLS session established at the TLS layer) and successful response with a certificate-bound access token:
+
+    POST /oauth2/token HTTP/1.1
+    Host: acme.chat.example
+    Content-Type: application/x-www-form-urlencoded
+
+    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+    &assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json;charset=UTF-8
+
+    {
+      "token_type": "Bearer",
+      "access_token": "2YotnFZFEjr1zCsicMWpAA",
+      "expires_in": 86400,
+      "scope": "chat.read chat.history"
     }
 
 
@@ -1369,7 +1452,7 @@ The following use cases are illustrative and not exhaustive. Enterprise workforc
 
 Enterprises often have hundreds of SaaS applications.  SaaS applications often have integrations to other SaaS applications that are critical to the application experience and jobs to be done.  When a SaaS app needs to request an access token on behalf of a user to a 3rd party SaaS integration's API, the end-user typically needs to complete an interactive delegated OAuth 2.0 flow, as the SaaS application is not in the same security or policy domain as the 3rd party SaaS integration.
 
-It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilities for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.
+It is industry best practice for an enterprise to connect their ecosystem of SaaS applications to their Identity Provider (IdP) to centralize identity and access management capabilities for the organization.  End-users get a better experience (SSO) and administrators get better security outcomes such as multi-factor authentication and zero-trust.  SaaS applications today enable the administrator to establish trust with an IdP for user authentication.
 
 This specification can be used to extend the SSO relationship of multiple SaaS applications to include API access between these applications as well. This specification enables federation for Authorization Servers across policy or administrative boundaries. The same enterprise IdP that is trusted by applications for SSO can be extended to broker access to APIs.  This enables the enterprise to centralize more access decisions across their SaaS ecosystem and provides better end-user experience for users that need to connect multiple applications via OAuth 2.0.
 
@@ -1578,7 +1661,7 @@ AI Agent discovers the External Tool Resource Authorization Server (`authorizati
     Host: authorization-server.saas-tool.example
     Accept: application/json
 
-    HTTP/1.1 200 Ok
+    HTTP/1.1 200 OK
     Content-Type: application/json
 
     {
@@ -1705,7 +1788,7 @@ AI Agent (`https://ai-agent-app.example/`) calls the External Tool API (Resource
 # Acknowledgments
 {:numbered="false"}
 
-The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Kai Lehmann, Anuj Mistry, Dean H. Saxe, Filip Skokan, Phil Whipps.
+The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Aaron Jeongwoo Kim, Kai Lehmann, Anuj Mistry, Dean H. Saxe, Filip Skokan, Phil Whipps.
 
 # Document History
 {:numbered="false"}
@@ -1716,9 +1799,11 @@ The authors would like to thank the following people for their contributions and
 
 * Added `invalid_target` handling and resource governance checks for the `resource` parameter and claim
 * Added security considerations on Authorization Server and Protected Resource Metadata validation
+* Added mTLS certificate binding as an alternative sender-constraining mechanism for the ID-JAG, alongside DPoP
 * Added security considerations on storage and caching of subject tokens (ID Token, SAML Assertion, Refresh Token)
 * Added requirement that the IdP confirm the subject token is actually a token of the indicated type
 * Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured
+* Editorial clarifications and typo fixes
 
 -04
 
