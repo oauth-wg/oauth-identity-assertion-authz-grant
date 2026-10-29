@@ -204,7 +204,9 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the IdP Authorization Server as defined in {{RFC8414}}.
 
 `sub`:
-: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
+: REQUIRED - Subject Identifier for the End-User, selected by the IdP Authorization Server for the Resource Authorization Server identified by the `aud` claim as described in {{subject-mapping}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer.
+
+  When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User.
 
 `sub_id`:
 : OPTIONAL - Subject Identifier as defined in {{RFC9493}}. The `sub_id` claim MAY be used to identify the same End-User as the `sub` claim using a different identifier namespace from the ID-JAG `iss` and `sub`. This is useful when the Resource Authorization Server resolves users by a non-JWT subject identifier, such as a SAML Assertion Subject `<NameID>`, in its SSO trust relationship with the IdP Authorization Server. See {{saml-nameid-format}} for the SAML NameID Subject Identifier Format defined by this specification, and {{saml-nameid-sub-id-processing}} for processing rules.
@@ -907,7 +909,7 @@ When this assertion is used as the `subject_token` in Token Exchange, the IdP Au
       "expires_in": 1209600
     }
 
-# Cross-Domain Client ID Handling {#client-id-mapping}
+# Cross-Domain Client and Subject Identifier Handling
 
 There are three separate OAuth/OpenID Connect/SAML relationships involved in this flow:
 
@@ -917,13 +919,21 @@ There are three separate OAuth/OpenID Connect/SAML relationships involved in thi
 
 Each relationship is typically represented by independent client registrations between each party. For example, the IdP Authorization Server typically issues a Client ID for both the Client and Resource Authorization Server to use for single sign-on with OpenID Connect as a Relying Party. Similarly, the Resource Authorization Server typically issues a Client ID for the Client to use for API access to the Resource Server.   The Client may choose to use different client credentials with each registration.
 
+## Client ID Mapping {#client-id-mapping}
+
 In this flow, the IdP Authorization Server accepts a Token Exchange request from the Client, and issues an ID-JAG that will be consumed by the Resource Authorization Server. This means the IdP Authorization Server needs to know about the relationship between the Client and the Resource Authorization Server, in order to include a `client_id` claim in the ID-JAG that will be recognized by the Resource Authorization Server.
 
 This can be handled by the IdP Authorization Server maintaining a record of each `client_id` used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.  The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG for the mapped `client_id`. Requiring a confidential client helps to prevent the IdP Authorization Server from delegating access to any of the valid clients for the Resource Authorization Server.
 
-Note: The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG. The same user may have a pairwise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party. The Resource Authorization Server needs consistent subject identifiers for subject resolution across both SSO and API access. The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the same identifier for the user that it would have included in an ID Token intended for the Resource Authorization Server.
-
 Alternatively, if clients use "Client ID Metadata Document" {{I-D.ietf-oauth-client-id-metadata-document}} as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.
+
+## Subject Identifier Mapping {#subject-mapping}
+
+The IdP Authorization Server selects the subject identifiers in the ID-JAG for the Resource Authorization Server identified by the `aud` claim, not for the Client. The same user can have a pairwise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party, and the Resource Authorization Server needs consistent subject identifiers for subject resolution across both SSO and API access.
+
+The IdP Authorization Server MUST include the same `sub` value for a given End-User in every ID-JAG it issues for the same Resource Authorization Server and, when present, the same `aud_tenant`, regardless of which Client requested it. When the Resource Authorization Server uses OpenID Connect for SSO with the IdP Authorization Server, that value MUST be the `sub` the IdP Authorization Server would include in an ID Token issued to the Resource Authorization Server as a Relying Party. This requires the IdP Authorization Server to know which Relying Party registration corresponds to the Resource Authorization Server's issuer identifier, a mapping established out of band like the `client_id` mapping in {{client-id-mapping}}. When pairwise subject identifiers are used, the `sub` claim of the ID-JAG can differ from the `sub` claim of the Client's ID Token (see {{sub-id-disclosure}}).
+
+When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, see the `sub_id` claim and {{saml-nameid-subject-identifier}}.
 
 # Tenant Relationships with Issuer and Client ID {#tenant-relationships}
 
@@ -1064,7 +1074,7 @@ The Resource Authorization Server MUST use a SAML NameID `sub_id` only when the 
 
 ## Subject Identifier Disclosure {#sub-id-disclosure}
 
-The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.
+The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. For the same reason, a pairwise `sub` selected for the Resource Authorization Server ({{subject-mapping}}) is disclosed to the Client, which can link it to the `sub` in its own ID Token. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.
 
 ## Actor Delegation Extensions
 
