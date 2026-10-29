@@ -1235,7 +1235,15 @@ svg {
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-cross-domain-client-id-hand" class="internal xref">Cross-Domain Client ID Handling</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-cross-domain-client-and-sub" class="internal xref">Cross-Domain Client and Subject Identifier Handling</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-client-id-mapping" class="internal xref">Client ID Mapping</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-subject-identifier-mapping" class="internal xref">Subject Identifier Mapping</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-tenant-relationships-with-i" class="internal xref">Tenant Relationships with Issuer and Client ID</a></p>
@@ -1528,7 +1536,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <dt id="section-3.1-2.3">
 <code>sub</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-3.1-2.4">
-            <p id="section-3.1-2.4.1"><span class="bcp14">REQUIRED</span> - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span>. The <code>sub</code> claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject <code>&lt;NameID&gt;</code> namespace, the ID-JAG <span class="bcp14">MAY</span> include <code>sub_id</code> to carry the SSO subject identifier. When both <code>sub</code> and <code>sub_id</code> are present, they <span class="bcp14">MUST</span> identify the same End-User. A public subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer (<code>iss</code>+<code>sub</code>) for a single-tenant issuer and <span class="bcp14">MUST</span> be unique when scoped with issuer and tenant (<code>iss</code>+<code>tenant</code>+<code>sub</code>) for multi-tenant issuer. See <a href="#client-id-mapping" class="auto internal xref">Section 5</a> for additional considerations.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-3.1-2.4.1"><span class="bcp14">REQUIRED</span> - Subject Identifier for the End-User, selected by the IdP Authorization Server for the Resource Authorization Server identified by the <code>aud</code> claim as described in <a href="#subject-mapping" class="auto internal xref">Section 5.2</a>. The <code>sub</code> claim identifies the End-User in the subject namespace of the ID-JAG issuer. A public subject identifier <span class="bcp14">MUST</span> be unique when scoped with issuer (<code>iss</code>+<code>sub</code>) for a single-tenant issuer and <span class="bcp14">MUST</span> be unique when scoped with issuer and tenant (<code>iss</code>+<code>tenant</code>+<code>sub</code>) for multi-tenant issuer.<a href="#section-3.1-2.4.1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2.4.2">When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject <code>&lt;NameID&gt;</code> namespace, the ID-JAG <span class="bcp14">MAY</span> include <code>sub_id</code> to carry the SSO subject identifier. When both <code>sub</code> and <code>sub_id</code> are present, they <span class="bcp14">MUST</span> identify the same End-User.<a href="#section-3.1-2.4.2" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-3.1-2.5">
@@ -1546,7 +1555,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <dt id="section-3.1-2.9">
 <code>client_id</code>:</dt>
           <dd style="margin-left: 1.5em" id="section-3.1-2.10">
-            <p id="section-3.1-2.10.1"><span class="bcp14">REQUIRED</span> - The client identifier of the OAuth 2.0 <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> client at the Resource Authorization Server that will act on behalf of the resource owner (<code>sub</code>).  This identifier <span class="bcp14">MAY</span> be different that client identifier of the OAuth 2.0 client requesting an ID-JAG from the IdP <span><a href="https://rfc-editor.org/rfc/rfc8693#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> as it represents and independent client relationship to another Authorization Server in a different trust domain.  See <a href="#client-id-mapping" class="auto internal xref">Section 5</a> for additional considerations.<a href="#section-3.1-2.10.1" class="pilcrow">¶</a></p>
+            <p id="section-3.1-2.10.1"><span class="bcp14">REQUIRED</span> - The client identifier of the OAuth 2.0 <span>[<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> client at the Resource Authorization Server that will act on behalf of the resource owner (<code>sub</code>).  This identifier <span class="bcp14">MAY</span> be different that client identifier of the OAuth 2.0 client requesting an ID-JAG from the IdP <span><a href="https://rfc-editor.org/rfc/rfc8693#section-4.3" class="relref">Section 4.3</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> as it represents and independent client relationship to another Authorization Server in a different trust domain.  See <a href="#client-id-mapping" class="auto internal xref">Section 5.1</a> for additional considerations.<a href="#section-3.1-2.10.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="section-3.1-2.11">
@@ -2566,10 +2575,10 @@ Pragma: no-cache
 </div>
 </section>
 </div>
-<div id="client-id-mapping">
+<div id="cross-domain-client-and-subject-identifier-handling">
 <section id="section-5">
-      <h2 id="name-cross-domain-client-id-hand">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-cross-domain-client-id-hand" class="section-name selfRef">Cross-Domain Client ID Handling</a>
+      <h2 id="name-cross-domain-client-and-sub">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-cross-domain-client-and-sub" class="section-name selfRef">Cross-Domain Client and Subject Identifier Handling</a>
       </h2>
 <p id="section-5-1">There are three separate OAuth/OpenID Connect/SAML relationships involved in this flow:<a href="#section-5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -2584,10 +2593,26 @@ Pragma: no-cache
 </li>
       </ul>
 <p id="section-5-3">Each relationship is typically represented by independent client registrations between each party. For example, the IdP Authorization Server typically issues a Client ID for both the Client and Resource Authorization Server to use for single sign-on with OpenID Connect as a Relying Party. Similarly, the Resource Authorization Server typically issues a Client ID for the Client to use for API access to the Resource Server.   The Client may choose to use different client credentials with each registration.<a href="#section-5-3" class="pilcrow">¶</a></p>
-<p id="section-5-4">In this flow, the IdP Authorization Server accepts a Token Exchange request from the Client, and issues an ID-JAG that will be consumed by the Resource Authorization Server. This means the IdP Authorization Server needs to know about the relationship between the Client and the Resource Authorization Server, in order to include a <code>client_id</code> claim in the ID-JAG that will be recognized by the Resource Authorization Server.<a href="#section-5-4" class="pilcrow">¶</a></p>
-<p id="section-5-5">This can be handled by the IdP Authorization Server maintaining a record of each <code>client_id</code> used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.  The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG for the mapped <code>client_id</code>. Requiring a confidential client helps to prevent the IdP Authorization Server from delegating access to any of the valid clients for the Resource Authorization Server.<a href="#section-5-5" class="pilcrow">¶</a></p>
-<p id="section-5-6">Note: The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG. The same user may have a pairwise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party. The Resource Authorization Server needs consistent subject identifiers for subject resolution across both SSO and API access. The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the same identifier for the user that it would have included in an ID Token intended for the Resource Authorization Server.<a href="#section-5-6" class="pilcrow">¶</a></p>
-<p id="section-5-7">Alternatively, if clients use "Client ID Metadata Document" <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span> as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.<a href="#section-5-7" class="pilcrow">¶</a></p>
+<div id="client-id-mapping">
+<section id="section-5.1">
+        <h3 id="name-client-id-mapping">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-client-id-mapping" class="section-name selfRef">Client ID Mapping</a>
+        </h3>
+<p id="section-5.1-1">In this flow, the IdP Authorization Server accepts a Token Exchange request from the Client, and issues an ID-JAG that will be consumed by the Resource Authorization Server. This means the IdP Authorization Server needs to know about the relationship between the Client and the Resource Authorization Server, in order to include a <code>client_id</code> claim in the ID-JAG that will be recognized by the Resource Authorization Server.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">This can be handled by the IdP Authorization Server maintaining a record of each <code>client_id</code> used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.  The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG for the mapped <code>client_id</code>. Requiring a confidential client helps to prevent the IdP Authorization Server from delegating access to any of the valid clients for the Resource Authorization Server.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">Alternatively, if clients use "Client ID Metadata Document" <span>[<a href="#I-D.ietf-oauth-client-id-metadata-document" class="cite xref">I-D.ietf-oauth-client-id-metadata-document</a>]</span> as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="subject-mapping">
+<section id="section-5.2">
+        <h3 id="name-subject-identifier-mapping">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-subject-identifier-mapping" class="section-name selfRef">Subject Identifier Mapping</a>
+        </h3>
+<p id="section-5.2-1">The IdP Authorization Server selects the subject identifiers in the ID-JAG for the Resource Authorization Server identified by the <code>aud</code> claim, not for the Client. The same user can have a pairwise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party, and the Resource Authorization Server needs consistent subject identifiers for subject resolution across both SSO and API access.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">The IdP Authorization Server <span class="bcp14">MUST</span> include the same <code>sub</code> value for a given End-User in every ID-JAG it issues for the same Resource Authorization Server and, when present, the same <code>aud_tenant</code>, regardless of which Client requested it. When the Resource Authorization Server uses OpenID Connect for SSO with the IdP Authorization Server, that value <span class="bcp14">MUST</span> be the <code>sub</code> the IdP Authorization Server would include in an ID Token issued to the Resource Authorization Server as a Relying Party. This requires the IdP Authorization Server to know which Relying Party registration corresponds to the Resource Authorization Server's issuer identifier, a mapping established out of band like the <code>client_id</code> mapping in <a href="#client-id-mapping" class="auto internal xref">Section 5.1</a>. When pairwise subject identifiers are used, the <code>sub</code> claim of the ID-JAG can differ from the <code>sub</code> claim of the Client's ID Token (see <a href="#sub-id-disclosure" class="auto internal xref">Section 9.6</a>).<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject <code>&lt;NameID&gt;</code> namespace, see the <code>sub_id</code> claim and <a href="#saml-nameid-subject-identifier" class="auto internal xref">Section 3.2</a>.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="tenant-relationships">
@@ -2792,7 +2817,7 @@ Cache-Control: no-store
         <h3 id="name-subject-identifier-disclosu">
 <a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-subject-identifier-disclosu" class="section-name selfRef">Subject Identifier Disclosure</a>
         </h3>
-<p id="section-9.6-1">The IdP Authorization Server <span class="bcp14">SHOULD</span> include <code>sub_id</code> only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, <code>sub_id</code> can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. The IdP Authorization Server <span class="bcp14">SHOULD</span> minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.<a href="#section-9.6-1" class="pilcrow">¶</a></p>
+<p id="section-9.6-1">The IdP Authorization Server <span class="bcp14">SHOULD</span> include <code>sub_id</code> only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, <code>sub_id</code> can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. For the same reason, a pairwise <code>sub</code> selected for the Resource Authorization Server (<a href="#subject-mapping" class="auto internal xref">Section 5.2</a>) is disclosed to the Client, which can link it to the <code>sub</code> in its own ID Token. The IdP Authorization Server <span class="bcp14">SHOULD</span> minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.<a href="#section-9.6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="actor-delegation-extensions">
