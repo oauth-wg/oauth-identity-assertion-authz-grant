@@ -1731,7 +1731,7 @@ AI Agent (`https://ai-agent-app.example/`) calls the External Tool API (Resource
 # Acknowledgments
 {:numbered="false"}
 
-The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Kai Lehmann, Anuj Mistry, Dean H. Saxe, Filip Skokan, Phil Whipps.
+The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Aaron Jeongwoo Kim, Kai Lehmann, Anuj Mistry, Dean H. Saxe, Filip Skokan, Phil Whipps.
 
 # Document History
 {:numbered="false"}
@@ -1744,6 +1744,7 @@ The authors would like to thank the following people for their contributions and
 * Added security considerations on storage and caching of subject tokens (ID Token, SAML Assertion, Refresh Token)
 * Added requirement that the IdP confirm the subject token is actually a token of the indicated type
 * Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured
+* Editorial clarifications and typo fixes
 
 -04
 
