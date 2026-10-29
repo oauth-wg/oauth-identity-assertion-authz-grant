@@ -44,6 +44,7 @@ normative:
   RFC7519:
   RFC7521:
   RFC7523:
+  RFC7518:
   RFC8693:
   RFC8707:
   RFC8725:
@@ -74,6 +75,16 @@ normative:
       - ins: M. Jones
       - ins: B. de Medeiros
       - ins: C. Mortimore
+
+  OpenID.Discovery:
+    title: OpenID Connect Discovery 1.0 incorporating errata set 2
+    target: https://openid.net/specs/openid-connect-discovery-1_0.html
+    date: December 15, 2023
+    author:
+      - ins: N. Sakimura
+      - ins: J. Bradley
+      - ins: M. Jones
+      - ins: E. Jay
 
   OpenID.Enterprise:
     title: OpenID Connect Enterprise Extensions 1.0 - draft 01
@@ -178,11 +189,13 @@ Tenant
 
 # Identity Assertion JWT Authorization Grant {#id-jag}
 
-The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
+The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource, typically in another trust domain, on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
 
-An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.
+An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server, typically in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.
 
 As described in {{OpenID.Core}}, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.
+
+Because an ID-JAG is a JWT authorization grant, RS256 is mandatory to implement for both the IdP Authorization Server and the Resource Authorization Server ({{Section 5 of RFC7523}}). Resource Authorization Servers SHOULD also support ES256 {{RFC7518}}.
 
 ## ID-JAG Claims
 
@@ -192,7 +205,9 @@ The following claims are used within the Identity Assertion JWT Authorization Gr
 : REQUIRED - The issuer identifier of the IdP Authorization Server as defined in {{RFC8414}}.
 
 `sub`:
-: REQUIRED - Subject Identifier. An identifier within the IdP Authorization Server for the End-User, which is intended to be consumed by the Client as defined in {{OpenID.Core}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer. See {{client-id-mapping}} for additional considerations.
+: REQUIRED - Subject Identifier for the End-User, selected by the IdP Authorization Server for the Resource Authorization Server identified by the `aud` claim as described in {{subject-mapping}}. The `sub` claim identifies the End-User in the subject namespace of the ID-JAG issuer. A public subject identifier MUST be unique when scoped with issuer (`iss`+`sub`) for a single-tenant issuer and MUST be unique when scoped with issuer and tenant (`iss`+`tenant`+`sub`) for multi-tenant issuer.
+
+  When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, the ID-JAG MAY include `sub_id` to carry the SSO subject identifier. When both `sub` and `sub_id` are present, they MUST identify the same End-User.
 
 `sub_id`:
 : OPTIONAL - Subject Identifier as defined in {{RFC9493}}. The `sub_id` claim MAY be used to identify the same End-User as the `sub` claim using a different identifier namespace from the ID-JAG `iss` and `sub`. This is useful when the Resource Authorization Server resolves users by a non-JWT subject identifier, such as a SAML Assertion Subject `<NameID>`, in its SSO trust relationship with the IdP Authorization Server. See {{saml-nameid-format}} for the SAML NameID Subject Identifier Format defined by this specification, and {{saml-nameid-sub-id-processing}} for processing rules.
@@ -438,13 +453,13 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an Identity Assertion JWT Authorization Grant is being requested.
 
 `audience`:
-: REQUIRED - The identifier of the Resource Authorization Server in another trust domain as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
+: REQUIRED - The identifier of the Resource Authorization Server, typically in another trust domain, as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
 
 `resource`:
 : OPTIONAL - The Resource Identifier of the Resource Server as defined in {{Section 2 of RFC8707}}.
 
 `scope`:
-: OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
+: OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested. As in {{Section 2.1 of RFC8693}}, these values have the meaning defined by the Resource Authorization Server where the ID-JAG will be used, not their OpenID Connect meaning, so a value such as `profile` or `email` does not request identity claims (Section 5.4 of {{OpenID.Core}}).
 
 `authorization_details`:
 : OPTIONAL - A JSON string containing a JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This parameter enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
@@ -531,9 +546,12 @@ This non-normative example shows using a Refresh Token as the `subject_token` (w
 
 The IdP MUST validate the subject token:
 
+* The IdP MUST determine that the `subject_token` is in fact a token of the type indicated by `subject_token_type`, and that the IdP issued it for that purpose. A token that the IdP issued for a different purpose, such as an access token, an ID-JAG, or a client assertion, MUST NOT be accepted as an Identity Assertion.
 * If the subject token is an Identity Assertion, the IdP MUST validate the assertion and MUST validate that the audience of the assertion (e.g. the `aud` claim of the ID Token or SAML Audience) matches the `client_id` of the client authentication of the request.
 * If the subject token is a Refresh Token, the IdP MUST validate it the same way it would for a standard `refresh_token` grant at the token endpoint: the token is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and the requested scopes and audience remain within the authorization context of the Refresh Token.
 * If the subject token is a Refresh Token, the IdP Authorization Server SHOULD retrieve or assemble the subject's claims needed for the ID-JAG in the same way it would when issuing a new Identity Assertion during a token request, so that the resulting ID-JAG reflects current subject attributes and policy.
+
+Determining that a JWT is an ID Token requires care, because OpenID Connect Core {{OpenID.Core}} does not define an explicit `typ` header value for ID Tokens, so an ID Token cannot be positively identified from its header alone. The IdP MUST reject the request if the `subject_token` carries a `typ` header that identifies a different type of token, such as the access token type defined in {{RFC9068}} or the ID-JAG type defined in {{id-jag}}. Because the IdP issued the `subject_token` itself, this determination is made entirely within the IdP's own trust domain and does not depend on interoperable agreement with any other party, so the IdP MAY use deployment-specific means to positively identify the token as an ID Token, such as a claim that the IdP includes in the ID Tokens it issues, a signing key or key set reserved for ID Tokens, or an internal record of the type of each token it issued. Explicit typing of JWTs, as recommended in {{Section 3.11 of RFC8725}}, avoids this ambiguity where an explicit type is defined. For a SAML 2.0 Assertion, the IdP MUST likewise confirm that the assertion is one it issued as an authentication assertion for the subject, and not a SAML assertion or protocol message it issued for a different purpose.
 
 If an `actor_token` is present, any processing of it is outside the scope of this specification. Future profiles or extensions MAY define validation requirements, policy evaluation rules, and issued token content related to `actor_token`.
 
@@ -776,6 +794,8 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{Section 3.11 of RFC8725}})
 
+* The Resource Authorization Server MUST reject the ID-JAG with an `invalid_grant` error if the `iss` claim does not identify an IdP Authorization Server it trusts. It SHOULD obtain that issuer's keys from the `jwks_uri` in the issuer's metadata ({{idp-metadata}}). It validates the signature as required by {{Section 5.2 of RFC7521}}, accepting only the algorithms it allows for that issuer ({{Section 3.1 of RFC8725}}).
+
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
 
 * The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
@@ -816,9 +836,9 @@ The Resource Authorization Server's token endpoint responds with an OAuth 2.0 To
 
 The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
 
-When the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server.
+When the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server. However, the Resource Authorization Server can reject an ID-JAG with an `exp` longer than its policy allows, or accept each ID-JAG only once by tracking its `jti` ({{Section 3 of RFC7523}}).
 
-If the ID-JAG has expired, the Client SHOULD request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Sever using the original Identity Assertion from the IdP (e.g ID Token)
+If the ID-JAG has expired, or the Resource Authorization Server rejects a re-submitted ID-JAG with an `invalid_grant` error, the Client SHOULD request a new ID-JAG from the IdP Authorization Server before presenting it to the Resource Authorization Server using the original Identity Assertion from the IdP (e.g ID Token). If the Resource Authorization Server also rejects the new ID-JAG, requesting another will not resolve the error.
 
 If the ID Token is expired, the Client MAY use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it SHOULD re-authenticate the user by redirecting to the IdP.
 
@@ -893,7 +913,7 @@ When this assertion is used as the `subject_token` in Token Exchange, the IdP Au
       "expires_in": 1209600
     }
 
-# Cross-Domain Client ID Handling {#client-id-mapping}
+# Cross-Domain Client and Subject Identifier Handling
 
 There are three separate OAuth/OpenID Connect/SAML relationships involved in this flow:
 
@@ -903,13 +923,21 @@ There are three separate OAuth/OpenID Connect/SAML relationships involved in thi
 
 Each relationship is typically represented by independent client registrations between each party. For example, the IdP Authorization Server typically issues a Client ID for both the Client and Resource Authorization Server to use for single sign-on with OpenID Connect as a Relying Party. Similarly, the Resource Authorization Server typically issues a Client ID for the Client to use for API access to the Resource Server.   The Client may choose to use different client credentials with each registration.
 
+## Client ID Mapping {#client-id-mapping}
+
 In this flow, the IdP Authorization Server accepts a Token Exchange request from the Client, and issues an ID-JAG that will be consumed by the Resource Authorization Server. This means the IdP Authorization Server needs to know about the relationship between the Client and the Resource Authorization Server, in order to include a `client_id` claim in the ID-JAG that will be recognized by the Resource Authorization Server.
 
 This can be handled by the IdP Authorization Server maintaining a record of each `client_id` used between Clients and Resource Authorization Servers, which will need to be obtained by out-of-band mechanisms.  The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG for the mapped `client_id`. Requiring a confidential client helps to prevent the IdP Authorization Server from delegating access to any of the valid clients for the Resource Authorization Server.
 
-Note: The IdP Authorization Server is also responsible for mapping subject identifiers across Clients and trust domains in the ID-JAG. The same user may have a pairwise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party. The Resource Authorization Server needs consistent subject identifiers for subject resolution across both SSO and API access. The IdP Authorization Server needs to ensure that the subject identifier issued in the ID-JAG is the same identifier for the user that it would have included in an ID Token intended for the Resource Authorization Server.
-
 Alternatively, if clients use "Client ID Metadata Document" {{I-D.ietf-oauth-client-id-metadata-document}} as their client identifiers, this acts as a shared global namespace of Client IDs and removes the need for the IdP Authorization Server to maintain a mapping of each client registration.
+
+## Subject Identifier Mapping {#subject-mapping}
+
+The IdP Authorization Server selects the subject identifiers in the ID-JAG for the Resource Authorization Server identified by the `aud` claim, not for the Client. The same user can have a pairwise subject identifier issued in an ID Token for SSO to the Client and another with SSO to the Resource Authorization Server as a Relying Party, and the Resource Authorization Server needs consistent subject identifiers for subject resolution across both SSO and API access.
+
+The IdP Authorization Server MUST include the same `sub` value for a given End-User in every ID-JAG it issues for the same Resource Authorization Server and, when present, the same `aud_tenant`, regardless of which Client requested it. When the Resource Authorization Server uses OpenID Connect for SSO with the IdP Authorization Server, that value MUST be the `sub` the IdP Authorization Server would include in an ID Token issued to the Resource Authorization Server as a Relying Party. This requires the IdP Authorization Server to know which Relying Party registration corresponds to the Resource Authorization Server's issuer identifier, a mapping established out of band like the `client_id` mapping in {{client-id-mapping}}. When pairwise subject identifiers are used, the `sub` claim of the ID-JAG can differ from the `sub` claim of the Client's ID Token (see {{sub-id-disclosure}}).
+
+When the Resource Authorization Server uses a different subject namespace for SSO, such as a SAML Assertion Subject `<NameID>` namespace, see the `sub_id` claim and {{saml-nameid-subject-identifier}}.
 
 # Tenant Relationships with Issuer and Client ID {#tenant-relationships}
 
@@ -967,6 +995,13 @@ To advertise support for issuing an Identity Assertion JWT Authorization Grant v
 
 `urn:ietf:params:oauth:token-type:id-jag`
 
+The IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located from its issuer identifier as described in {{Section 3 of RFC8414}} or Section 4 of {{OpenID.Discovery}}.
+
+The IdP Authorization Server can also advertise the algorithms it uses to sign ID-JAGs:
+
+`id_jag_signing_alg_values_supported`:
+: OPTIONAL. JSON array containing a list of the JWS signing algorithms (`alg` values) supported by the IdP Authorization Server for signing ID-JAGs. If present, the list MUST include RS256. `id_token_signing_alg_values_supported` {{OpenID.Discovery}} does not describe ID-JAGs, which the IdP Authorization Server can sign differently from ID Tokens.
+
 ## Resource Authorization Server Metadata {#ras-metadata}
 
 A Resource Authorization Server can advertise support for authorization grant profiles in its OAuth Authorization Server Metadata {{RFC8414}} using the `authorization_grant_profiles_supported` metadata parameter.
@@ -1001,6 +1036,24 @@ A client that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authoriz
 
 This specification SHOULD only be supported for confidential clients.  Public clients SHOULD use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.
 
+## Storage of Subject Tokens {#subject-token-storage}
+
+The subject tokens used with this specification, whether an OpenID Connect ID Token, a SAML 2.0 Assertion, or a Refresh Token issued by the IdP Authorization Server, are high-value artifacts. A client that holds one of these can obtain an ID-JAG for any Resource Authorization Server the IdP policy permits, and can then redeem each ID-JAG for an access token at the corresponding Resource Authorization Server. A compromised subject token therefore exposes not only the IdP, but potentially every downstream resource reachable through it, and does so without further interaction with the user.
+
+Exploiting a stolen subject token also requires the attacker to authenticate to the IdP Authorization Server's token endpoint as the client, since the Token Exchange request requires client authentication. This means the client's credentials are the only remaining barrier, and both the subject token and the client credentials are typically held by the same deployment. An attacker who obtains access to the client's storage, backup, logs, or process memory is likely to obtain both. Deployments SHOULD NOT rely on client authentication alone to mitigate the theft of subject tokens.
+
+Clients that retain subject tokens beyond the immediate Token Exchange request:
+
+* SHOULD protect them at rest with at least the same protections applied to the client's own credentials, and SHOULD store them in a separate protection domain from the client credentials, for example by keeping client authentication keys in a hardware security module or key management service so that both cannot be exfiltrated together.
+* SHOULD NOT write them to application logs, error reports, telemetry, traces, or crash dumps, and SHOULD NOT include them in HTTP request URIs where they may be recorded by intermediaries.
+* SHOULD scope stored subject tokens to the individual user session or task they were obtained for, rather than pooling them in a shared cache that any part of the client can read.
+* SHOULD discard them as soon as they are no longer needed, and SHOULD NOT cache an Identity Assertion beyond its expiration.
+* SHOULD prefer requesting a new ID-JAG when needed over caching issued ID-JAGs and access tokens, since the ID-JAG and any resulting access tokens are themselves credentials subject to the same handling requirements.
+
+IdP Authorization Servers SHOULD limit exposure from a compromised subject token by issuing Identity Assertions with short lifetimes, and, when Refresh Tokens are accepted as subject tokens, by sender-constraining those Refresh Tokens as described in {{sender-constraining-tokens}}, rotating them on use, and binding them to the client that they were issued to. IdP Authorization Servers SHOULD also provide a mechanism to revoke Refresh Tokens and to invalidate outstanding sessions for a subject, so that a detected compromise can be contained before the affected subject tokens expire.
+
+Because a single subject token can be exchanged for ID-JAGs targeting many different Resource Authorization Servers, IdP Authorization Servers SHOULD record the `audience`, `resource`, `scope`, and authenticated client of each Token Exchange request, which allows unusual patterns, such as a client requesting ID-JAGs for audiences it does not normally access, to be detected.
+
 ## Step-Up Authentication
 
 In the initial token exchange request, the IdP may require step-up authentication for the subject if the authentication context in the subject's assertion does not meet policy requirements. An `insufficient_user_authentication` OAuth error response may be returned to convey the authentication requirements back to the client similar to OAuth 2.0 Step-up Authentication Challenge Protocol {{RFC9470}}.
@@ -1023,7 +1076,7 @@ TBD: It may make more sense to request the Identity Assertion JWT Authorization 
 
 ## Cross-Domain Use
 
-This specification is intended for cross-domain uses where the Client, Resource Authorization Server, and IdP are in different trust domains. In particular, the IdP MUST NOT issue access tokens in response to an ID-JAG it issued itself in the same domain. Doing so could lead to unintentional broadening of the scope of authorization. This does not preclude a single piece of software from being both an IdP issuing ID-JAGs as well as a Resource Authorization Server consuming ID-JAGs, as long as the ID-JAG crosses a trust domain such as a tenant or customer boundary.
+This specification is intended for cross-domain uses where the Client, Resource Authorization Server, and IdP are in different trust domains. In particular, the IdP MUST NOT issue access tokens in response to an ID-JAG it issued itself unless explicitly configured to do so, since this could lead to unintentional broadening of the scope of authorization. When so configured, the IdP MUST NOT grant the client more access than it would when issuing an access token for the same subject and resource directly, and evaluates any consent and authentication requirements when issuing the ID-JAG, since the access token request does not involve the user. This does not preclude a single piece of software from being both an IdP issuing ID-JAGs as well as a Resource Authorization Server consuming ID-JAGs, as long as the ID-JAG crosses a trust domain such as a tenant or customer boundary.
 
 An ID-JAG is specific to the trust relationship between the issuing IdP Authorization Server and the Resource Authorization Server identified by the `aud` claim. When a deployment involves additional downstream hops, the same ID-JAG MUST NOT be reused as the authorization grant for a different downstream Resource Authorization Server. For each subsequent hop, a new ID-JAG MAY be issued by the IdP Authorization Server trusted by that downstream Resource Authorization Server for SSO and subject resolution, or other mechanisms MAY be used.
 
@@ -1043,7 +1096,7 @@ The Resource Authorization Server MUST use a SAML NameID `sub_id` only when the 
 
 ## Subject Identifier Disclosure {#sub-id-disclosure}
 
-The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.
+The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. For the same reason, a pairwise `sub` selected for the Resource Authorization Server ({{subject-mapping}}) is disclosed to the Client, which can link it to the `sub` in its own ID Token. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.
 
 ## Actor Delegation Extensions
 
@@ -1055,7 +1108,7 @@ Such profiles or extensions should define how `actor_token` is validated, how th
 
 When such profiles or extensions use an `act` claim, they should preserve the distinction between the actor identified by `act` and the resource owner identified by `sub`. The authenticated client identity is also not a substitute for actor identity.
 
-## Sender Constraining Tokens
+## Sender Constraining Tokens {#sender-constraining-tokens}
 
 Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 4 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.
 
@@ -1284,10 +1337,15 @@ This section registers `urn:ietf:params:oauth:grant-profile:id-jag` in the "OAut
 
 ## OAuth Authorization Server Metadata Registration
 
-This section registers `authorization_grant_profiles_supported` in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+This section registers the following in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
 
 * Metadata Name: `authorization_grant_profiles_supported`
 * Metadata Description: JSON array of supported authorization grant profile identifiers
+* Change Controller: IETF
+* Specification Document: This document
+
+* Metadata Name: `id_jag_signing_alg_values_supported`
+* Metadata Description: JSON array of the JWS signing algorithms supported for signing Identity Assertion JWT Authorization Grants
 * Change Controller: IETF
 * Specification Document: This document
 
@@ -1673,7 +1731,7 @@ AI Agent (`https://ai-agent-app.example/`) calls the External Tool API (Resource
 # Acknowledgments
 {:numbered="false"}
 
-The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Kai Lehmann, Dean H. Saxe, Filip Skokan, Phil Whipps.
+The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Kai Lehmann, Anuj Mistry, Dean H. Saxe, Filip Skokan, Phil Whipps.
 
 # Document History
 {:numbered="false"}
@@ -1683,6 +1741,9 @@ The authors would like to thank the following people for their contributions and
 -05
 
 * Added mTLS certificate binding as an alternative sender-constraining mechanism for the ID-JAG, alongside DPoP
+* Added security considerations on storage and caching of subject tokens (ID Token, SAML Assertion, Refresh Token)
+* Added requirement that the IdP confirm the subject token is actually a token of the indicated type
+* Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured
 
 -04
 
