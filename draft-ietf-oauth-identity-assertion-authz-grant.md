@@ -491,7 +491,7 @@ This specification does not define normative processing requirements for `actor_
 
 This specification profiles the `audience` and `resource` parameters of OAuth 2.0 Token Exchange {{RFC8693}} for interoperable use with ID-JAG. In this profile, `audience` identifies the Resource Authorization Server to which the ID-JAG is issued, and `resource` identifies the protected resource for which access is requested. This profile uses `audience` for the Resource Authorization Server rather than defining a new parameter. The ID-JAG is issued by the IdP Authorization Server for processing by the Resource Authorization Server, and the Resource Authorization Server validates the `aud` claim to determine whether the ID-JAG was issued for it. The `resource` parameter continues to identify the protected resource, as defined in {{RFC8707}}. This convention provides a single interoperable interpretation of `audience` and `resource`, including deployments in which one Resource Authorization Server governs multiple protected resources or tenant-specific resources.
 
-Resource identifiers in the `resource` parameter, in the `resource` claim, and of the protected resources a Resource Authorization Server governs are compared using Simple String Comparison ({{Section 6.2.1 of RFC3986}}). The IdP Authorization Server MUST copy each granted resource identifier that the Client requested into the ID-JAG unchanged.
+Resource identifiers in the `resource` parameter, in the `resource` claim, and of the protected resources a Resource Authorization Server governs are compared using Simple String Comparison ({{Section 6.2.1 of RFC3986}}).
 
 For example, if a SaaS provider operates a Resource Authorization Server at `https://authorization-server.saas-tool.example/` and protected resources at `https://api.saas-tool.example/files` and `https://api.saas-tool.example/messages`, a client requesting access to the Files API uses:
 
@@ -582,7 +582,7 @@ When processing the request:
 
 * If both `scope` and `authorization_details` are present, the IdP MUST process both. The IdP SHOULD ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
 
-* The IdP MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it MUST reflect the granted values in the ID-JAG.
+* The IdP MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it MUST reflect the granted values in the ID-JAG. Each granted resource identifier that the Client requested MUST appear in the `resource` claim unchanged.
 
 How the IdP learns which protected resources each Resource Authorization Server governs is out of scope for this specification.
 
