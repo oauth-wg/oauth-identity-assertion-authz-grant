@@ -415,7 +415,8 @@ Table of Contents
       access is granted, using resource identifiers as defined in
       Section 2 of [RFC8707].  The value is a string for a single
       resource, or a non-empty JSON array of unique strings for multiple
-      resources.
+      resources.  Resource identifiers are compared as described in
+      Section 4.3.
 
    scope:  OPTIONAL - a JSON string containing a space-separated list of
       scopes associated with the token, in the format described in
@@ -478,7 +479,7 @@ Table of Contents
      "client_id": "f53f191f9311af35",
      "exp": 1311281970,
      "iat": 1311280970,
-     "resource": "https://api.chat.example/",
+     "resource": "https://acme.chat.example/api",
      "scope": "chat.read chat.history",
      "auth_time": 1311280970,
      "amr": [
@@ -848,10 +849,12 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
       identifier in the aud claim.
 
    resource:  RECOMMENDED - The Resource Identifier(s) of the protected
-      resource(s) as defined in Section 2 of [RFC8707].  A Client that
-      discovered the Resource Authorization Server using Protected
-      Resource Metadata [RFC9728] MUST include the resource value from
-      that metadata unchanged (Section 9.6).
+      resource(s), governed by the Resource Authorization Server
+      identified by audience, for which access is requested, as defined
+      in Section 2 of [RFC8707].  A Client that discovered the Resource
+      Authorization Server using Protected Resource Metadata [RFC9728]
+      MUST include the resource value from that metadata unchanged
+      (Section 9.6).
 
    scope:  OPTIONAL - The space-separated list of scopes at the Resource
       Server that is being requested.  As in Section 2.1 of [RFC8693],
@@ -917,13 +920,14 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
    convention provides a single interoperable interpretation of audience
    and resource, including deployments in which one Resource
    Authorization Server governs multiple protected resources or tenant-
-   specific resources.  A Resource Authorization Server governs a
-   protected resource when it issues access tokens for that resource.
+   specific resources.
 
-   Resource identifiers in the resource parameter and the resource claim
-   are compared using Simple String Comparison (Section 6.2.1 of
-   [RFC3986]).  The IdP Authorization Server copies each granted
-   resource identifier into the ID-JAG unchanged.
+   Resource identifiers in the resource parameter, in the resource
+   claim, and of the protected resources a Resource Authorization Server
+   governs are compared using Simple String Comparison (Section 6.2.1 of
+   [RFC3986]).  The IdP Authorization Server MUST copy each granted
+   resource identifier that the Client requested into the ID-JAG
+   unchanged.
 
    For example, if a SaaS provider operates a Resource Authorization
    Server at https://authorization-server.saas-tool.example/ and
@@ -1166,15 +1170,15 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       what was requested, or if the IdP modified the authorization
       details.
 
-   The response does not indicate the granted resources.  A Client can
-   learn them from the resource claim of the ID-JAG.
-
    expires_in:  RECOMMENDED - The lifetime in seconds of the
       authorization grant.
 
    refresh_token:  OPTIONAL according to Section 2.2 of [RFC8693].  In
       the context of this specification, this parameter SHOULD NOT be
       used.
+
+   The response does not include the granted resources.  Unless the ID-
+   JAG is encrypted, the Client can read them from its resource claim.
 
 4.3.4.1.  Issued Identity Assertion JWT Authorization Grant
 
@@ -1436,16 +1440,17 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    *  If the resource claim is present, each identifier MUST be a
       protected resource governed by this Resource Authorization Server
-      in the tenant context of the ID-JAG (Section 6), compared as
-      described in Section 4.3.  If any identifier is not, the Resource
-      Authorization Server MUST reject the request with invalid_grant as
-      defined in Section 5.2 of [RFC6749], because the ID-JAG was not
-      issued for resources it governs.  The access token MUST be
-      restricted to resources in the resource claim, and SHOULD be
-      audience-restricted to them (Section 2 of [RFC8707]).  The
+      for the tenant identified by aud_tenant when present, otherwise
+      for the tenant it associates with the issuing IdP (Section 6),
+      compared as described in Section 4.3.  If any identifier is not,
+      the Resource Authorization Server MUST reject the request with
+      invalid_grant as defined in Section 5.2 of [RFC6749], because the
+      ID-JAG was not issued for resources it governs.  The access token
+      MUST be restricted to resources in the resource claim, and SHOULD
+      be audience-restricted to them (Section 2 of [RFC8707]).  The
       Resource Authorization Server MAY restrict it to a subset based on
-      local policy, and MUST reject the request if none of the resources
-      are acceptable.
+      local policy, and MUST reject the request with access_denied
+      (Section 4.4.3) if none of the resources are acceptable.
 
    *  If the resource claim is absent, the Resource Authorization Server
       MAY select one or more default resources based on policy, client
@@ -1475,7 +1480,8 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       resource identifiers and authorization details when issuing the
       access token.  The Resource Authorization Server MAY derive
       resource identifiers from authorization details or vice versa, or
-      process them independently based on policy.
+      process them independently based on policy.  Any resource
+      identifiers it derives MUST be among those in the resource claim.
 
    *  If both scope and authorization_details claims are present, the
       Resource Authorization Server MUST process both.  The Resource
@@ -2092,11 +2098,11 @@ Cache-Control: no-store
    value (Section 4.3), the ID-JAG names the attacker's resource, so the
    legitimate Resource Authorization Server rejects the relayed ID-JAG
    because it does not govern that resource (Section 4.4).  An IdP that
-   knows which resources that Resource Authorization Server governs
-   rejects the Token Exchange request instead, so the ID-JAG never
-   reaches the attacker.  A sender-constrained ID-JAG (Section 9.11)
-   also defeats the relay, because the attacker cannot prove possession
-   of the client's key.
+   checks which resources that Resource Authorization Server governs
+   (Section 4.3) rejects the Token Exchange request instead, so the ID-
+   JAG never reaches the attacker.  A sender-constrained ID-JAG
+   (Section 9.11) also defeats the relay, because the attacker cannot
+   prove possession of the client's key.
 
 9.6.  Protected Resource Metadata Validation
 
@@ -2112,8 +2118,9 @@ Cache-Control: no-store
    Server unrelated to the intended resource.
 
    Together with the Authorization Server metadata issuer check in
-   Section 9.5, these validations bind discovery and the grant to the
-   resource the client intended to access.
+   Section 9.5, this validation binds discovery to the resource the
+   client intended to access, and including the validated resource value
+   in the Token Exchange request (Section 4.3) binds the grant to it.
 
 9.7.  Metadata Disclosure
 
@@ -2781,6 +2788,11 @@ Cache-Control: no-store
               DOI 10.17487/RFC9493, December 2023,
               <https://www.rfc-editor.org/rfc/rfc9493>.
 
+   [RFC9728]  Jones, M.B., Hunt, P., and A. Parecki, "OAuth 2.0
+              Protected Resource Metadata", RFC 9728,
+              DOI 10.17487/RFC9728, April 2025,
+              <https://www.rfc-editor.org/rfc/rfc9728>.
+
 11.2.  Informative References
 
    [I-D.ietf-oauth-client-id-metadata-document]
@@ -2798,11 +2810,6 @@ Cache-Control: no-store
               Authentication Challenge Protocol", RFC 9470,
               DOI 10.17487/RFC9470, September 2023,
               <https://www.rfc-editor.org/rfc/rfc9470>.
-
-   [RFC9728]  Jones, M.B., Hunt, P., and A. Parecki, "OAuth 2.0
-              Protected Resource Metadata", RFC 9728,
-              DOI 10.17487/RFC9728, April 2025,
-              <https://www.rfc-editor.org/rfc/rfc9728>.
 
 Appendix A.  Use Cases
 
