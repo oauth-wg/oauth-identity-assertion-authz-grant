@@ -1225,7 +1225,10 @@ svg {
                     <p id="section-toc.1-1.4.2.4.2.2.1"><a href="#section-4.4.2" class="auto internal xref">4.4.2</a>.  <a href="#name-response-2" class="internal xref">Response</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.3">
-                    <p id="section-toc.1-1.4.2.4.2.3.1"><a href="#section-4.4.3" class="auto internal xref">4.4.3</a>.  <a href="#name-refresh-token" class="internal xref">Refresh Token</a></p>
+                    <p id="section-toc.1-1.4.2.4.2.3.1"><a href="#section-4.4.3" class="auto internal xref">4.4.3</a>.  <a href="#name-error-response-2" class="internal xref">Error Response</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.4">
+                    <p id="section-toc.1-1.4.2.4.2.4.1"><a href="#section-4.4.4" class="auto internal xref">4.4.4</a>.  <a href="#name-refresh-token" class="internal xref">Refresh Token</a></p>
 </li>
                 </ul>
 </li>
@@ -2368,24 +2371,36 @@ Pragma: no-cache
 </div>
 </section>
 </div>
-<div id="error-response">
+<div id="token-exchange-error-response">
 <section id="section-4.3.4.3">
             <h5 id="name-error-response">
 <a href="#section-4.3.4.3" class="section-number selfRef">4.3.4.3. </a><a href="#name-error-response" class="section-name selfRef">Error Response</a>
             </h5>
-<p id="section-4.3.4.3-1">On an error condition, the IdP returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>, e.g:<a href="#section-4.3.4.3-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.3.4.3-2">
+<p id="section-4.3.4.3-1">On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>. Any OAuth error code <span class="bcp14">MAY</span> be returned; this specification profiles the following two codes for interoperability:<a href="#section-4.3.4.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.3.4.3-2.1">
+                <p id="section-4.3.4.3-2.1.1"><code>invalid_grant</code>: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked). A re-issued subject token may resolve the error.<a href="#section-4.3.4.3-2.1.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.4.3-2.1.2">
 <pre>
-HTTP/1.1 400 Bad Request
-Content-Type: application/json
-Cache-Control: no-store
-
 {
   "error": "invalid_grant",
   "error_description": "Audience validation failed"
 }
-</pre><a href="#section-4.3.4.3-2" class="pilcrow">¶</a>
+</pre><a href="#section-4.3.4.3-2.1.2" class="pilcrow">¶</a>
 </div>
+</li>
+              <li class="normal" id="section-4.3.4.3-2.2">
+                <p id="section-4.3.4.3-2.2.1"><code>access_denied</code>: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow.<a href="#section-4.3.4.3-2.2.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.3.4.3-2.2.2">
+<pre>
+{
+  "error": "access_denied",
+  "error_description": "Client is not authorized to access the target Resource Authorization Server"
+}
+</pre><a href="#section-4.3.4.3-2.2.2" class="pilcrow">¶</a>
+</div>
+</li>
+            </ul>
 </section>
 </div>
 </section>
@@ -2494,16 +2509,48 @@ Pragma: no-cache
 </div>
 </section>
 </div>
-<div id="refresh-token">
+<div id="access-token-error-response">
 <section id="section-4.4.3">
-          <h4 id="name-refresh-token">
-<a href="#section-4.4.3" class="section-number selfRef">4.4.3. </a><a href="#name-refresh-token" class="section-name selfRef">Refresh Token</a>
+          <h4 id="name-error-response-2">
+<a href="#section-4.4.3" class="section-number selfRef">4.4.3. </a><a href="#name-error-response-2" class="section-name selfRef">Error Response</a>
           </h4>
-<p id="section-4.4.3-1">The Resource Authorization Server <span class="bcp14">SHOULD NOT</span> return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-5.2" class="relref">Section 5.2</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>.<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-2">When the access token has expired, clients <span class="bcp14">MAY</span> re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server. However, the Resource Authorization Server can reject an ID-JAG with an <code>exp</code> longer than its policy allows, or accept each ID-JAG only once by tracking its <code>jti</code> (<span><a href="https://rfc-editor.org/rfc/rfc7523#section-3" class="relref">Section 3</a> of [<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>).<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-3">If the ID-JAG has expired, or the Resource Authorization Server rejects a re-submitted ID-JAG with an <code>invalid_grant</code> error, the Client <span class="bcp14">SHOULD</span> request a new ID-JAG from the IdP Authorization Server using the original Identity Assertion from the IdP (e.g ID Token) before presenting it to the Resource Authorization Server. If the Resource Authorization Server also rejects the new ID-JAG, requesting another will not resolve the error.<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-4">If the ID Token is expired, the Client <span class="bcp14">MAY</span> use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it <span class="bcp14">SHOULD</span> re-authenticate the user by redirecting to the IdP.<a href="#section-4.4.3-4" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-5">If the IdP Authorization Server supports Refresh Tokens as a <code>subject_token</code> in Token Exchange, the client can skip renewing the Identity Assertion and directly request a new ID-JAG by presenting the Refresh Token (see <a href="#token-exchange-refresh-token-example" class="auto internal xref">Section 4.3.2</a>).<a href="#section-4.4.3-5" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-1">On error, the Resource Authorization Server returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>. Any OAuth error code <span class="bcp14">MAY</span> be returned; this specification profiles the following two codes for interoperability:<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4.3-2.1">
+              <p id="section-4.4.3-2.1.1"><code>invalid_grant</code>: the ID-JAG failed a validation rule in <a href="#token-request" class="auto internal xref">Section 4.4</a> (for example signature, <code>aud</code>, <code>client_id</code>, <code>exp</code>, <code>typ</code>, decryption, or <code>cnf</code> binding). A re-issued ID-JAG may resolve the error.<a href="#section-4.4.3-2.1.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.4.3-2.1.2">
+<pre>
+{
+  "error": "invalid_grant",
+  "error_description": "Audience validation failed"
+}
+</pre><a href="#section-4.4.3-2.1.2" class="pilcrow">¶</a>
+</div>
+</li>
+            <li class="normal" id="section-4.4.3-2.2">
+              <p id="section-4.4.3-2.2.1"><code>access_denied</code>: the ID-JAG is valid but the End-User or Client is not authorized at the Resource Authorization Server (for example the End-User lacks a license, entitlement, or provisioning record, or is denied by the Resource Authorization Server's policy or role/permission assignments). A re-issued ID-JAG will not resolve the error. Remediation is defined by the Resource Authorization Server operator's access-request, entitlement, or provisioning process, such as an Identity Governance and Administration (IGA) workflow.<a href="#section-4.4.3-2.2.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.4.3-2.2.2">
+<pre>
+{
+  "error": "access_denied",
+  "error_description": "The end-user is not licensed for this application"
+}
+</pre><a href="#section-4.4.3-2.2.2" class="pilcrow">¶</a>
+</div>
+</li>
+          </ul>
+</section>
+</div>
+<div id="refresh-token">
+<section id="section-4.4.4">
+          <h4 id="name-refresh-token">
+<a href="#section-4.4.4" class="section-number selfRef">4.4.4. </a><a href="#name-refresh-token" class="section-name selfRef">Refresh Token</a>
+          </h4>
+<p id="section-4.4.4-1">The Resource Authorization Server <span class="bcp14">SHOULD NOT</span> return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-5.2" class="relref">Section 5.2</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>.<a href="#section-4.4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.4-2">When the access token has expired, clients <span class="bcp14">MAY</span> re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server. However, the Resource Authorization Server can reject an ID-JAG with an <code>exp</code> longer than its policy allows, or accept each ID-JAG only once by tracking its <code>jti</code> (<span><a href="https://rfc-editor.org/rfc/rfc7523#section-3" class="relref">Section 3</a> of [<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>).<a href="#section-4.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.4-3">If the ID-JAG has expired, or the Resource Authorization Server rejects a re-submitted ID-JAG with an <code>invalid_grant</code> error, the Client <span class="bcp14">SHOULD</span> request a new ID-JAG from the IdP Authorization Server using the original Identity Assertion from the IdP (e.g ID Token) before presenting it to the Resource Authorization Server. If the Resource Authorization Server also rejects the new ID-JAG, requesting another will not resolve the error.<a href="#section-4.4.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.4.4-4">If the ID Token is expired, the Client <span class="bcp14">MAY</span> use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it <span class="bcp14">SHOULD</span> re-authenticate the user by redirecting to the IdP.<a href="#section-4.4.4-4" class="pilcrow">¶</a></p>
+<p id="section-4.4.4-5">If the IdP Authorization Server supports Refresh Tokens as a <code>subject_token</code> in Token Exchange, the client can skip renewing the Identity Assertion and directly request a new ID-JAG by presenting the Refresh Token (see <a href="#token-exchange-refresh-token-example" class="auto internal xref">Section 4.3.2</a>).<a href="#section-4.4.4-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
