@@ -111,14 +111,15 @@ Table of Contents
    8.  Client Metadata
    9.  Security Considerations
      9.1.  Client Authentication
-     9.2.  Step-Up Authentication
-     9.3.  Cross-Domain Use
-     9.4.  Metadata Disclosure
-     9.5.  Subject Identifier Trust
-     9.6.  Subject Identifier Disclosure
-     9.7.  Actor Delegation Extensions
-     9.8.  Sender Constraining Tokens
-       9.8.1.  Proof-of-Possession
+     9.2.  Storage of Subject Tokens
+     9.3.  Step-Up Authentication
+     9.4.  Cross-Domain Use
+     9.5.  Metadata Disclosure
+     9.6.  Subject Identifier Trust
+     9.7.  Subject Identifier Disclosure
+     9.8.  Actor Delegation Extensions
+     9.9.  Sender Constraining Tokens
+       9.9.1.  Proof-of-Possession
    10. IANA Considerations
      10.1.  Media Types
      10.2.  OAuth URI Registration
@@ -598,7 +599,7 @@ Table of Contents
    *  the sub_id claim is not authorized by local policy for the
       validated ID-JAG issuer.
 
-   See Section 9.5 and Section 9.6 for security considerations on the
+   See Section 9.6 and Section 9.7 for security considerations on the
    sub_id claim.
 
 4.  Cross-Domain Access
@@ -1561,7 +1562,7 @@ Pragma: no-cache
    a mapping established out of band like the client_id mapping in
    Section 5.1.  When pairwise subject identifiers are used, the sub
    claim of the ID-JAG can differ from the sub claim of the Client's ID
-   Token (see Section 9.6).
+   Token (see Section 9.7).
 
    When the Resource Authorization Server uses a different subject
    namespace for SSO, such as a SAML Assertion Subject <NameID>
@@ -1772,7 +1773,72 @@ Pragma: no-cache
    2.0 Authorization Request where the user can interactively consent to
    the access delegation.
 
-9.2.  Step-Up Authentication
+9.2.  Storage of Subject Tokens
+
+   The subject tokens used with this specification, whether an OpenID
+   Connect ID Token, a SAML 2.0 Assertion, or a Refresh Token issued by
+   the IdP Authorization Server, are high-value artifacts.  A client
+   that holds one of these can obtain an ID-JAG for any Resource
+   Authorization Server the IdP policy permits, and can then redeem each
+   ID-JAG for an access token at the corresponding Resource
+   Authorization Server.  A compromised subject token therefore exposes
+   not only the IdP, but potentially every downstream resource reachable
+   through it, and does so without further interaction with the user.
+
+   Exploiting a stolen subject token also requires the attacker to
+   authenticate to the IdP Authorization Server's token endpoint as the
+   client, since the Token Exchange request requires client
+   authentication.  This means the client's credentials are the only
+   remaining barrier, and both the subject token and the client
+   credentials are typically held by the same deployment.  An attacker
+   who obtains access to the client's storage, backup, logs, or process
+   memory is likely to obtain both.  Deployments SHOULD NOT rely on
+   client authentication alone to mitigate the theft of subject tokens.
+
+   Clients that retain subject tokens beyond the immediate Token
+   Exchange request:
+
+   *  SHOULD protect them at rest with at least the same protections
+      applied to the client's own credentials, and SHOULD store them in
+      a separate protection domain from the client credentials, for
+      example by keeping client authentication keys in a hardware
+      security module or key management service so that both cannot be
+      exfiltrated together.
+
+   *  SHOULD NOT write them to application logs, error reports,
+      telemetry, traces, or crash dumps, and SHOULD NOT include them in
+      HTTP request URIs where they may be recorded by intermediaries.
+
+   *  SHOULD scope stored subject tokens to the individual user session
+      or task they were obtained for, rather than pooling them in a
+      shared cache that any part of the client can read.
+
+   *  SHOULD discard them as soon as they are no longer needed, and
+      SHOULD NOT cache an Identity Assertion beyond its expiration.
+
+   *  SHOULD prefer requesting a new ID-JAG when needed over caching
+      issued ID-JAGs and access tokens, since the ID-JAG and any
+      resulting access tokens are themselves credentials subject to the
+      same handling requirements.
+
+   IdP Authorization Servers SHOULD limit exposure from a compromised
+   subject token by issuing Identity Assertions with short lifetimes,
+   and, when Refresh Tokens are accepted as subject tokens, by sender-
+   constraining those Refresh Tokens as described in Section 9.9,
+   rotating them on use, and binding them to the client that they were
+   issued to.  IdP Authorization Servers SHOULD also provide a mechanism
+   to revoke Refresh Tokens and to invalidate outstanding sessions for a
+   subject, so that a detected compromise can be contained before the
+   affected subject tokens expire.
+
+   Because a single subject token can be exchanged for ID-JAGs targeting
+   many different Resource Authorization Servers, IdP Authorization
+   Servers SHOULD record the audience, resource, scope, and
+   authenticated client of each Token Exchange request, which allows
+   unusual patterns, such as a client requesting ID-JAGs for audiences
+   it does not normally access, to be detected.
+
+9.3.  Step-Up Authentication
 
    In the initial token exchange request, the IdP may require step-up
    authentication for the subject if the authentication context in the
@@ -1800,7 +1866,7 @@ Cache-Control: no-store
    Connect for SSO when performing a step-up to skip the need for
    additional token exchange round-trip.
 
-9.3.  Cross-Domain Use
+9.4.  Cross-Domain Use
 
    This specification is intended for cross-domain uses where the
    Client, Resource Authorization Server, and IdP are in different trust
@@ -1827,7 +1893,7 @@ Cache-Control: no-store
    Authorization Server for SSO and subject resolution, or other
    mechanisms MAY be used.
 
-9.4.  Metadata Disclosure
+9.5.  Metadata Disclosure
 
    Advertising issuer-specific trust relationships in publicly
    accessible metadata can disclose federation topology, business
@@ -1847,7 +1913,7 @@ Cache-Control: no-store
    response MUST be specific to the authenticated client and MAY also be
    scoped by tenant, resource, or other local policy context.
 
-9.5.  Subject Identifier Trust
+9.6.  Subject Identifier Trust
 
    When the ID-JAG includes a sub_id claim, the Resource Authorization
    Server MUST NOT use the sub_id.issuer value to establish trust in the
@@ -1860,7 +1926,7 @@ Cache-Control: no-store
    SAML issuer identified by sub_id.issuer through local configuration
    or trusted federation metadata.
 
-9.6.  Subject Identifier Disclosure
+9.7.  Subject Identifier Disclosure
 
    The IdP Authorization Server SHOULD include sub_id only when needed
    by the target Resource Authorization Server for subject resolution.
@@ -1874,7 +1940,7 @@ Cache-Control: no-store
    identifiers included in the ID-JAG to those required by the Resource
    Authorization Server.
 
-9.7.  Actor Delegation Extensions
+9.8.  Actor Delegation Extensions
 
    This specification allows Token Exchange requests for ID-JAG to carry
    actor_token, but it does not define normative processing requirements
@@ -1899,9 +1965,9 @@ Cache-Control: no-store
    resource owner identified by sub.  The authenticated client identity
    is also not a substitute for actor identity.
 
-9.8.  Sender Constraining Tokens
+9.9.  Sender Constraining Tokens
 
-9.8.1.  Proof-of-Possession
+9.9.1.  Proof-of-Possession
 
    Identity Assertion JWT Authorization Grant may support key binding to
    enable sender-constrained tokens as described in Section 4 of
@@ -1931,7 +1997,7 @@ Cache-Control: no-store
    exchanging the ID-JAG for an access token at the Resource
    Authorization Server).
 
-9.8.1.1.  Proof-of-Possession During Token Exchange
+9.9.1.1.  Proof-of-Possession During Token Exchange
 
    When a client requests an ID-JAG from the IdP Authorization Server
    via Token Exchange, the client MAY include a DPoP proof in the
@@ -1998,14 +2064,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.  If no DPoP proof is presented, the IdP issues an ID-JAG without a
        cnf claim.
 
-9.8.1.2.  Proof-of-Possession During ID-JAG Exchange
+9.9.1.2.  Proof-of-Possession During ID-JAG Exchange
 
    When a client exchanges an ID-JAG for an access token at the Resource
    Authorization Server, the processing rules depend on whether the ID-
    JAG contains a cnf claim and whether the client presents a DPoP
    proof.
 
-9.8.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
+9.9.1.2.1.  ID-JAG Contains cnf Claim and DPoP Proof is Presented
 
    If the ID-JAG contains a cnf claim and the client presents a DPoP
    proof, the Resource Authorization Server MUST:
@@ -2051,7 +2117,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
      "scope": "chat.read chat.history"
    }
 
-9.8.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
+9.9.1.2.2.  ID-JAG Contains cnf Claim but DPoP Proof is Not Presented
 
    If the ID-JAG contains a cnf claim but the client does not present a
    DPoP proof, the Resource Authorization Server MUST reject the request
@@ -2069,7 +2135,7 @@ Cache-Control: no-store
   "error_description": "Proof of possession required for this authorization grant"
 }
 
-9.8.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
+9.9.1.2.3.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is
             Presented
 
    If the ID-JAG does not contain a cnf claim but the client presents a
@@ -2085,7 +2151,7 @@ Cache-Control: no-store
    3.  The access token response will indicate the token type (e.g.,
        DPoP for DPoP-bound tokens, or Bearer for unconstrained tokens).
 
-9.8.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
+9.9.1.2.4.  ID-JAG Does Not Contain cnf Claim and DPoP Proof is Not
             Presented
 
    If the ID-JAG does not contain a cnf claim and the client does not
@@ -2938,14 +3004,17 @@ Acknowledgments
    The authors would like to thank the following people for their
    contributions and reviews of this specification: Kamron
    Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher,
-   Bingrong He, Pieter Kasselman, Kai Lehmann, Dean H.  Saxe, Filip
-   Skokan, Phil Whipps.
+   Bingrong He, Pieter Kasselman, Kai Lehmann, Anuj Mistry, Dean H.
+   Saxe, Filip Skokan, Phil Whipps.
 
 Document History
 
    [[ To be removed from the final specification ]]
 
    -05
+
+   *  Added security considerations on storage and caching of subject
+      tokens (ID Token, SAML Assertion, Refresh Token)
 
    *  Added requirement that the IdP confirm the subject token is
       actually a token of the indicated type
