@@ -626,8 +626,6 @@ If access is granted, the IdP creates a signed Identity Assertion JWT Authorizat
 `refresh_token`:
 : OPTIONAL according to {{Section 2.2 of RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
 
-The response does not include the granted resources. Unless the ID-JAG is encrypted, the Client can read them from its `resource` claim.
-
 #### Issued Identity Assertion JWT Authorization Grant
 
 The following is a non-normative example of the issued token
