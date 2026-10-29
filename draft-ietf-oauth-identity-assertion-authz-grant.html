@@ -4121,7 +4121,7 @@ Content-Type: application/json
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-B-1">The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Aaron Jeongwoo Kim, Kai Lehmann, Anuj Mistry, Dean H. Saxe, Filip Skokan, Phil Whipps.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-1">The authors would like to thank the following people for their contributions and reviews of this specification: Kamron Batmanghelich, Paul Carleton, Sofia Desenberg, Meghna Dubey, George Fletcher, Bingrong He, Pieter Kasselman, Aaron Jeongwoo Kim, Kai Lehmann, David Lozano, Kaixuan Luo, Ken McCracken, Anuj Mistry, Dean H. Saxe, Kenneth Sinder, Filip Skokan, Phil Whipps.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="document-history">
@@ -4151,7 +4151,31 @@ Content-Type: application/json
           <p id="appendix-C-3.6.1">Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured<a href="#appendix-C-3.6.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-3.7">
-          <p id="appendix-C-3.7.1">Editorial clarifications and typo fixes<a href="#appendix-C-3.7.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.7.1">Profiled <code>access_denied</code> alongside <code>invalid_grant</code> for authorization failures at the IdP and Resource Authorization Server<a href="#appendix-C-3.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.8">
+          <p id="appendix-C-3.8.1">Clarified SAML NameID stability and scope assumptions, and resolution of users by attributes other than NameID<a href="#appendix-C-3.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.9">
+          <p id="appendix-C-3.9.1">Clarified the subjects whose claims the ID-JAG conveys (End-User, client, and actor)<a href="#appendix-C-3.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.10">
+          <p id="appendix-C-3.10.1">Clarified that <code>sub</code> is selected for the Resource Authorization Server, and added a Subject Identifier Mapping section<a href="#appendix-C-3.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.11">
+          <p id="appendix-C-3.11.1">Clarified that Token Exchange <code>scope</code> values are not OpenID Connect scopes<a href="#appendix-C-3.11.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.12">
+          <p id="appendix-C-3.12.1">Specified how the Resource Authorization Server finds and validates ID-JAG signing keys<a href="#appendix-C-3.12.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.13">
+          <p id="appendix-C-3.13.1">Added <code>id_jag_signing_alg_values_supported</code> IdP metadata parameter<a href="#appendix-C-3.13.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.14">
+          <p id="appendix-C-3.14.1">Clarified ID-JAG reuse limits and when the Client should request a new ID-JAG<a href="#appendix-C-3.14.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.15">
+          <p id="appendix-C-3.15.1">Editorial clarifications and typo fixes<a href="#appendix-C-3.15.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-C-4">-04<a href="#appendix-C-4" class="pilcrow">¶</a></p>

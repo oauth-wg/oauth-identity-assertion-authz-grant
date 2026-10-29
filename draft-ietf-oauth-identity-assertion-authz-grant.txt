@@ -3342,9 +3342,10 @@ Acknowledgments
 
    The authors would like to thank the following people for their
    contributions and reviews of this specification: Kamron
-   Batmanghelich, Sofia Desenberg, Meghna Dubey, George Fletcher,
-   Bingrong He, Pieter Kasselman, Aaron Jeongwoo Kim, Kai Lehmann, Anuj
-   Mistry, Dean H.  Saxe, Filip Skokan, Phil Whipps.
+   Batmanghelich, Paul Carleton, Sofia Desenberg, Meghna Dubey, George
+   Fletcher, Bingrong He, Pieter Kasselman, Aaron Jeongwoo Kim, Kai
+   Lehmann, David Lozano, Kaixuan Luo, Ken McCracken, Anuj Mistry, Dean
+   H.  Saxe, Kenneth Sinder, Filip Skokan, Phil Whipps.
 
 Document History
 
@@ -3369,6 +3370,29 @@ Document History
 
    *  Allowed an IdP to accept ID-JAGs it issued itself when explicitly
       configured
+
+   *  Profiled access_denied alongside invalid_grant for authorization
+      failures at the IdP and Resource Authorization Server
+
+   *  Clarified SAML NameID stability and scope assumptions, and
+      resolution of users by attributes other than NameID
+
+   *  Clarified the subjects whose claims the ID-JAG conveys (End-User,
+      client, and actor)
+
+   *  Clarified that sub is selected for the Resource Authorization
+      Server, and added a Subject Identifier Mapping section
+
+   *  Clarified that Token Exchange scope values are not OpenID Connect
+      scopes
+
+   *  Specified how the Resource Authorization Server finds and
+      validates ID-JAG signing keys
+
+   *  Added id_jag_signing_alg_values_supported IdP metadata parameter
+
+   *  Clarified ID-JAG reuse limits and when the Client should request a
+      new ID-JAG
 
    *  Editorial clarifications and typo fixes
 
