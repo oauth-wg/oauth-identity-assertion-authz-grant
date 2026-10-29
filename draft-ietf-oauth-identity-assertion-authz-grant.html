@@ -1307,7 +1307,10 @@ svg {
                 <p id="section-toc.1-1.9.2.9.1"><a href="#section-9.9" class="auto internal xref">9.9</a>.  <a href="#name-sender-constraining-tokens" class="internal xref">Sender Constraining Tokens</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.9.2.1">
-                    <p id="section-toc.1-1.9.2.9.2.1.1"><a href="#section-9.9.1" class="auto internal xref">9.9.1</a>.  <a href="#name-proof-of-possession" class="internal xref">Proof-of-Possession</a></p>
+                    <p id="section-toc.1-1.9.2.9.2.1.1"><a href="#section-9.9.1" class="auto internal xref">9.9.1</a>.  <a href="#name-dpop-key-binding" class="internal xref">DPoP Key Binding</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.9.2.2">
+                    <p id="section-toc.1-1.9.2.9.2.2.1"><a href="#section-9.9.2" class="auto internal xref">9.9.2</a>.  <a href="#name-mtls-certificate-binding" class="internal xref">mTLS Certificate Binding</a></p>
 </li>
                 </ul>
 </li>
@@ -2872,19 +2875,30 @@ Cache-Control: no-store
         <h3 id="name-sender-constraining-tokens">
 <a href="#section-9.9" class="section-number selfRef">9.9. </a><a href="#name-sender-constraining-tokens" class="section-name selfRef">Sender Constraining Tokens</a>
         </h3>
-<div id="proof-of-possession">
+<p id="section-9.9-1">Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-4" class="relref">Section 4</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> and <span>[<a href="#I-D.parecki-oauth-jwt-dpop-grant" class="cite xref">I-D.parecki-oauth-jwt-dpop-grant</a>]</span>. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.<a href="#section-9.9-1" class="pilcrow">¶</a></p>
+<p id="section-9.9-2">This specification defines two sender-constraining mechanisms for the ID-JAG:<a href="#section-9.9-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.9-3.1">
+            <p id="section-9.9-3.1.1"><strong>DPoP Key Binding</strong> (<a href="#sec-dpop-binding" class="auto internal xref">Section 9.9.1</a>): binding via a DPoP proof JWT as defined by <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>. The <code>cnf</code> claim carries a <code>jkt</code> property with the JWK SHA-256 Thumbprint of the bound key.<a href="#section-9.9-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.9-3.2">
+            <p id="section-9.9-3.2.1"><strong>mTLS Certificate Binding</strong> (<a href="#sec-mtls-binding" class="auto internal xref">Section 9.9.2</a>): binding via a mutually authenticated TLS session using an X.509 client certificate as defined by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3" class="relref">Section 3</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>. The <code>cnf</code> claim carries an <code>x5t#S256</code> property with the SHA-256 thumbprint of the DER encoding of the bound X.509 certificate.<a href="#section-9.9-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-9.9-4">An IdP <span class="bcp14">SHOULD NOT</span> bind the same ID-JAG to both a DPoP key and an X.509 certificate. If both a DPoP proof and a certificate suitable for binding are presented on the same Token Exchange request, the IdP selects a single binding mechanism according to local policy for the target Resource Authorization Server.<a href="#section-9.9-4" class="pilcrow">¶</a></p>
+<p id="section-9.9-5">The <code>cnf</code> (confirmation) claim, as defined in <span>[<a href="#RFC7800" class="cite xref">RFC7800</a>]</span>, is used to bind a key or certificate to a JWT. When an ID-JAG contains a <code>cnf</code> claim, proof of possession of the corresponding private key or X.509 certificate <span class="bcp14">MUST</span> be demonstrated when using the ID-JAG at the Resource Authorization Server.<a href="#section-9.9-5" class="pilcrow">¶</a></p>
+<p id="section-9.9-6">The following sections describe the processing rules for each mechanism at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).<a href="#section-9.9-6" class="pilcrow">¶</a></p>
+<div id="sec-dpop-binding">
 <section id="section-9.9.1">
-          <h4 id="name-proof-of-possession">
-<a href="#section-9.9.1" class="section-number selfRef">9.9.1. </a><a href="#name-proof-of-possession" class="section-name selfRef">Proof-of-Possession</a>
+          <h4 id="name-dpop-key-binding">
+<a href="#section-9.9.1" class="section-number selfRef">9.9.1. </a><a href="#name-dpop-key-binding" class="section-name selfRef">DPoP Key Binding</a>
           </h4>
-<p id="section-9.9.1-1">Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-4" class="relref">Section 4</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> and <span>[<a href="#I-D.parecki-oauth-jwt-dpop-grant" class="cite xref">I-D.parecki-oauth-jwt-dpop-grant</a>]</span>. This provides additional security by binding tokens to a specific cryptographic key, preventing reuse by parties that do not have access to the private key.<a href="#section-9.9.1-1" class="pilcrow">¶</a></p>
-<p id="section-9.9.1-2">Proof-of-possession is demonstrated by the client presenting a DPoP proof JWT (as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>) in a <code>DPoP</code> HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.<a href="#section-9.9.1-2" class="pilcrow">¶</a></p>
-<p id="section-9.9.1-3">The <code>cnf</code> (confirmation) claim, as defined in <span>[<a href="#RFC7800" class="cite xref">RFC7800</a>]</span>, is used to bind a public key to a JWT. When an ID-JAG contains a <code>cnf</code> claim with a <code>jkt</code> property as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key <span class="bcp14">MUST</span> be demonstrated when using the ID-JAG.<a href="#section-9.9.1-3" class="pilcrow">¶</a></p>
-<p id="section-9.9.1-4">The following sections describe the processing rules for proof-of-possession at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).<a href="#section-9.9.1-4" class="pilcrow">¶</a></p>
-<div id="proof-of-possession-during-token-exchange">
+<p id="section-9.9.1-1">DPoP key binding is demonstrated by the client presenting a DPoP proof JWT (as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>) in a <code>DPoP</code> HTTP header. The DPoP proof demonstrates that the client possesses the private key corresponding to a public key. This public key can be bound to tokens, ensuring that only the holder of the private key can use those tokens.<a href="#section-9.9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.9.1-2">When an ID-JAG contains a <code>cnf</code> claim with a <code>jkt</code> property as defined in <span>[<a href="#RFC9449" class="cite xref">RFC9449</a>]</span>, it indicates that the ID-JAG is bound to that specific key (identified by its JWK SHA-256 Thumbprint), and proof of possession of the corresponding private key <span class="bcp14">MUST</span> be demonstrated when using the ID-JAG.<a href="#section-9.9.1-2" class="pilcrow">¶</a></p>
+<div id="dpop-key-binding-during-token-exchange">
 <section id="section-9.9.1.1">
-            <h5 id="name-proof-of-possession-during-">
-<a href="#section-9.9.1.1" class="section-number selfRef">9.9.1.1. </a><a href="#name-proof-of-possession-during-" class="section-name selfRef">Proof-of-Possession During Token Exchange</a>
+            <h5 id="name-dpop-key-binding-during-tok">
+<a href="#section-9.9.1.1" class="section-number selfRef">9.9.1.1. </a><a href="#name-dpop-key-binding-during-tok" class="section-name selfRef">DPoP Key Binding During Token Exchange</a>
             </h5>
 <p id="section-9.9.1.1-1">When a client requests an ID-JAG from the IdP Authorization Server via Token Exchange, the client <span class="bcp14">MAY</span> include a DPoP proof in the request. This demonstrates possession of a key that can be bound to the ID-JAG.<a href="#section-9.9.1.1-1" class="pilcrow">¶</a></p>
 <p id="section-9.9.1.1-2">The client generates a key pair and includes a DPoP proof JWT in the <code>DPoP</code> header of the Token Exchange request:<a href="#section-9.9.1.1-2" class="pilcrow">¶</a></p>
@@ -2942,10 +2956,10 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
             </ol>
 </section>
 </div>
-<div id="proof-of-possession-during-id-jag-exchange">
+<div id="dpop-key-binding-during-id-jag-exchange">
 <section id="section-9.9.1.2">
-            <h5 id="name-proof-of-possession-during-i">
-<a href="#section-9.9.1.2" class="section-number selfRef">9.9.1.2. </a><a href="#name-proof-of-possession-during-i" class="section-name selfRef">Proof-of-Possession During ID-JAG Exchange</a>
+            <h5 id="name-dpop-key-binding-during-id-">
+<a href="#section-9.9.1.2" class="section-number selfRef">9.9.1.2. </a><a href="#name-dpop-key-binding-during-id-" class="section-name selfRef">DPoP Key Binding During ID-JAG Exchange</a>
             </h5>
 <p id="section-9.9.1.2-1">When a client exchanges an ID-JAG for an access token at the Resource Authorization Server, the processing rules depend on whether the ID-JAG contains a <code>cnf</code> claim and whether the client presents a DPoP proof.<a href="#section-9.9.1.2-1" class="pilcrow">¶</a></p>
 <div id="id-jag-contains-cnf-claim-and-dpop-proof-is-presented">
@@ -3069,6 +3083,76 @@ Cache-Control: no-store
 </pre><a href="#section-9.9.1.2.4-4" class="pilcrow">¶</a>
 </div>
 </section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="sec-mtls-binding">
+<section id="section-9.9.2">
+          <h4 id="name-mtls-certificate-binding">
+<a href="#section-9.9.2" class="section-number selfRef">9.9.2. </a><a href="#name-mtls-certificate-binding" class="section-name selfRef">mTLS Certificate Binding</a>
+          </h4>
+<p id="section-9.9.2-1">An IdP <span class="bcp14">MAY</span> bind an ID-JAG to a client's X.509 certificate per <span>[<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>. When bound, the <code>cnf</code> claim carries an <code>x5t#S256</code> property containing the SHA-256 thumbprint of the DER encoding of the certificate, as defined by <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.9.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.9.2-2">The certificate used for binding is the certificate the client presents during the mutually authenticated TLS handshake, validated per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are the same certificate.<a href="#section-9.9.2-2" class="pilcrow">¶</a></p>
+<div id="mtls-certificate-binding-during-token-exchange">
+<section id="section-9.9.2.1">
+            <h5 id="name-mtls-certificate-binding-du">
+<a href="#section-9.9.2.1" class="section-number selfRef">9.9.2.1. </a><a href="#name-mtls-certificate-binding-du" class="section-name selfRef">mTLS Certificate Binding During Token Exchange</a>
+            </h5>
+<p id="section-9.9.2.1-1">When the client presents an X.509 client certificate on the mTLS session to the IdP token endpoint and local policy permits certificate-bound issuance, the IdP validates the certificate per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span> and includes an <code>x5t#S256</code> <code>cnf</code> claim in the issued ID-JAG per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>:<a href="#section-9.9.2.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.9.2.1-2">
+<pre>
+"cnf": {
+  "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
+}
+</pre><a href="#section-9.9.2.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-9.9.2.1-3">The <code>token_type</code> response parameter for an ID-JAG is always <code>N_A</code> per <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.1" class="relref">Section 2.2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. The client <span class="bcp14">SHOULD</span> verify that the returned ID-JAG contains an <code>x5t#S256</code> <code>cnf</code> claim matching the certificate it presented, to detect a silent downgrade.<a href="#section-9.9.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-9.9.2.1-4">If no client certificate is presented (or is not accepted for binding), the IdP issues an ID-JAG without an <code>x5t#S256</code> <code>cnf</code> claim.<a href="#section-9.9.2.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="mtls-certificate-binding-during-id-jag-exchange">
+<section id="section-9.9.2.2">
+            <h5 id="name-mtls-certificate-binding-dur">
+<a href="#section-9.9.2.2" class="section-number selfRef">9.9.2.2. </a><a href="#name-mtls-certificate-binding-dur" class="section-name selfRef">mTLS Certificate Binding During ID-JAG Exchange</a>
+            </h5>
+<p id="section-9.9.2.2-1">When the client exchanges the ID-JAG at the Resource Authorization Server, processing depends on whether the ID-JAG contains an <code>x5t#S256</code> <code>cnf</code> claim and whether the client establishes an mTLS session:<a href="#section-9.9.2.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.9.2.2-2.1">
+                <p id="section-9.9.2.2-2.1.1"><strong><code>cnf.x5t#S256</code> present and mTLS certificate presented:</strong> The Resource Authorization Server <span class="bcp14">MUST</span> validate the certificate per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>, compute its SHA-256 thumbprint per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>, and compare against <code>cnf.x5t#S256</code>. Mismatch <span class="bcp14">MUST</span> fail with <code>invalid_grant</code>. On match, the Resource Authorization Server <span class="bcp14">MAY</span> issue a certificate-bound access token per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3" class="relref">Section 3</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.9.2.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-9.9.2.2-2.2">
+                <p id="section-9.9.2.2-2.2.1"><strong><code>cnf.x5t#S256</code> present, no mTLS certificate:</strong> <span class="bcp14">MUST</span> fail with <code>invalid_grant</code>.<a href="#section-9.9.2.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-9.9.2.2-2.3">
+                <p id="section-9.9.2.2-2.3.1"><strong>No <code>cnf.x5t#S256</code>, mTLS certificate presented:</strong> The Resource Authorization Server <span class="bcp14">MAY</span> validate the certificate per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-2" class="relref">Section 2</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span> and issue a certificate-bound access token per <span><a href="https://rfc-editor.org/rfc/rfc8705#section-3" class="relref">Section 3</a> of [<a href="#RFC8705" class="cite xref">RFC8705</a>]</span>.<a href="#section-9.9.2.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-9.9.2.2-2.4">
+                <p id="section-9.9.2.2-2.4.1"><strong>No <code>cnf.x5t#S256</code>, no mTLS certificate:</strong> The Resource Authorization Server <span class="bcp14">MAY</span> issue an unconstrained Bearer token; if Resource Server configuration requires sender-constrained tokens, <span class="bcp14">MUST</span> fail with <code>invalid_grant</code>.<a href="#section-9.9.2.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-9.9.2.2-3">Example request (mTLS session established at the TLS layer) and successful response with a certificate-bound access token:<a href="#section-9.9.2.2-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.9.2.2-4">
+<pre>
+POST /oauth2/token HTTP/1.1
+Host: acme.chat.example
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
+&amp;assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+
+
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+
+{
+  "token_type": "Bearer",
+  "access_token": "2YotnFZFEjr1zCsicMWpAA",
+  "expires_in": 86400,
+  "scope": "chat.read chat.history"
+}
+</pre><a href="#section-9.9.2.2-4" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -3348,6 +3432,10 @@ Cache-Control: no-store
 <dt id="RFC8693">[RFC8693]</dt>
         <dd>
 <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Nadalin, A.</span>, <span class="refAuthor">Campbell, B., Ed.</span>, <span class="refAuthor">Bradley, J.</span>, and <span class="refAuthor">C. Mortimore</span>, <span class="refTitle">"OAuth 2.0 Token Exchange"</span>, <span class="seriesInfo">RFC 8693</span>, <span class="seriesInfo">DOI 10.17487/RFC8693</span>, <time datetime="2020-01" class="refDate">January 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8693">https://www.rfc-editor.org/rfc/rfc8693</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8705">[RFC8705]</dt>
+        <dd>
+<span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">T. Lodderstedt</span>, <span class="refTitle">"OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens"</span>, <span class="seriesInfo">RFC 8705</span>, <span class="seriesInfo">DOI 10.17487/RFC8705</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8705">https://www.rfc-editor.org/rfc/rfc8705</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8707">[RFC8707]</dt>
         <dd>
@@ -3936,13 +4024,16 @@ Content-Type: application/json
 <p id="appendix-C-2">-05<a href="#appendix-C-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-C-3.1">
-          <p id="appendix-C-3.1.1">Added security considerations on storage and caching of subject tokens (ID Token, SAML Assertion, Refresh Token)<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.1.1">Added mTLS certificate binding as an alternative sender-constraining mechanism for the ID-JAG, alongside DPoP<a href="#appendix-C-3.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-3.2">
-          <p id="appendix-C-3.2.1">Added requirement that the IdP confirm the subject token is actually a token of the indicated type<a href="#appendix-C-3.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.2.1">Added security considerations on storage and caching of subject tokens (ID Token, SAML Assertion, Refresh Token)<a href="#appendix-C-3.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-3.3">
-          <p id="appendix-C-3.3.1">Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured<a href="#appendix-C-3.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.3.1">Added requirement that the IdP confirm the subject token is actually a token of the indicated type<a href="#appendix-C-3.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.4">
+          <p id="appendix-C-3.4.1">Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured<a href="#appendix-C-3.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-C-4">-04<a href="#appendix-C-4" class="pilcrow">¶</a></p>
