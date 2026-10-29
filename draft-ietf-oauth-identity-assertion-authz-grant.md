@@ -580,7 +580,7 @@ When processing the request:
 
 * If both `scope` and `authorization_details` are present, the IdP MUST process both. The IdP SHOULD ensure consistency between the scopes and authorization details, as they may represent overlapping authorization requests. The IdP MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
 
-* The IdP MUST include the granted `resource` (if any), `scope` (if any), and `authorization_details` (if any) in the issued ID-JAG. If the IdP modifies the requested resources, scopes, or authorization details, it MUST reflect the granted values in the ID-JAG. Each granted resource identifier that the Client requested MUST appear in the `resource` claim unchanged.
+* The IdP MUST include the granted values, if any, in the `resource`, `scope`, and `authorization_details` claims of the issued ID-JAG, even when they differ from the requested values. Each requested resource identifier that the IdP grants MUST appear in the `resource` claim exactly as the Client sent it.
 
 How the IdP learns which protected resources each Resource Authorization Server governs is out of scope for this specification.
 
