@@ -1177,9 +1177,6 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       the context of this specification, this parameter SHOULD NOT be
       used.
 
-   The response does not include the granted resources.  Unless the ID-
-   JAG is encrypted, the Client can read them from its resource claim.
-
 4.3.4.1.  Issued Identity Assertion JWT Authorization Grant
 
    The following is a non-normative example of the issued token
