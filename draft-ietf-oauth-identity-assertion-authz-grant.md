@@ -456,7 +456,7 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : OPTIONAL - The Resource Identifier of the Resource Server as defined in {{Section 2 of RFC8707}}.
 
 `scope`:
-: OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested.
+: OPTIONAL - The space-separated list of scopes at the Resource Server that is being requested. As in {{Section 2.1 of RFC8693}}, these values have the meaning defined by the Resource Authorization Server where the ID-JAG will be used, not their OpenID Connect meaning, so a value such as `profile` or `email` does not request identity claims (Section 5.4 of {{OpenID.Core}}).
 
 `authorization_details`:
 : OPTIONAL - A JSON string containing a JSON array of authorization detail objects as defined in {{Section 2 of RFC9396}}. This parameter enables Rich Authorization Requests (RAR) support, allowing structured authorization requests beyond simple scope strings.
