@@ -851,10 +851,11 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
    resource:  RECOMMENDED - The Resource Identifier(s) of the protected
       resource(s), governed by the Resource Authorization Server
       identified by audience, for which access is requested, as defined
-      in Section 2 of [RFC8707].  A Client that discovered the Resource
-      Authorization Server using Protected Resource Metadata [RFC9728]
-      MUST include the resource value from that metadata unchanged
-      (Section 9.6).
+      in Section 2 of [RFC8707].  Resource identifiers are compared
+      using Simple String Comparison (Section 6.2.1 of [RFC3986]).  A
+      Client that discovered the Resource Authorization Server using
+      Protected Resource Metadata [RFC9728] MUST include the resource
+      value from that metadata unchanged (Section 9.6).
 
    scope:  OPTIONAL - The space-separated list of scopes at the Resource
       Server that is being requested.  As in Section 2.1 of [RFC8693],
@@ -921,11 +922,6 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
    and resource, including deployments in which one Resource
    Authorization Server governs multiple protected resources or tenant-
    specific resources.
-
-   Resource identifiers in the resource parameter, in the resource
-   claim, and of the protected resources a Resource Authorization Server
-   governs are compared using Simple String Comparison (Section 6.2.1 of
-   [RFC3986]).
 
    For example, if a SaaS provider operates a Resource Authorization
    Server at https://authorization-server.saas-tool.example/ and
