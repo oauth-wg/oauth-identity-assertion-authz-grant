@@ -188,9 +188,9 @@ Tenant
 
 # Identity Assertion JWT Authorization Grant {#id-jag}
 
-The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource in another trust domain on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
+The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT Authorization Grant {{RFC7523}} that grants a client delegated access to a resource, typically in another trust domain, on behalf of a user without a direct user-approval step at the authorization server. In addition to traditional OAuth scope-based authorization, this specification can be extended with Rich Authorization Requests (RAR) {{RFC9396}}, allowing clients to request limited authorization using structured authorization details.
 
-An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.
+An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server, typically in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.
 
 As described in {{OpenID.Core}}, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.
 
@@ -452,7 +452,7 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an Identity Assertion JWT Authorization Grant is being requested.
 
 `audience`:
-: REQUIRED - The identifier of the Resource Authorization Server in another trust domain as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
+: REQUIRED - The identifier of the Resource Authorization Server, typically in another trust domain, as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
 
 `resource`:
 : OPTIONAL - The Resource Identifier of the Resource Server as defined in {{Section 2 of RFC8707}}.
@@ -1054,7 +1054,7 @@ TBD: It may make more sense to request the Identity Assertion JWT Authorization 
 
 ## Cross-Domain Use
 
-This specification is intended for cross-domain uses where the Client, Resource Authorization Server, and IdP are in different trust domains. In particular, the IdP MUST NOT issue access tokens in response to an ID-JAG it issued itself in the same domain. Doing so could lead to unintentional broadening of the scope of authorization. This does not preclude a single piece of software from being both an IdP issuing ID-JAGs as well as a Resource Authorization Server consuming ID-JAGs, as long as the ID-JAG crosses a trust domain such as a tenant or customer boundary.
+This specification is intended for cross-domain uses where the Client, Resource Authorization Server, and IdP are in different trust domains. In particular, the IdP MUST NOT issue access tokens in response to an ID-JAG it issued itself unless explicitly configured to do so, since this could lead to unintentional broadening of the scope of authorization. When so configured, the IdP MUST NOT grant the client more access than it would when issuing an access token for the same subject and resource directly, and evaluates any consent and authentication requirements when issuing the ID-JAG, since the access token request does not involve the user. This does not preclude a single piece of software from being both an IdP issuing ID-JAGs as well as a Resource Authorization Server consuming ID-JAGs, as long as the ID-JAG crosses a trust domain such as a tenant or customer boundary.
 
 An ID-JAG is specific to the trust relationship between the issuing IdP Authorization Server and the Resource Authorization Server identified by the `aud` claim. When a deployment involves additional downstream hops, the same ID-JAG MUST NOT be reused as the authorization grant for a different downstream Resource Authorization Server. For each subsequent hop, a new ID-JAG MAY be issued by the IdP Authorization Server trusted by that downstream Resource Authorization Server for SSO and subject resolution, or other mechanisms MAY be used.
 
@@ -1656,6 +1656,10 @@ The authors would like to thank the following people for their contributions and
 {:numbered="false"}
 
 \[\[ To be removed from the final specification ]]
+
+-05
+
+* Allowed an IdP to accept ID-JAGs it issued itself when explicitly configured
 
 -04
 
