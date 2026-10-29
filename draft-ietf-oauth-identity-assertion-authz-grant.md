@@ -747,7 +747,7 @@ On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response
 
       {
         "error": "access_denied",
-        "error_description": "Client is not authorized to broker access to the target Resource Authorization Server"
+        "error_description": "Client is not authorized to access the target Resource Authorization Server"
       }
 
 
