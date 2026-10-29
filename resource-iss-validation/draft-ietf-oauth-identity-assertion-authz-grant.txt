@@ -115,8 +115,7 @@ Table of Contents
      9.3.  Step-Up Authentication
      9.4.  Cross-Domain Use
      9.5.  Authorization Server Metadata Validation
-     9.6.  Protected Resource Metadata and Access Token Resource
-            Verification
+     9.6.  Protected Resource Metadata Validation
      9.7.  Metadata Disclosure
      9.8.  Subject Identifier Trust
      9.9.  Subject Identifier Disclosure
@@ -128,9 +127,8 @@ Table of Contents
      10.2.  OAuth URI Registration
      10.3.  OAuth Authorization Server Metadata Registration
      10.4.  OAuth Dynamic Client Registration Metadata Registration
-     10.5.  OAuth Parameters Registration
-     10.6.  JSON Web Token Claims Registration
-     10.7.  Security Event Identifier Format Registration
+     10.5.  JSON Web Token Claims Registration
+     10.6.  Security Event Identifier Format Registration
    11. References
      11.1.  Normative References
      11.2.  Informative References
@@ -1076,7 +1074,6 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
      "access_token": "eyJhbGciOiJIUzI1NiIsI...",
      "token_type": "N_A",
      "scope": "chat.read chat.history",
-     "resource": "https://api.chat.example/",
      "expires_in": 300
    }
 
@@ -1095,26 +1092,6 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       scope requested by the client; otherwise, it is REQUIRED.  Various
       policies in the IdP may result in different scopes being issued
       from the scopes the application requested.
-
-   resource:  REQUIRED when the issued ID-JAG contains a resource claim;
-      MUST be omitted otherwise.  Its value MUST identify exactly the
-      same resource set as that claim: a string for a single resource,
-      or a non-empty JSON array of unique strings for multiple
-      resources.  Each identifier is an absolute URI as specified in
-      Section 2 of [RFC8707], MUST NOT include a fragment, and SHOULD
-      NOT include a query.  Identifiers are compared per Section 6.2.1
-      of [RFC3986] after syntax-based normalization per Section 6.2.2 of
-      [RFC3986].
-
-   The client MUST verify that the returned resource set is a non-empty
-   subset of what it requested; or, if it did not request resource, that
-   every returned identifier is one it intended to access.  If the
-   parameter is required and absent, malformed, contains duplicates, or
-   differs from the ID-JAG's resource claim, the client MUST NOT use the
-   ID-JAG and SHOULD discard it.  When the client did not request
-   resource and lacks pre-configured knowledge that the ID-JAG matches
-   its intended protected resource, it MUST reject the response if
-   resource is absent.
 
    authorization_details:  OPTIONAL - A JSON array of authorization
       detail objects as defined in Section 2.2 of [RFC9396].  This
@@ -1421,18 +1398,15 @@ Cache-Control: no-store
       details or vice versa, or process them independently based on
       policy.
 
-   *  The Resource Authorization Server MUST include the granted
-      resource (if any), scope (if any), and authorization_details (if
-      any) in the access token response as defined in the response
-      parameters below.  The response format follows Section 5.1 of
-      [RFC6749] for scope and Section 2.2 of [RFC9396] for
-      authorization_details.
+   *  The Resource Authorization Server MUST include the granted scope
+      (if any) and authorization_details (if any) in the access token
+      response.  The response format follows Section 5.1 of [RFC6749]
+      for scope and Section 2.2 of [RFC9396] for authorization_details.
 
 4.4.2.  Response
 
    The Resource Authorization Server's token endpoint responds with an
-   OAuth 2.0 Token Response as defined in Section 5.1 of [RFC6749], with
-   the addition of the resource response parameter defined below, e.g.:
+   OAuth 2.0 Token Response, e.g.:
 
    HTTP/1.1 200 OK
    Content-Type: application/json;charset=UTF-8
@@ -1443,33 +1417,8 @@ Cache-Control: no-store
      "token_type": "Bearer",
      "access_token": "2YotnFZFEjr1zCsicMWpAA",
      "expires_in": 86400,
-     "scope": "chat.read chat.history",
-     "resource": "https://api.chat.example/"
+     "scope": "chat.read chat.history"
    }
-
-   resource:  REQUIRED when the access token is restricted to one or
-      more specific protected resources; MUST be omitted when the token
-      has no resource-specific restriction.  The value is a string for a
-      single resource, or a non-empty JSON array of unique strings for
-      multiple resources.  Each identifier is an absolute URI as
-      specified in Section 2 of [RFC8707], MUST NOT include a fragment,
-      and SHOULD NOT include a query.  Identifiers are compared per
-      Section 6.2.1 of [RFC3986] after syntax-based normalization per
-      Section 6.2.2 of [RFC3986].
-
-   The client MUST verify that every returned identifier is one it
-   intended to access; if the ID-JAG contained a resource claim, the
-   client MUST additionally verify that the returned set is a non-empty
-   subset of that claim.  If the parameter is required and absent,
-   malformed, or contains duplicates, or any returned identifier fails
-   validation, the client MUST NOT use the access token and SHOULD
-   discard it.  When the ID-JAG did not contain a resource claim and the
-   client lacks pre-configured knowledge that the access token matches
-   its intended protected resource, it MUST reject the response if
-   resource is absent.
-
-   See [I-D.mcguinness-oauth-resource-token-resp] for related use of the
-   resource response parameter in OAuth 2.0 access token responses.
 
 4.4.3.  Refresh Token
 
@@ -2022,11 +1971,9 @@ Cache-Control: no-store
    resource, the IdP MUST verify each requested identifier is governed
    by the audience Resource Authorization Server and MUST reject with
    invalid_target otherwise.  Clients SHOULD include resource in Token
-   Exchange requests, and the response validation in Section 4.4 adds a
-   further check that the returned identifiers match the client's
-   intended resource.
+   Exchange requests.
 
-9.6.  Protected Resource Metadata and Access Token Resource Verification
+9.6.  Protected Resource Metadata Validation
 
    Clients that discover the Resource Authorization Server for a
    protected resource via Protected Resource Metadata [RFC9728] MUST
@@ -2047,18 +1994,9 @@ Cache-Control: no-store
    JAG issuance without any resource-level constraint the IdP can
    verify.
 
-   Independently, the client MUST verify that the resource identifier
-   returned in the access token response (Section 4.4.2) identifies the
-   protected resource the client intended to access, and if the ID-JAG
-   contained a resource claim, that the returned identifier(s) are a
-   non-empty subset of that claim.  This check ensures that a token
-   bound to an unintended resource is not accepted by the client or
-   presented to the wrong Resource Server, even if discovery or grant
-   issuance is compromised.
-
    Together with the Authorization Server metadata issuer check in
-   Section 9.5, these validations bind discovery, grant, and issued
-   access token back to the resource the user intended to authorize.
+   Section 9.5, these validations bind discovery and the grant back to
+   the resource the user intended to authorize.
 
 9.7.  Metadata Disclosure
 
@@ -2420,21 +2358,7 @@ Cache-Control: no-store
 
    *  Specification Document: Section 8
 
-10.5.  OAuth Parameters Registration
-
-   This specification updates the registration of the resource parameter
-   in the "OAuth Parameters" registry [IANA.oauth-parameters] to add
-   token response as a Parameter Usage Location.
-
-   *  Name: resource
-
-   *  Parameter Usage Location: token response
-
-   *  Change Controller: IETF
-
-   *  Reference: Section 4.3.4 and Section 4.4.2
-
-10.6.  JSON Web Token Claims Registration
+10.5.  JSON Web Token Claims Registration
 
    This section registers the following claims in the "JSON Web Token
    Claims" subregistry of the "JSON Web Token (JWT)" registry
@@ -2457,7 +2381,7 @@ Cache-Control: no-store
 
    *  Specification Document(s): Section 3
 
-10.7.  Security Event Identifier Format Registration
+10.6.  Security Event Identifier Format Registration
 
    This section registers the saml-nameid Subject Identifier Format in
    the "Security Event Identifier Formats" registry established by
@@ -2637,14 +2561,6 @@ Cache-Control: no-store
               oauth-client-id-metadata-document-02, 6 July 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
               client-id-metadata-document-02>.
-
-   [I-D.mcguinness-oauth-resource-token-resp]
-              McGuinness, K., Hanson, J., and F. Skokan, "OAuth 2.0
-              Resource Parameter in Access Token Response", Work in
-              Progress, Internet-Draft, draft-mcguinness-oauth-resource-
-              token-resp-04, 25 October 2026,
-              <https://datatracker.ietf.org/doc/html/draft-mcguinness-
-              oauth-resource-token-resp-04>.
 
    [RFC9068]  Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0
               Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October
@@ -3210,11 +3126,6 @@ Document History
    *  Added invalid_target error handling and required audience/resource
       consistency check for the Token Exchange resource parameter (issue
       #120)
-
-   *  Added resource response parameter to the Token Exchange and Access
-      Token responses, with normative behavior aligned with draft-
-      mcguinness-oauth-resource-token-resp; registered token response as
-      a Parameter Usage Location for resource
 
    *  Added Authorization Server Metadata Validation security
       consideration for RFC 8414 §3.3 issuer validation (issue #122)
