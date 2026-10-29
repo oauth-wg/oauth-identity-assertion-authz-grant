@@ -781,7 +781,11 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
       as defined in Section 2 of [RFC8707].
 
    scope:  OPTIONAL - The space-separated list of scopes at the Resource
-      Server that is being requested.
+      Server that is being requested.  As in Section 2.1 of [RFC8693],
+      these values have the meaning defined by the Resource
+      Authorization Server where the ID-JAG will be used, not their
+      OpenID Connect meaning, so a value such as profile or email does
+      not request identity claims (Section 5.4 of [OpenID.Core]).
 
    authorization_details:  OPTIONAL - A JSON string containing a JSON
       array of authorization detail objects as defined in Section 2 of
