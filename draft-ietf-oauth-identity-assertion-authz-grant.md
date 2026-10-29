@@ -44,6 +44,7 @@ normative:
   RFC7519:
   RFC7521:
   RFC7523:
+  RFC7518:
   RFC8693:
   RFC8707:
   RFC8725:
@@ -73,6 +74,16 @@ normative:
       - ins: M. Jones
       - ins: B. de Medeiros
       - ins: C. Mortimore
+
+  OpenID.Discovery:
+    title: OpenID Connect Discovery 1.0 incorporating errata set 2
+    target: https://openid.net/specs/openid-connect-discovery-1_0.html
+    date: December 15, 2023
+    author:
+      - ins: N. Sakimura
+      - ins: J. Bradley
+      - ins: M. Jones
+      - ins: E. Jay
 
   OpenID.Enterprise:
     title: OpenID Connect Enterprise Extensions 1.0 - draft 01
@@ -182,6 +193,8 @@ The Identity Assertion JWT Authorization Grant (ID-JAG) is a profile of the JWT 
 An ID-JAG is issued and signed by an IdP Authorization Server similar to an ID Token {{OpenID.Core}}, and contains claims about an End-User. Instead of being issued for a Client (Relying Party in {{OpenID.Core}}) as the intended audience for the assertion, it is instead issued with an audience of an Authorization Server in another trust domain (Resource Authorization Server). It replaces the need for the client to obtain an authorization code from the Resource Authorization Server to delegate access to the client, and instead uses the IdP Authorization Server that is trusted by the Resource Authorization Server for SSO and subject resolution to delegate access to the client. The Resource Authorization Server still applies local policy when deciding whether to honor the ID-JAG and what access token to issue.
 
 As described in {{OpenID.Core}}, ID Tokens are only intended to be processed by the Relying Party (indicated by the ID Token audience) or the Issuer (e.g. for revocation), and not by other actors in a different trust domain such as an Authorization Server.
+
+Because an ID-JAG is a JWT authorization grant, RS256 is mandatory to implement for both the IdP Authorization Server and the Resource Authorization Server ({{Section 5 of RFC7523}}). Resource Authorization Servers SHOULD also support ES256 {{RFC7518}}.
 
 ## ID-JAG Claims
 
@@ -775,6 +788,8 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * Validate the JWT `typ` is `oauth-id-jag+jwt` (per {{Section 3.11 of RFC8725}})
 
+* The Resource Authorization Server MUST reject the ID-JAG with an `invalid_grant` error if the `iss` claim does not identify an IdP Authorization Server it trusts. It SHOULD obtain that issuer's keys from the `jwks_uri` in the issuer's metadata ({{idp-metadata}}). It validates the signature as required by {{Section 5.2 of RFC7521}}, accepting only the algorithms it allows for that issuer ({{Section 3.1 of RFC8725}}).
+
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
 
 * The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
@@ -965,6 +980,13 @@ An IdP Authorization Server can advertise the identity chaining token types it c
 To advertise support for issuing an Identity Assertion JWT Authorization Grant via Token Exchange, the IdP Authorization Server SHOULD include the following value in `identity_chaining_requested_token_types_supported`:
 
 `urn:ietf:params:oauth:token-type:id-jag`
+
+The IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located from its issuer identifier as described in {{Section 3 of RFC8414}} or Section 4 of {{OpenID.Discovery}}.
+
+The IdP Authorization Server can also advertise the algorithms it uses to sign ID-JAGs:
+
+`id_jag_signing_alg_values_supported`:
+: OPTIONAL. JSON array containing a list of the JWS signing algorithms (`alg` values) supported by the IdP Authorization Server for signing ID-JAGs. If present, the list MUST include RS256. `id_token_signing_alg_values_supported` {{OpenID.Discovery}} does not describe ID-JAGs, which the IdP Authorization Server can sign differently from ID Tokens.
 
 ## Resource Authorization Server Metadata {#ras-metadata}
 
@@ -1224,10 +1246,15 @@ This section registers `urn:ietf:params:oauth:grant-profile:id-jag` in the "OAut
 
 ## OAuth Authorization Server Metadata Registration
 
-This section registers `authorization_grant_profiles_supported` in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
+This section registers the following in the "OAuth Authorization Server Metadata" registry of the "OAuth Parameters" registry {{IANA.oauth-parameters}}.
 
 * Metadata Name: `authorization_grant_profiles_supported`
 * Metadata Description: JSON array of supported authorization grant profile identifiers
+* Change Controller: IETF
+* Specification Document: This document
+
+* Metadata Name: `id_jag_signing_alg_values_supported`
+* Metadata Description: JSON array of the JWS signing algorithms supported for signing Identity Assertion JWT Authorization Grants
 * Change Controller: IETF
 * Specification Document: This document
 
