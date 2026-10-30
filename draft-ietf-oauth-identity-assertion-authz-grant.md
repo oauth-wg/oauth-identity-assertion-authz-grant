@@ -56,7 +56,6 @@ normative:
   RFC9493:
   RFC7591:
   I-D.ietf-oauth-identity-chaining:
-  I-D.ietf-oauth-rfc7523bis:
   IANA.media-types:
   IANA.oauth-parameters:
   IANA.jwt:
@@ -115,7 +114,7 @@ informative:
 
 --- abstract
 
-This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange {{RFC8693}} and JWT Profile for OAuth 2.0 Authorization Grants {{RFC7523}}. This pattern is informally referred to as Cross-App Access (XAA).
+This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using OAuth 2.0 Token Exchange (RFC 8693) and the JWT Profile for OAuth 2.0 Authorization Grants (RFC 7523). This pattern is informally referred to as Cross-App Access (XAA).
 
 --- middle
 
