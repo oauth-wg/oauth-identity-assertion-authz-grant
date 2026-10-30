@@ -462,7 +462,9 @@ The Client makes a Token Exchange {{RFC8693}} request to the IdP Authorization S
 : REQUIRED - The value `urn:ietf:params:oauth:token-type:id-jag` indicates that an Identity Assertion JWT Authorization Grant is being requested.
 
 `audience`:
-: REQUIRED - The identifier of the Resource Authorization Server, typically in another trust domain, as the intended audience for the ID-JAG. IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
+: REQUIRED - The identifier of the Resource Authorization Server, typically in another trust domain, as the intended audience for the ID-JAG. Exactly one `audience` value is allowed.
+
+  IdP Authorization Servers MUST support the issuer identifier of the Resource Authorization Server as defined in {{Section 2 of RFC8414}}. IdP Authorization Servers MAY also support implementation-specific `audience` values, such as URNs, that identify pre-established trust relationships with Resource Authorization Servers. When such a value is used, the IdP Authorization Server resolves it to the corresponding Resource Authorization Server identifier and issues the ID-JAG with that identifier in the `aud` claim.
 
 `resource`:
 : RECOMMENDED - The Resource Identifier(s) of the protected resource(s), governed by the Resource Authorization Server identified by `audience`, for which access is requested, as defined in {{Section 2 of RFC8707}}. Resource identifiers are compared using Simple String Comparison ({{Section 6.2.1 of RFC3986}}). A Client that discovered the Resource Authorization Server using Protected Resource Metadata {{RFC9728}} MUST include the `resource` value from that metadata unchanged ({{prm-validation}}).
@@ -565,6 +567,8 @@ Determining that a JWT is an ID Token requires care, because OpenID Connect Core
 If an `actor_token` is present, any processing of it is outside the scope of this specification. Future profiles or extensions MAY define validation requirements, policy evaluation rules, and issued token content related to `actor_token`.
 
 The IdP Authorization Server evaluates administrator-defined policy for the token exchange request and determines if the client should be granted access to act on behalf of the subject for the target audience, resources, scopes, and authorization details.
+
+If the request contains more than one `audience` value, the IdP MUST respond with `invalid_request`. If `audience` does not identify a Resource Authorization Server with which the IdP has a trust relationship, the IdP MUST respond with `invalid_target` ({{Section 2.2.2 of RFC8693}}).
 
 When processing the request:
 
@@ -766,7 +770,7 @@ Access Token Response:
 
 #### Error Response {#token-exchange-error-response}
 
-On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following two codes for interoperability:
+On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following codes for interoperability:
 
 * `invalid_grant`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked). A re-issued subject token may resolve the error.
 
@@ -782,16 +786,12 @@ On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response
         "error_description": "Client is not authorized to access the target Resource Authorization Server"
       }
 
-For example, the IdP responds with `invalid_target` when a requested resource is not governed by the `audience` Resource Authorization Server:
+* `invalid_target`: the `audience` does not identify a Resource Authorization Server with which the IdP Authorization Server has a trust relationship, or a requested resource is not governed by that Resource Authorization Server ({{token-exchange}}). A re-issued subject token will not resolve the error; the Client needs to change the request.
 
-    HTTP/1.1 400 Bad Request
-    Content-Type: application/json
-    Cache-Control: no-store
-
-    {
-      "error": "invalid_target",
-      "error_description": "Resource not governed by audience"
-    }
+      {
+        "error": "invalid_target",
+        "error_description": "Resource not governed by audience"
+      }
 
 
 ## Access Token Request {#token-request}
