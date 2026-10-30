@@ -290,7 +290,7 @@ A non-normative example JWT with expanded header and payload claims is below:
     .
     signature
 
-The ID-JAG conveys claims about three subjects: the End-User identified by `sub` (including identity, authentication context, and audience-scoped authorization context such as roles or entitlements at the target application), the OAuth 2.0 client identified by `client_id` that will act on behalf of the End-User at the Resource Authorization Server, and, when present, the actor identified by `act` ({{Section 4.1 of RFC8693}}). The IdP Authorization Server populates these claims for the specific Resource Authorization Server identified by `aud`, in the same way it would populate audience-scoped claims into an ID Token or SAML Assertion issued to that Resource Authorization Server. Any claim that would be valid in an ID Token {{OpenID.Core}} may appear in the ID-JAG, since the grant functions as both an Identity Assertion and an authorization delegation for the Resource Authorization Server.
+The ID-JAG conveys claims about three subjects: the End-User identified by `sub` (including identity, authentication context, and audience-scoped authorization context such as roles or entitlements at the target application), the OAuth 2.0 client identified by `client_id` that will act on behalf of the End-User at the Resource Authorization Server, and, when present, the actor identified by `act` ({{Section 4.1 of RFC8693}}). The IdP Authorization Server populates these claims for the specific Resource Authorization Server identified by `aud`, in the same way it would populate audience-scoped claims into an ID Token or SAML Assertion issued to that Resource Authorization Server. Any claim that would be valid in an ID Token {{OpenID.Core}} may appear in the ID-JAG, since the grant conveys identity claims about the End-User as well as an authorization delegation for the Resource Authorization Server.
 
 It is RECOMMENDED that the ID-JAG contain an `email` {{OpenID.Core}} and/or `aud_sub` {{OpenID.Enterprise}} claim. The Resource Authorization Server MAY use these claims for subject resolution, including JIT provisioning, for example when the user has not yet SSO'd into the Resource Authorization Server. Additional Resource Authorization Server specific identity claims MAY be needed for subject resolution.
 
@@ -1006,11 +1006,11 @@ When an IdP Authorization Server issues an ID-JAG, it MUST include the `tenant` 
 
 The relationship between `client_id` and tenant depends on the deployment model:
 
-* **Tenant-scoped client identifiers**: In some deployments, the `client_id` is unique only within a tenant context. The same `client_id` value may exist in different tenants, and the combination of `tenant` + `client_id` (or `iss` + `tenant` + `client_id` for multi-tenant issuers) uniquely identifies the client registration.
+* **Tenant-scoped client identifiers**: In some deployments, the `client_id` is unique only within a tenant context. The same `client_id` value may exist in different tenants, and the combination of the Resource Authorization Server tenant and `client_id` uniquely identifies the client registration.
 
 * **Global client identifiers**: In other deployments, the `client_id` is globally unique across all tenants. The `client_id` alone uniquely identifies the client, regardless of tenant context.
 
-The IdP Authorization Server MUST understand the client identifier model used by the Resource Authorization Server when including the `client_id` claim in an ID-JAG. For tenant-scoped client identifiers, the IdP MUST ensure that the `client_id` included in the ID-JAG is valid within the tenant context indicated by the `tenant` claim (if present) or the issuer's tenant context.
+The IdP Authorization Server MUST understand the client identifier model used by the Resource Authorization Server when including the `client_id` claim in an ID-JAG. For tenant-scoped client identifiers, the IdP MUST ensure that the `client_id` included in the ID-JAG is valid within the Resource Authorization Server tenant for which the ID-JAG is issued (identified by `aud_tenant`, when present).
 
 ## Subject Identifier Uniqueness with Tenants
 
@@ -1020,7 +1020,7 @@ As specified in {{id-jag}}, subject identifiers (`sub`) have different uniquenes
 
 * For multi-tenant issuers: The subject identifier MUST be unique when scoped with issuer and tenant (`iss` + `tenant` + `sub`).
 
-The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server. When the Resource Authorization Server is multi-tenant, the IdP MUST include the `tenant` claim in the ID-JAG to ensure proper subject identifier scoping.
+The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server. When the issuer is multi-tenant, the IdP MUST include the `tenant` claim in the ID-JAG to ensure proper subject identifier scoping.
 
 ## Tenant Context in Token Exchange
 
