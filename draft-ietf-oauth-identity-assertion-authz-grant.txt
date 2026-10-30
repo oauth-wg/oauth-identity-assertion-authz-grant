@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 2 May 2027                                          Independent
+Expires: 3 May 2027                                          Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         29 October 2026
+                                                         30 October 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 May 2027.
+   This Internet-Draft will expire on 3 May 2027.
 
 Copyright Notice
 
@@ -415,10 +415,8 @@ Table of Contents
       access is granted, using resource identifiers as defined in
       Section 2 of [RFC8707].  The value is a string for a single
       resource, or a non-empty JSON array of unique strings for multiple
-      resources.  The IdP Authorization Server and the Resource
-      Authorization Server compare resource identifiers per
-      Section 6.2.1 of [RFC3986] after syntax-based normalization per
-      Section 6.2.2 of [RFC3986].
+      resources.  Resource identifiers are compared as described in
+      Section 4.3.
 
    scope:  OPTIONAL - a JSON string containing a space-separated list of
       scopes associated with the token, in the format described in
@@ -860,11 +858,14 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
       Authorization Server identifier and issues the ID-JAG with that
       identifier in the aud claim.
 
-   resource:  RECOMMENDED - The Resource Identifier of the Resource
-      Server as defined in Section 2 of [RFC8707].  A Client that
-      discovered the Resource Authorization Server using Protected
-      Resource Metadata [RFC9728] MUST include the resource value from
-      that metadata (Section 9.6).
+   resource:  RECOMMENDED - The Resource Identifier(s) of the protected
+      resource(s), governed by the Resource Authorization Server
+      identified by audience, for which access is requested, as defined
+      in Section 2 of [RFC8707].  Resource identifiers are compared
+      using Simple String Comparison (Section 6.2.1 of [RFC3986]).  A
+      Client that discovered the Resource Authorization Server using
+      Protected Resource Metadata [RFC9728] MUST include the resource
+      value from that metadata unchanged (Section 9.6).
 
    scope:  OPTIONAL - The space-separated list of scopes at the Resource
       Server that is being requested.  As in Section 2.1 of [RFC8693],
@@ -1076,23 +1077,22 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    When processing the request:
 
-   *  If resource is present, the IdP MUST process it according to
-      Section 2 of [RFC8707].  When the IdP is configured with the
-      protected resources governed by the Resource Authorization Server
-      identified by audience, it MUST respond with invalid_target
-      (Section 2 of [RFC8707], Section 2.2.2 of [RFC8693]) if any
-      requested resource is not one of them.  The IdP MUST also respond
-      with invalid_target if none of the requested resources are
-      acceptable to policy; otherwise, the granted resources MAY be a
-      subset of the requested resources.
+   *  If resource is present, the IdP MUST process it as defined in
+      Section 2 of [RFC8707] and MAY grant a subset of the requested
+      resources based on policy.  The IdP SHOULD respond with
+      invalid_target (Section 2.2.2 of [RFC8693]) if any requested
+      resource is not governed by the Resource Authorization Server
+      identified by audience, and MUST respond with invalid_target if it
+      grants none of them.
 
    *  If resource is absent, the IdP MAY select one or more default
-      resources based on policy, client configuration, or other request
-      context.  The IdP MAY require the client to include resource; if
-      the parameter is required and absent, the IdP MUST respond with
-      invalid_target as defined in Section 2 of [RFC8707].  If no
-      default is selected, the issued ID-JAG is not restricted to a
-      specific protected resource, though it remains restricted to the
+      resources governed by the Resource Authorization Server identified
+      by audience, based on policy, client configuration, or other
+      request context.  The IdP MAY require the client to include
+      resource; if the parameter is required and absent, the IdP MUST
+      respond with invalid_target as defined in Section 2 of [RFC8707].
+      If no default is selected, the issued ID-JAG is not restricted to
+      a specific protected resource, though it remains restricted to the
       Resource Authorization Server identified by audience.
 
    *  If scope is present, the IdP MUST process it according to
@@ -1121,12 +1121,13 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       from authorization details or vice versa, or process them
       independently based on policy.
 
-   *  The IdP MUST include the granted resource (if any), scope (if
-      any), and authorization_details (if any) in the issued ID-JAG.  If
-      the IdP modifies the requested resources, scopes, or authorization
-      details, it MUST reflect the granted values in the ID-JAG.
+   *  The IdP MUST include the granted values, if any, in the resource,
+      scope, and authorization_details claims of the issued ID-JAG, even
+      when they differ from the requested values.  Each requested
+      resource identifier that the IdP grants MUST appear in the
+      resource claim exactly as the Client sent it.
 
-   How the IdP is configured with the protected resources each Resource
+   How the IdP learns which protected resources each Resource
    Authorization Server governs is out of scope for this specification.
 
    The IdP may also introspect the authentication context described in
@@ -1440,13 +1441,18 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    When processing authorization information from the ID-JAG:
 
    *  If the resource claim is present, each identifier MUST be a
-      protected resource governed by this Resource Authorization Server.
-      If any identifier is not, the Resource Authorization Server MUST
-      reject the request with invalid_grant as defined in Section 5.2 of
-      [RFC6749], because the ID-JAG was not issued for resources it
-      governs.  The Resource Authorization Server MAY issue an access
-      token restricted to a subset of the resources in the resource
-      claim based on local policy.
+      protected resource governed by this Resource Authorization Server
+      for the tenant identified by aud_tenant when present, otherwise
+      for the tenant it associates with the issuing IdP (Section 6),
+      compared as described in Section 4.3.  If any identifier is not,
+      the Resource Authorization Server MUST reject the request with
+      invalid_grant as defined in Section 5.2 of [RFC6749], because the
+      ID-JAG was not issued for resources it governs.  The access token
+      MUST be restricted to resources in the resource claim, and SHOULD
+      be audience-restricted to them (Section 2 of [RFC8707]).  The
+      Resource Authorization Server MAY restrict it to a subset based on
+      local policy, and MUST reject the request with access_denied
+      (Section 4.4.3) if none of the resources are acceptable.
 
    *  If the resource claim is absent, the Resource Authorization Server
       MAY select one or more default resources based on policy, client
@@ -1476,7 +1482,8 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       resource identifiers and authorization details when issuing the
       access token.  The Resource Authorization Server MAY derive
       resource identifiers from authorization details or vice versa, or
-      process them independently based on policy.
+      process them independently based on policy.  Any resource
+      identifiers it derives MUST be among those in the resource claim.
 
    *  If both scope and authorization_details claims are present, the
       Resource Authorization Server MUST process both.  The Resource
@@ -2079,19 +2086,25 @@ Cache-Control: no-store
    value matching a legitimate Resource Authorization Server the user's
    IdP already trusts.  A client that skips the issuer check treats the
    malicious metadata as authoritative for the legitimate Authorization
-   Server and requests an ID-JAG with audience set to that server.
-   Presenting the ID-JAG to the attacker's token endpoint lets the
-   attacker relay it to the legitimate Resource Authorization Server and
-   obtain an access token for the End-User.
+   Server and requests an ID-JAG with audience set to that server.  The
+   client then presents the ID-JAG and its client authentication to the
+   attacker's token endpoint.  The attacker relays both to the
+   legitimate Resource Authorization Server, authenticating as the
+   client with the client_secret it received or with a client assertion
+   whose aud is the legitimate issuer, and obtains an access token for
+   the End-User.
 
    The client-side issuer check required by Section 3.3 of [RFC8414] is
-   the primary defense.  When the client includes resource
-   (Section 4.3), the ID-JAG names the attacker's resource, so the
+   the primary defense.  When the client has validated the attacker's
+   Protected Resource Metadata (Section 9.6) and includes its resource
+   value (Section 4.3), the ID-JAG names the attacker's resource, so the
    legitimate Resource Authorization Server rejects the relayed ID-JAG
-   because it does not govern that resource (Section 4.4).  An IdP
-   configured with the resources that Resource Authorization Server
-   governs rejects the Token Exchange request instead, so the ID-JAG
-   never reaches the attacker.
+   because it does not govern that resource (Section 4.4).  An IdP that
+   checks which resources that Resource Authorization Server governs
+   (Section 4.3) rejects the Token Exchange request instead, so the ID-
+   JAG never reaches the attacker.  A sender-constrained ID-JAG
+   (Section 9.11) also defeats the relay, because the attacker cannot
+   prove possession of the client's key.
 
 9.6.  Protected Resource Metadata Validation
 
@@ -2099,22 +2112,17 @@ Cache-Control: no-store
    protected resource via Protected Resource Metadata [RFC9728] MUST
    validate that metadata as required by Section 3.3 of [RFC9728],
    including verifying that the resource value is identical to the
-   resource identifier used to construct the metadata URL, or to the URL
-   the client requested when that URL came from a WWW-Authenticate
-   response.  Without this check, an attacker who publishes metadata at
-   their own resource can misrepresent the resource identifier and
-   redirect the client toward an Authorization Server unrelated to the
-   intended resource.
-
-   Clients that use Protected Resource Metadata for dynamic discovery
-   include its resource value in the Token Exchange request
-   (Section 4.3).  The resource then appears in the ID-JAG, so a
-   Resource Authorization Server that does not govern it rejects the ID-
-   JAG even if Authorization Server metadata was compromised.
+   resource identifier used to construct the metadata URL or, when the
+   metadata URL came from a WWW-Authenticate response, to the URL of the
+   request that received that response.  Without this check, an attacker
+   who publishes metadata at their own resource can misrepresent the
+   resource identifier and redirect the client toward an Authorization
+   Server unrelated to the intended resource.
 
    Together with the Authorization Server metadata issuer check in
-   Section 9.5, these validations bind discovery and the grant to the
-   resource the client intended to access.
+   Section 9.5, this validation binds discovery to the resource the
+   client intended to access, and including the validated resource value
+   in the Token Exchange request (Section 4.3) binds the grant to it.
 
 9.7.  Metadata Disclosure
 
@@ -2782,6 +2790,11 @@ Cache-Control: no-store
               DOI 10.17487/RFC9493, December 2023,
               <https://www.rfc-editor.org/rfc/rfc9493>.
 
+   [RFC9728]  Jones, M.B., Hunt, P., and A. Parecki, "OAuth 2.0
+              Protected Resource Metadata", RFC 9728,
+              DOI 10.17487/RFC9728, April 2025,
+              <https://www.rfc-editor.org/rfc/rfc9728>.
+
 11.2.  Informative References
 
    [I-D.ietf-oauth-client-id-metadata-document]
@@ -2799,11 +2812,6 @@ Cache-Control: no-store
               Authentication Challenge Protocol", RFC 9470,
               DOI 10.17487/RFC9470, September 2023,
               <https://www.rfc-editor.org/rfc/rfc9470>.
-
-   [RFC9728]  Jones, M.B., Hunt, P., and A. Parecki, "OAuth 2.0
-              Protected Resource Metadata", RFC 9728,
-              DOI 10.17487/RFC9728, April 2025,
-              <https://www.rfc-editor.org/rfc/rfc9728>.
 
 Appendix A.  Use Cases
 
@@ -3146,7 +3154,7 @@ A.4.2.4.  AI Agent calls External Tool
       Note: How agents discover available external tools is out of scope
       of this specification
 
-  GET /tools
+  GET /
   Host: api.saas-tool.example
   Accept: application/json
 
