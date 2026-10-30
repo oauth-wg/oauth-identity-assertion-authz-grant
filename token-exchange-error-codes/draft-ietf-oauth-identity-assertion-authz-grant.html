@@ -2403,7 +2403,7 @@ Pragma: no-cache
 <p id="section-4.3.4.3-1">On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>. Any OAuth error code <span class="bcp14">MAY</span> be returned; this specification profiles the following codes for interoperability:<a href="#section-4.3.4.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.4.3-2.1">
-                <p id="section-4.3.4.3-2.1.1"><code>invalid_request</code>: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.2" class="relref">Section 2.2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. A Client that receives <code>invalid_request</code> for a request that previously succeeded can obtain a new subject token and retry once.<a href="#section-4.3.4.3-2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.4.3-2.1.1"><code>invalid_request</code>: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.2" class="relref">Section 2.2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. A Client that receives <code>invalid_request</code> for a request that previously succeeded can obtain a new subject token and retry.<a href="#section-4.3.4.3-2.1.1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.4.3-2.1.2">
 <pre>
 {
@@ -3452,7 +3452,7 @@ Content-Type: application/json;charset=UTF-8
 <dd class="break"></dd>
 <dt id="I-D.parecki-oauth-jwt-dpop-grant">[I-D.parecki-oauth-jwt-dpop-grant]</dt>
         <dd>
-<span class="refAuthor">Parecki, A.</span>, <span class="refTitle">"OAuth 2.0 JWT Authorization Grant with DPoP Binding"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-parecki-oauth-jwt-dpop-grant-01</span>, <time datetime="2026-01-30" class="refDate">30 January 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-01">https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-01</a>&gt;</span>. </dd>
+<span class="refAuthor">Parecki, A.</span>, <span class="refTitle">"OAuth 2.0 JWT Authorization Grant with DPoP Binding"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-parecki-oauth-jwt-dpop-grant-02</span>, <time datetime="2026-10-30" class="refDate">30 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-02">https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-02</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="IANA.jwt">[IANA.jwt]</dt>
         <dd>

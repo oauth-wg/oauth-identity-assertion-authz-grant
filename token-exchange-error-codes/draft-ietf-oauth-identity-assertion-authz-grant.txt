@@ -1342,7 +1342,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    expired, malformed, audience mismatch, or a Refresh Token is
    expired or revoked), as required by Section 2.2.2 of [RFC8693].  A
    Client that receives invalid_request for a request that previously
-   succeeded can obtain a new subject token and retry once.
+   succeeded can obtain a new subject token and retry.
 
    {
      "error": "invalid_request",
@@ -2654,9 +2654,9 @@ Cache-Control: no-store
    [I-D.parecki-oauth-jwt-dpop-grant]
               Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP
               Binding", Work in Progress, Internet-Draft, draft-parecki-
-              oauth-jwt-dpop-grant-01, 30 January 2026,
+              oauth-jwt-dpop-grant-02, 30 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-parecki-
-              oauth-jwt-dpop-grant-01>.
+              oauth-jwt-dpop-grant-02>.
 
    [IANA.jwt] IANA, "JSON Web Token (JWT)",
               <https://www.iana.org/assignments/jwt>.
