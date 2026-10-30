@@ -1004,7 +1004,7 @@ An Authorization Server may operate as either a single-tenant or multi-tenant is
 
 When an IdP Authorization Server issues an ID-JAG, it MUST include the `tenant` claim if the issuer is multi-tenant. The `tenant` value identifies the End-User's tenant at the issuer.
 
-## Client ID and Tenant Relationship
+## Client ID and Tenant Relationship {#client-id-tenant}
 
 The relationship between `client_id` and tenant depends on the deployment model:
 
@@ -1026,13 +1026,10 @@ The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG foll
 
 ## Tenant Context in Token Exchange
 
-When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Server determines the tenant context from:
+When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Server determines the value of each tenant claim it includes:
 
-1. The subject token (e.g., ID Token or SAML assertion) used in the token exchange request, which may contain tenant information
-2. The authenticated client's tenant membership
-3. The target Resource Authorization Server's tenant requirements
-
-The IdP MUST evaluate policy to determine if the requested `audience` (Resource Authorization Server) requires tenant information, and if so, which tenant identifier to include in the issued ID-JAG. The tenant identifier in the ID-JAG MUST match the tenant context that the Resource Authorization Server expects for the specified `client_id` and `sub`.
+* `tenant`: the issuer tenant, which is the End-User's tenant, from the subject token. The subject token was issued to the authenticated Client in that tenant.
+* `aud_tenant`: the Resource Authorization Server tenant, from the requested `audience` and `resource` and the issuer tenant's configuration for that Resource Authorization Server. The IdP Authorization Server selects `client_id` ({{client-id-tenant}}), `sub` ({{subject-mapping}}), and `aud_sub` for that tenant.
 
 # Authorization Server Metadata {#as-metadata}
 
