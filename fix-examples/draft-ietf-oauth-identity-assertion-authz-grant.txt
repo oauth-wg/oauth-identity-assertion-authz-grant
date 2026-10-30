@@ -831,7 +831,6 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
    HTTP/1.1 200 OK
    Content-Type: application/json
    Cache-Control: no-store
-   Pragma: no-cache
 
    {
      "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
@@ -2500,7 +2499,6 @@ Cache-Control: no-store
    HTTP/1.1 200 OK
    Content-Type: application/json;charset=UTF-8
    Cache-Control: no-store
-   Pragma: no-cache
 
    {
      "token_type": "Bearer",
@@ -2647,9 +2645,9 @@ Cache-Control: no-store
    [I-D.parecki-oauth-jwt-dpop-grant]
               Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP
               Binding", Work in Progress, Internet-Draft, draft-parecki-
-              oauth-jwt-dpop-grant-01, 30 January 2026,
+              oauth-jwt-dpop-grant-02, 30 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-parecki-
-              oauth-jwt-dpop-grant-01>.
+              oauth-jwt-dpop-grant-02>.
 
    [IANA.jwt] IANA, "JSON Web Token (JWT)",
               <https://www.iana.org/assignments/jwt>.
@@ -3117,7 +3115,6 @@ https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC12
    HTTP/1.1 200 OK
    Content-Type: application/json
    Cache-Control: no-store
-   Pragma: no-cache
 
    {
      "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
