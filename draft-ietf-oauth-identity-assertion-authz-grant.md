@@ -599,7 +599,7 @@ If access is granted, the IdP creates a signed Identity Assertion JWT Authorizat
 
     {
       "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-      "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+      "access_token": "eyJhbGciOiJSUzI1NiIsI...",
       "token_type": "N_A",
       "scope": "chat.read chat.history",
       "expires_in": 300
@@ -683,7 +683,7 @@ Token Exchange Response:
 
     {
       "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-      "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+      "access_token": "eyJhbGciOiJSUzI1NiIsI...",
       "token_type": "N_A",
       "authorization_details": [
         {
@@ -739,7 +739,7 @@ Access Token Request:
     Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-    &assertion=eyJhbGciOiJIUzI1NiIsI...
+    &assertion=eyJhbGciOiJSUzI1NiIsI...
 
 Access Token Response:
 
@@ -816,7 +816,7 @@ For example:
     Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-    &assertion=eyJhbGciOiJIUzI1NiIsI...
+    &assertion=eyJhbGciOiJSUzI1NiIsI...
 
 
 ### Processing Rules
@@ -1268,7 +1268,7 @@ Example request:
     DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
-    &assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+    &assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
 
 Example successful response with DPoP-bound token:
 
@@ -1365,7 +1365,7 @@ Example request (mTLS session established at the TLS layer) and successful respo
     Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-    &assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+    &assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
     &client_id=f53f191f9311af35
 
 
@@ -1729,7 +1729,7 @@ If access is granted, the Enterprise IdP (`idp.cyberdyne-corp.example`) creates 
 
     {
       "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-      "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+      "access_token": "eyJhbGciOiJSUzI1NiIsI...",
       "token_type": "N_A",
       "scope": "agent.read agent.write",
       "expires_in": 300
@@ -1768,7 +1768,7 @@ AI Agent (`https://ai-agent-app.example/`) makes a token request to the External
     Content-Type: application/x-www-form-urlencoded
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-    &assertion=eyJhbGciOiJIUzI1NiIsI...
+    &assertion=eyJhbGciOiJSUzI1NiIsI...
 
 External Tool Resource Authorization Server (`authorization-server.saas-tool.example`) validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP (`idp.cyberdyne-corp.example`)
 
