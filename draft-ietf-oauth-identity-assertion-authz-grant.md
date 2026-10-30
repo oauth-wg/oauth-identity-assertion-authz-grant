@@ -772,14 +772,14 @@ Access Token Response:
 
 On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following codes for interoperability:
 
-* `invalid_grant`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked). A re-issued subject token may resolve the error.
+* `invalid_request`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by {{Section 2.2.2 of RFC8693}}. A Client that receives `invalid_request` for a request that previously succeeded can obtain a new subject token and retry once.
 
       {
-        "error": "invalid_grant",
+        "error": "invalid_request",
         "error_description": "Audience validation failed"
       }
 
-* `access_denied`: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow.
+* `access_denied`: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow. This profile uses `access_denied` here rather than `invalid_target` ({{Section 2.2.2 of RFC8693}}), so that the Client can tell a target it is not allowed to use from one the IdP Authorization Server does not recognize.
 
       {
         "error": "access_denied",
