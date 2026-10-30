@@ -56,7 +56,6 @@ normative:
   RFC9493:
   RFC7591:
   I-D.ietf-oauth-identity-chaining:
-  I-D.ietf-oauth-rfc7523bis:
   IANA.media-types:
   IANA.oauth-parameters:
   IANA.jwt:
@@ -115,7 +114,7 @@ informative:
 
 --- abstract
 
-This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange {{RFC8693}} and JWT Profile for OAuth 2.0 Authorization Grants {{RFC7523}}. This pattern is informally referred to as Cross-App Access (XAA).
+This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using OAuth 2.0 Token Exchange (RFC 8693) and the JWT Profile for OAuth 2.0 Authorization Grants (RFC 7523). This pattern is informally referred to as Cross-App Access (XAA).
 
 --- middle
 
@@ -616,13 +615,13 @@ If access is granted, the IdP creates a signed Identity Assertion JWT Authorizat
 : OPTIONAL if the scope of the issued token is identical to the scope requested by the client; otherwise, it is REQUIRED. Various policies in the IdP may result in different scopes being issued from the scopes the application requested.
 
 `authorization_details`:
-: OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 2.2 of RFC9396}}. This parameter MUST be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.
+: OPTIONAL - A JSON array of authorization detail objects as defined in {{Section 7 of RFC9396}}. This parameter MUST be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.
 
 `expires_in`:
 : RECOMMENDED - The lifetime in seconds of the authorization grant.
 
 `refresh_token`:
-: OPTIONAL according to {{Section 2.2 of RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
+: OPTIONAL according to {{Section 2.2.1 of RFC8693}}. In the context of this specification, this parameter SHOULD NOT be used.
 
 #### Issued Identity Assertion JWT Authorization Grant
 
@@ -847,7 +846,7 @@ When processing authorization information from the ID-JAG:
 
 * If both `scope` and `authorization_details` claims are present, the Resource Authorization Server MUST process both. The Resource Authorization Server SHOULD ensure consistency between the scopes and authorization details when issuing the access token. The Resource Authorization Server MAY derive scopes from authorization details or vice versa, or process them independently based on policy.
 
-* The Resource Authorization Server MUST include the granted `scope` (if any) and `authorization_details` (if any) in the access token response. The response format follows {{Section 5.1 of RFC6749}} for scope and {{Section 2.2 of RFC9396}} for authorization_details.
+* The Resource Authorization Server MUST include the granted `scope` (if any) and `authorization_details` (if any) in the access token response. The response format follows {{Section 5.1 of RFC6749}} for scope and {{Section 7 of RFC9396}} for authorization_details.
 
 ### Response
 
@@ -885,7 +884,7 @@ On error, the Resource Authorization Server returns an OAuth 2.0 Token Error res
 
 ### Refresh Token
 
-The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per {{Section 5.2 of I-D.ietf-oauth-identity-chaining}}.
+The Resource Authorization Server SHOULD NOT return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per {{Section 5.4 of I-D.ietf-oauth-identity-chaining}}.
 
 When the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server. However, the Resource Authorization Server can reject an ID-JAG with an `exp` longer than its policy allows, or accept each ID-JAG only once by tracking its `jti` ({{Section 3 of RFC7523}}).
 
@@ -1175,7 +1174,7 @@ When such profiles or extensions use an `act` claim, they should preserve the di
 
 ## Sender Constraining Tokens {#sender-constraining-tokens}
 
-Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 4 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.
+Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in {{Section 5.2 of I-D.ietf-oauth-identity-chaining}} and {{I-D.parecki-oauth-jwt-dpop-grant}}. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.
 
 This specification defines two sender-constraining mechanisms for the ID-JAG:
 
