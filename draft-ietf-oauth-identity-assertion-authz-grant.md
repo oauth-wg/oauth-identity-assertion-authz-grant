@@ -1822,6 +1822,14 @@ The authors would like to thank the following people for their contributions and
 * Specified how the Resource Authorization Server finds and validates ID-JAG signing keys
 * Added `id_jag_signing_alg_values_supported` IdP metadata parameter
 * Clarified ID-JAG reuse limits and when the Client should request a new ID-JAG
+* Limited the Token Exchange request to a single `audience` value, and profiled `invalid_target` for an unrecognized audience or a resource not governed by it
+* Defined resource identifier comparison, made the IdP resource governance check a SHOULD, and required the access token to be restricted to the resources in the ID-JAG `resource` claim
+* Moved RFC 9728 to normative references
+* Clarified how the IdP validates a Refresh Token used as the subject token, and when the RFC 6749 scope comparison applies
+* Required the `jwt-dpop` grant type for DPoP-bound ID-JAGs, and required the Resource Authorization Server to reject an ID-JAG with an unsupported `cnf` confirmation method
+* Fixed the tenant claims used in the client ID and subject identifier uniqueness rules
+* Fixed examples (RS256 signatures, `Cache-Control` headers, mTLS `client_id`, consistent `iss` and `exp` values)
+* Corrected cited section numbers, removed citations from the abstract, and removed an unused reference
 * Editorial clarifications and typo fixes
 
 -04
