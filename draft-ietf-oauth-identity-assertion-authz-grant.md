@@ -568,7 +568,7 @@ The IdP Authorization Server evaluates administrator-defined policy for the toke
 
 When processing the request:
 
-* If `resource` is present, the IdP MUST process it according to {{Section 2 of RFC8707}}. The IdP SHOULD respond with `invalid_target` ({{Section 2 of RFC8707}}, {{Section 2.2.2 of RFC8693}}) if any requested resource is not governed by the Resource Authorization Server identified by `audience`. The IdP MUST respond with `invalid_target` if none of the requested resources are acceptable to policy; otherwise, the granted resources MAY be a subset of the requested resources.
+* If `resource` is present, the IdP MUST process it as defined in {{Section 2 of RFC8707}} and MAY grant a subset of the requested resources based on policy. The IdP SHOULD respond with `invalid_target` ({{Section 2.2.2 of RFC8693}}) if any requested resource is not governed by the Resource Authorization Server identified by `audience`, and MUST respond with `invalid_target` if it grants none of them.
 
 * If `resource` is absent, the IdP MAY select one or more default resources based on policy, client configuration, or other request context. The IdP MAY require the client to include `resource`; if the parameter is required and absent, the IdP MUST respond with `invalid_target` as defined in {{Section 2 of RFC8707}}. If no default is selected, the issued ID-JAG is not restricted to a specific protected resource, though it remains restricted to the Resource Authorization Server identified by `audience`.
 
