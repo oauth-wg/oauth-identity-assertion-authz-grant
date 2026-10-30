@@ -806,7 +806,7 @@ The Client makes an access token request to the Resource Authorization Server's 
 `assertion`:
 : REQUIRED - The Identity Assertion JWT Authorization Grant obtained in the previous token exchange step
 
-The Client authenticates with its credentials as registered with the Resource Authorization Server.
+The Client authenticates with its credentials as registered with the Resource Authorization Server. The Resource Authorization Server SHOULD require client authentication. It MUST reject a request that has neither client authentication nor a sender-constrained ID-JAG ({{sender-constraining-tokens}}) with `invalid_client` ({{Section 5.2 of RFC6749}}). See {{client-authentication}} for the trade-off.
 
 For example:
 
@@ -829,7 +829,7 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
 
-* The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
+* If the Client authenticates, the Resource Authorization Server MUST reject the request with an `invalid_grant` error unless the `client_id` claim identifies the authenticated client. If the Client does not authenticate, proof of possession of the key in the `cnf` claim ({{sender-constraining-tokens}}) takes the place of this check, and the `client_id` claim identifies the Client. This client continuity check preserves the OAuth client binding across the exchange, but does not by itself identify or authenticate any actor represented in an `act` claim.
 
 * If the ID-JAG contains a `cnf` claim, the Resource Authorization Server verifies proof of possession as described in {{sender-constraining-tokens}}.
 
@@ -1087,7 +1087,7 @@ A client that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authoriz
 
 ## Client Authentication
 
-This specification SHOULD only be supported for confidential clients.  Public clients SHOULD use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.
+The IdP Authorization Server always authenticates the Client ({{token-exchange}}). The Resource Authorization Server usually does too, but it can instead accept a sender-constrained ID-JAG from a Client that does not authenticate ({{token-request}}). It then relies on the IdP Authorization Server: the `client_id` claim identifies the Client that the IdP Authorization Server authenticated, and proof of possession shows that the presenter holds the key the IdP Authorization Server bound to the ID-JAG for that Client. Without the key binding, anyone holding a copy of the ID-JAG could present it. Clients that cannot authenticate to the IdP Authorization Server SHOULD use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.
 
 ## Storage of Subject Tokens {#subject-token-storage}
 
