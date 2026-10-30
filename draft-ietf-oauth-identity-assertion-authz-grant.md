@@ -799,7 +799,7 @@ For example, the IdP responds with `invalid_target` when a requested resource is
 The Client makes an access token request to the Resource Authorization Server's token endpoint using the previously obtained Identity Assertion JWT Authorization Grant as a JWT Bearer Assertion as defined by {{RFC7523}}.
 
 `grant_type`:
-: REQUIRED - The value of `grant_type` is `urn:ietf:params:oauth:grant-type:jwt-bearer`
+: REQUIRED - `urn:ietf:params:oauth:grant-type:jwt-bearer`, or `urn:ietf:params:oauth:grant-type:jwt-dpop` ({{I-D.parecki-oauth-jwt-dpop-grant}}) when the ID-JAG is bound to a DPoP key ({{sec-dpop-binding}}).
 
 `assertion`:
 : REQUIRED - The Identity Assertion JWT Authorization Grant obtained in the previous token exchange step
@@ -828,6 +828,8 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
 
 * The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
+
+* If the ID-JAG contains a `cnf` claim, the Resource Authorization Server verifies proof of possession as described in {{sender-constraining-tokens}}.
 
 * If the Resource Authorization Server uses the `sub_id` claim for subject resolution, it MUST process the claim according to the indicated Subject Identifier Format. For SAML NameID subject identifiers, the Resource Authorization Server MUST apply the processing rules in {{saml-nameid-sub-id-processing}}.
 
@@ -1182,7 +1184,7 @@ This specification defines two sender-constraining mechanisms for the ID-JAG:
 
 An IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. If both a DPoP proof and a certificate suitable for binding are presented on the same Token Exchange request, the IdP selects a single binding mechanism according to local policy for the target Resource Authorization Server.
 
-The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a key or certificate to a JWT. When an ID-JAG contains a `cnf` claim, proof of possession of the corresponding private key or X.509 certificate MUST be demonstrated when using the ID-JAG at the Resource Authorization Server.
+The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a key or certificate to a JWT. When an ID-JAG contains a `cnf` claim, proof of possession of the corresponding private key or X.509 certificate MUST be demonstrated when using the ID-JAG at the Resource Authorization Server. A Resource Authorization Server that does not support the confirmation method in the `cnf` claim MUST reject the request with an `invalid_grant` error.
 
 The following sections describe the processing rules for each mechanism at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
 
@@ -1215,7 +1217,7 @@ The IdP Authorization Server processes the request as follows:
 
 1. If a DPoP proof is present, the IdP MUST validate it according to {{Section 4.3 of RFC9449}}. The `htm` claim MUST be `POST`, and the `htu` claim MUST match the token endpoint URL.
 
-2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing a `jkt` property with the JWK SHA-256 Thumbprint computed from the DPoP proof's `jwk` header parameter as defined in {{Section 6.1 of RFC9449}}.  This enables the Resource Authorization Server to validate the key binding for the ID-JAG using simple string comparison of the JWK SHA-256 Thumbprint.
+2. If the DPoP proof is valid, the IdP MUST include a `cnf` claim in the issued ID-JAG containing a `jkt` property with the JWK SHA-256 Thumbprint computed from the DPoP proof's `jwk` header parameter as defined in {{Section 6.1 of RFC9449}}, unless it binds the ID-JAG to the client's X.509 certificate instead ({{sec-mtls-binding}}).  This enables the Resource Authorization Server to validate the key binding for the ID-JAG using simple string comparison of the JWK SHA-256 Thumbprint.
 
 The `cnf` claim format follows {{Section 6.1 of RFC9449}}:
 
