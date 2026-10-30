@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 2 May 2027                                          Independent
+Expires: 3 May 2027                                          Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         29 October 2026
+                                                         30 October 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 May 2027.
+   This Internet-Draft will expire on 3 May 2027.
 
 Copyright Notice
 
@@ -1111,12 +1111,11 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       from authorization details or vice versa, or process them
       independently based on policy.
 
-   *  The IdP MUST include the granted resource (if any), scope (if
-      any), and authorization_details (if any) in the issued ID-JAG.  If
-      the IdP modifies the requested resources, scopes, or authorization
-      details, it MUST reflect the granted values in the ID-JAG.  Each
-      granted resource identifier that the Client requested MUST appear
-      in the resource claim unchanged.
+   *  The IdP MUST include the granted values, if any, in the resource,
+      scope, and authorization_details claims of the issued ID-JAG, even
+      when they differ from the requested values.  Each requested
+      resource identifier that the IdP grants MUST appear in the
+      resource claim exactly as the Client sent it.
 
    How the IdP learns which protected resources each Resource
    Authorization Server governs is out of scope for this specification.
