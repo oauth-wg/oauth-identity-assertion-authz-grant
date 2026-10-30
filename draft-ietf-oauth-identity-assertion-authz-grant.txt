@@ -1373,8 +1373,10 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    Identity Assertion JWT Authorization Grant as a JWT Bearer Assertion
    as defined by [RFC7523].
 
-   grant_type:  REQUIRED - The value of grant_type is
-      urn:ietf:params:oauth:grant-type:jwt-bearer
+   grant_type:  REQUIRED - urn:ietf:params:oauth:grant-type:jwt-bearer,
+      or urn:ietf:params:oauth:grant-type:jwt-dpop
+      ([I-D.parecki-oauth-jwt-dpop-grant]) when the ID-JAG is bound to a
+      DPoP key (Section 9.11.1).
 
    assertion:  REQUIRED - The Identity Assertion JWT Authorization Grant
       obtained in the previous token exchange step
@@ -1431,6 +1433,9 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       the OAuth client binding across the exchange, but it does not by
       itself identify or authenticate any actor represented in an act
       claim.
+
+   *  If the ID-JAG contains a cnf claim, the Resource Authorization
+      Server verifies proof of possession as described in Section 9.11.
 
    *  If the Resource Authorization Server uses the sub_id claim for
       subject resolution, it MUST process the claim according to the
@@ -2229,7 +2234,9 @@ Cache-Control: no-store
    bind a key or certificate to a JWT.  When an ID-JAG contains a cnf
    claim, proof of possession of the corresponding private key or X.509
    certificate MUST be demonstrated when using the ID-JAG at the
-   Resource Authorization Server.
+   Resource Authorization Server.  A Resource Authorization Server that
+   does not support the confirmation method in the cnf claim MUST reject
+   the request with an invalid_grant error.
 
    The following sections describe the processing rules for each
    mechanism at two stages: during the Token Exchange (when requesting
@@ -2284,9 +2291,11 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    2.  If the DPoP proof is valid, the IdP MUST include a cnf claim in
        the issued ID-JAG containing a jkt property with the JWK SHA-256
        Thumbprint computed from the DPoP proof's jwk header parameter as
-       defined in Section 6.1 of [RFC9449].  This enables the Resource
-       Authorization Server to validate the key binding for the ID-JAG
-       using simple string comparison of the JWK SHA-256 Thumbprint.
+       defined in Section 6.1 of [RFC9449], unless it binds the ID-JAG
+       to the client's X.509 certificate instead (Section 9.11.2).  This
+       enables the Resource Authorization Server to validate the key
+       binding for the ID-JAG using simple string comparison of the JWK
+       SHA-256 Thumbprint.
 
    The cnf claim format follows Section 6.1 of [RFC9449]:
 
@@ -2650,9 +2659,9 @@ Cache-Control: no-store
    [I-D.parecki-oauth-jwt-dpop-grant]
               Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP
               Binding", Work in Progress, Internet-Draft, draft-parecki-
-              oauth-jwt-dpop-grant-01, 30 January 2026,
+              oauth-jwt-dpop-grant-02, 30 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-parecki-
-              oauth-jwt-dpop-grant-01>.
+              oauth-jwt-dpop-grant-02>.
 
    [IANA.jwt] IANA, "JSON Web Token (JWT)",
               <https://www.iana.org/assignments/jwt>.
