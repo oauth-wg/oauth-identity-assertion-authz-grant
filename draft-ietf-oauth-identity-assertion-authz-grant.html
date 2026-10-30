@@ -1668,11 +1668,11 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 .
 {
   "jti": "9e43f81b64a33f20116179",
-  "iss": "https://acme.idp.example",
+  "iss": "https://acme.idp.example/",
   "sub": "U019488227",
   "aud": "https://acme.chat.example/",
   "client_id": "f53f191f9311af35",
-  "exp": 1311281970,
+  "exp": 1311281270,
   "iat": 1311280970,
   "resource": "https://acme.chat.example/api",
   "scope": "chat.read chat.history",
@@ -1956,6 +1956,7 @@ grant_type=authorization_code
 
 HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
   "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
@@ -2181,7 +2182,7 @@ Pragma: no-cache
 
 {
   "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-  "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+  "access_token": "eyJhbGciOiJSUzI1NiIsI...",
   "token_type": "N_A",
   "scope": "chat.read chat.history",
   "expires_in": 300
@@ -2250,7 +2251,7 @@ Pragma: no-cache
   "sub": "U019488227",
   "aud": "https://acme.chat.example/",
   "client_id": "f53f191f9311af35",
-  "exp": 1311281970,
+  "exp": 1311281270,
   "iat": 1311280970,
   "resource": "https://api.chat.example/",
   "scope": "chat.read chat.history",
@@ -2301,7 +2302,7 @@ Pragma: no-cache
 
 {
   "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-  "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+  "access_token": "eyJhbGciOiJSUzI1NiIsI...",
   "token_type": "N_A",
   "authorization_details": [
     {
@@ -2332,7 +2333,7 @@ Pragma: no-cache
   "sub": "U019488227",
   "aud": "https://acme.chat.example/",
   "client_id": "f53f191f9311af35",
-  "exp": 1311281970,
+  "exp": 1311281270,
   "iat": 1311280970,
   "authorization_details": [
     {
@@ -2361,7 +2362,7 @@ Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-&amp;assertion=eyJhbGciOiJIUzI1NiIsI...
+&amp;assertion=eyJhbGciOiJSUzI1NiIsI...
 </pre><a href="#section-4.3.4.2-9" class="pilcrow">¶</a>
 </div>
 <p id="section-4.3.4.2-10">Access Token Response:<a href="#section-4.3.4.2-10" class="pilcrow">¶</a></p>
@@ -2472,7 +2473,7 @@ Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-&amp;assertion=eyJhbGciOiJIUzI1NiIsI...
+&amp;assertion=eyJhbGciOiJSUzI1NiIsI...
 </pre><a href="#section-4.4-5" class="pilcrow">¶</a>
 </div>
 <div id="processing-rules-1">
@@ -3039,11 +3040,11 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 <pre>
 {
   "jti": "9e43f81b64a33f20116179",
-  "iss": "https://acme.idp.example",
+  "iss": "https://acme.idp.example/",
   "sub": "U019488227",
   "aud": "https://acme.chat.example/",
   "client_id": "f53f191f9311af35",
-  "exp": 1311281970,
+  "exp": 1311281270,
   "iat": 1311280970,
   "resource": "https://api.chat.example/",
   "scope": "chat.read chat.history",
@@ -3101,7 +3102,7 @@ Content-Type: application/x-www-form-urlencoded
 DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
-&amp;assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+&amp;assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
 </pre><a href="#section-9.11.1.2.1-4" class="pilcrow">¶</a>
 </div>
 <p id="section-9.11.1.2.1-5">Example successful response with DPoP-bound token:<a href="#section-9.11.1.2.1-5" class="pilcrow">¶</a></p>
@@ -3247,11 +3248,13 @@ Host: acme.chat.example
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-&amp;assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+&amp;assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+&amp;client_id=f53f191f9311af35
 
 
 HTTP/1.1 200 OK
 Content-Type: application/json;charset=UTF-8
+Cache-Control: no-store
 
 {
   "token_type": "Bearer",
@@ -3872,6 +3875,7 @@ grant_type=authorization_code
 
 HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
   "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
@@ -4013,7 +4017,7 @@ Pragma: no-cache
 
 {
   "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-  "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+  "access_token": "eyJhbGciOiJSUzI1NiIsI...",
   "token_type": "N_A",
   "scope": "agent.read agent.write",
   "expires_in": 300
@@ -4035,7 +4039,7 @@ Pragma: no-cache
   "aud": "https://authorization-server.saas-tool.example/",
   "resource": "https://api.saas-tool.example/",
   "client_id": "https://ai-agent-app.example/",
-  "exp": 1984445160,
+  "exp": 1984445400,
   "iat": 1984445100,
   "scope": "agent.read agent.write"
 }
@@ -4064,7 +4068,7 @@ Authorization: Basic yZS1yYW5kb20tc2VjcmV0v3JOkF0XG5Qx2
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-&amp;assertion=eyJhbGciOiJIUzI1NiIsI...
+&amp;assertion=eyJhbGciOiJSUzI1NiIsI...
 </pre><a href="#appendix-A.4.2.6-3" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.4.2.6-4">External Tool Resource Authorization Server (<code>authorization-server.saas-tool.example</code>) validates the Identity Assertion JWT Authorization Grant using the published JWKS for the trusted Enterprise IdP (<code>idp.cyberdyne-corp.example</code>)<a href="#appendix-A.4.2.6-4" class="pilcrow">¶</a></p>

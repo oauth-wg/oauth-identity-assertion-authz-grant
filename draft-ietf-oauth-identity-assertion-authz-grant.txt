@@ -473,11 +473,11 @@ Table of Contents
    .
    {
      "jti": "9e43f81b64a33f20116179",
-     "iss": "https://acme.idp.example",
+     "iss": "https://acme.idp.example/",
      "sub": "U019488227",
      "aud": "https://acme.chat.example/",
      "client_id": "f53f191f9311af35",
-     "exp": 1311281970,
+     "exp": 1311281270,
      "iat": 1311280970,
      "resource": "https://acme.chat.example/api",
      "scope": "chat.read chat.history",
@@ -828,6 +828,7 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
 
    HTTP/1.1 200 OK
    Content-Type: application/json
+   Cache-Control: no-store
 
    {
      "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
@@ -1146,7 +1147,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    {
      "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-     "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+     "access_token": "eyJhbGciOiJSUzI1NiIsI...",
      "token_type": "N_A",
      "scope": "chat.read chat.history",
      "expires_in": 300
@@ -1196,7 +1197,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
      "sub": "U019488227",
      "aud": "https://acme.chat.example/",
      "client_id": "f53f191f9311af35",
-     "exp": 1311281970,
+     "exp": 1311281270,
      "iat": 1311280970,
      "resource": "https://api.chat.example/",
      "scope": "chat.read chat.history",
@@ -1240,7 +1241,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    {
      "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-     "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+     "access_token": "eyJhbGciOiJSUzI1NiIsI...",
      "token_type": "N_A",
      "authorization_details": [
        {
@@ -1270,7 +1271,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
      "sub": "U019488227",
      "aud": "https://acme.chat.example/",
      "client_id": "f53f191f9311af35",
-     "exp": 1311281970,
+     "exp": 1311281270,
      "iat": 1311280970,
      "authorization_details": [
        {
@@ -1297,7 +1298,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    Content-Type: application/x-www-form-urlencoded
 
    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-   &assertion=eyJhbGciOiJIUzI1NiIsI...
+   &assertion=eyJhbGciOiJSUzI1NiIsI...
 
    Access Token Response:
 
@@ -1392,7 +1393,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    Content-Type: application/x-www-form-urlencoded
 
    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-   &assertion=eyJhbGciOiJIUzI1NiIsI...
+   &assertion=eyJhbGciOiJSUzI1NiIsI...
 
 4.4.1.  Processing Rules
 
@@ -2301,11 +2302,11 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    {
      "jti": "9e43f81b64a33f20116179",
-     "iss": "https://acme.idp.example",
+     "iss": "https://acme.idp.example/",
      "sub": "U019488227",
      "aud": "https://acme.chat.example/",
      "client_id": "f53f191f9311af35",
-     "exp": 1311281970,
+     "exp": 1311281270,
      "iat": 1311280970,
      "resource": "https://api.chat.example/",
      "scope": "chat.read chat.history",
@@ -2365,7 +2366,7 @@ Content-Type: application/x-www-form-urlencoded
 DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IkVTMjU2IiwiandrIjp7Imt0eSI6IkVDI...
 
 grant_type=urn:ietf:params:oauth:grant-type:jwt-dpop
-&assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+&assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
 
    Example successful response with DPoP-bound token:
 
@@ -2508,11 +2509,13 @@ Cache-Control: no-store
    Content-Type: application/x-www-form-urlencoded
 
    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-   &assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+   &assertion=eyJhbGciOiJSUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+   &client_id=f53f191f9311af35
 
 
    HTTP/1.1 200 OK
    Content-Type: application/json;charset=UTF-8
+   Cache-Control: no-store
 
    {
      "token_type": "Bearer",
@@ -3119,6 +3122,7 @@ https://ai-agent-app.example/callback?code=SplxlOBeZQQYbYS6WxSbIA&state=xyzABC12
 
    HTTP/1.1 200 OK
    Content-Type: application/json
+   Cache-Control: no-store
 
    {
      "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
@@ -3263,7 +3267,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    {
      "issued_token_type": "urn:ietf:params:oauth:token-type:id-jag",
-     "access_token": "eyJhbGciOiJIUzI1NiIsI...",
+     "access_token": "eyJhbGciOiJSUzI1NiIsI...",
      "token_type": "N_A",
      "scope": "agent.read agent.write",
      "expires_in": 300
@@ -3283,7 +3287,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
      "aud": "https://authorization-server.saas-tool.example/",
      "resource": "https://api.saas-tool.example/",
      "client_id": "https://ai-agent-app.example/",
-     "exp": 1984445160,
+     "exp": 1984445400,
      "iat": 1984445100,
      "scope": "agent.read agent.write"
    }
@@ -3310,7 +3314,7 @@ A.4.2.6.  AI Agent obtains an Access Token for External Tool
    Content-Type: application/x-www-form-urlencoded
 
    grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
-   &assertion=eyJhbGciOiJIUzI1NiIsI...
+   &assertion=eyJhbGciOiJSUzI1NiIsI...
 
    External Tool Resource Authorization Server (authorization-
    server.saas-tool.example) validates the Identity Assertion JWT
