@@ -1036,9 +1036,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    *  If the subject token is a Refresh Token, the IdP MUST validate it
       the same way it would for a standard refresh_token grant at the
       token endpoint: the token is issued by the IdP, bound to the
-      authenticated client, unexpired, not revoked, and the requested
-      scopes and audience remain within the authorization context of the
-      Refresh Token.
+      authenticated client, unexpired, not revoked, and not restricted
+      by the IdP from the requested audience, resources, or scopes.  The
+      scope comparison in Section 6 of [RFC6749] applies only when
+      audience identifies the IdP Authorization Server itself
+      (Section 9.4).  For any other Authorization Server, the requested
+      scope and authorization_details have that server's meaning
+      (Section 4.3), not the IdP's, so the IdP evaluates them by policy
+      as for any other Token Exchange request.
 
    *  If the subject token is a Refresh Token, the IdP Authorization
       Server SHOULD retrieve or assemble the subject's claims needed for
