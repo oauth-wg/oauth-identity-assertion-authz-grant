@@ -1044,7 +1044,7 @@ To advertise support for issuing an Identity Assertion JWT Authorization Grant v
 
 `urn:ietf:params:oauth:token-type:id-jag`
 
-The IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located from its issuer identifier as described in {{Section 3 of RFC8414}} or Section 4 of {{OpenID.Discovery}}.
+The IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located from its issuer identifier as described in {{Section 3 of RFC8414}}. A Resource Authorization Server that cannot retrieve metadata from that location MAY fall back to Section 4 of {{OpenID.Discovery}}, as described in {{Section 5 of RFC8414}}.
 
 The IdP Authorization Server can also advertise the algorithms it uses to sign ID-JAGs:
 
