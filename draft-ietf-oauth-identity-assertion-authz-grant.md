@@ -555,6 +555,8 @@ This non-normative example shows using a Refresh Token as the `subject_token` (w
 
 ### Processing Rules
 
+The IdP MUST authenticate the Client, and MUST reject a request without client authentication with `invalid_client` ({{Section 5.2 of RFC6749}}).
+
 The IdP MUST validate the subject token:
 
 * The IdP MUST determine that the `subject_token` is in fact a token of the type indicated by `subject_token_type`, and that the IdP issued it for that purpose. A token that the IdP issued for a different purpose, such as an access token, an ID-JAG, or a client assertion, MUST NOT be accepted as an Identity Assertion.
