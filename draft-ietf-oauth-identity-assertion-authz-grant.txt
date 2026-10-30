@@ -503,9 +503,9 @@ Table of Contents
    identified by aud, in the same way it would populate audience-scoped
    claims into an ID Token or SAML Assertion issued to that Resource
    Authorization Server.  Any claim that would be valid in an ID Token
-   [OpenID.Core] may appear in the ID-JAG, since the grant functions as
-   both an Identity Assertion and an authorization delegation for the
-   Resource Authorization Server.
+   [OpenID.Core] may appear in the ID-JAG, since the grant conveys
+   identity claims about the End-User as well as an authorization
+   delegation for the Resource Authorization Server.
 
    It is RECOMMENDED that the ID-JAG contain an email [OpenID.Core] and/
    or aud_sub [OpenID.Enterprise] claim.  The Resource Authorization
@@ -1782,8 +1782,8 @@ Pragma: no-cache
    *  *Tenant-scoped client identifiers*: In some deployments, the
       client_id is unique only within a tenant context.  The same
       client_id value may exist in different tenants, and the
-      combination of tenant + client_id (or iss + tenant + client_id for
-      multi-tenant issuers) uniquely identifies the client registration.
+      combination of the Resource Authorization Server tenant and
+      client_id uniquely identifies the client registration.
 
    *  *Global client identifiers*: In other deployments, the client_id
       is globally unique across all tenants.  The client_id alone
@@ -1793,8 +1793,8 @@ Pragma: no-cache
    model used by the Resource Authorization Server when including the
    client_id claim in an ID-JAG.  For tenant-scoped client identifiers,
    the IdP MUST ensure that the client_id included in the ID-JAG is
-   valid within the tenant context indicated by the tenant claim (if
-   present) or the issuer's tenant context.
+   valid within the Resource Authorization Server tenant for which the
+   ID-JAG is issued (identified by aud_tenant, when present).
 
 6.3.  Subject Identifier Uniqueness with Tenants
 
@@ -1809,9 +1809,9 @@ Pragma: no-cache
 
    The IdP Authorization Server MUST ensure that the sub claim in the
    ID-JAG follows the appropriate uniqueness rules for the target
-   Resource Authorization Server.  When the Resource Authorization
-   Server is multi-tenant, the IdP MUST include the tenant claim in the
-   ID-JAG to ensure proper subject identifier scoping.
+   Resource Authorization Server.  When the issuer is multi-tenant, the
+   IdP MUST include the tenant claim in the ID-JAG to ensure proper
+   subject identifier scoping.
 
 6.4.  Tenant Context in Token Exchange
 
