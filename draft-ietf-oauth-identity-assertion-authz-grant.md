@@ -799,7 +799,7 @@ For example, the IdP responds with `invalid_target` when a requested resource is
 The Client makes an access token request to the Resource Authorization Server's token endpoint using the previously obtained Identity Assertion JWT Authorization Grant as a JWT Bearer Assertion as defined by {{RFC7523}}.
 
 `grant_type`:
-: REQUIRED - The value of `grant_type` is `urn:ietf:params:oauth:grant-type:jwt-bearer`
+: REQUIRED - `urn:ietf:params:oauth:grant-type:jwt-bearer`, or `urn:ietf:params:oauth:grant-type:jwt-dpop` ({{I-D.parecki-oauth-jwt-dpop-grant}}) when the ID-JAG is bound to a DPoP key ({{sec-dpop-binding}}).
 
 `assertion`:
 : REQUIRED - The Identity Assertion JWT Authorization Grant obtained in the previous token exchange step
