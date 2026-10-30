@@ -1022,6 +1022,10 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
 4.3.3.  Processing Rules
 
+   The IdP MUST authenticate the Client, and MUST reject a request
+   without client authentication with invalid_client (Section 5.2 of
+   [RFC6749]).
+
    The IdP MUST validate the subject token:
 
    *  The IdP MUST determine that the subject_token is in fact a token
