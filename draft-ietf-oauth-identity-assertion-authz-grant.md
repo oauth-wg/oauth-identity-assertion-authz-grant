@@ -1161,6 +1161,8 @@ When the ID-JAG includes a `sub_id` claim, the Resource Authorization Server MUS
 
 The Resource Authorization Server MUST use a SAML NameID `sub_id` only when the validated ID-JAG issuer is explicitly associated with the SAML issuer identified by `sub_id.issuer` through local configuration or trusted federation metadata.
 
+A Resource Authorization Server that resolves the subject using `email` or `aud_sub` relies on the administrators of the issuer tenant for those values. It SHOULD do so only when it trusts that issuer tenant as authoritative for them, for example for email addresses in domains the tenant has verified, because administrators of another tenant at the same issuer can set any value.
+
 ## Subject Identifier Disclosure {#sub-id-disclosure}
 
 The IdP Authorization Server SHOULD include `sub_id` only when needed by the target Resource Authorization Server for subject resolution. Because the ID-JAG is visible to the Client that presents it, `sub_id` can disclose additional user identifiers, such as email-address NameIDs or stable enterprise account identifiers, that the Client might not otherwise receive. For the same reason, a pairwise `sub` selected for the Resource Authorization Server ({{subject-mapping}}) is disclosed to the Client, which can link it to the `sub` in its own ID Token. The IdP Authorization Server SHOULD minimize the subject identifiers included in the ID-JAG to those required by the Resource Authorization Server.
