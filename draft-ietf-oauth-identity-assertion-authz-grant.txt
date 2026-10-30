@@ -849,13 +849,15 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
 
    audience:  REQUIRED - The identifier of the Resource Authorization
       Server, typically in another trust domain, as the intended
-      audience for the ID-JAG.  IdP Authorization Servers MUST support
-      the issuer identifier of the Resource Authorization Server as
-      defined in Section 2 of [RFC8414].  IdP Authorization Servers MAY
-      also support implementation-specific audience values, such as
-      URNs, that identify pre-established trust relationships with
-      Resource Authorization Servers.  When such a value is used, the
-      IdP Authorization Server resolves it to the corresponding Resource
+      audience for the ID-JAG.  Exactly one audience value is allowed.
+
+      IdP Authorization Servers MUST support the issuer identifier of
+      the Resource Authorization Server as defined in Section 2 of
+      [RFC8414].  IdP Authorization Servers MAY also support
+      implementation-specific audience values, such as URNs, that
+      identify pre-established trust relationships with Resource
+      Authorization Servers.  When such a value is used, the IdP
+      Authorization Server resolves it to the corresponding Resource
       Authorization Server identifier and issues the ID-JAG with that
       identifier in the aud claim.
 
@@ -1080,6 +1082,12 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    for the token exchange request and determines if the client should be
    granted access to act on behalf of the subject for the target
    audience, resources, scopes, and authorization details.
+
+   If the request contains more than one audience value, the IdP MUST
+   respond with invalid_request.  If audience does not identify a
+   Resource Authorization Server with which the IdP has a trust
+   relationship, the IdP MUST respond with invalid_target (Section 2.2.2
+   of [RFC8693]).
 
    When processing the request:
 
@@ -1335,7 +1343,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    On error, the IdP Authorization Server returns an OAuth 2.0 Token
    Error response as defined in Section 5.2 of [RFC6749].  Any OAuth
    error code MAY be returned; this specification profiles the following
-   two codes for interoperability:
+   codes for interoperability:
 
 *  invalid_grant: the subject token failed validation (for example
    expired, malformed, audience mismatch, or a Refresh Token is
@@ -1359,13 +1367,12 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
   "error_description": "Client is not authorized to access the target Resource Authorization Server"
 }
 
-   For example, the IdP responds with invalid_target when a requested
-   resource is not governed by the audience Resource Authorization
-   Server:
-
-   HTTP/1.1 400 Bad Request
-   Content-Type: application/json
-   Cache-Control: no-store
+*  invalid_target: the audience does not identify a Resource
+   Authorization Server with which the IdP Authorization Server has a
+   trust relationship, or a requested resource is not governed by
+   that Resource Authorization Server (Section 4.3).  A re-issued
+   subject token will not resolve the error; the Client needs to
+   change the request.
 
    {
      "error": "invalid_target",
