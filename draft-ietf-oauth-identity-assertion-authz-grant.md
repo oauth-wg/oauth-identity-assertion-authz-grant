@@ -555,6 +555,8 @@ This non-normative example shows using a Refresh Token as the `subject_token` (w
 
 ### Processing Rules
 
+The IdP MUST authenticate the Client, and MUST reject a request without client authentication with `invalid_client` ({{Section 5.2 of RFC6749}}).
+
 The IdP MUST validate the subject token:
 
 * The IdP MUST determine that the `subject_token` is in fact a token of the type indicated by `subject_token_type`, and that the IdP issued it for that purpose. A token that the IdP issued for a different purpose, such as an access token, an ID-JAG, or a client assertion, MUST NOT be accepted as an Identity Assertion.
@@ -804,7 +806,7 @@ The Client makes an access token request to the Resource Authorization Server's 
 `assertion`:
 : REQUIRED - The Identity Assertion JWT Authorization Grant obtained in the previous token exchange step
 
-The Client authenticates with its credentials as registered with the Resource Authorization Server.
+The Client authenticates with its credentials as registered with the Resource Authorization Server. The Resource Authorization Server SHOULD require client authentication. It MUST reject a request that has neither client authentication nor a sender-constrained ID-JAG ({{sender-constraining-tokens}}) with `invalid_client` ({{Section 5.2 of RFC6749}}). See {{client-authentication}} for the trade-off.
 
 For example:
 
@@ -827,7 +829,7 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
 
-* The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
+* If the Client authenticates, the Resource Authorization Server MUST reject the request with an `invalid_grant` error unless the `client_id` claim identifies the authenticated client. If the Client does not authenticate, proof of possession of the key in the `cnf` claim ({{sender-constraining-tokens}}) takes the place of this check, and the `client_id` claim identifies the Client. This client continuity check preserves the OAuth client binding across the exchange, but does not by itself identify or authenticate any actor represented in an `act` claim.
 
 * If the ID-JAG contains a `cnf` claim, the Resource Authorization Server verifies proof of possession as described in {{sender-constraining-tokens}}.
 
@@ -1046,7 +1048,7 @@ To advertise support for issuing an Identity Assertion JWT Authorization Grant v
 
 `urn:ietf:params:oauth:token-type:id-jag`
 
-The IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located from its issuer identifier as described in {{Section 3 of RFC8414}} or Section 4 of {{OpenID.Discovery}}.
+The IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located from its issuer identifier as described in {{Section 3 of RFC8414}}. A Resource Authorization Server that cannot retrieve metadata from that location MAY fall back to Section 4 of {{OpenID.Discovery}}, as described in {{Section 5 of RFC8414}}.
 
 The IdP Authorization Server can also advertise the algorithms it uses to sign ID-JAGs:
 
@@ -1085,7 +1087,7 @@ A client that includes `urn:ietf:params:oauth:grant-profile:id-jag` in `authoriz
 
 ## Client Authentication
 
-This specification SHOULD only be supported for confidential clients.  Public clients SHOULD use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.
+The IdP Authorization Server always authenticates the Client ({{token-exchange}}). The Resource Authorization Server usually does too, but it can instead accept a sender-constrained ID-JAG from a Client that does not authenticate ({{token-request}}). It then relies on the IdP Authorization Server: the `client_id` claim identifies the Client that the IdP Authorization Server authenticated, and proof of possession shows that the presenter holds the key the IdP Authorization Server bound to the ID-JAG for that Client. Without the key binding, anyone holding a copy of the ID-JAG could present it. Clients that cannot authenticate to the IdP Authorization Server SHOULD use the existing authorization code grant and redirect the user to the Resource Authorization Server with an OAuth 2.0 Authorization Request where the user can interactively consent to the access delegation.
 
 ## Storage of Subject Tokens {#subject-token-storage}
 
@@ -1379,6 +1381,18 @@ Example request (mTLS session established at the TLS layer) and successful respo
     }
 
 
+# Privacy Considerations
+
+The privacy considerations of {{RFC8693}}, {{RFC7523}}, and {{Section 6 of I-D.ietf-oauth-identity-chaining}} also apply to this specification. Disclosure of subject identifiers to the Client is covered in {{sub-id-disclosure}}, and disclosure of trust relationships in metadata in {{metadata-disclosure}}.
+
+The IdP Authorization Server learns which Clients access which Resource Authorization Servers for which End-Users, and when, including access that happens without the End-User present. It should keep the records described in {{subject-token-storage}} only as long as security and audit require, and should let End-Users or administrators see and revoke cross-app access.
+
+The Client can read the ID-JAG, including claims it would not receive in its own ID Token, such as a pairwise `sub` or `aud_sub`, and can link them across Resource Authorization Servers. The IdP Authorization Server SHOULD include only the claims the Resource Authorization Server needs.
+
+A Resource Authorization Server that provisions accounts from ID-JAGs ({{id-jag}}) can create accounts for End-Users who never used it directly, and should retain only the attributes it needs.
+
+Error descriptions SHOULD NOT disclose more about the End-User than the error code conveys, such as whether the End-User holds a license for the application.
+
 # IANA Considerations
 
 ## Media Types
@@ -1507,8 +1521,9 @@ To streamline the user experience, this specification can be used to enable the 
 ### Preconditions
 
 * The Client does not have a pre-registered OAuth 2.0 client at the IdP Authorization Server or the Resource Authorization Server
+* The Client identifies itself at both with a Client ID Metadata Document {{I-D.ietf-oauth-client-id-metadata-document}} that publishes its public keys, and authenticates in the Token Exchange request with the corresponding private key ({{token-exchange}}), for example using `private_key_jwt`
 * The Client has obtained an Identity Assertion (e.g. ID Token) from the IdP Authorization Server
-* The Resource Authorization Server is configured to allow the Identity Assertion JWT Authorization Grant from unregistered clients
+* The Resource Authorization Server accepts clients identified by a Client ID Metadata Document, and either authenticates the Client the same way or accepts a sender-constrained ID-JAG ({{token-request}})
 
 ## AI Agent using External Tools
 
