@@ -1002,7 +1002,7 @@ An Authorization Server may operate as either a single-tenant or multi-tenant is
 
 * **Multi-tenant issuer**: The issuer identifier (`iss`) identifies the Authorization Server, but multiple tenants may be hosted by the same issuer. In this case, the tenant identifier (`tenant`) claim is used in conjunction with the issuer identifier to uniquely identify the tenant context. The combination of `iss` + `tenant` uniquely identifies the tenant.
 
-When an IdP Authorization Server issues an ID-JAG, it MUST include the `tenant` claim if the issuer is multi-tenant and the tenant context is relevant for the Resource Authorization Server. The IdP MUST determine the appropriate tenant identifier based on the subject's tenant membership and the target Resource Authorization Server's tenant requirements.
+When an IdP Authorization Server issues an ID-JAG, it MUST include the `tenant` claim if the issuer is multi-tenant. The `tenant` value identifies the End-User's tenant at the issuer.
 
 ## Client ID and Tenant Relationship
 
@@ -1022,7 +1022,7 @@ As specified in {{id-jag}}, subject identifiers (`sub`) have different uniquenes
 
 * For multi-tenant issuers: The subject identifier MUST be unique when scoped with issuer and tenant (`iss` + `tenant` + `sub`).
 
-The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server. When the issuer is multi-tenant, the IdP MUST include the `tenant` claim in the ID-JAG to ensure proper subject identifier scoping.
+The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server.
 
 ## Tenant Context in Token Exchange
 
