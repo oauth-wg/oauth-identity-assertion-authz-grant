@@ -2811,7 +2811,7 @@ Pragma: no-cache
 <p id="section-7.1-1">An IdP Authorization Server can advertise the identity chaining token types it can issue in its OAuth Authorization Server Metadata <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. Identity and Authorization Chaining Across Domains <span>[<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> defines the <code>identity_chaining_requested_token_types_supported</code> metadata parameter for this purpose.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.1-2">To advertise support for issuing an Identity Assertion JWT Authorization Grant via Token Exchange, the IdP Authorization Server <span class="bcp14">SHOULD</span> include the following value in <code>identity_chaining_requested_token_types_supported</code>:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
 <p id="section-7.1-3"><code>urn:ietf:params:oauth:token-type:id-jag</code><a href="#section-7.1-3" class="pilcrow">¶</a></p>
-<p id="section-7.1-4">The IdP Authorization Server <span class="bcp14">SHOULD</span> sign ID-JAGs with a key published at the <code>jwks_uri</code> in its metadata, located from its issuer identifier as described in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-3" class="relref">Section 3</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> or Section 4 of <span>[<a href="#OpenID.Discovery" class="cite xref">OpenID.Discovery</a>]</span>.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.1-4">The IdP Authorization Server <span class="bcp14">SHOULD</span> sign ID-JAGs with a key published at the <code>jwks_uri</code> in its metadata, located from its issuer identifier as described in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-3" class="relref">Section 3</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>. A Resource Authorization Server that cannot retrieve metadata from that location <span class="bcp14">MAY</span> fall back to Section 4 of <span>[<a href="#OpenID.Discovery" class="cite xref">OpenID.Discovery</a>]</span>, as described in <span><a href="https://rfc-editor.org/rfc/rfc8414#section-5" class="relref">Section 5</a> of [<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>.<a href="#section-7.1-4" class="pilcrow">¶</a></p>
 <p id="section-7.1-5">The IdP Authorization Server can also advertise the algorithms it uses to sign ID-JAGs:<a href="#section-7.1-5" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-7.1-6">
           <dt id="section-7.1-6.1">
@@ -4196,7 +4196,31 @@ Content-Type: application/json
           <p id="appendix-C-3.14.1">Clarified ID-JAG reuse limits and when the Client should request a new ID-JAG<a href="#appendix-C-3.14.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-C-3.15">
-          <p id="appendix-C-3.15.1">Editorial clarifications and typo fixes<a href="#appendix-C-3.15.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-3.15.1">Limited the Token Exchange request to a single <code>audience</code> value, and profiled <code>invalid_target</code> for an unrecognized audience or a resource not governed by it<a href="#appendix-C-3.15.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.16">
+          <p id="appendix-C-3.16.1">Defined resource identifier comparison, made the IdP resource governance check a <span class="bcp14">SHOULD</span>, and required the access token to be restricted to the resources in the ID-JAG <code>resource</code> claim<a href="#appendix-C-3.16.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.17">
+          <p id="appendix-C-3.17.1">Moved RFC 9728 to normative references<a href="#appendix-C-3.17.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.18">
+          <p id="appendix-C-3.18.1">Clarified how the IdP validates a Refresh Token used as the subject token, and when the RFC 6749 scope comparison applies<a href="#appendix-C-3.18.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.19">
+          <p id="appendix-C-3.19.1">Required the <code>jwt-dpop</code> grant type for DPoP-bound ID-JAGs, and required the Resource Authorization Server to reject an ID-JAG with an unsupported <code>cnf</code> confirmation method<a href="#appendix-C-3.19.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.20">
+          <p id="appendix-C-3.20.1">Fixed the tenant claims used in the client ID and subject identifier uniqueness rules<a href="#appendix-C-3.20.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.21">
+          <p id="appendix-C-3.21.1">Fixed examples (RS256 signatures, <code>Cache-Control</code> headers, mTLS <code>client_id</code>, consistent <code>iss</code> and <code>exp</code> values)<a href="#appendix-C-3.21.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.22">
+          <p id="appendix-C-3.22.1">Corrected cited section numbers, removed citations from the abstract, and removed an unused reference<a href="#appendix-C-3.22.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-3.23">
+          <p id="appendix-C-3.23.1">Editorial clarifications and typo fixes<a href="#appendix-C-3.23.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="appendix-C-4">-04<a href="#appendix-C-4" class="pilcrow">¶</a></p>
