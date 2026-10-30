@@ -772,7 +772,7 @@ Access Token Response:
 
 On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following codes for interoperability:
 
-* `invalid_request`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by {{Section 2.2.2 of RFC8693}}. A Client that receives `invalid_request` for a request that previously succeeded can obtain a new subject token and retry once.
+* `invalid_request`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by {{Section 2.2.2 of RFC8693}}. A Client that receives `invalid_request` for a request that previously succeeded can obtain a new subject token and retry.
 
       {
         "error": "invalid_request",
