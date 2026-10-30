@@ -445,6 +445,8 @@ Note: The IdP Authorization Server may enforce security controls such as multi-f
 
     HTTP/1.1 200 OK
     Content-Type: application/json
+    Cache-Control: no-store
+    Pragma: no-cache
 
     {
       "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
@@ -1364,10 +1366,13 @@ Example request (mTLS session established at the TLS layer) and successful respo
 
     grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
     &assertion=eyJhbGciOiJIUzI1NiIsInR5cCI6Im9hdXRoLWlkLWphZytqd3QifQ...
+    &client_id=f53f191f9311af35
 
 
     HTTP/1.1 200 OK
     Content-Type: application/json;charset=UTF-8
+    Cache-Control: no-store
+    Pragma: no-cache
 
     {
       "token_type": "Bearer",
@@ -1603,6 +1608,8 @@ AI Agent (`https://ai-agent-app.example/`) exchanges the `code` and PKCE `code_v
 
     HTTP/1.1 200 OK
     Content-Type: application/json
+    Cache-Control: no-store
+    Pragma: no-cache
 
     {
       "id_token": "eyJraWQiOiJzMTZ0cVNtODhwREo4VGZCXzdrSEtQ...",
