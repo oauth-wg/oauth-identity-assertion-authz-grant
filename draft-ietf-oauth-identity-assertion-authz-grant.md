@@ -827,6 +827,8 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * The Resource Authorization Server MUST reject the ID-JAG with an `invalid_grant` error if the `iss` claim does not identify an IdP Authorization Server it trusts. It SHOULD obtain that issuer's keys from the `jwks_uri` in the issuer's metadata ({{idp-metadata}}). It validates the signature as required by {{Section 5.2 of RFC7521}}, accepting only the algorithms it allows for that issuer ({{Section 3.1 of RFC8725}}).
 
+* If the issuer is multi-tenant, the Resource Authorization Server MUST reject the ID-JAG with an `invalid_grant` error unless the `tenant` claim is present and the Resource Authorization Server trusts `iss` and `tenant` together for the recipient tenant. The recipient tenant is identified by `aud`, by `aud_tenant` when present, or by the Resource Authorization Server's trust relationship with the issuer. If the Resource Authorization Server cannot determine the recipient tenant unambiguously, it MUST reject the ID-JAG with an `invalid_grant` error. It MUST resolve the subject only within the recipient tenant.
+
 * The Resource Authorization Server MUST validate the `aud` (audience) claim of the ID-JAG. The `aud` claim MUST contain the issuer identifier of the Resource Authorization Server as defined in {{RFC8414}}. The `aud` claim MAY be a string containing a single issuer identifier, or an array containing a single issuer identifier. If the `aud` claim is an array, it MUST contain exactly one element, and that element MUST be the issuer identifier of the Resource Authorization Server. If the `aud` claim does not match the Resource Authorization Server's issuer identifier, the Resource Authorization Server MUST reject the JWT with an `invalid_grant` error as defined in {{Section 5.2 of RFC6749}}. This validation prevents audience injection attacks and ensures the ID-JAG was intended for this specific Resource Authorization Server.
 
 * If the Client authenticates, the Resource Authorization Server MUST reject the request with an `invalid_grant` error unless the `client_id` claim identifies the authenticated client. If the Client does not authenticate, proof of possession of the key in the `cnf` claim ({{sender-constraining-tokens}}) takes the place of this check, and the `client_id` claim identifies the Client. This client continuity check preserves the OAuth client binding across the exchange, but does not by itself identify or authenticate any actor represented in an `act` claim.
@@ -1004,9 +1006,9 @@ An Authorization Server may operate as either a single-tenant or multi-tenant is
 
 * **Multi-tenant issuer**: The issuer identifier (`iss`) identifies the Authorization Server, but multiple tenants may be hosted by the same issuer. In this case, the tenant identifier (`tenant`) claim is used in conjunction with the issuer identifier to uniquely identify the tenant context. The combination of `iss` + `tenant` uniquely identifies the tenant.
 
-When an IdP Authorization Server issues an ID-JAG, it MUST include the `tenant` claim if the issuer is multi-tenant and the tenant context is relevant for the Resource Authorization Server. The IdP MUST determine the appropriate tenant identifier based on the subject's tenant membership and the target Resource Authorization Server's tenant requirements.
+When an IdP Authorization Server issues an ID-JAG, it MUST include the `tenant` claim if the issuer is multi-tenant. The `tenant` value identifies the End-User's tenant at the issuer.
 
-## Client ID and Tenant Relationship
+## Client ID and Tenant Relationship {#client-id-tenant}
 
 The relationship between `client_id` and tenant depends on the deployment model:
 
@@ -1024,17 +1026,14 @@ As specified in {{id-jag}}, subject identifiers (`sub`) have different uniquenes
 
 * For multi-tenant issuers: The subject identifier MUST be unique when scoped with issuer and tenant (`iss` + `tenant` + `sub`).
 
-The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server. When the issuer is multi-tenant, the IdP MUST include the `tenant` claim in the ID-JAG to ensure proper subject identifier scoping.
+The IdP Authorization Server MUST ensure that the `sub` claim in the ID-JAG follows the appropriate uniqueness rules for the target Resource Authorization Server.
 
 ## Tenant Context in Token Exchange
 
-When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Server determines the tenant context from:
+When a Client requests an ID-JAG via Token Exchange, the IdP Authorization Server determines the value of each tenant claim it includes:
 
-1. The subject token (e.g., ID Token or SAML assertion) used in the token exchange request, which may contain tenant information
-2. The authenticated client's tenant membership
-3. The target Resource Authorization Server's tenant requirements
-
-The IdP MUST evaluate policy to determine if the requested `audience` (Resource Authorization Server) requires tenant information, and if so, which tenant identifier to include in the issued ID-JAG. The tenant identifier in the ID-JAG MUST match the tenant context that the Resource Authorization Server expects for the specified `client_id` and `sub`.
+* `tenant`: the issuer tenant, which is the End-User's tenant, from the subject token. The subject token was issued to the authenticated Client in that tenant.
+* `aud_tenant`: the Resource Authorization Server tenant, from the requested `audience` and `resource` and the issuer tenant's configuration for that Resource Authorization Server. The IdP Authorization Server selects `client_id` ({{client-id-tenant}}), `sub` ({{subject-mapping}}), and `aud_sub` for that tenant.
 
 # Authorization Server Metadata {#as-metadata}
 
@@ -1160,6 +1159,8 @@ Resource Authorization Servers MAY provide a protected discovery mechanism by wh
 When the ID-JAG includes a `sub_id` claim, the Resource Authorization Server MUST NOT use the `sub_id.issuer` value to establish trust in the ID-JAG issuer. The ID-JAG MUST first be validated using the `iss` claim, signature, audience, expiration, and client binding according to this specification.
 
 The Resource Authorization Server MUST use a SAML NameID `sub_id` only when the validated ID-JAG issuer is explicitly associated with the SAML issuer identified by `sub_id.issuer` through local configuration or trusted federation metadata.
+
+A Resource Authorization Server that resolves the subject using `email` or `aud_sub` relies on the administrators of the issuer tenant for those values. It SHOULD do so only when it trusts that issuer tenant as authoritative for them, for example for email addresses in domains the tenant has verified, because administrators of another tenant at the same issuer can set any value.
 
 ## Subject Identifier Disclosure {#sub-id-disclosure}
 
