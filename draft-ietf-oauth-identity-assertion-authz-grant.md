@@ -1377,6 +1377,18 @@ Example request (mTLS session established at the TLS layer) and successful respo
     }
 
 
+# Privacy Considerations
+
+The privacy considerations of {{RFC8693}}, {{RFC7523}}, and {{Section 6 of I-D.ietf-oauth-identity-chaining}} also apply to this specification. Disclosure of subject identifiers to the Client is covered in {{sub-id-disclosure}}, and disclosure of trust relationships in metadata in {{metadata-disclosure}}.
+
+The IdP Authorization Server learns which Clients access which Resource Authorization Servers for which End-Users, and when, including access that happens without the End-User present. It should keep the records described in {{subject-token-storage}} only as long as security and audit require, and should let End-Users or administrators see and revoke cross-app access.
+
+The Client can read the ID-JAG, including claims it would not receive in its own ID Token, such as a pairwise `sub` or `aud_sub`, and can link them across Resource Authorization Servers. The IdP Authorization Server SHOULD include only the claims the Resource Authorization Server needs.
+
+A Resource Authorization Server that provisions accounts from ID-JAGs ({{id-jag}}) can create accounts for End-Users who never used it directly, and should retain only the attributes it needs.
+
+Error descriptions SHOULD NOT disclose more about the End-User than the error code conveys, such as whether the End-User holds a license for the application.
+
 # IANA Considerations
 
 ## Media Types
