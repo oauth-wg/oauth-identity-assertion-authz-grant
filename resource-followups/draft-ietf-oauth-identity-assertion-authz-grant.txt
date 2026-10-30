@@ -1076,12 +1076,13 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       grants none of them.
 
    *  If resource is absent, the IdP MAY select one or more default
-      resources based on policy, client configuration, or other request
-      context.  The IdP MAY require the client to include resource; if
-      the parameter is required and absent, the IdP MUST respond with
-      invalid_target as defined in Section 2 of [RFC8707].  If no
-      default is selected, the issued ID-JAG is not restricted to a
-      specific protected resource, though it remains restricted to the
+      resources governed by the Resource Authorization Server identified
+      by audience, based on policy, client configuration, or other
+      request context.  The IdP MAY require the client to include
+      resource; if the parameter is required and absent, the IdP MUST
+      respond with invalid_target as defined in Section 2 of [RFC8707].
+      If no default is selected, the issued ID-JAG is not restricted to
+      a specific protected resource, though it remains restricted to the
       Resource Authorization Server identified by audience.
 
    *  If scope is present, the IdP MUST process it according to
