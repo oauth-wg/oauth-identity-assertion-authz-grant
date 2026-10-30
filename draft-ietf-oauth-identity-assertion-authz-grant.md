@@ -271,11 +271,11 @@ A non-normative example JWT with expanded header and payload claims is below:
     .
     {
       "jti": "9e43f81b64a33f20116179",
-      "iss": "https://acme.idp.example",
+      "iss": "https://acme.idp.example/",
       "sub": "U019488227",
       "aud": "https://acme.chat.example/",
       "client_id": "f53f191f9311af35",
-      "exp": 1311281970,
+      "exp": 1311281270,
       "iat": 1311280970,
       "resource": "https://acme.chat.example/api",
       "scope": "chat.read chat.history",
@@ -640,7 +640,7 @@ The following is a non-normative example of the issued token
       "sub": "U019488227",
       "aud": "https://acme.chat.example/",
       "client_id": "f53f191f9311af35",
-      "exp": 1311281970,
+      "exp": 1311281270,
       "iat": 1311280970,
       "resource": "https://api.chat.example/",
       "scope": "chat.read chat.history",
@@ -712,7 +712,7 @@ Issued Identity Assertion JWT Authorization Grant with authorization_details:
       "sub": "U019488227",
       "aud": "https://acme.chat.example/",
       "client_id": "f53f191f9311af35",
-      "exp": 1311281970,
+      "exp": 1311281270,
       "iat": 1311280970,
       "authorization_details": [
         {
@@ -1225,11 +1225,11 @@ The `cnf` claim format follows {{Section 6.1 of RFC9449}}:
 
     {
       "jti": "9e43f81b64a33f20116179",
-      "iss": "https://acme.idp.example",
+      "iss": "https://acme.idp.example/",
       "sub": "U019488227",
       "aud": "https://acme.chat.example/",
       "client_id": "f53f191f9311af35",
-      "exp": 1311281970,
+      "exp": 1311281270,
       "iat": 1311280970,
       "resource": "https://api.chat.example/",
       "scope": "chat.read chat.history",
@@ -1749,7 +1749,7 @@ Identity Assertion JWT Authorization Grant claims:
       "aud": "https://authorization-server.saas-tool.example/",
       "resource": "https://api.saas-tool.example/",
       "client_id": "https://ai-agent-app.example/",
-      "exp": 1984445160,
+      "exp": 1984445400,
       "iat": 1984445100,
       "scope": "agent.read agent.write"
     }
