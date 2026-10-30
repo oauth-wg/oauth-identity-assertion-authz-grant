@@ -1815,21 +1815,18 @@ Pragma: no-cache
 6.4.  Tenant Context in Token Exchange
 
    When a Client requests an ID-JAG via Token Exchange, the IdP
-   Authorization Server determines the tenant context from:
+   Authorization Server determines the value of each tenant claim it
+   includes:
 
-   1.  The subject token (e.g., ID Token or SAML assertion) used in the
-       token exchange request, which may contain tenant information
+   *  tenant: the issuer tenant, which is the End-User's tenant, from
+      the subject token.  The subject token was issued to the
+      authenticated Client in that tenant.
 
-   2.  The authenticated client's tenant membership
-
-   3.  The target Resource Authorization Server's tenant requirements
-
-   The IdP MUST evaluate policy to determine if the requested audience
-   (Resource Authorization Server) requires tenant information, and if
-   so, which tenant identifier to include in the issued ID-JAG.  The
-   tenant identifier in the ID-JAG MUST match the tenant context that
-   the Resource Authorization Server expects for the specified client_id
-   and sub.
+   *  aud_tenant: the Resource Authorization Server tenant, from the
+      requested audience and resource and the issuer tenant's
+      configuration for that Resource Authorization Server.  The IdP
+      Authorization Server selects client_id (Section 6.2), sub
+      (Section 5.2), and aud_sub for that tenant.
 
 7.  Authorization Server Metadata
 
@@ -2655,9 +2652,9 @@ Cache-Control: no-store
    [I-D.parecki-oauth-jwt-dpop-grant]
               Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP
               Binding", Work in Progress, Internet-Draft, draft-parecki-
-              oauth-jwt-dpop-grant-01, 30 January 2026,
+              oauth-jwt-dpop-grant-02, 30 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-parecki-
-              oauth-jwt-dpop-grant-01>.
+              oauth-jwt-dpop-grant-02>.
 
    [IANA.jwt] IANA, "JSON Web Token (JWT)",
               <https://www.iana.org/assignments/jwt>.
