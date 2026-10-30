@@ -1338,13 +1338,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    error code MAY be returned; this specification profiles the following
    codes for interoperability:
 
-*  invalid_grant: the subject token failed validation (for example
+*  invalid_request: the subject token failed validation (for example
    expired, malformed, audience mismatch, or a Refresh Token is
-   expired or revoked).  A re-issued subject token may resolve the
-   error.
+   expired or revoked), as required by Section 2.2.2 of [RFC8693].  A
+   Client that receives invalid_request for a request that previously
+   succeeded can obtain a new subject token and retry.
 
    {
-     "error": "invalid_grant",
+     "error": "invalid_request",
      "error_description": "Audience validation failed"
    }
 
@@ -1354,6 +1355,10 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    the error.  Remediation is defined by the IdP Authorization Server
    operator's app assignment, access-request, or entitlement process,
    such as an Identity Governance and Administration (IGA) workflow.
+   This profile uses access_denied here rather than invalid_target
+   (Section 2.2.2 of [RFC8693]), so that the Client can tell a target
+   it is not allowed to use from one the IdP Authorization Server
+   does not recognize.
 
 {
   "error": "access_denied",
@@ -2649,9 +2654,9 @@ Cache-Control: no-store
    [I-D.parecki-oauth-jwt-dpop-grant]
               Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP
               Binding", Work in Progress, Internet-Draft, draft-parecki-
-              oauth-jwt-dpop-grant-01, 30 January 2026,
+              oauth-jwt-dpop-grant-02, 30 October 2026,
               <https://datatracker.ietf.org/doc/html/draft-parecki-
-              oauth-jwt-dpop-grant-01>.
+              oauth-jwt-dpop-grant-02>.
 
    [IANA.jwt] IANA, "JSON Web Token (JWT)",
               <https://www.iana.org/assignments/jwt>.

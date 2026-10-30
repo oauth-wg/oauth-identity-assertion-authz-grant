@@ -2403,18 +2403,18 @@ Pragma: no-cache
 <p id="section-4.3.4.3-1">On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.2" class="relref">Section 5.2</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span>. Any OAuth error code <span class="bcp14">MAY</span> be returned; this specification profiles the following codes for interoperability:<a href="#section-4.3.4.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3.4.3-2.1">
-                <p id="section-4.3.4.3-2.1.1"><code>invalid_grant</code>: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked). A re-issued subject token may resolve the error.<a href="#section-4.3.4.3-2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.4.3-2.1.1"><code>invalid_request</code>: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.2" class="relref">Section 2.2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. A Client that receives <code>invalid_request</code> for a request that previously succeeded can obtain a new subject token and retry.<a href="#section-4.3.4.3-2.1.1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.4.3-2.1.2">
 <pre>
 {
-  "error": "invalid_grant",
+  "error": "invalid_request",
   "error_description": "Audience validation failed"
 }
 </pre><a href="#section-4.3.4.3-2.1.2" class="pilcrow">¶</a>
 </div>
 </li>
               <li class="normal" id="section-4.3.4.3-2.2">
-                <p id="section-4.3.4.3-2.2.1"><code>access_denied</code>: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow.<a href="#section-4.3.4.3-2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-4.3.4.3-2.2.1"><code>access_denied</code>: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow. This profile uses <code>access_denied</code> here rather than <code>invalid_target</code> (<span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.2" class="relref">Section 2.2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>), so that the Client can tell a target it is not allowed to use from one the IdP Authorization Server does not recognize.<a href="#section-4.3.4.3-2.2.1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.3.4.3-2.2.2">
 <pre>
 {
@@ -3452,7 +3452,7 @@ Content-Type: application/json;charset=UTF-8
 <dd class="break"></dd>
 <dt id="I-D.parecki-oauth-jwt-dpop-grant">[I-D.parecki-oauth-jwt-dpop-grant]</dt>
         <dd>
-<span class="refAuthor">Parecki, A.</span>, <span class="refTitle">"OAuth 2.0 JWT Authorization Grant with DPoP Binding"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-parecki-oauth-jwt-dpop-grant-01</span>, <time datetime="2026-01-30" class="refDate">30 January 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-01">https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-01</a>&gt;</span>. </dd>
+<span class="refAuthor">Parecki, A.</span>, <span class="refTitle">"OAuth 2.0 JWT Authorization Grant with DPoP Binding"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-parecki-oauth-jwt-dpop-grant-02</span>, <time datetime="2026-10-30" class="refDate">30 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-02">https://datatracker.ietf.org/doc/html/draft-parecki-oauth-jwt-dpop-grant-02</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="IANA.jwt">[IANA.jwt]</dt>
         <dd>
