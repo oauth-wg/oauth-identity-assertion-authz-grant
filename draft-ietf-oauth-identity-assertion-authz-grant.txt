@@ -2989,12 +2989,18 @@ A.3.1.  Preconditions
    *  The Client does not have a pre-registered OAuth 2.0 client at the
       IdP Authorization Server or the Resource Authorization Server
 
+   *  The Client identifies itself at both with a Client ID Metadata
+      Document [I-D.ietf-oauth-client-id-metadata-document] that
+      publishes its public keys, and authenticates in the Token Exchange
+      request with the corresponding private key (Section 4.3), for
+      example using private_key_jwt
+
    *  The Client has obtained an Identity Assertion (e.g. ID Token) from
       the IdP Authorization Server
 
-   *  The Resource Authorization Server is configured to allow the
-      Identity Assertion JWT Authorization Grant from unregistered
-      clients
+   *  The Resource Authorization Server accepts clients identified by a
+      Client ID Metadata Document, and either authenticates the Client
+      the same way or accepts a sender-constrained ID-JAG (Section 4.4)
 
 A.4.  AI Agent using External Tools
 
