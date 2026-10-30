@@ -20,9 +20,9 @@ Abstract
    identity assertion to obtain an access token for a third-party API by
    coordinating through an identity provider that the downstream
    Resource Authorization Server already trusts for single sign-on
-   (SSO), using Token Exchange [RFC8693] and JWT Profile for OAuth 2.0
-   Authorization Grants [RFC7523].  This pattern is informally referred
-   to as Cross-App Access (XAA).
+   (SSO), using OAuth 2.0 Token Exchange (RFC 8693) and the JWT Profile
+   for OAuth 2.0 Authorization Grants (RFC 7523).  This pattern is
+   informally referred to as Cross-App Access (XAA).
 
 About This Document
 
@@ -1169,7 +1169,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
       from the scopes the application requested.
 
    authorization_details:  OPTIONAL - A JSON array of authorization
-      detail objects as defined in Section 2.2 of [RFC9396].  This
+      detail objects as defined in Section 7 of [RFC9396].  This
       parameter MUST be included if the client requested authorization
       details and the IdP granted authorization details that differ from
       what was requested, or if the IdP modified the authorization
@@ -1178,7 +1178,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    expires_in:  RECOMMENDED - The lifetime in seconds of the
       authorization grant.
 
-   refresh_token:  OPTIONAL according to Section 2.2 of [RFC8693].  In
+   refresh_token:  OPTIONAL according to Section 2.2.1 of [RFC8693].  In
       the context of this specification, this parameter SHOULD NOT be
       used.
 
@@ -1501,7 +1501,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    *  The Resource Authorization Server MUST include the granted scope
       (if any) and authorization_details (if any) in the access token
       response.  The response format follows Section 5.1 of [RFC6749]
-      for scope and Section 2.2 of [RFC9396] for authorization_details.
+      for scope and Section 7 of [RFC9396] for authorization_details.
 
 4.4.2.  Response
 
@@ -1555,7 +1555,7 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 
    The Resource Authorization Server SHOULD NOT return a Refresh Token
    when an Identity Assertion JWT Authorization Grant is exchanged for
-   an Access Token per Section 5.2 of
+   an Access Token per Section 5.4 of
    [I-D.ietf-oauth-identity-chaining].
 
    When the access token has expired, clients MAY re-submit the original
@@ -2204,7 +2204,7 @@ Cache-Control: no-store
 9.11.  Sender Constraining Tokens
 
    Identity Assertion JWT Authorization Grant may support key binding to
-   enable sender-constrained tokens as described in Section 4 of
+   enable sender-constrained tokens as described in Section 5.2 of
    [I-D.ietf-oauth-identity-chaining] and
    [I-D.parecki-oauth-jwt-dpop-grant].  This provides additional
    security by binding tokens to a specific cryptographic key or
@@ -2646,15 +2646,6 @@ Cache-Control: no-store
               Internet-Draft, draft-ietf-oauth-identity-chaining-17, 19
               July 2026, <https://datatracker.ietf.org/doc/html/draft-
               ietf-oauth-identity-chaining-17>.
-
-   [I-D.ietf-oauth-rfc7523bis]
-              Jones, M. B., Campbell, B., Mortimore, C., and F. Skokan,
-              "Updates to OAuth 2.0 JSON Web Token (JWT) Client
-              Authentication and Assertion-Based Authorization Grants",
-              Work in Progress, Internet-Draft, draft-ietf-oauth-
-              rfc7523bis-11, 28 April 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              rfc7523bis-11>.
 
    [I-D.parecki-oauth-jwt-dpop-grant]
               Parecki, A., "OAuth 2.0 JWT Authorization Grant with DPoP

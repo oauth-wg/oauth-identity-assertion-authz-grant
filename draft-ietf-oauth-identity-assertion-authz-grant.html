@@ -9,7 +9,7 @@
 <meta content="Karl McGuinness" name="author">
 <meta content="Brian Campbell" name="author">
 <meta content="
-       This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange   and JWT Profile for OAuth 2.0 Authorization Grants  . This pattern is informally referred to as Cross-App Access (XAA). 
+       This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using OAuth 2.0 Token Exchange (RFC 8693) and the JWT Profile for OAuth 2.0 Authorization Grants (RFC 7523). This pattern is informally referred to as Cross-App Access (XAA). 
     " name="description">
 <meta content="xml2rfc 3.34.1" name="generator">
 <meta content="cross-domain" name="keyword">
@@ -1090,7 +1090,7 @@ svg {
 <h1 id="title">Identity Assertion JWT Authorization Grant</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using Token Exchange <span>[<a href="#RFC8693" class="cite xref">RFC8693</a>]</span> and JWT Profile for OAuth 2.0 Authorization Grants <span>[<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>. This pattern is informally referred to as Cross-App Access (XAA).<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This specification provides a mechanism for an application to use an identity assertion to obtain an access token for a third-party API by coordinating through an identity provider that the downstream Resource Authorization Server already trusts for single sign-on (SSO), using OAuth 2.0 Token Exchange (RFC 8693) and the JWT Profile for OAuth 2.0 Authorization Grants (RFC 7523). This pattern is informally referred to as Cross-App Access (XAA).<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -2216,7 +2216,7 @@ Pragma: no-cache
 <dt id="section-4.3.4-3.9">
 <code>authorization_details</code>:</dt>
             <dd style="margin-left: 1.5em" id="section-4.3.4-3.10">
-              <p id="section-4.3.4-3.10.1"><span class="bcp14">OPTIONAL</span> - A JSON array of authorization detail objects as defined in <span><a href="https://rfc-editor.org/rfc/rfc9396#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. This parameter <span class="bcp14">MUST</span> be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.<a href="#section-4.3.4-3.10.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.4-3.10.1"><span class="bcp14">OPTIONAL</span> - A JSON array of authorization detail objects as defined in <span><a href="https://rfc-editor.org/rfc/rfc9396#section-7" class="relref">Section 7</a> of [<a href="#RFC9396" class="cite xref">RFC9396</a>]</span>. This parameter <span class="bcp14">MUST</span> be included if the client requested authorization details and the IdP granted authorization details that differ from what was requested, or if the IdP modified the authorization details.<a href="#section-4.3.4-3.10.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
 <dt id="section-4.3.4-3.11">
@@ -2228,7 +2228,7 @@ Pragma: no-cache
 <dt id="section-4.3.4-3.13">
 <code>refresh_token</code>:</dt>
             <dd style="margin-left: 1.5em" id="section-4.3.4-3.14">
-              <p id="section-4.3.4-3.14.1"><span class="bcp14">OPTIONAL</span> according to <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. In the context of this specification, this parameter <span class="bcp14">SHOULD NOT</span> be used.<a href="#section-4.3.4-3.14.1" class="pilcrow">¶</a></p>
+              <p id="section-4.3.4-3.14.1"><span class="bcp14">OPTIONAL</span> according to <span><a href="https://rfc-editor.org/rfc/rfc8693#section-2.2.1" class="relref">Section 2.2.1</a> of [<a href="#RFC8693" class="cite xref">RFC8693</a>]</span>. In the context of this specification, this parameter <span class="bcp14">SHOULD NOT</span> be used.<a href="#section-4.3.4-3.14.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>
@@ -2522,7 +2522,7 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer
               <p id="section-4.4.1-4.6.1">If both <code>scope</code> and <code>authorization_details</code> claims are present, the Resource Authorization Server <span class="bcp14">MUST</span> process both. The Resource Authorization Server <span class="bcp14">SHOULD</span> ensure consistency between the scopes and authorization details when issuing the access token. The Resource Authorization Server <span class="bcp14">MAY</span> derive scopes from authorization details or vice versa, or process them independently based on policy.<a href="#section-4.4.1-4.6.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-4.4.1-4.7">
-              <p id="section-4.4.1-4.7.1">The Resource Authorization Server <span class="bcp14">MUST</span> include the granted <code>scope</code> (if any) and <code>authorization_details</code> (if any) in the access token response. The response format follows <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.1" class="relref">Section 5.1</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> for scope and <span><a href="https://rfc-editor.org/rfc/rfc9396#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC9396" class="cite xref">RFC9396</a>]</span> for authorization_details.<a href="#section-4.4.1-4.7.1" class="pilcrow">¶</a></p>
+              <p id="section-4.4.1-4.7.1">The Resource Authorization Server <span class="bcp14">MUST</span> include the granted <code>scope</code> (if any) and <code>authorization_details</code> (if any) in the access token response. The response format follows <span><a href="https://rfc-editor.org/rfc/rfc6749#section-5.1" class="relref">Section 5.1</a> of [<a href="#RFC6749" class="cite xref">RFC6749</a>]</span> for scope and <span><a href="https://rfc-editor.org/rfc/rfc9396#section-7" class="relref">Section 7</a> of [<a href="#RFC9396" class="cite xref">RFC9396</a>]</span> for authorization_details.<a href="#section-4.4.1-4.7.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -2587,7 +2587,7 @@ Pragma: no-cache
           <h4 id="name-refresh-token">
 <a href="#section-4.4.4" class="section-number selfRef">4.4.4. </a><a href="#name-refresh-token" class="section-name selfRef">Refresh Token</a>
           </h4>
-<p id="section-4.4.4-1">The Resource Authorization Server <span class="bcp14">SHOULD NOT</span> return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-5.2" class="relref">Section 5.2</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>.<a href="#section-4.4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.4-1">The Resource Authorization Server <span class="bcp14">SHOULD NOT</span> return a Refresh Token when an Identity Assertion JWT Authorization Grant is exchanged for an Access Token per <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-5.4" class="relref">Section 5.4</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span>.<a href="#section-4.4.4-1" class="pilcrow">¶</a></p>
 <p id="section-4.4.4-2">When the access token has expired, clients <span class="bcp14">MAY</span> re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server. However, the Resource Authorization Server can reject an ID-JAG with an <code>exp</code> longer than its policy allows, or accept each ID-JAG only once by tracking its <code>jti</code> (<span><a href="https://rfc-editor.org/rfc/rfc7523#section-3" class="relref">Section 3</a> of [<a href="#RFC7523" class="cite xref">RFC7523</a>]</span>).<a href="#section-4.4.4-2" class="pilcrow">¶</a></p>
 <p id="section-4.4.4-3">If the ID-JAG has expired, or the Resource Authorization Server rejects a re-submitted ID-JAG with an <code>invalid_grant</code> error, the Client <span class="bcp14">SHOULD</span> request a new ID-JAG from the IdP Authorization Server using the original Identity Assertion from the IdP (e.g ID Token) before presenting it to the Resource Authorization Server. If the Resource Authorization Server also rejects the new ID-JAG, requesting another will not resolve the error.<a href="#section-4.4.4-3" class="pilcrow">¶</a></p>
 <p id="section-4.4.4-4">If the ID Token is expired, the Client <span class="bcp14">MAY</span> use the Refresh Token obtained from the IdP during SSO to obtain a new ID Token which it can exchange for a new ID-JAG.  If the Client is unable to obtain a new Identity Assertion with a Refresh Token then it <span class="bcp14">SHOULD</span> re-authenticate the user by redirecting to the IdP.<a href="#section-4.4.4-4" class="pilcrow">¶</a></p>
@@ -2982,7 +2982,7 @@ Cache-Control: no-store
         <h3 id="name-sender-constraining-tokens">
 <a href="#section-9.11" class="section-number selfRef">9.11. </a><a href="#name-sender-constraining-tokens" class="section-name selfRef">Sender Constraining Tokens</a>
         </h3>
-<p id="section-9.11-1">Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-4" class="relref">Section 4</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> and <span>[<a href="#I-D.parecki-oauth-jwt-dpop-grant" class="cite xref">I-D.parecki-oauth-jwt-dpop-grant</a>]</span>. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.<a href="#section-9.11-1" class="pilcrow">¶</a></p>
+<p id="section-9.11-1">Identity Assertion JWT Authorization Grant may support key binding to enable sender-constrained tokens as described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17#section-5.2" class="relref">Section 5.2</a> of [<a href="#I-D.ietf-oauth-identity-chaining" class="cite xref">I-D.ietf-oauth-identity-chaining</a>]</span> and <span>[<a href="#I-D.parecki-oauth-jwt-dpop-grant" class="cite xref">I-D.parecki-oauth-jwt-dpop-grant</a>]</span>. This provides additional security by binding tokens to a specific cryptographic key or certificate, preventing reuse by parties that do not have access to the corresponding private key.<a href="#section-9.11-1" class="pilcrow">¶</a></p>
 <p id="section-9.11-2">This specification defines two sender-constraining mechanisms for the ID-JAG:<a href="#section-9.11-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-9.11-3.1">
@@ -3447,10 +3447,6 @@ Content-Type: application/json;charset=UTF-8
 <dt id="I-D.ietf-oauth-identity-chaining">[I-D.ietf-oauth-identity-chaining]</dt>
         <dd>
 <span class="refAuthor">Schwenkschuster, A.</span>, <span class="refAuthor">Kasselman, P.</span>, <span class="refAuthor">Burgin, K.</span>, <span class="refAuthor">Jenkins, M. J.</span>, <span class="refAuthor">Campbell, B.</span>, and <span class="refAuthor">A. Parecki</span>, <span class="refTitle">"OAuth Identity and Authorization Chaining Across Domains"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-identity-chaining-17</span>, <time datetime="2026-07-19" class="refDate">19 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-17</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="I-D.ietf-oauth-rfc7523bis">[I-D.ietf-oauth-rfc7523bis]</dt>
-        <dd>
-<span class="refAuthor">Jones, M. B.</span>, <span class="refAuthor">Campbell, B.</span>, <span class="refAuthor">Mortimore, C.</span>, and <span class="refAuthor">F. Skokan</span>, <span class="refTitle">"Updates to OAuth 2.0 JSON Web Token (JWT) Client Authentication and Assertion-Based Authorization Grants"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-rfc7523bis-11</span>, <time datetime="2026-04-28" class="refDate">28 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-11">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-rfc7523bis-11</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.parecki-oauth-jwt-dpop-grant">[I-D.parecki-oauth-jwt-dpop-grant]</dt>
         <dd>
