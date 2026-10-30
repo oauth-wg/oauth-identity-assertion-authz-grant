@@ -829,6 +829,8 @@ All of {{Section 5.2 of RFC7521}} applies, in addition to the following processi
 
 * The `client_id` claim MUST identify the same client as the client authentication in the request. The Resource Authorization Server MUST validate that the `client_id` claim in the ID-JAG matches the authenticated client making the request. If they do not match, the Resource Authorization Server MUST reject the request with an `invalid_grant` error. This client continuity requirement preserves the OAuth client binding across the exchange, but it does not by itself identify or authenticate any actor represented in an `act` claim.
 
+* If the ID-JAG contains a `cnf` claim, the Resource Authorization Server verifies proof of possession as described in {{sender-constraining-tokens}}.
+
 * If the Resource Authorization Server uses the `sub_id` claim for subject resolution, it MUST process the claim according to the indicated Subject Identifier Format. For SAML NameID subject identifiers, the Resource Authorization Server MUST apply the processing rules in {{saml-nameid-sub-id-processing}}.
 
 When processing authorization information from the ID-JAG:
@@ -1184,7 +1186,7 @@ This specification defines two sender-constraining mechanisms for the ID-JAG:
 
 An IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. If both a DPoP proof and a certificate suitable for binding are presented on the same Token Exchange request, the IdP selects a single binding mechanism according to local policy for the target Resource Authorization Server.
 
-The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a key or certificate to a JWT. When an ID-JAG contains a `cnf` claim, proof of possession of the corresponding private key or X.509 certificate MUST be demonstrated when using the ID-JAG at the Resource Authorization Server.
+The `cnf` (confirmation) claim, as defined in {{RFC7800}}, is used to bind a key or certificate to a JWT. When an ID-JAG contains a `cnf` claim, proof of possession of the corresponding private key or X.509 certificate MUST be demonstrated when using the ID-JAG at the Resource Authorization Server. A Resource Authorization Server that does not support the confirmation method in the `cnf` claim MUST reject the request with an `invalid_grant` error.
 
 The following sections describe the processing rules for each mechanism at two stages: during the Token Exchange (when requesting an ID-JAG from the IdP) and during the ID-JAG exchange (when exchanging the ID-JAG for an access token at the Resource Authorization Server).
 
