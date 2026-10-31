@@ -774,14 +774,14 @@ Access Token Response:
 
 On error, the IdP Authorization Server returns an OAuth 2.0 Token Error response as defined in {{Section 5.2 of RFC6749}}. Any OAuth error code MAY be returned; this specification profiles the following codes for interoperability:
 
-* `invalid_grant`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked). A re-issued subject token may resolve the error.
+* `invalid_request`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by {{Section 2.2.2 of RFC8693}}. A Client that receives `invalid_request` for a request that previously succeeded can obtain a new subject token and retry.
 
       {
-        "error": "invalid_grant",
+        "error": "invalid_request",
         "error_description": "Audience validation failed"
       }
 
-* `access_denied`: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow.
+* `access_denied`: the subject token is valid but the Client or End-User is not authorized to obtain an ID-JAG for the target Resource Authorization Server. A re-issued subject token will not resolve the error. Remediation is defined by the IdP Authorization Server operator's app assignment, access-request, or entitlement process, such as an Identity Governance and Administration (IGA) workflow. This profile uses `access_denied` here rather than `invalid_target` ({{Section 2.2.2 of RFC8693}}), so that the Client can tell a target it is not allowed to use from one the IdP Authorization Server does not recognize.
 
       {
         "error": "access_denied",
@@ -1822,6 +1822,11 @@ The authors would like to thank the following people for their contributions and
 
 \[\[ To be removed from the final specification ]]
 
+-06
+
+* Changed the IdP Authorization Server error for a subject token that fails validation from `invalid_grant` to `invalid_request`, as required by Section 2.2.2 of RFC 8693
+* Explained why `access_denied` is used rather than `invalid_target` when the Client or End-User is not authorized for the target
+
 -05
 
 * Added `invalid_target` handling and resource governance checks for the `resource` parameter and claim
@@ -1837,13 +1842,19 @@ The authors would like to thank the following people for their contributions and
 * Clarified that Token Exchange `scope` values are not OpenID Connect scopes
 * Specified how the Resource Authorization Server finds and validates ID-JAG signing keys
 * Added `id_jag_signing_alg_values_supported` IdP metadata parameter
+* Specified that IdP metadata is located per RFC 8414
 * Clarified ID-JAG reuse limits and when the Client should request a new ID-JAG
+* Required the IdP to authenticate the Client in the Token Exchange request
 * Limited the Token Exchange request to a single `audience` value, and profiled `invalid_target` for an unrecognized audience or a resource not governed by it
 * Defined resource identifier comparison, made the IdP resource governance check a SHOULD, and required the access token to be restricted to the resources in the ID-JAG `resource` claim
 * Moved RFC 9728 to normative references
 * Clarified how the IdP validates a Refresh Token used as the subject token, and when the RFC 6749 scope comparison applies
 * Required the `jwt-dpop` grant type for DPoP-bound ID-JAGs, and required the Resource Authorization Server to reject an ID-JAG with an unsupported `cnf` confirmation method
+* Allowed a key-bound ID-JAG to be used in place of client authentication at the Resource Authorization Server
 * Fixed the tenant claims used in the client ID and subject identifier uniqueness rules
+* Added a tenant context check at the Resource Authorization Server
+* Added Privacy Considerations
+* Updated the email and calendaring use case to use a Client ID Metadata Document
 * Fixed examples (RS256 signatures, `Cache-Control` headers, mTLS `client_id`, consistent `iss` and `exp` values)
 * Corrected cited section numbers, removed citations from the abstract, and removed an unused reference
 * Editorial clarifications and typo fixes
