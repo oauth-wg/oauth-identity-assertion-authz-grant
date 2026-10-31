@@ -1822,6 +1822,11 @@ The authors would like to thank the following people for their contributions and
 
 \[\[ To be removed from the final specification ]]
 
+-06
+
+* Changed the IdP Authorization Server error for a subject token that fails validation from `invalid_grant` to `invalid_request`, as required by Section 2.2.2 of RFC 8693
+* Explained why `access_denied` is used rather than `invalid_target` when the Client or End-User is not authorized for the target
+
 -05
 
 * Added `invalid_target` handling and resource governance checks for the `resource` parameter and claim
