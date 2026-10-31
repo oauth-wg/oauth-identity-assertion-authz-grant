@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 3 May 2027                                          Independent
+Expires: 4 May 2027                                          Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         30 October 2026
+                                                         31 October 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 May 2027.
+   This Internet-Draft will expire on 4 May 2027.
 
 Copyright Notice
 
@@ -1350,13 +1350,14 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    error code MAY be returned; this specification profiles the following
    codes for interoperability:
 
-*  invalid_grant: the subject token failed validation (for example
+*  invalid_request: the subject token failed validation (for example
    expired, malformed, audience mismatch, or a Refresh Token is
-   expired or revoked).  A re-issued subject token may resolve the
-   error.
+   expired or revoked), as required by Section 2.2.2 of [RFC8693].  A
+   Client that receives invalid_request for a request that previously
+   succeeded can obtain a new subject token and retry.
 
    {
-     "error": "invalid_grant",
+     "error": "invalid_request",
      "error_description": "Audience validation failed"
    }
 
@@ -1366,6 +1367,10 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
    the error.  Remediation is defined by the IdP Authorization Server
    operator's app assignment, access-request, or entitlement process,
    such as an Identity Governance and Administration (IGA) workflow.
+   This profile uses access_denied here rather than invalid_target
+   (Section 2.2.2 of [RFC8693]), so that the Client can tell a target
+   it is not allowed to use from one the IdP Authorization Server
+   does not recognize.
 
 {
   "error": "access_denied",
@@ -3439,6 +3444,15 @@ Document History
 
    [[ To be removed from the final specification ]]
 
+   -06
+
+   *  Changed the IdP Authorization Server error for a subject token
+      that fails validation from invalid_grant to invalid_request, as
+      required by Section 2.2.2 of RFC 8693
+
+   *  Explained why access_denied is used rather than invalid_target
+      when the Client or End-User is not authorized for the target
+
    -05
 
    *  Added invalid_target handling and resource governance checks for
@@ -3479,8 +3493,13 @@ Document History
 
    *  Added id_jag_signing_alg_values_supported IdP metadata parameter
 
+   *  Specified that IdP metadata is located per RFC 8414
+
    *  Clarified ID-JAG reuse limits and when the Client should request a
       new ID-JAG
+
+   *  Required the IdP to authenticate the Client in the Token Exchange
+      request
 
    *  Limited the Token Exchange request to a single audience value, and
       profiled invalid_target for an unrecognized audience or a resource
@@ -3499,8 +3518,18 @@ Document History
       required the Resource Authorization Server to reject an ID-JAG
       with an unsupported cnf confirmation method
 
+   *  Allowed a key-bound ID-JAG to be used in place of client
+      authentication at the Resource Authorization Server
+
    *  Fixed the tenant claims used in the client ID and subject
       identifier uniqueness rules
+
+   *  Added a tenant context check at the Resource Authorization Server
+
+   *  Added Privacy Considerations
+
+   *  Updated the email and calendaring use case to use a Client ID
+      Metadata Document
 
    *  Fixed examples (RS256 signatures, Cache-Control headers, mTLS
       client_id, consistent iss and exp values)
