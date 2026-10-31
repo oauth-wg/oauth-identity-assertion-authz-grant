@@ -1837,13 +1837,19 @@ The authors would like to thank the following people for their contributions and
 * Clarified that Token Exchange `scope` values are not OpenID Connect scopes
 * Specified how the Resource Authorization Server finds and validates ID-JAG signing keys
 * Added `id_jag_signing_alg_values_supported` IdP metadata parameter
+* Specified that IdP metadata is located per RFC 8414
 * Clarified ID-JAG reuse limits and when the Client should request a new ID-JAG
+* Required the IdP to authenticate the Client in the Token Exchange request
 * Limited the Token Exchange request to a single `audience` value, and profiled `invalid_target` for an unrecognized audience or a resource not governed by it
 * Defined resource identifier comparison, made the IdP resource governance check a SHOULD, and required the access token to be restricted to the resources in the ID-JAG `resource` claim
 * Moved RFC 9728 to normative references
 * Clarified how the IdP validates a Refresh Token used as the subject token, and when the RFC 6749 scope comparison applies
 * Required the `jwt-dpop` grant type for DPoP-bound ID-JAGs, and required the Resource Authorization Server to reject an ID-JAG with an unsupported `cnf` confirmation method
+* Allowed a key-bound ID-JAG to be used in place of client authentication at the Resource Authorization Server
 * Fixed the tenant claims used in the client ID and subject identifier uniqueness rules
+* Added a tenant context check at the Resource Authorization Server
+* Added Privacy Considerations
+* Updated the email and calendaring use case to use a Client ID Metadata Document
 * Fixed examples (RS256 signatures, `Cache-Control` headers, mTLS `client_id`, consistent `iss` and `exp` values)
 * Corrected cited section numbers, removed citations from the abstract, and removed an unused reference
 * Editorial clarifications and typo fixes
