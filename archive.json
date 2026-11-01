@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-29T00:03:00.301287+00:00",
+  "timestamp": "2026-11-01T00:03:09.273377+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -2687,15 +2687,15 @@
       "id": "I_kwDOKv5r-s8AAAABELxcDw",
       "title": "Mention OpenID Connect scopes in the Token Exchange request explicitly",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/99",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "Currently there is no mention of whether OpenID Connect scopes are allowed or not in the [Token Exchange step](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.3) of the flow.\n\nThe text says \n\n> The space-separated list of scopes at the Resource Server that is being requested.\n\nand OpenID Connect scopes are meant for client consumption, not resource server consumption, so it's kind of implied that they should not be accepted in the Token Exchange request.\n\nThoughts are welcome about which direction to go, but in either case we should mention that either they are acceptable in the request or they must not be included in the request.",
       "createdAt": "2026-06-02T23:44:29Z",
-      "updatedAt": "2026-10-27T03:53:56Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T19:56:21Z",
+      "closedAt": "2026-10-29T19:56:21Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -2718,15 +2718,15 @@
       "id": "I_kwDOKv5r-s8AAAABFVR7TA",
       "title": "Should SAML->RT->ID-JAG flow suggest or require the `email` scope?",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/100",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "Currently the spec says the client MUST request the `openid offline_access` scopes when exchanging the SAML assertion for refresh token.\n\nIt is likely, but not guaranteed, that the SAML assertion that the client has would already include the email address. (SAML can be configured to return opaque values for the `NameId`, and there is no guarantee the IdP would be configured to send an `email` attribute.)\n\nIf the SAML assertion did not have the email, you could argue the client should request the email scope because the ID-JAG will be visible to the client and would contain information beyond what is in the SAML assertion.\n\nHowever, the purpose of including the `email` in the ID-JAG is for the benefit of the Resource AS, when it looks up users by email address from the SAML assertion. This behavior isn't necessarily known by the client, since it's about the relationship between the Resource AS and IdP.\n\nSo the question is whether we want to keep the text as is with the `email` claim being optional, or aim for better interoperability by suggesting/requiring that the client request the `email` scope.\n\nAlso note that if the IdP includes the `sub_id` property with the SAML NameId values, then the Resource AS likely won't need to rely on the `email` claim at all.",
       "createdAt": "2026-06-12T21:48:18Z",
-      "updatedAt": "2026-06-16T04:00:40Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T23:12:53Z",
+      "closedAt": "2026-10-29T23:12:53Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -2755,6 +2755,13 @@
           "body": "PR https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/102 for optional JWE support",
           "createdAt": "2026-06-16T04:00:40Z",
           "updatedAt": "2026-06-16T04:00:40Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "#138 clarifies that scopes in the token exchange request are intended to describe scopes at the RAS, so closing this issue based on that definition",
+          "createdAt": "2026-10-29T23:12:53Z",
+          "updatedAt": "2026-10-29T23:12:53Z"
         }
       ]
     },
@@ -2862,15 +2869,15 @@
       "id": "I_kwDOKv5r-s8AAAABFs09pA",
       "title": "Note to preserve SAML NameId immutability",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/104",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "sdesen",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "NameId must not be changed by idp, if a scenario where this will not cause sso to fail, it should be noted",
       "createdAt": "2026-06-16T20:06:14Z",
-      "updatedAt": "2026-06-16T22:19:36Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T23:16:57Z",
+      "closedAt": "2026-10-29T23:16:57Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -2951,15 +2958,15 @@
       "id": "I_kwDOKv5r-s8AAAABIju8EA",
       "title": "Usage of \"resource\" request parameter incompatible with oauth-identity-chaining",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/110",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "randomstuff",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "oauth-identity-assertion-authz-grant is expected to be a profile of [identity chaining](https://datatracker.ietf.org/doc/draft-ietf-oauth-identity-chaining/):\n\n> Identity Chaining intentionally leaves many details unspecified in order to support multiple use cases. **This specification profiles it [Identity Chaining]** [\u2026]\n\nHowever, their definition of the `resource` parameter in the token Exchange Request is incompatible:\n\n* For identity chaining, this identifies the *authorization server* for trust domain B (i.e. the *resource authorization server*)\n* For identity assertion authz grant, this identified the *resource server*\n\n***\n\nIn identity chaining, we have:\n\n> Token Exchange Request\n>\n> [\u2026]\n>\n> resource, URI of **authorization server** for trust domain B\n\nIn oauth-identity-assertion-authz-grant:\n\n> The Client makes a Token Exchange [[RFC8693](https://www.rfc-editor.org/rfc/rfc8693)] request to the IdP Authorization Server's Token Endpoint with the following parameters:\n>\n> [\u2026]\n>\n> resource: OPTIONAL - The Resource Identifier of the **Resource Server** as defined in [Section 2](https://rfc-editor.org/rfc/rfc8707#section-2) of [[RFC8707](https://www.rfc-editor.org/rfc/rfc8707)].\n\n***\n\nI would claim oauth-identity-chaining is more consistent with the definition of `resource` because as per RFC 8693, they are supposed to have the [same semantic meaning](https://datatracker.ietf.org/doc/html/rfc8693#name-request).",
       "createdAt": "2026-07-13T00:03:26Z",
-      "updatedAt": "2026-07-22T08:43:34Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T23:08:01Z",
+      "closedAt": "2026-10-29T23:08:00Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -2982,15 +2989,15 @@
       "id": "I_kwDOKv5r-s8AAAABIqyz3A",
       "title": "Standardize error code for \"user does not have a license\" - today we get `invalid_grant`",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/111",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "pcarleton",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "On the final leg of the ID-JAG flow, we often get back `invalid_grant` when a user does not have a license (i.e. it's a 100 person company, and only 50 people have a Figma license). This causes problems because it's difficult to know when to retry and what to tell the user for how to get access to the app.  `invalid_grant` is indistinguishable from a misconfiguration.\n\nRelated, but separate issue from discussion, is the user might have a license in the resource server, but it's not configured in the IdP.\n\n",
       "createdAt": "2026-07-13T18:59:12Z",
-      "updatedAt": "2026-07-20T20:29:10Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T22:07:52Z",
+      "closedAt": "2026-10-29T22:07:41Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3196,15 +3203,15 @@
       "id": "I_kwDOKv5r-s8AAAABK_o4rg",
       "title": "Sender constraining the ID-JAG via mTLS-cert binding",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/117",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kenmccracken-google",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "In the [Sender constraining tokens](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-sender-constraining-tokens) section of the draft, it mentions DPoP-binding semantics for the ID-JAG.\n\nIn one of the referenced docs in the [Delegated key binding section](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-identity-chaining-12), support for mTLS binding the token is mentioned.  \"The client in trust domain A that presents the access token must use the key matching the \"cnf\" claim to generate a DPoP proof or set up a MTLS session when presenting the access token to a resource server in trust domain B.\"\n\nWould the authors of this ID-JAG spec consider support for similar mTLS session binding in a new Section 9.8.2?",
       "createdAt": "2026-07-31T19:35:23Z",
-      "updatedAt": "2026-08-01T01:41:36Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T21:38:04Z",
+      "closedAt": "2026-10-29T21:38:04Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3227,15 +3234,15 @@
       "id": "I_kwDOKv5r-s8AAAABLfxaSQ",
       "title": "Constraints on `resource` parameter in Token Exchange",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/120",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "If a Resource AS defines 3 `resource` values: `A`, `B`, and `C`, what are the expectations for the values a client can include in the `resource` parameters in Token Exchange?\n\nMy assumption is the client would be able to ask for any combination of the 3:\n\n* `A`\n* `B`\n* `A`, `B`\n* `B`, `C`\n* `A`, `C`\n* `A`, `B`, `C`\n\nand if the client includes one that is not defined `D`, that is an error.\n\nThis isn't explicit in Token Exchange:\n\n> An authorization server can use the invalid_target error code, defined in [Section 2.2.2](https://www.rfc-editor.org/info/rfc8693/#ErrorResponse), to inform a client that it requested access to too many target services simultaneously.\n\nbut since this has come up in implementation discussions of this spec, we should probably include some guidance. Ideally normative language, but at least something informative.",
       "createdAt": "2026-08-05T01:50:18Z",
-      "updatedAt": "2026-08-12T00:37:48Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T23:05:50Z",
+      "closedAt": "2026-10-29T23:05:50Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3282,15 +3289,15 @@
       "id": "I_kwDOKv5r-s8AAAABMYWzYQ",
       "title": "add security consideration about the extra importance of validating the AS issuer URL",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/122",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "RFC8414 [already includes](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3) language about validating that the `iss` in the AS metadata matches the URL it was fetched from. However, it's extra important to validate that in the context of this spec, since more things are happening without user interaction.\n\nWe should add a new security consideration section that discusses the validation required and the reason for doing so.\n\nBelow is a scenario that can trivially lead to account takeovers if the validation step is not done by the client.\n\n---\n\nThe attacker's hosts an MCP server at `https://mcp.attacker.com/`, and its Protected Resource Metadata points to the attacker's AS `https://auth.attacker.com/`\n\nThe attacker hosts AS metadata at `https://auth.attacker.com/.well-known/oauth-authorization-server` with the following contents:\n\n```\n{\n  \"iss\": \"https://auth.example.com/\",\n  \"authorization_endpoint\": \"https://auth.attacker.com/authorize\",\n  \"token_endpoint\": \"https://auth.attacker.com/token\",\n  ...\n}\n```\n\nThis is invalid according to RFC8414 because the `iss` value in this metadata doesn't match the URL it was requested from. However if the client continues, it would make a request for an ID-JAG with the issuer of a real MCP server `https://auth.example.com/`.\n\nThe attack occurs starting with getting a user to connect the malicious MCP server.\n\nWithout a `resource` parameter, the IDP wouldn't be able to tell that the request for the ID-JAG with `iss=https://auth.example.com` is starting from a malicious MCP server, so the IDP would issue an ID-JAG with the audience of `https://auth.example.com`. At that point, the client sends the ID-JAG to the attacker's token endpoint, and the attacker can forward it on to the real MCP AS and get the access token for the real MCP server.\n\n---\n\nThis is not a new attack, the same thing is possible in an interactive OAuth flow. But I think it's worth reminding people about again here because of how subtle this kind of thing can be.\n\n\n",
       "createdAt": "2026-08-12T00:18:30Z",
-      "updatedAt": "2026-08-12T01:37:16Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T23:05:50Z",
+      "closedAt": "2026-10-29T23:05:50Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3435,15 +3442,15 @@
       "id": "I_kwDOKv5r-s8AAAABSjqBrw",
       "title": "Best practices on id-jag expiration and reuse",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/130",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "dlozlla",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Currently the [spec](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-refresh-token) states RTs should not be generated but instead `id-jags` can be re-used several times to get new `access_tokens`, as long as they are not expired. \n\nFor scenarios where access needs to be revoked for a requesting app, the enterprise IdP still keeps control of how fast the revokation will happen, simply by controlling the expiration time of the `id-jag` it issues. If quick revokation is important, then it can use short (few minutes) expiration times. \n\nWith this context, which is the best practice for the Resource App AS:\n- should it always honour the expiration of the `id-jag` or is it reasonable to enforce a maximum expiration period for `id-jag`? this latter may be reasonable for public clients when sender constraining is not used, in order to limit problems with leaked `id-jags`\n- is it reasonable to enforce `id-jag` are used only once?  allowing for reuse can actually help with transient error situations and the problem with leaked id-jags can already be tackled by setting a max expiration time or better by using DPoP.\n\nEven when this seems to be part of the Resource App AS policy, or even the IdP police, we propose clearly stating best practices / recommended behaviour in the spec",
       "createdAt": "2026-09-22T13:32:06Z",
-      "updatedAt": "2026-10-27T00:21:49Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T20:06:45Z",
+      "closedAt": "2026-10-29T20:06:45Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3459,15 +3466,15 @@
       "id": "I_kwDOKv5r-s8AAAABTskiFg",
       "title": "Cross-domain use",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/131",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "dlozlla",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "The spec currently states that [id-jags are for cross-domain use cases](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#name-cross-domain-use) only, but we are starting to see cases where the same external requesting App (e.g. Claude) needs to get access to both 1) MCP servers protected by the same IdP issuing the id-jag and 2) MCP server protected by external authorization servers. It seems much simpler in those cases to always stick to using XAA (i.e. EMA in the scope for MCP)\n\nAre there specific security issues identified to forbid this behaviour? Should we relax the recommendation for an IdP to reject id-jags issued by itself in the same domain?",
       "createdAt": "2026-09-28T15:07:36Z",
-      "updatedAt": "2026-10-26T23:36:08Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T20:10:24Z",
+      "closedAt": "2026-10-29T20:10:24Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3525,15 +3532,15 @@
       "id": "I_kwDOKv5r-s8AAAABTt6J5w",
       "title": "Clarify sub claim audience semantics",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/132",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Section 3.1 currently describes the sub claim as identifying the End-User \u201cwhich is intended to be consumed by the Client.\u201d\n\nIssue #59 attempted to clarify this but was not sufficient.  This was raised on the mailing list https://mailarchive.ietf.org/arch/msg/oauth/4edOgB7CxPzKIfMOQlWeT13Ss4A/.  \n\nThe Resource Authorization Server is the intended audience and consumer of the ID-JAG. The Client obtains and presents the ID-JAG, but it does not need to interpret the sub claim.\n\nMore importantly, the sub value is audience-specific. The IdP determines the subject identifier appropriate for the Resource AS identified by the aud claim. Where pairwise subject identifiers are used, the IdP maps the audience to the corresponding pairwise sub.\n\nSuggested text:\n\n```\nsub: REQUIRED - Subject Identifier. An identifier for the End-User determined by the IdP AS for the audience identified by the `aud` claim, including the use of a pairwise subject identifier where applicable. \n```\n\nThis makes explicit that the Resource AS, rather than the Client, is the consumer of sub, and that sub is selected in the context of the ID-JAG audience.\n\nIt may also make sense to refactor subject mapping into its own section and reference in the claim defintiion. ",
       "createdAt": "2026-09-28T16:52:13Z",
-      "updatedAt": "2026-10-27T00:03:22Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T20:09:08Z",
+      "closedAt": "2026-10-29T20:09:08Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3549,15 +3556,15 @@
       "id": "I_kwDOKv5r-s8AAAABVaa4oQ",
       "title": "Specify how the Resource Authorization Server finds the IdP's signing keys and algorithm",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/133",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ksinder",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "## Problem\n\n[\u00a74.4.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.4.1) requires the Resource Authorization Server to validate the ID-JAG's signature, and [\u00a79.5](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-9.5) lists signature as part of validating the issuer. Neither section says where the keys come from. [RFC 7523 \u00a75](https://www.rfc-editor.org/rfc/rfc7523#section-5) calls key exchange \"explicitly out of scope\" and leaves it to profiles, so this draft is the place to say it.\n\nThe intent is to use the `iss` to find the IdP's [OpenID Connect](https://openid.net/specs/openid-connect-discovery-1_0.html) or [OAuth Authorization Server Metadata](https://www.rfc-editor.org/rfc/rfc8414) and use its [`jwks_uri`](https://www.rfc-editor.org/rfc/rfc8414#section-2) (per discussion in [modelcontextprotocol/ext-auth#34](https://github.com/modelcontextprotocol/ext-auth/issues/34)). Writing it down would keep implementations from each picking their own approach, such as hand-configured keys.\n\n**A related gap**: nothing says which algorithm the IdP uses to sign ID-JAGs. While testing an MCP server against several IdPs, we found one that signs ID-JAGs with ES256 only. Our server accepted only RS256, so every exchange failed, and the error didn't make the cause obvious. [`id_token_signing_alg_values_supported`](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata) describes ID tokens, which an IdP may sign differently.\n\n## Proposal\n\n1. In [\u00a74.4.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-4.4.1), or near [\u00a77.1](https://www.ietf.org/archive/id/draft-ietf-oauth-identity-assertion-authz-grant-04.html#section-7.1): the Resource Authorization Server SHOULD get the IdP's signing keys from the `jwks_uri` in the metadata for the ID-JAG's `iss`, found with [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html) or [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414).\n2. One of:\n   - a new IdP metadata parameter, such as `id_jag_signing_alg_values_supported`; or\n   - a recommendation that Resource Authorization Servers accept at least RS256 and ES256.\n\nI'm happy to send a PR once there's a preferred direction for item 2!",
       "createdAt": "2026-10-06T16:33:00Z",
-      "updatedAt": "2026-10-27T03:36:20Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-29T23:09:38Z",
+      "closedAt": "2026-10-29T23:09:38Z",
       "comments": [
         {
           "author": "mcguinness",
@@ -3573,15 +3580,15 @@
       "id": "I_kwDOKv5r-s8AAAABaWJ-6g",
       "title": "User consent for ID-JAG issuance",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/139",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "tulshi",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "In certain scenarios (probably more consumer scenarios), it might make sense for the user to consent to the creation of an ID-JAG, since their identity will be shared with an external party. \n\nI can think of ways in which this might be achieved, but is this a reasonable requirement?",
       "createdAt": "2026-10-27T16:07:38Z",
-      "updatedAt": "2026-10-28T17:54:01Z",
-      "closedAt": null,
+      "updatedAt": "2026-10-30T22:41:45Z",
+      "closedAt": "2026-10-30T22:41:45Z",
       "comments": [
         {
           "author": "bc-pi",
@@ -3612,6 +3619,54 @@
           "updatedAt": "2026-10-28T17:54:01Z"
         }
       ]
+    },
+    {
+      "number": 141,
+      "id": "I_kwDOKv5r-s8AAAABbDfiyg",
+      "title": "Confirm granted resources in Token Exchange and access token responses",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/141",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Split out of #123 for WG discussion.\n\n#123 and #140 profile the request side of #120: which `resource` values the IdP and Resource AS accept, and the errors when they don't. Neither covers how the Client learns which resources were granted when the IdP or Resource AS grants a subset or picks a default.\n\nOptions:\n\n1. Add a `resource` response parameter to the Token Exchange and access token responses, and register `token response` as a usage location for `resource`. This was in #123 before review.\n2. Reference draft-mcguinness-oauth-resource-token-resp once it is adopted.\n3. Leave it out. The Client can read the `resource` claim of an unencrypted ID-JAG, but cannot learn the access token's resources.\n",
+      "createdAt": "2026-10-29T23:55:33Z",
+      "updatedAt": "2026-10-29T23:55:33Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 142,
+      "id": "I_kwDOKv5r-s8AAAABbDfjVw",
+      "title": "Profile the `resource` parameter in the ID-JAG access token request",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/142",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Raised in review of #140. #123 and #140 profile `resource` in the Token Exchange request and the `resource` claim, but not in the access token request to the Resource Authorization Server.\n\nRFC 8707 Section 2.2: \"When the \"resource\" parameter is used on an access token request made to the token endpoint, for all grant types, it indicates the target service or protected resource where the client intends to use the requested access token.\" The draft's access token request defines only `grant_type` and `assertion`, so one Resource Authorization Server may ignore `resource` sent with an ID-JAG, another may honor it, and a third may reject it.\n\nProposal:\n\n- A `resource` parameter in the access token request selects a subset of the resources in the ID-JAG's `resource` claim, for example to obtain one access token per resource from a multi-resource ID-JAG.\n- A value not in the claim is rejected with `invalid_target` (RFC 8707 Section 2).\n- If the ID-JAG has no `resource` claim, the Resource Authorization Server treats the parameter as in RFC 8707.\n",
+      "createdAt": "2026-10-29T23:55:34Z",
+      "updatedAt": "2026-10-29T23:55:34Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 145,
+      "id": "I_kwDOKv5r-s8AAAABbGMkjQ",
+      "title": "Access token lifetime relative to the ID-JAG",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/145",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The examples issue one-day access tokens (`\"expires_in\": 86400`) from five-minute ID-JAGs (`\"expires_in\": 300`). RFC 7521 Section 4.1 says authorization servers \"SHOULD NOT issue access tokens with a lifetime that exceeds the validity period of the assertion by a significant period.\"\n\nThis matters more here than for a generic assertion grant. The ID-JAG replaces the refresh token (Section 4.4.4), so the access token lifetime sets how often the IdP re-evaluates its decision to broker access. With a one-day token, access withdrawn at the IdP stays usable for up to a day unless the Resource Authorization Server revokes it. The Introduction also says the Resource Authorization Server \"keeps independent control over its own access tokens\".\n\nOptions:\n\n1. Point to RFC 7521 Section 4.1 in the access token response, and fix the examples.\n2. Leave lifetime to Resource Authorization Server policy, add a security consideration on the trade-off, and fix the examples.\n3. Fix the examples only.\n\nRelated: #136.\n",
+      "createdAt": "2026-10-30T04:47:38Z",
+      "updatedAt": "2026-10-30T04:47:38Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -8267,24 +8322,26 @@
       "id": "PR_kwDOKv5r-s7g-8XS",
       "title": "Clarify subjects whose claims the ID-JAG conveys",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/98",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "## Summary\n\nClarifies which subjects' claims appear in an ID-JAG and how the IdP populates them, without changing normative behavior.\n\n- Names the three subjects: End-User (`sub`), OAuth client (`client_id`), and optional actor (`act`).\n- Anchors audience-scoped claim population to the same model IdPs already use for ID Tokens and SAML Assertions issued to the target Resource Authorization Server.\n- Preserves the prior text's OpenID Core reference and the \"Identity Assertion plus authorization delegation\" framing as the closing sentence.\n\n## Motivation\n\nImplementer feedback indicated the previous text (`The ID-JAG may contain additional authentication, identity, or authorization claims...`) didn't make the implicit claim model obvious. In particular, audience-scoped authorization claims about the End-User (such as roles or entitlements at the target application) are first-class ID-JAG content. Naming the subjects explicitly and pointing to the existing IdP pattern resolves that without introducing new normative requirements or new claim shapes.\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm cross-references resolve\n- [ ] Confirm no anchors changed",
       "createdAt": "2026-05-30T18:28:34Z",
-      "updatedAt": "2026-05-30T18:28:34Z",
+      "updatedAt": "2026-10-29T23:24:48Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "clarify-claim-subjects",
       "headRefOid": "4e6e69283f999a37aa37ca919631ed471193a687",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-29T23:24:45Z",
+      "mergedAt": "2026-10-29T23:24:45Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "d026f65292d866f141836aa99890064116510ceb"
+      },
       "comments": [],
       "reviews": []
     },
@@ -8348,24 +8405,26 @@
       "id": "PR_kwDOKv5r-s7nsRtx",
       "title": "Clarify SAML NameID stability, scope, and non-NameID resolution",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/105",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #104.\n\n## Summary\n\nAddresses @sdesen's feedback in #104 that the SAML NameID Subject Identifier section did not make its assumptions about immutability and uniqueness of the NameID explicit, and did not acknowledge that some real-world IdP deployments (for example Microsoft Entra ID) resolve users by a SAML attribute outside the `<Subject>` element rather than by the `<NameID>` itself.\n\n## What changed\n\n1. **Format intro tightening.** The Format section's \"intended for deployments\" sentence now refers specifically to \"a SAML `<NameID>` from its SSO trust relationship with the IdP Authorization Server\" instead of the vague \"SAML SSO subject identifiers.\"\n\n2. **New requirements block in Subject Identifier Processing**, inserted between the IdP construction rule and the Resource Authorization Server consumption rules. The block adds three normative bullets covering the assumptions the format depends on: stability of the NameID value (banning transient NameID Formats, allowing `emailAddress` and `persistent` with caveats inherited from the underlying Format), uniqueness scope (per SAML issuer plus Service Provider, with explicit handling of pairwise vs public NameIDs and the OAuth `client_id` to SAML SP entity ID mapping the IdP must maintain), and non-NameID subject resolution (citing Microsoft Entra ID's `objectidentifier` attribute as a real-world example, directing IdPs to convey the relevant attribute as an additional claim in the ID-JAG when SSO does not resolve by the `<NameID>`).\n\n## How this responds to #104\n\n| Issue concern | Resolution |\n|---|---|\n| Immutability of the NameID is critical but the spec did not require it | Stability requirement bans transient NameIDs and anchors stability to the Resource Authorization Server's SSO subject-resolution behavior |\n| A SAML implementation might not break if the NameID is modified | Stability requirement notes the SAML NameID Subject Identifier inherits the underlying Format's mutability properties; the same `emailAddress` caveats apply to ID-JAG as to SAML SSO |\n| NameID is not globally unique to an IdP, only to the relying party | Identifier scope requirement states this explicitly, requires the IdP to use the per-SP value for pairwise NameIDs, and requires the OAuth `client_id` to SAML SP entity ID mapping |\n| Microsoft docs show SSO can use a different claim than NameID | Non-NameID subject resolution requirement acknowledges this case, cites Entra ID's `objectidentifier`, and directs IdPs to use an additional ID-JAG claim instead of forcing the value into the SAML NameID Subject Identifier Format |\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm the new bullets render correctly\n- [ ] Confirm cross-references (`{{OASIS.saml-core-2.0-os}}`, `{{saml-nameid-format}}`, etc.) all resolve\n- [ ] Confirm no anchor IDs changed",
       "createdAt": "2026-06-17T22:23:58Z",
-      "updatedAt": "2026-06-19T05:25:33Z",
+      "updatedAt": "2026-10-29T23:16:59Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "saml-nameid-stability",
       "headRefOid": "873b8ab38e9964fc8a509c2dcf51fe438f42f011",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-29T23:16:55Z",
+      "mergedAt": "2026-10-29T23:16:55Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "6d819974450c8ebf6a9138f3e775b88f380acbf8"
+      },
       "comments": [],
       "reviews": [
         {
@@ -8407,6 +8466,26 @@
               "updatedAt": "2026-06-19T05:25:34Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVB186Q",
+          "commit": {
+            "abbreviatedOid": "873b8ab"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T23:16:18Z",
+          "updatedAt": "2026-10-29T23:16:19Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Ok, given that SAML is very extensible, let's just skip any further definition of how to map SAML claims here. So far we've had enough success with people being able to just use `sub_id` anyway, and I've only heard one case where someone needed additional claims that were in SAML.",
+              "createdAt": "2026-10-29T23:16:18Z",
+              "updatedAt": "2026-10-29T23:16:19Z"
+            }
+          ]
         }
       ]
     },
@@ -8422,7 +8501,7 @@
       "labels": [],
       "body": "Closes #107.\n\n## Summary\n\nAddresses @meghnadubey's request in #107 for explicit spec text and an example covering custom/private claims an IdP Authorization Server can include in the ID-JAG to convey Resource Authorization Server-specific context (for example RBAC roles, tenant context, or other audience-scoped authorization information) that is not part of an ID Token released to a Client during SSO.\n\n## What changed\n\nThree additions to the ID-JAG Claims section, placed after the existing \"may contain additional claims valid for an ID Token\" paragraph and before the `email`/`aud_sub` recommendation:\n\n1. **RAS-specific claims paragraph.** Makes it explicit that the IdP Authorization Server MAY include claims that are specific to the Resource Authorization Server identified by `aud` and that would not appear in an ID Token released to a Client during SSO. Names the categories: audience-scoped authorization context (roles or entitlements at the target application), Resource Authorization Server-specific identifiers, and other claims agreed out-of-band between the IdP and the RAS. Ties the addition to the design that SSO claim release and ID-JAG claim release can differ.\n\n2. **Claim naming guidance paragraph.** Adopts the OpenID Connect Core 1.0 Additional Claims naming guidance for ID-JAG, referencing Section 4.2 of RFC 7519: collision-resistant names RECOMMENDED, Private Claim Names acceptable when the IdP and RAS have an out-of-band agreement and naming conflicts are unlikely, and Registered Claim Names appropriate for claims with broad and general applicability.\n\n3. **Non-normative example payload.** A single JSON example showing all three naming conventions in one ID-JAG:\n\n   - `https://acme.idp.example/claims/employee_id` \u2014 collision-resistant Claim Name using a URI under the IdP's namespace.\n   - `authorization_details` (RFC 9396) \u2014 Registered Claim Name carrying a RAS-specific RAR type (`acme-chat-roles`) with role values.\n   - `chat_workspace_id` \u2014 Private Claim Name shared between the IdP and this specific RAS by out-of-band agreement.\n\nA short prose explanation follows the example, mapping each Claim Name back to its naming convention.\n\n## How this responds to #107\n\n@meghnadubey asked for \"text in the spec and an example for custom_claim... allowing for an optional custom claim in id-jag JWT [to] go a long way to address this gap\" for conveying RAS-specific context beyond `aud_tenant`.\n\nThe PR responds by:\n\n- Explicitly permitting RAS-specific custom claims in the spec (the first new paragraph).\n- Providing the naming conventions an IdP should use when defining such claims (the second new paragraph).\n- Demonstrating a concrete example with multiple custom-claim shapes side by side (the non-normative example).\n\nThe flexible `(key, value)` and `(format_specifier, key, value)` patterns the issue requested are accommodated by the three naming conventions plus the existing `authorization_details` (RFC 9396) carrier, which already supports structured `type`-discriminated objects. No new claim or registry is required.\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm the new paragraphs and JSON example render correctly\n- [ ] Confirm cross-references (`{{Section 4.2 of RFC7519}}`, `{{IANA.jwt}}`, `{{RFC9396}}`, `{{OpenID.Core}}`, `{{OpenID.Enterprise}}`) all resolve\n- [ ] Confirm no existing anchors changed",
       "createdAt": "2026-06-22T22:08:36Z",
-      "updatedAt": "2026-07-01T23:11:35Z",
+      "updatedAt": "2026-10-29T23:24:04Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
@@ -8440,6 +8519,13 @@
           "body": "Using IDP-namespaced claims will lead to a Resource AS relying on IDP-specific claims in the ID-JAG, which means the RAS will have to have IDP-specific processing which hurts interoperability.\r\n\r\nI changed these to RAS-namespaced claims instead which would help, since that would encourage IDPs to allow custom configuration for claim names, and then an admin could configure any IDP based on what the RAS needs.",
           "createdAt": "2026-07-01T22:19:38Z",
           "updatedAt": "2026-07-01T22:19:38Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "I lost the plot here, why do we need to allow the ID-JAG to contain custom claims that are not in the ID Token or SAML Assertion? I don't think that's what Meghna was implying in #107 ",
+          "createdAt": "2026-10-29T23:24:03Z",
+          "updatedAt": "2026-10-29T23:24:03Z"
         }
       ],
       "reviews": [
@@ -8550,50 +8636,75 @@
       "id": "PR_kwDOKv5r-s70eGuq",
       "title": "Profile access_denied for authorization failures at IdP and RAS",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/112",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #111.\n\n## Summary\n\nAddresses @pcarleton's report in #111 that RAS-side authorization failures (for example \"the End-User does not have a license\", or a policy or role check that denies access) today return `invalid_grant`, which is indistinguishable from grant validation failures such as signature or audience mismatches. Clients cannot tell whether a fresh ID-JAG would resolve the error or whether the End-User needs to remediate through an entitlement or access-request process.\n\nPer the discussion on #111, this PR adopts the path @aaronpk agreed to: profile `access_denied` for authorization failures at both the IdP Token Exchange endpoint and the RAS ID-JAG-to-access-token exchange, keeping `invalid_grant` for grant validation failures.\n\n## What changed\n\nAdds an Error Response subsection under Access Token Request and expands the existing Error Response subsection under Token Exchange. Each section:\n\n- Opens with a one-sentence framing noting that any OAuth token endpoint error code MAY be returned and that these two codes are profiled specifically for interoperability.\n- Defines `invalid_grant` as the grant validation failure code (signature, `aud`, `client_id`, `exp`, `typ`, decryption, `cnf` binding, subject token expiration at the IdP, etc.). A re-issued grant may resolve the error.\n- Defines `access_denied` as the authorization failure code (the grant is valid but the End-User or Client is not authorized). Covers licensing, entitlement, and provisioning gaps as well as policy or role/permission denials. A re-issued grant will not resolve the error.\n- Points at operator-defined remediation. Both bullets frame this as the \"operator's access-request, entitlement, or provisioning process\" (IdP-side adds \"app assignment\" as the leading example), with Identity Governance and Administration (IGA) workflows called out as a concrete enterprise deployment shape.\n\nThe two sections stay parallel and self-contained so readers of either endpoint's flow can consume the full error semantics without cross-referencing.\n\n## How this responds to #111\n\n| Concern | Resolution |\n|---|---|\n| RAS-side \"user does not have a license\" returns `invalid_grant`, indistinguishable from misconfiguration | New `access_denied` bullet at the RAS with explicit license, entitlement, provisioning, and policy/role denial examples |\n| Client cannot tell when to retry vs when to send the user through an access-request process | Each bullet states whether re-issuing the grant will resolve the error, giving the client a clear retry signal |\n| Same class of failure exists at the IdP side | Parallel `access_denied` bullet at the IdP for \"Client or End-User not authorized to obtain an ID-JAG for the target Resource Authorization Server\" |\n| Remediation is deployment-specific (enterprise IGA, or other operator processes) | Remediation sentence points to the operator's process and names IGA as a concrete example without foreclosing other deployment shapes |\n\n## Not in this PR (for future work)\n\nThe #111 discussion also mentioned:\n\n- `insufficient_user_authentication` \u2014 already covered in PR #88, so intentionally not touched here.\n- `insufficient_claims` (`draft-mcguinness-oauth-insufficient-claims`) \u2014 separate individual draft; would land as a follow-up if adopted.\n- `interaction_required` (`draft-parecki-oauth-jwt-grant-interaction-response`) \u2014 separate individual draft; would land as a follow-up if adopted.\n\n## Test plan\n\n- [ ] Render with kramdown-rfc / xml2rfc and confirm the new Error Response sections render correctly\n- [ ] Confirm cross-references (`{{Section 5.2 of RFC6749}}`, `{{token-request}}`) resolve\n- [ ] Confirm the new `{#token-exchange-error-response}` and `{#access-token-error-response}` anchors are unique and available for later specs to reference",
       "createdAt": "2026-07-21T16:51:15Z",
-      "updatedAt": "2026-08-25T19:44:17Z",
+      "updatedAt": "2026-10-29T22:07:47Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "access_denied_error",
-      "headRefOid": "9c3e6b579acdb5763608fcaead247b25afae5b60",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "9b79a9c3497e95eb1436926c46173015b6fd6419",
+      "closedAt": "2026-10-29T22:07:40Z",
+      "mergedAt": "2026-10-29T22:07:40Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "2f33528772ebc020513c87e707f72ff78642a275"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVBMJ6w",
+          "commit": {
+            "abbreviatedOid": "9c3e6b5"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:56:16Z",
+          "updatedAt": "2026-10-29T21:56:16Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\n        \"error_description\": \"Client is not authorized to access the target Resource Authorization Server\"\n```",
+              "createdAt": "2026-10-29T21:56:16Z",
+              "updatedAt": "2026-10-29T21:56:16Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 116,
       "id": "PR_kwDOKv5r-s73JCzj",
       "title": "Fix: correct minor editorial errors in ID-JAG draft",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/116",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mlajkim",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "## Overview\r\n\r\nThis PR fixes minor grammar, spelling, and example-formatting errors in the ID-JAG draft. It does not change protocol behavior or normative requirements.\r\n\r\n## Validation\r\n\r\nThe following has been run:\r\n\r\n- `make`\r\n- `make lint spellcheck check`\r\n",
       "createdAt": "2026-07-27T21:45:10Z",
-      "updatedAt": "2026-07-27T21:45:10Z",
+      "updatedAt": "2026-10-29T22:14:44Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "baseRefOid": "10616aa71ed8aa932623152037f733389d1407b6",
       "headRepository": "mlajkim/oauth-identity-assertion-authz-grant",
       "headRefName": "fix/minor-typos",
-      "headRefOid": "cfcc70e25d84922b2bab8c6f7573b32d7fb518c9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "b54ea89c435ad594e0226edee8a393a75c81e073",
+      "closedAt": "2026-10-29T21:41:10Z",
+      "mergedAt": "2026-10-29T21:41:10Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "45631f7df1f6f071e05a704836e3107ccf3dfa6b"
+      },
       "comments": [],
       "reviews": []
     },
@@ -8602,24 +8713,26 @@
       "id": "PR_kwDOKv5r-s75Qq5f",
       "title": "Add mTLS certificate binding for ID-JAG sender constraining",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/118",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "## Summary\n\n- Adds Section 9.8.2 **mTLS Certificate Binding** as a sibling to the existing DPoP binding, following [RFC 8705](https://www.rfc-editor.org/rfc/rfc8705).\n- Renames the existing `### Proof-of-Possession` subsection to `### DPoP Key Binding` for parallelism. DPoP processing rules are unchanged.\n- Adds guidance that an IdP SHOULD NOT bind the same ID-JAG to both a DPoP key and an X.509 certificate. When both a DPoP proof and a suitable certificate are presented on the same Token Exchange request, the IdP selects a single binding mechanism per local policy for the target Resource Authorization Server.\n- The new mTLS subsection mirrors the DPoP treatment with parallel \"During Token Exchange\" and \"During ID-JAG Exchange\" sub-subsections, including the same four-case `cnf`/mTLS processing matrix.\n- Adds RFC 8705 to normative references and a `-05` document history entry.\n\n### Note on the binding certificate\n\nThe certificate used for binding is the X.509 client certificate the client presents during the mutually authenticated TLS handshake, validated per RFC 8705 \u00a72. Because TLS exposes a single client certificate per connection, the binding certificate and the client-authentication certificate are necessarily the same certificate.\n\nCloses #117.\n\n## Test plan\n\n- [ ] CI builds the draft (kramdown-rfc render succeeds)\n- [ ] Internal anchors resolve (`sec-dpop-binding`, `sec-mtls-binding`)\n- [ ] Rendered HTML shows Section 9.8 with 9.8.1 (DPoP) and 9.8.2 (mTLS) at the same level\n- [ ] Document history `-05` entry appears",
       "createdAt": "2026-08-01T01:24:34Z",
-      "updatedAt": "2026-08-25T19:41:51Z",
+      "updatedAt": "2026-10-29T21:38:10Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "baseRefOid": "2339db4a9cf482875fc50f60aa82a8ef42003d07",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "mtls-cnf-binding",
-      "headRefOid": "660dd92481aa7a391531c6eb67ce14cde44a89d0",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "d40be6d0b4bd7a456d57dd43afe1e42cb2146c27",
+      "closedAt": "2026-10-29T21:38:03Z",
+      "mergedAt": "2026-10-29T21:38:03Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "10616aa71ed8aa932623152037f733389d1407b6"
+      },
       "comments": [
         {
           "author": "kenmccracken-google",
@@ -8719,24 +8832,26 @@
       "id": "PR_kwDOKv5r-s795NsY",
       "title": "Constrain resource parameter and require AS metadata iss validation",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/123",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "## Summary\n\nAddress issues #120 and #122 in a single PR.\n\n**#120 \u2014 `resource` parameter constraints in Token Exchange**\n\n- IdP MUST verify each requested resource identifier is governed by the `audience` Resource Authorization Server, and reject with `invalid_target` when it is not or when none is acceptable to policy.\n- RAS MUST apply the same check on the ID-JAG `resource` claim and reject with `invalid_target` on governance mismatch; missing required claim \u2192 `invalid_grant`.\n- New `resource` response parameter on both the Token Exchange response and the Access Token response, carrying the granted resource set with URI syntax and comparison rules per RFC 3986. Fixes the dangling RFC 8707 \u00a72 citation on the RAS response format.\n- Tightened the ID-JAG `resource` claim grammar (single string or non-empty JSON array of unique absolute URIs) to match the response grammar so the claim and the response can never disagree.\n- New IANA action registering `token response` as a Parameter Usage Location for the `resource` parameter so ID-JAG adoption is not gated on draft-mcguinness-oauth-resource-token-resp.\n\n**#122 \u2014 AS metadata `issuer` validation**\n\n- New security consideration requiring clients to validate the `issuer` value in Authorization Server metadata against the identifier used to construct the retrieval URL, per RFC 8414 \u00a73.3.\n- Describes the account-takeover scenario (attacker AS metadata claiming a legitimate `iss`) and identifies the RFC 8414 \u00a73.3 check as the primary defense.\n- Cross-references the IdP-side `resource` parameter governance rule from #120 as defense in depth: when the client includes `resource`, the IdP catches an audience/resource inconsistency that the attacker cannot satisfy.\n\n## Test plan\n\n- [ ] `make` builds the draft cleanly (verified locally: kramdown-rfc, xml2rfc-txt, xml2rfc-html all OK)\n- [ ] References resolve: RFC 3986 added to normative, draft-mcguinness-oauth-resource-token-resp added to informative\n- [ ] Anchors `{#token-exchange}`, `{#token-exchange-response}`, `{#access-token-response}` do not collide with existing anchors\n- [ ] WG review of the invalid_target vs invalid_grant split (IdP: request-parameter \u2192 `invalid_target`; RAS: grant-content \u2192 `invalid_grant`; either: resource governance \u2192 `invalid_target`)\n- [ ] WG review of the ID-JAG doing the `resource` `token response` Parameter Usage Location registration on behalf of the generic OAuth registry\n\nCloses #120\nCloses #122",
+      "body": "## Summary\n\nAddress issues #120 and #122 in a single PR. This PR profiles existing parameters and claims only; it does not add new ones.\n\n**#120: `resource` parameter constraints in Token Exchange**\n\n- IdP MUST verify each requested resource identifier is governed by the `audience` Resource Authorization Server, and reject with `invalid_target` when it is not or when none is acceptable to policy.\n- RAS MUST apply the same check to the ID-JAG `resource` claim and reject with `invalid_grant` when an identifier is not governed by it, or when it requires the claim and it is missing.\n- Tightened the ID-JAG `resource` claim grammar (single string or non-empty JSON array of unique absolute URIs, compared per RFC 3986).\n- Removed `resource` from the RAS requirement to return granted values in the access token response. RFC 8707 Section 2 defines `resource` only as a request parameter, so the existing text cited a response format that doesn't exist.\n\n**#122: AS metadata `issuer` validation**\n\n- New security consideration requiring clients to validate the `issuer` value in Authorization Server metadata against the identifier used to construct the retrieval URL, per RFC 8414 Section 3.3.\n- Describes the account-takeover scenario (attacker AS metadata claiming a legitimate `iss`) and identifies the RFC 8414 Section 3.3 check as the primary defense.\n- Cross-references the IdP-side `resource` governance rule from #120 as defense in depth: when the client includes `resource`, the IdP catches an audience/resource inconsistency that the attacker cannot satisfy.\n- Clients that discover the Resource Authorization Server through Protected Resource Metadata MUST validate it per RFC 9728 Section 3.3 and MUST send its `resource` identifier in the Token Exchange request.\n\n## Deferred to WG discussion\n\nA `resource` response parameter on the Token Exchange and access token responses (and the matching `token response` Parameter Usage Location registration) was removed from this PR per review. See draft-mcguinness-oauth-resource-token-resp.\n\n## Test plan\n\n- [ ] `make` builds the draft cleanly\n- [ ] WG review of the error split: IdP request parameter \u2192 `invalid_target`; RAS grant content \u2192 `invalid_grant`\n\nCloses #120\nCloses #122\n",
       "createdAt": "2026-08-12T06:12:04Z",
-      "updatedAt": "2026-08-25T19:44:00Z",
+      "updatedAt": "2026-10-29T23:05:53Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "baseRefOid": "2f33528772ebc020513c87e707f72ff78642a275",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "resource-iss-validation",
-      "headRefOid": "4fe9ada68a8ce19c67efb73bf6deeb8cb3b9d0f6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "e58bcb059a6dfaa215bd02d0214e16be690ec007",
+      "closedAt": "2026-10-29T23:05:48Z",
+      "mergedAt": "2026-10-29T23:05:48Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "df9f8d05824dfc9d788e62c1178a8a4245400b6e"
+      },
       "comments": [],
       "reviews": [
         {
@@ -8758,6 +8873,66 @@
               "updatedAt": "2026-08-12T14:36:57Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVAvwZw",
+          "commit": {
+            "abbreviatedOid": "ac8e372"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:12:42Z",
+          "updatedAt": "2026-10-29T21:12:42Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "I thought this was going to be added by a separate doc https://datatracker.ietf.org/doc/draft-mcguinness-oauth-resource-token-resp/",
+              "createdAt": "2026-10-29T21:12:42Z",
+              "updatedAt": "2026-10-29T21:12:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVAxHmA",
+          "commit": {
+            "abbreviatedOid": "ac8e372"
+          },
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:14:42Z",
+          "updatedAt": "2026-10-29T21:14:42Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "approach taken in PR was to inline relevant parts vs depend on another document for normative requirements that hasn't been adopted. We can go the other way if preferred. ",
+              "createdAt": "2026-10-29T21:14:42Z",
+              "updatedAt": "2026-10-29T21:14:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVAy4ew",
+          "commit": {
+            "abbreviatedOid": "ac8e372"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T21:17:19Z",
+          "updatedAt": "2026-10-29T21:17:20Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "Given that it's a somewhat significant change to add a response parameter to the token exchange response and JWT authorization grant response we should probably discuss that with the WG first. Let's keep this out of this PR and merge the rest for now. I'm not opposed to doing it this way, but it seems like a good discussion topic for the next meeting.",
+              "createdAt": "2026-10-29T21:17:19Z",
+              "updatedAt": "2026-10-29T21:17:20Z"
+            }
+          ]
         }
       ]
     },
@@ -8766,24 +8941,26 @@
       "id": "PR_kwDOKv5r-s8AAAABCxUwZg",
       "title": "Added security considerations on storage and caching of subject tokens",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/127",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-09-09T03:50:44Z",
-      "updatedAt": "2026-09-09T03:50:44Z",
+      "updatedAt": "2026-10-29T20:35:07Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "baseRefOid": "9473b5f7415ad108d90dc4bf86c0d6e63fa74990",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "aaronpk/sec-subject-tokens",
-      "headRefOid": "dc2ede6114a78a9d2d61caf505db273c9515ce33",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "d07301cd83fcd4425c508d525482b8eb9a99681d",
+      "closedAt": "2026-10-29T20:35:07Z",
+      "mergedAt": "2026-10-29T20:35:07Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "2339db4a9cf482875fc50f60aa82a8ef42003d07"
+      },
       "comments": [],
       "reviews": []
     },
@@ -8792,24 +8969,26 @@
       "id": "PR_kwDOKv5r-s8AAAABCxVzEQ",
       "title": "Added requirement that the IdP confirm the subject token is actually \u2026",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/128",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "aaronpk",
       "authorAssociation": "MEMBER",
       "assignees": [],
       "labels": [],
       "body": "\u2026a token of the indicated type.",
       "createdAt": "2026-09-09T03:54:24Z",
-      "updatedAt": "2026-09-09T03:54:24Z",
+      "updatedAt": "2026-10-29T20:12:36Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
-      "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
+      "baseRefOid": "f841daf9f7f821d50b586c6bfc25f15e9caad764",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "aaronpk/subject-token-type",
-      "headRefOid": "b2871c5ed366519cceb354abfdc22179a903725d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "f3a8c8b4f87c5712e78d21347772858743a14e73",
+      "closedAt": "2026-10-29T20:12:32Z",
+      "mergedAt": "2026-10-29T20:12:32Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "9473b5f7415ad108d90dc4bf86c0d6e63fa74990"
+      },
       "comments": [],
       "reviews": []
     },
@@ -8818,24 +8997,26 @@
       "id": "PR_kwDOKv5r-s8AAAABK5Z0Tw",
       "title": "Allow IdP to accept its own ID-JAGs when explicitly configured",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/134",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Proposed change for #131.\n\nSection 9.3 currently forbids an IdP from issuing access tokens in response to an ID-JAG it issued itself. This replaces that with an explicit opt-in:\n\n- By default the MUST NOT still applies. An IdP can be explicitly configured to accept its own ID-JAGs.\n- When configured, the IdP MUST NOT grant the client more access than it would when issuing an access token for the same subject and resource directly. It evaluates consent and authentication requirements when issuing the ID-JAG, since the access token request does not involve the user.\n- The ID-JAG definition and the `audience` parameter now say \"typically in another trust domain\" so they don't contradict 9.3.\n\nThe second point follows the discussion with @dlozlla in #131: policy is applied at issuance, and redemption works the same way as at any Resource Authorization Server.",
       "createdAt": "2026-10-26T23:34:15Z",
-      "updatedAt": "2026-10-26T23:34:15Z",
+      "updatedAt": "2026-10-29T20:10:15Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "self-issued-id-jag",
       "headRefOid": "ce34419a310a45cae8d30ae547386f5f218a0704",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-29T20:10:11Z",
+      "mergedAt": "2026-10-29T20:10:11Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "f841daf9f7f821d50b586c6bfc25f15e9caad764"
+      },
       "comments": [],
       "reviews": []
     },
@@ -8844,24 +9025,26 @@
       "id": "PR_kwDOKv5r-s8AAAABK5oDmg",
       "title": "Clarify that sub is selected for the Resource Authorization Server",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/135",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Proposed change for #132.\n\nThe `sub` claim definition in Section 3.1 says the value is \"intended to be consumed by the Client\", which is carried over from the ID Token definition. Atul raised this on the list. The Resource Authorization Server is the consumer of the ID-JAG, and the `sub` value is specific to the audience.\n\nChanges:\n\n- **`sub` claim (3.1):** the value is selected by the IdP for the Resource Authorization Server identified by `aud`, as described in the new 5.2. I split the definition into two paragraphs: the value and its uniqueness rules, then `sub_id`.\n- **Section 5** is now \"Cross-Domain Client and Subject Identifier Handling\", with 5.1 Client ID Mapping (existing text) and 5.2 Subject Identifier Mapping (new). No other sections are renumbered.\n- **5.2 Subject Identifier Mapping** replaces the Note in Section 5:\n  - The IdP MUST use the same `sub` for a user in every ID-JAG it issues for the same Resource Authorization Server (and `aud_tenant`), regardless of which Client requested it.\n  - When the Resource Authorization Server uses OpenID Connect for SSO, that value MUST be the `sub` the IdP would put in an ID Token issued to it as a Relying Party.\n- **9.6 Subject Identifier Disclosure:** a pairwise `sub` selected for the Resource Authorization Server is visible to the Client, which can link it to the `sub` in its own ID Token.\n\nCompatibility: the Note said the IdP \"needs to ensure\" the ID-JAG `sub` matches what it would send the Resource Authorization Server for SSO. This makes that a MUST and adds the consistency rule. An IdP that copies `sub` from the `subject_token` into the ID-JAG won't meet these rules when pairwise identifiers are in use.\n\nNot in this PR: consolidating the duplicate uniqueness requirements in 3.1 and 6.3.",
       "createdAt": "2026-10-27T00:01:20Z",
-      "updatedAt": "2026-10-27T00:01:20Z",
+      "updatedAt": "2026-10-29T20:08:58Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "sub-claim-audience",
       "headRefOid": "9324345e9961ec359dd4f413d19b57af147dc4ca",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-10-29T20:08:56Z",
+      "mergedAt": "2026-10-29T20:08:56Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "08231cd249caab519b06390d6ac220f0d0c2fb6b"
+      },
       "comments": [],
       "reviews": []
     },
@@ -8870,51 +9053,104 @@
       "id": "PR_kwDOKv5r-s8AAAABK5wTqw",
       "title": "Clarify ID-JAG reuse limits and when to request a new ID-JAG",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/136",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Proposed change for #130. Two sentences in 4.4.3 (Refresh Token):\n\n- **Reuse limits:** the Resource Authorization Server can reject an ID-JAG whose `exp` is later than its policy allows, or accept each ID-JAG only once by tracking its `jti`. Both are already allowed by Section 3 of RFC 7523; this states them where the draft describes reuse.\n- **Requesting a new ID-JAG:** the Client's SHOULD now also applies when the Resource Authorization Server rejects a re-submitted ID-JAG with `invalid_grant`, not only when the ID-JAG has expired. Because every rejection uses `invalid_grant`, the text also notes that if the new ID-JAG is rejected too, requesting another will not resolve the error. This limits the client to one retry without adding a new error code.\n\nAlso fixes the \"Sever\" typo in that sentence.",
       "createdAt": "2026-10-27T00:17:29Z",
-      "updatedAt": "2026-10-27T00:17:29Z",
+      "updatedAt": "2026-10-29T20:04:52Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "id-jag-lifetime-reuse",
-      "headRefOid": "7d65692d0b32543223f03d67879a955d1c85f41b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "cff124fcc23ff3ad5acdba7a43aa37e32454a0ac",
+      "closedAt": "2026-10-29T20:04:47Z",
+      "mergedAt": "2026-10-29T20:04:47Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "e62bbdffdd60811ce8a1e1dcb090b8846e255a16"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABU_8ViQ",
+          "commit": {
+            "abbreviatedOid": "7d65692"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T20:03:21Z",
+          "updatedAt": "2026-10-29T20:03:21Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\nWhen the access token has expired, clients MAY re-submit the original Identity Assertion JWT Authorization Grant to obtain a new Access Token.  The ID-JAG replaces the use of Refresh Token for the Resource Authorization Server. However, the Resource Authorization Server can reject an ID-JAG with an `exp` longer than its policy allows, or accept each ID-JAG only once by tracking its `jti` ({{Section 3 of RFC7523}}).\n```",
+              "createdAt": "2026-10-29T20:03:21Z",
+              "updatedAt": "2026-10-29T20:03:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABU_8sAw",
+          "commit": {
+            "abbreviatedOid": "7d65692"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-29T20:03:51Z",
+          "updatedAt": "2026-10-29T20:03:51Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "took me a minute to understand this was not saying a RAS can accept a ID-JAG after the exp date. Hopefully this helps the next reader",
+              "createdAt": "2026-10-29T20:03:51Z",
+              "updatedAt": "2026-10-29T20:03:51Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 137,
       "id": "PR_kwDOKv5r-s8AAAABK522AQ",
       "title": "Specify how the Resource Authorization Server finds ID-JAG signing keys",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/137",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Proposed change for #133, following @ksinder's proposal. Two commits so the metadata parameter can be dropped on its own.\n\n**Keys** (first commit)\n- **4.4.1:** the Resource Authorization Server MUST reject an ID-JAG with `invalid_grant` if `iss` does not identify an IdP Authorization Server it trusts. It SHOULD obtain that issuer's keys from the `jwks_uri` in its metadata, and accepts only the algorithms it allows for that issuer (Section 3.1 of RFC 8725). The trust check means an ID-JAG from an `iss` an attacker controls is rejected, even if the attacker publishes matching keys.\n- **7.1:** the IdP Authorization Server SHOULD sign ID-JAGs with a key published at the `jwks_uri` in its metadata, located via Section 3 of RFC 8414 or Section 4 of OpenID Connect Discovery. The two differ for issuers with a path component, so both are named.\n\n**Algorithm** (first commit)\n- **Section 3:** RS256 is already mandatory to implement for JWT authorization grants (Section 5 of RFC 7523). Resource Authorization Servers SHOULD also support ES256, which covers the IdP in #133 that signs ID-JAGs with ES256 only.\n\n**Metadata** (second commit)\n- **7.1:** new OPTIONAL `id_jag_signing_alg_values_supported` listing the algorithms the IdP uses for ID-JAGs, which MUST include RS256 when present. `id_token_signing_alg_values_supported` doesn't describe ID-JAGs. This lets a Resource Authorization Server detect a mismatch at setup time. It doesn't select an algorithm per Resource Authorization Server; that would need the Resource Authorization Server to advertise what it accepts, which is left for WG discussion.\n- **IANA:** registers the parameter in the OAuth Authorization Server Metadata registry.\n\nAdds RFC 7518 and OpenID Connect Discovery 1.0 as normative references. This follows the approach RFC 9068 Section 4 takes for JWT access tokens.",
       "createdAt": "2026-10-27T00:30:44Z",
-      "updatedAt": "2026-10-27T00:36:03Z",
+      "updatedAt": "2026-10-29T19:51:55Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "id-jag-signing-keys",
       "headRefOid": "cdc2c0342a60446cae38ace576276f3e971eaab0",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "closedAt": "2026-10-29T19:51:54Z",
+      "mergedAt": "2026-10-29T19:51:54Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "649f12e3894f038ae9610955e6a203f271620c66"
+      },
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Looks good to me!",
+          "createdAt": "2026-10-29T19:50:45Z",
+          "updatedAt": "2026-10-29T19:50:45Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -8922,20 +9158,595 @@
       "id": "PR_kwDOKv5r-s8AAAABK7VpcA",
       "title": "Clarify that Token Exchange scope values are not OpenID Connect scopes",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/138",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Proposed change for #99. One sentence added to the `scope` parameter of the ID-JAG Token Exchange request (Section 4.3):\n\n> As in Section 2.1 of RFC 8693, these values have the meaning defined by the Resource Authorization Server where the ID-JAG will be used, not their OpenID Connect meaning, so a value such as `profile` or `email` does not request identity claims (Section 5.4 of OpenID Connect Core).\n\nWhy this direction rather than allowing OpenID Connect scopes:\n\n- **Wrong requester.** In OpenID Connect the Relying Party asks for the claims it consumes. Here the consumer is the Resource Authorization Server, but the Client would be asking, without knowing what the Resource Authorization Server needs. The IdP already knows that from the Resource Authorization Server's own SSO registration.\n- **One namespace.** If `email` could mean either the OpenID Connect claim or a Resource Authorization Server scope of the same name, the IdP would have to tell them apart, and a wrong guess grants the Client a scope it never meant to request.\n- **Reversible.** If the WG later wants Clients to request claims (#83), a separate parameter can be added. Giving `scope` OpenID Connect semantics now could not be withdrawn later.\n- **RFC 8693.** Section 2.1 makes scope values specific to the service where the token will be used.\n\nThere is no new BCP 14 keyword. A Client MUST NOT would also forbid a Resource Authorization Server's own scope that happens to be named `email`.\n\nNot changed here: the Refresh Token bullet in 4.3.3 requires that \"the requested scopes and audience remain within the authorization context of the Refresh Token\", while the example Refresh Token has `openid offline_access` and requests `chat.read chat.history`. I think that needs its own PR.\n",
       "createdAt": "2026-10-27T03:49:05Z",
-      "updatedAt": "2026-10-27T03:49:05Z",
+      "updatedAt": "2026-10-29T19:56:11Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "9c907a790d173b6db9dd252fce88c9d23e5b2e3f",
       "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "headRefName": "oidc-scopes-token-exchange",
       "headRefOid": "31b9cb42747cd2bf28bc02291022b9603ac62da6",
+      "closedAt": "2026-10-29T19:56:11Z",
+      "mergedAt": "2026-10-29T19:56:11Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "34763f7771c3d41d6adea28095c9f7bd4e390bce"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 140,
+      "id": "PR_kwDOKv5r-s8AAAABLpz08g",
+      "title": "Tighten resource checks and fix review findings from #123",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/140",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Follow-up to #123, which merged before these review fixes were pushed. Related to #122.\n\n**Resource checks**\n- The IdP check that each requested resource is governed by the `audience` Resource Authorization Server is now a SHOULD. The conditional MUST in #123 applied only when the IdP was configured with that information, so in practice it was a MAY. Default resources the IdP selects when `resource` is absent must be governed by the `audience` Resource Authorization Server.\n- The `resource` parameter definition now says resource identifiers are compared using Simple String Comparison (RFC 3986 Section 6.2.1), as RFC 7523 does for `aud` and `iss`. The `resource` claim and the Resource Authorization Server check point to it. A Client that used Protected Resource Metadata sends its `resource` value unchanged, and each requested resource identifier that the IdP grants MUST appear in the ID-JAG's `resource` claim exactly as the Client sent it. The IdP processing bullet that requires the granted values in the ID-JAG drops a sentence that repeated it.\n- The Resource Authorization Server checks governance for the tenant identified by `aud_tenant` when present, otherwise for the tenant it associates with the issuing IdP. The access token MUST be restricted to resources in the `resource` claim and SHOULD be audience-restricted to them (RFC 8707 Section 2). Resource identifiers derived from `authorization_details` MUST be among those in the claim. If none of the resources are acceptable, the Resource Authorization Server rejects the request with `access_denied`.\n\n**Security considerations**\n- The #122 walk-through now shows how the attacker authenticates as the client at the legitimate Resource Authorization Server: with the `client_secret` the client sent it, or with a client assertion whose `aud` is the legitimate issuer.\n- The `resource` defense applies only when the client validated the attacker's Protected Resource Metadata. An IdP that checks governance rejects the Token Exchange request instead, and a sender-constrained ID-JAG also defeats the relay.\n- Corrects the RFC 9728 Section 3.3 paraphrase: when the metadata URL came from a `WWW-Authenticate` response, `resource` must be identical to the URL of the request that received that response.\n- Removes a Protected Resource Metadata paragraph that repeated the `resource` parameter rule. The closing sentence now says that metadata validation binds discovery to the resource, and including the validated `resource` value in Token Exchange binds the grant to it.\n- Moves RFC 9728 to the normative references, since two MUSTs depend on it.\n\n**Examples and wording**\n- The AI agent example's first request is now `GET /`, so the RFC 9728 check passes against `\"resource\": \"https://api.saas-tool.example/\"`.\n- The `resource` parameter is described as the Resource Identifier(s) of the protected resource(s), governed by the Resource Authorization Server identified by `audience`, for which access is requested.\n\nThe build is the same as `main`.\n",
+      "createdAt": "2026-10-29T23:24:53Z",
+      "updatedAt": "2026-10-30T19:07:09Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "d026f65292d866f141836aa99890064116510ceb",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "resource-followups",
+      "headRefOid": "4984cf0c08cf0a4c9eea8935c9e2d81b76086df4",
+      "closedAt": "2026-10-30T19:07:06Z",
+      "mergedAt": "2026-10-30T19:07:06Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "46882d73e5a7974fe493f8d919fb751fc4fcca8b"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 143,
+      "id": "PR_kwDOKv5r-s8AAAABLsL80g",
+      "title": "Fix tenant claim and Identity Assertion contradictions",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/143",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes two contradictions found in a review of main at 9928ea6. Neither changes a design decision.\n\n**Tenant claims**\n- `tenant` is the issuer's tenant and `aud_tenant` is the Resource Authorization Server's tenant (ID-JAG Claims).\n- The `client_id` rule in \"Client ID and Tenant Relationship\" checked the Resource Authorization Server's `client_id` against `tenant`. It now uses the Resource Authorization Server tenant for which the ID-JAG is issued (`aud_tenant`, when present). The tenant-scoped client identifier bullet no longer scopes the registration by `iss` + `tenant`.\n- \"Subject Identifier Uniqueness with Tenants\" required `tenant` \"When the Resource Authorization Server is multi-tenant\". It now says \"When the issuer is multi-tenant\", which matches the uniqueness rules just above it (`iss` + `tenant` + `sub`).\n\n**ID-JAG is not an Identity Assertion**\n- The ID-JAG Claims text said the grant \"functions as both an Identity Assertion and an authorization delegation\", which contradicts the Token Exchange rule that an ID-JAG \"MUST NOT be accepted as an Identity Assertion\". It now says the grant \"conveys identity claims about the End-User as well as an authorization delegation\".\n\n**Not changed here**\n- \"Issuer and Tenant Relationship\" still requires `tenant` only when \"the tenant context is relevant\". The fixed rule above is now stricter. When to require each tenant claim, and a Resource Authorization Server tenant check, need WG discussion.\n- \"three subjects\" is unchanged, as chosen in #98.\n\nThe DPoP fixes from the same review are in #144.\n",
+      "createdAt": "2026-10-30T04:32:05Z",
+      "updatedAt": "2026-10-30T19:14:44Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "review-contradictions",
+      "headRefOid": "91fb8c7d3926d06c34e650fe1c90199a9c7d0fd4",
+      "closedAt": "2026-10-30T19:14:27Z",
+      "mergedAt": "2026-10-30T19:14:27Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "e830b1242baf14b387372df67835101da30d2368"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 144,
+      "id": "PR_kwDOKv5r-s8AAAABLsL99A",
+      "title": "Align DPoP grant type and cnf processing",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/144",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Aligns the DPoP and `cnf` text found inconsistent in a review of main at 9928ea6.\n\n**Grant type**\n- The access token request defined `grant_type` only as `jwt-bearer`, but the DPoP example uses `jwt-dpop` and the mTLS example uses `jwt-bearer`. draft-parecki-oauth-jwt-dpop-grant requires `jwt-dpop` for an assertion that carries `cnf.jkt`.\n- `grant_type` is now `jwt-bearer`, or `jwt-dpop` when the ID-JAG is bound to a DPoP key.\n\n**Binding selection**\n- When both a DPoP proof and a certificate are presented, the IdP \"selects a single binding mechanism according to local policy\", but the DPoP rule said a valid proof means the IdP \"MUST include a `cnf` claim ... containing a `jkt` property\".\n- The DPoP rule now applies unless the IdP binds the ID-JAG to the client's X.509 certificate instead.\n\n**`cnf` processing**\n- The access token processing rules now point to the sender-constraint checks. This is a pointer only; the existing MUSTs apply.\n- A Resource Authorization Server that does not support the confirmation method in `cnf` MUST reject with `invalid_grant`. This follows from the existing \"proof of possession ... MUST be demonstrated\" and the `invalid_grant` error list (\"`cnf` binding\"). It is stated because RFC 7800 Section 3.1 otherwise has recipients ignore confirmation members they do not understand, which would turn a bound ID-JAG into a bearer grant.\n\n**Open questions**\n- Metadata: should a Resource Authorization Server that accepts DPoP-bound ID-JAGs list `jwt-dpop` in `grant_types_supported`, and a client that uses them list it in `grant_types`? Today both sections require only `jwt-bearer`.\n- draft-parecki-oauth-jwt-dpop-grant is a normative reference to an individual draft (idnits flags a possible downref). It needs WG adoption, or another arrangement, before IESG review.\n\nThe build is the same as `main`.\n",
+      "createdAt": "2026-10-30T04:32:08Z",
+      "updatedAt": "2026-10-30T20:31:39Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "dpop-fixes",
+      "headRefOid": "e6cae6154d11d484ab77fdbaa4ddb912d664bb92",
+      "closedAt": "2026-10-30T20:31:35Z",
+      "mergedAt": "2026-10-30T20:31:35Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "4add73d3b19ede24f457e623c78f9733f3b2796b"
+      },
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "We already have a normative reference to `parecki-oauth-jwt-dpop-grant` so nothing new here. We'll need to address it eventually.",
+          "createdAt": "2026-10-30T20:31:30Z",
+          "updatedAt": "2026-10-30T20:31:30Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 146,
+      "id": "PR_kwDOKv5r-s8AAAABLsVQTw",
+      "title": "Fix cited section numbers and references",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/146",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Corrects references found in a review of main at 9928ea6. No normative change.\n\n**Section numbers**\n- Refresh tokens: Section 5.2 of draft-ietf-oauth-identity-chaining is \"Sender Constraining Tokens\". The refresh token text is Section 5.4.\n- Sender constraining: Section 4 of draft-ietf-oauth-identity-chaining is \"IANA Considerations\". The sender-constraining text is Section 5.2.\n- `authorization_details` in token responses (two places): Section 2.2 of RFC 9396 is \"Common Data Fields\". The token response is Section 7.\n- `refresh_token`: Section 2.2 of RFC 8693 introduces the response. The parameter is defined in Section 2.2.1.\n\nChecked against draft-ietf-oauth-identity-chaining-17. Recheck when it is published as an RFC.\n\n**References**\n- The Abstract cited RFC 8693 and RFC 7523. RFC 7322 Section 4.3: \"the Abstract must not contain citations.\" They are now named in plain text.\n- I-D.ietf-oauth-rfc7523bis was a normative reference that the document never cites. Removed.\n\nThe build is the same as `main`, minus the idnits abstract warning and the xml2rfc unused-reference warning.\n",
+      "createdAt": "2026-10-30T04:51:48Z",
+      "updatedAt": "2026-10-30T20:32:48Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "fix-references",
+      "headRefOid": "f03321da2c7ac2900d31dae5daf654eba34c6839",
+      "closedAt": "2026-10-30T20:32:37Z",
+      "mergedAt": "2026-10-30T20:32:37Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "d78630b08e760b4d0e1db0d14217cd06fc0c9c0b"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 147,
+      "id": "PR_kwDOKv5r-s8AAAABLsVRTA",
+      "title": "Fix examples",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/147",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes examples that disagree with the draft or its dependencies, found in a review of main at 9928ea6. No normative change.\n\n- **Cache-Control:** three token responses lacked `Cache-Control: no-store` and `Pragma: no-cache`, which RFC 6749 Section 5.1 requires and the other examples include.\n- **mTLS `client_id`:** the mTLS request authenticates the client with its certificate but omitted `client_id`, which RFC 8705 Section 2 requires.\n- **Signing algorithm:** all eight example ID-JAGs (including those returned in the Token Exchange `access_token` parameter) had headers that decode to `{\"alg\":\"HS256\",...}`. The Resource Authorization Server verifies ID-JAGs with the IdP's published keys, and RS256 is mandatory to implement. They now decode to RS256.\n- **`iss`:** two ID-JAGs used `https://acme.idp.example` and two used `https://acme.idp.example/`. All four now use the trailing slash, like every other issuer identifier in the draft (`https://acme.chat.example/`, `https://authorization-server.saas-tool.example/`, `https://idp.cyberdyne-corp.example/`).\n- **`exp`:** the Token Exchange responses say `\"expires_in\": 300`, but the example ID-JAGs had `exp` 1000 seconds (or, in the AI agent example, 60 seconds) after `iat`. They now expire 300 seconds after `iat`.\n\nAccess token lifetimes in the examples are unchanged; see #145.\n",
+      "createdAt": "2026-10-30T04:51:50Z",
+      "updatedAt": "2026-10-30T20:36:16Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "fix-examples",
+      "headRefOid": "7ad973fb17084ee80cdfdd2790223644b55365be",
+      "closedAt": "2026-10-30T20:36:14Z",
+      "mergedAt": "2026-10-30T20:36:13Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "d81e0ed47b90f03ffe40abde4791b4ce06cf087c"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVNbzRw",
+          "commit": {
+            "abbreviatedOid": "cf38a5f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-30T20:34:51Z",
+          "updatedAt": "2026-10-30T20:34:51Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "```suggestion\n```\n\nPragma headers are removed from OAuth 2.1 and should not have been added to OAuth 2.0 in the first place https://mailarchive.ietf.org/arch/msg/oauth/9DdkE2P0RrUZMeZAbdf3NrMfy0w/",
+              "createdAt": "2026-10-30T20:34:51Z",
+              "updatedAt": "2026-10-30T20:34:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVNb6gg",
+          "commit": {
+            "abbreviatedOid": "cf38a5f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-30T20:35:02Z",
+          "updatedAt": "2026-10-30T20:35:02Z",
+          "comments": [
+            {
+              "originalPosition": 112,
+              "body": "```suggestion\n```",
+              "createdAt": "2026-10-30T20:35:02Z",
+              "updatedAt": "2026-10-30T20:35:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVNb_gA",
+          "commit": {
+            "abbreviatedOid": "cf38a5f"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-30T20:35:09Z",
+          "updatedAt": "2026-10-30T20:35:10Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "```suggestion\n```",
+              "createdAt": "2026-10-30T20:35:10Z",
+              "updatedAt": "2026-10-30T20:35:10Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 148,
+      "id": "PR_kwDOKv5r-s8AAAABLscbrQ",
+      "title": "Clarify Refresh Token validation in Token Exchange",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/148",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Clarifies how the IdP validates a Refresh Token used as the Token Exchange `subject_token`. Found in a review of main at 9928ea6.\n\n**Problem**\n\nThe Processing Rules require \"the requested scopes and audience remain within the authorization context of the Refresh Token\". The draft never defines that context, and the draft's own example fails it:\n- The Refresh Token in User Authentication is issued with `scope` `openid offline_access`.\n- The \"Token Exchange using Refresh Token\" example then requests `audience=https://acme.chat.example/` and `scope=chat.read chat.history`.\n- Since #138, Token Exchange `scope` values have the Resource Authorization Server's meaning, so comparing them with the IdP scopes of the Refresh Token, as RFC 6749 Section 6 does for a `refresh_token` grant, does not work.\n\nOne IdP will reject every such request; another will treat any audience its policy allows as within context.\n\n**Change**\n\n- The Refresh Token is valid if it is issued by the IdP, bound to the authenticated client, unexpired, not revoked, and not restricted by the IdP from the requested audience, resources, or scopes. This replaces the undefined \"authorization context\" with a validation condition.\n- The RFC 6749 Section 6 scope comparison applies only when `audience` identifies the IdP itself (Cross-Domain Use). There the requested scopes are the IdP's own, and skipping the comparison would let a Client trade an `openid offline_access` Refresh Token for broader IdP scopes.\n- For any other Authorization Server, the requested `scope` and `authorization_details` are evaluated by policy, as for any other Token Exchange request.\n\nNo keywords are added or removed. The build is the same as `main`.\n\n**Open question**\n\nShould a Refresh Token issued only for SSO (`openid offline_access`) be usable for ID-JAG issuance, or only one whose grant authorized it? The current example and the SAML 2.0 Subject Token Interoperability section assume the SSO Refresh Token can be used. This PR keeps that and leaves stricter policy to the IdP.\n",
+      "createdAt": "2026-10-30T05:07:18Z",
+      "updatedAt": "2026-10-30T20:40:40Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "refresh-token-context",
+      "headRefOid": "4fa0d00c508c1684e33288a518d7986294f83e44",
+      "closedAt": "2026-10-30T20:40:35Z",
+      "mergedAt": "2026-10-30T20:40:35Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "f8bb383f227364b2b87cf9474ba0a87034192619"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 149,
+      "id": "PR_kwDOKv5r-s8AAAABLseM6g",
+      "title": "Locate IdP metadata per RFC 8414",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/149",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Defines where a Resource Authorization Server finds the IdP's metadata (and so its `jwks_uri`). Found in a review of main at 9928ea6.\n\n**Problem**\n\nIdP Authorization Server Metadata locates the metadata \"as described in Section 3 of RFC8414 or Section 4 of OpenID.Discovery\". The two give different URLs:\n- Suffix: `/.well-known/oauth-authorization-server` versus `/.well-known/openid-configuration`.\n- For an issuer with a path, such as `https://idp.example/tenant1`, RFC 8414 inserts the suffix before the path (`https://idp.example/.well-known/oauth-authorization-server/tenant1`), while OpenID Connect Discovery appends it (`https://idp.example/tenant1/.well-known/openid-configuration`).\n\nAn IdP that publishes at one location and a Resource Authorization Server that looks at the other both follow the draft, and the Resource Authorization Server cannot verify the IdP's ID-JAGs.\n\n**Change**\n\nMetadata is located as described in Section 3 of RFC 8414. A Resource Authorization Server that cannot retrieve it there MAY fall back to OpenID Connect Discovery, as described in Section 5 of RFC 8414:\n\n> Going forward, OAuth authorization server metadata locations should use the transformation defined in this specification. ... applications should first apply the transformation defined in this specification and attempt to retrieve the authorization server metadata from the resulting location; only if the retrieval from that location fails should they fall back to attempting to retrieve it from the alternate location obtained using the transformation defined by OpenID Connect Discovery 1.0.\n\nAdds one MAY. The build is the same as `main`.\n\n**Open question**\n\nShould the IdP be required (SHOULD) to publish at the RFC 8414 location, so Resource Authorization Servers do not depend on the fallback?\n",
+      "createdAt": "2026-10-30T05:11:09Z",
+      "updatedAt": "2026-10-30T21:01:46Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "idp-metadata-location",
+      "headRefOid": "e32cbb6e0fbe8f72c868c04baafded5f7906e8ec",
+      "closedAt": "2026-10-30T21:01:28Z",
+      "mergedAt": "2026-10-30T21:01:27Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "3110a0613f9e2eb2296b0cde6e67385451390546"
+      },
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "It seems like since a RAS is going to be federated for SSO using OIDC or SAML, they are more likely to already be fetching the OpenID Connect server metadata rather than OAuth server metadata. Should we use that as the default option instead?",
+          "createdAt": "2026-10-30T20:45:48Z",
+          "updatedAt": "2026-10-30T20:45:48Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I went with MCP default due to EMA being the driver\r\n\r\nhttps://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/authorization-server-discovery?utm_source=chatgpt.com",
+          "createdAt": "2026-10-30T20:52:48Z",
+          "updatedAt": "2026-10-30T20:52:48Z"
+        },
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "well it keeps it in the IETF family too, so good enough for now. we can always change later if we need to.",
+          "createdAt": "2026-10-30T21:01:19Z",
+          "updatedAt": "2026-10-30T21:01:19Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 150,
+      "id": "PR_kwDOKv5r-s8AAAABLshd0A",
+      "title": "Check tenant context at the Resource Authorization Server",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/150",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Adds the tenant check at the Resource Authorization Server and makes the IdP's tenant rules consistent with it. Follows #143, which fixed which tenant claim the `client_id` and `sub` rules use. Found in a review of main at 9928ea6.\n\n**Problem**\n\nThe Resource Authorization Server processing rules check `typ`, trusted `iss`, `aud`, `client_id`, and `sub_id`, but never `tenant`. A multi-tenant issuer's `sub` is unique only within `iss` + `tenant` (ID-JAG Claims), and the Resource Authorization Server MAY resolve the subject by `email` or `aud_sub`.\n\nExample: a shared multi-tenant IdP issuer serves tenants A and B, and the Resource Authorization Server trusts that issuer for tenant A. Tenant B's users can obtain ID-JAGs for the same SaaS Client.\n1. A tenant B administrator sets a tenant B user's `email` to `victim@a.example`.\n2. The user signs in to the Client, which obtains an ID-JAG with `tenant` = B and that `email`.\n3. At the Resource Authorization Server, `typ`, `iss`, the signature, `aud`, and `client_id` all pass.\n4. The Resource Authorization Server resolves the subject by `email` and issues an access token for the victim's account.\n\nThe same applies to `sub` alone if accounts are keyed by `iss` + `sub`.\n\n**Changes**\n\n1. **Resource Authorization Server tenant check (Processing Rules).** For a multi-tenant issuer, the Resource Authorization Server rejects the ID-JAG with `invalid_grant` unless `tenant` is present and `iss` + `tenant` is trusted for the recipient tenant. The recipient tenant comes from `aud`, `aud_tenant`, or the trust relationship with the issuer; if it is ambiguous, the ID-JAG is rejected. The subject is resolved only within the recipient tenant. The Resource Authorization Server decides whether it needs `aud_tenant`, since it is the party that knows whether `aud` alone identifies its tenant.\n2. **`tenant` whenever the issuer is multi-tenant (Issuer and Tenant Relationship).** Removes \"and the tenant context is relevant for the Resource Authorization Server\", which was undefined, and drops the duplicate rule #143 left in Subject Identifier Uniqueness with Tenants. The rule that the IdP chooses `tenant` from \"the target Resource Authorization Server's tenant requirements\" becomes a definition: `tenant` identifies the End-User's tenant at the issuer.\n3. **Subject resolution by changeable claims (Subject Identifier Trust).** A Resource Authorization Server SHOULD resolve by `email` or `aud_sub` only when it trusts the issuer tenant as authoritative for those values, for example verified email domains.\n4. **Tenant Context in Token Exchange.** It said the IdP decides per audience whether to include tenant information, which contradicts change 2. It now says where each claim's value comes from: `tenant` is the issuer tenant, from the subject token, which was issued to the authenticated Client in that tenant; `aud_tenant` comes from `audience`, `resource`, and the issuer tenant's configuration for that Resource Authorization Server, and `client_id`, `sub`, and `aud_sub` are selected for it.\n\n**Normative accounting**\n- One conditional MUST becomes unconditional (`tenant` for a multi-tenant issuer); one duplicate MUST is removed.\n- \"The IdP MUST determine the appropriate tenant identifier based on the subject's tenant membership and the target Resource Authorization Server's tenant requirements\" is removed. It tied the issuer tenant claim to the Resource Authorization Server's tenant; the definition in change 2 replaces it.\n- \"The IdP MUST evaluate policy to determine if the requested `audience` ... requires tenant information\" is removed. It contradicted change 2, and the inclusion rule for `aud_tenant` is in the claim definition.\n- \"The tenant identifier in the ID-JAG MUST match the tenant context that the Resource Authorization Server expects for the specified `client_id` and `sub`\" is removed. For `tenant` the IdP has no choice to make, and the Resource Authorization Server check (change 1) enforces it. For `aud_tenant`, Client ID and Tenant Relationship and the `aud_tenant` definition already cover `client_id` and `aud_sub`.\n- New Resource Authorization Server MUSTs: the tenant check, rejection when the recipient tenant is ambiguous, and resolution within the recipient tenant.\n- One new SHOULD on subject resolution.\n\nThe build is the same as `main`.\n\n**Questions for the WG**\n- Do deployments rely on a multi-tenant issuer omitting `tenant`, for example because `sub` is globally unique?\n- Is a SHOULD enough for `email` and `aud_sub` resolution, or should it be a MUST for multi-tenant issuers?\n",
+      "createdAt": "2026-10-30T05:18:06Z",
+      "updatedAt": "2026-10-30T21:19:20Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "e830b1242baf14b387372df67835101da30d2368",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "tenant-check",
+      "headRefOid": "b7d6c1c8cc03b95457f490977d3c72fdc62c4b58",
+      "closedAt": "2026-10-30T21:19:17Z",
+      "mergedAt": "2026-10-30T21:19:17Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "5e782e6b984e17acfc0146ef7f32a2413f8acc68"
+      },
+      "comments": [
+        {
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "body": "Is this ready to review now that #143 is merged?",
+          "createdAt": "2026-10-30T20:46:38Z",
+          "updatedAt": "2026-10-30T20:46:38Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yes. With `tenant` now required for every multi-tenant issuer, \"Tenant Context in Token Exchange\" still said the IdP decides per audience whether to include it, so I rewrote that section to say where `tenant` and `aud_tenant` come from. The description lists the three MUSTs this removes and why.\n",
+          "createdAt": "2026-10-30T21:16:19Z",
+          "updatedAt": "2026-10-30T21:16:19Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 151,
+      "id": "PR_kwDOKv5r-s8AAAABLsmWWQ",
+      "title": "Define audience cardinality and errors in Token Exchange",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/151",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Defines how many `audience` values a Token Exchange request may carry and which error the IdP returns for a bad audience. Found in a review of main at 9928ea6.\n\n**Problem**\n- RFC 8693 Section 2.1 allows multiple `audience` parameters, but an ID-JAG's `aud` names a single Resource Authorization Server. The draft does not say what the IdP does with more than one.\n- The draft has no error for an `audience` the IdP does not recognize. `access_denied` covers a Client or End-User that is \"not authorized to obtain an ID-JAG for the target Resource Authorization Server\", which is a different case.\n- The Error Response section said it profiles \"two codes\", then showed a third (`invalid_target`) as an example.\n\n**Change**\n- `audience` definition: \"Exactly one `audience` value is allowed.\"\n- IdP Processing Rules: more than one `audience` gets `invalid_request` (RFC 6749 Section 5.2: the request \"repeats a parameter\"). An `audience` that does not identify a Resource Authorization Server the IdP has a trust relationship with gets `invalid_target`, tightening RFC 8693 Section 2.2.2's SHOULD to a MUST.\n- Error Response: `invalid_target` is a profiled code, covering an unknown `audience` and a resource not governed by it. A re-issued subject token will not resolve it; the Client needs to change the request.\n\nThe resulting split:\n- `invalid_grant`: the subject token is bad; obtain a new one.\n- `invalid_target`: the target is unknown or not governed; change the request.\n- `access_denied`: the target is known but the Client or End-User is not allowed; do not retry.\n\nAdds two MUSTs. The build is the same as `main`.\n\n**Depends on the A1 question**\n\nRFC 8693 Section 2.2.2 says a subject token that is invalid or unacceptable by policy MUST get `invalid_request`, and a refusal to issue for a target SHOULD get `invalid_target`. This draft uses `invalid_grant` and `access_denied` instead (#112). If the WG moves to RFC 8693's codes, unknown and unauthorized targets would both be `invalid_target`, and Clients would lose the do-not-retry signal. This PR assumes the #112 codes stay.\n\n**Trade-off**\n\nDistinct codes for unknown and unauthorized audiences tell an authenticated Client which Resource Authorization Servers the IdP trusts.\n\n**Follow-up**\n\nThe audience rule is a paragraph before the \"When processing the request\" list rather than its first bullet, to avoid a conflict with #140. It can become a bullet once #140 merges.\n",
+      "createdAt": "2026-10-30T05:28:26Z",
+      "updatedAt": "2026-10-30T20:52:36Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "audience-errors",
+      "headRefOid": "e55155a970fbfac72e987273e9ec27b1028cf842",
+      "closedAt": "2026-10-30T20:52:36Z",
+      "mergedAt": "2026-10-30T20:52:36Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "a4257d7bcb0de45545aebbf46d6c3e89c53ddcec"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 152,
+      "id": "PR_kwDOKv5r-s8AAAABLspsYg",
+      "title": "Require client authentication at the IdP Authorization Server",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/152",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "States that the IdP Authorization Server authenticates the Client in Token Exchange. Found in a review of main at 9928ea6.\n\n**Problem**\n\nThe draft relies on client authentication at the IdP but never requires it:\n- The subject-token check compares the assertion's audience with \"the `client_id` of the client authentication of the request\" (Token Exchange Processing Rules).\n- Storage of Subject Tokens says an attacker must authenticate \"as the client, since the Token Exchange request requires client authentication\".\n\nRFC 7523 Section 3.1 otherwise leaves client authentication to the server's discretion.\n\n**Change**\n\nA new first rule in the IdP Processing Rules: \"The IdP MUST authenticate the Client, and MUST reject a request without client authentication with `invalid_client` (Section 5.2 of RFC 6749).\"\n\nAdds one MUST. The build is the same as `main`.\n\n**Not changed here**\n- The Resource Authorization Server side, the \"SHOULD only be supported for confidential clients\" text, and the Email and Calendaring use case (unregistered native clients) are left for #85, which asks whether a public client at the Resource Authorization Server can rely on a key-bound ID-JAG instead.\n- #113 asks to relax this at the IdP when the ID Token is key-bound. That would become an exception to this rule.\n",
+      "createdAt": "2026-10-30T05:35:49Z",
+      "updatedAt": "2026-10-30T20:54:10Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "client-authentication",
+      "headRefOid": "50e997bf1aa580c304ba27dec590dc7f7685b537",
+      "closedAt": "2026-10-30T20:54:06Z",
+      "mergedAt": "2026-10-30T20:54:06Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "6c7ffd0dd928d31c86e950d6d246b90b7b1244b7"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 153,
+      "id": "PR_kwDOKv5r-s8AAAABLswr1g",
+      "title": "Allow key-bound ID-JAGs in place of client authentication at the Resource Authorization Server",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/153",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Stacked on #152, which requires the IdP Authorization Server to authenticate the Client. Proposes an answer to #85: the Resource Authorization Server SHOULD authenticate the Client, and may instead rely on a sender-constrained ID-JAG.\n\n**Problem**\n- Access Token Request only says \"The Client authenticates with its credentials as registered with the Resource Authorization Server\". RFC 7523 Section 3.1 leaves client authentication to the server's discretion.\n- The `client_id` check compares the claim with \"the authenticated client making the request\", which has nothing to compare against when the Client does not authenticate.\n- Security Considerations says \"This specification SHOULD only be supported for confidential clients\" without naming who enforces it.\n\n**Changes**\n- **Access Token Request:** the Resource Authorization Server SHOULD require client authentication. It MUST reject a request that has neither client authentication nor a sender-constrained ID-JAG with `invalid_client`.\n- **`client_id` check (Processing Rules):** if the Client authenticates, the `client_id` claim must identify it (`invalid_grant` otherwise). If it does not, proof of possession of the `cnf` key takes the place of this check, and the `client_id` claim identifies the Client. No `client_id` request parameter is needed, consistent with RFC 7521 Section 4.1.\n- **Security Considerations, Client Authentication:** explains the trust chain. The IdP authenticates the Client and binds the ID-JAG to that Client's key; proof of possession shows the presenter holds that key; without the binding, anyone holding a copy of the ID-JAG could present it. The confidential-clients SHOULD, which named no actor, is replaced by the rules above. \"Public clients SHOULD use the authorization code grant\" now applies to Clients that cannot authenticate to the IdP.\n\n**Normative accounting (against #152)**\n- Added: one SHOULD (require client authentication) and one MUST (reject a request with neither authentication nor a key binding).\n- The three MUSTs in the `client_id` check become one, conditioned on the Client authenticating.\n- Removed: \"This specification SHOULD only be supported for confidential clients.\"\n\nThe build is the same as `main`.\n\n**Open items**\n- Email and Calendaring Applications describes a Client with no registration at the IdP or the Resource Authorization Server, typically a native app. With #152 it must authenticate to the IdP, for example with a Client ID Metadata Document and `private_key_jwt`, which a widely distributed native app may not be able to protect. That use case needs revisiting.\n- #113 proposes relaxing client authentication at the IdP when the ID Token is key-bound. This PR's trust chain assumes the IdP authenticates the Client, so #113 would need an equivalent argument.\n",
+      "createdAt": "2026-10-30T05:49:51Z",
+      "updatedAt": "2026-10-30T20:55:22Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "6c7ffd0dd928d31c86e950d6d246b90b7b1244b7",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "ras-client-authentication",
+      "headRefOid": "f19694ae7f48a85c0674f5cda7014cbfa2d311e7",
+      "closedAt": "2026-10-30T20:55:18Z",
+      "mergedAt": "2026-10-30T20:55:18Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "e8e3836e184ee690ca00d82c1c2ed575929a8c30"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 154,
+      "id": "PR_kwDOKv5r-s8AAAABLszdFA",
+      "title": "Use a Client ID Metadata Document in the email and calendaring use case",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/154",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Stacked on #153 (and #152). Updates the Email and Calendaring Applications use case so its Client can meet the client authentication rules in those PRs.\n\n**Problem**\n\nThe use case's preconditions say the Client has no pre-registered client at the IdP or the Resource Authorization Server, and the Resource Authorization Server allows the ID-JAG \"from unregistered clients\". They do not say how the Client authenticates. #152 requires the IdP to authenticate the Client, and #153 has the Resource Authorization Server either authenticate it or accept a sender-constrained ID-JAG.\n\n**Change**\n\nThe Client identifies itself at both servers with a Client ID Metadata Document that publishes its public keys, and authenticates in the Token Exchange request with the corresponding private key (for example `private_key_jwt`). The Resource Authorization Server accepts clients identified by a Client ID Metadata Document, and either authenticates the Client the same way or accepts a sender-constrained ID-JAG.\n\nBecause the Client uses the same client identifier URL at both servers, the ID-JAG's `client_id` is that URL, which the Resource Authorization Server can recognize without a separate registration or client ID mapping.\n\nNo normative change. The build is the same as `main`.\n\n**Limit**\n\nSection 8.2 of draft-ietf-oauth-client-id-metadata-document has a Client authenticate only if it is \"capable of maintaining private key material\". A native email app that ships one private key in every install cannot. The use case therefore covers email clients with a backend that holds the key, or that protect a key by other means such as platform attestation. Dynamic Client Registration with per-instance credentials (RFC 8252 Section 8.4) is the alternative for purely native clients, but gives each install its own client identifier that the Resource Authorization Server cannot recognize.\n",
+      "createdAt": "2026-10-30T05:55:24Z",
+      "updatedAt": "2026-10-30T20:55:57Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "e8e3836e184ee690ca00d82c1c2ed575929a8c30",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "email-use-case",
+      "headRefOid": "2b7f19ee3d55937f49879a41719df8a38e414bd0",
+      "closedAt": "2026-10-30T20:55:54Z",
+      "mergedAt": "2026-10-30T20:55:54Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "2e0b74a4f39905ed58a3fba55ca0fd1468057200"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 155,
+      "id": "PR_kwDOKv5r-s8AAAABLs2SGg",
+      "title": "Add Privacy Considerations",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/155",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Adds a Privacy Considerations section. Found in a review of main at 9928ea6: the draft has Security Considerations but no Privacy Considerations, and only Subject Identifier Disclosure and Metadata Disclosure touch on privacy.\n\n**The section covers what each party learns**\n- **IdP Authorization Server:** which Clients access which Resource Authorization Servers for which End-Users, and when, including access without the End-User present. The request records in Storage of Subject Tokens hold the same information; they should be kept only as long as security and audit require, and End-Users or administrators should be able to see and revoke cross-app access.\n- **Client:** it can read the ID-JAG, including claims it would not receive in its own ID Token (a pairwise `sub`, `aud_sub`), and can link them across Resource Authorization Servers. The IdP Authorization Server SHOULD include only the claims the Resource Authorization Server needs.\n- **Resource Authorization Server:** JIT provisioning can create accounts for End-Users who never used it directly; it should retain only the attributes it needs.\n- **Error responses:** error descriptions SHOULD NOT disclose more about the End-User than the error code conveys.\n\nIt points to the existing Subject Identifier Disclosure and Metadata Disclosure sections rather than moving them, to avoid conflicting with #102.\n\nAdds two SHOULDs, both observable by another party (claims in the ID-JAG, error descriptions). Retention and user visibility are lowercase advice. The build is the same as `main`.\n\n**Open question**\n\nThe `access_denied` example in the Access Token Request error response uses \"The end-user is not licensed for this application\", which is the kind of disclosure the new SHOULD NOT discourages. Either the example changes, or the privacy text should say that remediation information like this is an accepted trade-off.\n\nEncryption as a way to keep claims from the Client is left to #102.\n",
+      "createdAt": "2026-10-30T06:01:17Z",
+      "updatedAt": "2026-10-30T20:57:06Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "9928ea623dced01c5783f4721213ac8d5c2c39f2",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "privacy-considerations",
+      "headRefOid": "d3637098ca6e67462089a900d0a734f2a8a876b8",
+      "closedAt": "2026-10-30T20:56:49Z",
+      "mergedAt": "2026-10-30T20:56:49Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "401ffadf7de3c129332e1a273b296a2114e8a0ad"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 156,
+      "id": "PR_kwDOKv5r-s8AAAABLyT2Fg",
+      "title": "Use RFC 8693 invalid_request for subject token errors",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/156",
+      "state": "MERGED",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Stacked on #151. Resolves the error-code question #151 raised: the subject token error follows RFC 8693, and `access_denied` stays, with a stated reason. Changes part of #112. Found in a review of main at 9928ea6.\n\n**Problem**\n- RFC 8693 Section 2.2.2: if the `subject_token` is \"invalid for any reason, or [is] unacceptable based on policy\", the value of the `error` parameter \"MUST be the `invalid_request` error code\". The draft profiles `invalid_grant` for this case, contradicting that MUST.\n- RFC 8693 Section 2.2.2 also says `invalid_target` SHOULD be used when the server \"is unwilling or unable to issue a token for any target service\". The draft uses `access_denied` for an unauthorized Client or End-User without saying why it departs from that SHOULD.\n\n**Changes**\n- **Subject token failure:** `invalid_grant` becomes `invalid_request`, and the example changes with it. \"A re-issued subject token may resolve the error\" becomes: a Client that receives `invalid_request` for a request that previously succeeded can obtain a new subject token and retry once. `invalid_request` also covers malformed requests, so the retry guidance is limited to a request that worked before.\n- **`access_denied`:** same meaning. One sentence says why it is used instead of `invalid_target`: the Client can tell a target it is not allowed to use from one the IdP Authorization Server does not recognize (`invalid_target`, #151).\n- **Resource Authorization Server errors:** unchanged. `invalid_grant` is what RFC 7521 Section 4.1.1 requires for an invalid assertion.\n\nThe resulting split at the IdP:\n- `invalid_request`: the subject token is bad, or the request is malformed. If the request worked before, obtain a new subject token and retry once.\n- `invalid_target`: the target is unknown or not governed; change the request.\n- `access_denied`: the target is known but the Client or End-User is not allowed; do not retry until access is granted.\n\nNo keywords are added or removed. The build is the same as `main`.\n\n**Trade-off**\n\n`invalid_request` is less specific than `invalid_grant`: by code alone, a Client cannot tell a bad subject token from a malformed request. The retry-once guidance bounds the cost. Keeping `invalid_grant` would need a reason strong enough to override a MUST in the base specification.\n",
+      "createdAt": "2026-10-30T14:26:25Z",
+      "updatedAt": "2026-10-30T21:03:32Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "audience-errors",
+      "baseRefOid": "e55155a970fbfac72e987273e9ec27b1028cf842",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "token-exchange-error-codes",
+      "headRefOid": "9d56bc65d8e158f388a6e1c51ddc968aabcfd0fc",
+      "closedAt": "2026-10-30T21:03:29Z",
+      "mergedAt": "2026-10-30T21:03:29Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "9aa199d548abf53fde365875572b2928f6ffb415"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOKv5r-s8AAAABVNpJxw",
+          "commit": {
+            "abbreviatedOid": "89bd016"
+          },
+          "author": "aaronpk",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-30T20:57:46Z",
+          "updatedAt": "2026-10-30T20:57:47Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\n* `invalid_request`: the subject token failed validation (for example expired, malformed, audience mismatch, or a Refresh Token is expired or revoked), as required by {{Section 2.2.2 of RFC8693}}. A Client that receives `invalid_request` for a request that previously succeeded can obtain a new subject token and retry.\n```",
+              "createdAt": "2026-10-30T20:57:47Z",
+              "updatedAt": "2026-10-30T20:57:47Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 157,
+      "id": "PR_kwDOKv5r-s8AAAABL46tqQ",
+      "title": "Draft 06",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/157",
+      "state": "MERGED",
+      "author": "aaronpk",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "adds missing branch from the last publish. I didn't realize one of the PRs was to a branch and not main.",
+      "createdAt": "2026-10-31T00:28:20Z",
+      "updatedAt": "2026-10-31T00:28:38Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "5e782e6b984e17acfc0146ef7f32a2413f8acc68",
+      "headRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "headRefName": "draft-06",
+      "headRefOid": "dc0bcb579afec315db44e9f311b20beff20f3477",
+      "closedAt": "2026-10-31T00:28:33Z",
+      "mergedAt": "2026-10-31T00:28:33Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "6e1294a0b14b9f511bac2cf2582e09b039ff4728"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 158,
+      "id": "PR_kwDOKv5r-s8AAAABL9cXeA",
+      "title": "Fix the client authentication target in the Token Exchange section",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/158",
+      "state": "OPEN",
+      "author": "shlee1223",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Thanks for your work on this draft. I noticed a small mix-up while reading it.\n\nThe Token Exchange section says \"Client authentication to the Resource Authorization Server\", but this request goes to the IdP Authorization Server. The examples right below it send `client_assertion` to `acme.idp.example`, and the Processing Rules say \"The IdP MUST authenticate the Client\". Client authentication at the Resource Authorization Server is covered separately in the Access Token Request section.\n\nThis changes the sentence to \"Client authentication to the IdP Authorization Server\".",
+      "createdAt": "2026-10-31T12:41:53Z",
+      "updatedAt": "2026-10-31T12:41:53Z",
+      "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
+      "baseRefName": "main",
+      "baseRefOid": "6e1294a0b14b9f511bac2cf2582e09b039ff4728",
+      "headRepository": "shlee1223/oauth-identity-assertion-authz-grant",
+      "headRefName": "fix-token-exchange-client-auth-target",
+      "headRefOid": "5f7d274aa4bc93ee8051e6cea6ae4c550e03fc4d",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
