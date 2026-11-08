@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-01T00:03:09.273377+00:00",
+  "timestamp": "2026-11-08T00:02:58.488663+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3665,6 +3665,38 @@
       "body": "The examples issue one-day access tokens (`\"expires_in\": 86400`) from five-minute ID-JAGs (`\"expires_in\": 300`). RFC 7521 Section 4.1 says authorization servers \"SHOULD NOT issue access tokens with a lifetime that exceeds the validity period of the assertion by a significant period.\"\n\nThis matters more here than for a generic assertion grant. The ID-JAG replaces the refresh token (Section 4.4.4), so the access token lifetime sets how often the IdP re-evaluates its decision to broker access. With a one-day token, access withdrawn at the IdP stays usable for up to a day unless the Resource Authorization Server revokes it. The Introduction also says the Resource Authorization Server \"keeps independent control over its own access tokens\".\n\nOptions:\n\n1. Point to RFC 7521 Section 4.1 in the access token response, and fix the examples.\n2. Leave lifetime to Resource Authorization Server policy, add a security consideration on the trade-off, and fix the examples.\n3. Fix the examples only.\n\nRelated: #136.\n",
       "createdAt": "2026-10-30T04:47:38Z",
       "updatedAt": "2026-10-30T04:47:38Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 159,
+      "id": "I_kwDOKv5r-s8AAAABdGhvQQ",
+      "title": "Sections 7.2 and 8 require jwt-bearer but omit jwt-dpop",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/159",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 4.4 requires `jwt-dpop` \"when the ID-JAG is bound to a DPoP key\". Section 9.11.1.1, step 2, says that for a valid DPoP proof the IdP \"MUST include a `cnf` claim\", unless it binds the ID-JAG to the client's X.509 certificate instead. draft-parecki-oauth-jwt-dpop-grant-02 Section 5.2 says a server that supports `jwt-dpop` \"MUST NOT accept a DPoP-bound JWT assertion\" as `jwt-bearer`.\n\nThe metadata rules name only `jwt-bearer`:\n\n- Section 8: a client \"MUST also include both `urn:ietf:params:oauth:grant-type:token-exchange` and `urn:ietf:params:oauth:grant-type:jwt-bearer` in its `grant_types`\".\n- Section 7.2: a Resource Authorization Server \"MUST also include `urn:ietf:params:oauth:grant-type:jwt-bearer` in `grant_types_supported`\".\n\nSo a client that sends DPoP proofs and lists only these grant types can be refused by a Resource Authorization Server that limits clients to their `grant_types`. RFC 7591 Section 2 defines those as the grant types the client \"can use at the token endpoint\". Meanwhile, a client or server that uses only DPoP-bound ID-JAGs must list a grant type it never uses.\n\nOptions:\n\n1. Also require `jwt-dpop`: in `grant_types` for a client that sends DPoP proofs, and in `grant_types_supported` for a Resource Authorization Server that accepts DPoP-bound ID-JAGs, at MUST or at the grant draft's SHOULD.\n2. Require the grant types each party uses: `jwt-bearer`, `jwt-dpop`, or both.\n3. Treat `jwt-bearer` in a client's `grant_types` as also permitting `jwt-dpop` for an ID-JAG redemption.\n\n#144 updated Section 4.4 only.\n",
+      "createdAt": "2026-11-06T18:00:31Z",
+      "updatedAt": "2026-11-06T18:00:31Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 160,
+      "id": "I_kwDOKv5r-s8AAAABdGhwlg",
+      "title": "Sender-constrained ID-JAG should not replace required client authentication",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/160",
+      "state": "OPEN",
+      "author": "mcguinness",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 4.4 says the Resource Authorization Server \"SHOULD require client authentication\", and \"MUST reject a request that has neither client authentication nor a sender-constrained ID-JAG\". Section 9.1 says it \"can instead accept a sender-constrained ID-JAG from a Client that does not authenticate\".\n\nNeither section says which clients may use that path, and two rules limit it:\n\n- Section 5.1, for a mapped `client_id`: \"The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG\".\n- draft-ietf-oauth-client-id-metadata-document-03 Section 5: \"When a client declares private_key_jwt as a token endpoint auth method and the authorization server supports this method, the authorization server MUST require client authentication ...\".\n\nRead alone, Sections 4.4 and 9.1 allow accepting a DPoP-bound ID-JAG from such a client with no client authentication.\n\nOptions:\n\n1. Limit the path to clients that have no credential at the Resource Authorization Server (token endpoint authentication method `none`).\n2. State that a client's registered or published metadata can require client authentication, as CIMD Section 5 does, and reconcile Section 5.1 with Section 4.4.\n3. Add an informative pointer to CIMD Section 5 in Section 9.1.\n\nRelated: #85 (a public client at the Resource Authorization Server with a key-bound ID-JAG) and #113 (relaxing client authentication for key-bound ID Tokens).\n",
+      "createdAt": "2026-11-06T18:00:32Z",
+      "updatedAt": "2026-11-06T18:00:32Z",
       "closedAt": null,
       "comments": []
     }
