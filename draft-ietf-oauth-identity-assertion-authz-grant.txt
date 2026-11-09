@@ -5,10 +5,10 @@
 Web Authorization Protocol                                    A. Parecki
 Internet-Draft                                                      Okta
 Intended status: Standards Track                           K. McGuinness
-Expires: 4 May 2027                                          Independent
+Expires: 13 May 2027                                         Independent
                                                              B. Campbell
                                                            Ping Identity
-                                                         31 October 2026
+                                                         9 November 2026
 
 
                Identity Assertion JWT Authorization Grant
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 May 2027.
+   This Internet-Draft will expire on 13 May 2027.
 
 Copyright Notice
 
@@ -973,9 +973,9 @@ Location: https://acme.idp.example/authorize?response_type=code&scope=openid%20o
    issues the ID-JAG with aud set to https://authorization-server.saas-
    tool.example/.
 
-   Client authentication to the Resource Authorization Server is done
-   using the standard mechanisms provided by OAuth 2.0.  Section 2.3.1
-   of [RFC6749] defines password-based authentication of the client
+   Client authentication to the IdP Authorization Server is done using
+   the standard mechanisms provided by OAuth 2.0.  Section 2.3.1 of
+   [RFC6749] defines password-based authentication of the client
    (client_id and client_secret), however, client authentication is
    extensible and other mechanisms are possible.  For example, [RFC7523]
    defines client authentication using bearer JSON Web Tokens using
@@ -2878,9 +2878,9 @@ Cache-Control: no-store
    [I-D.ietf-oauth-client-id-metadata-document]
               Parecki, A. and E. Smith, "OAuth Client ID Metadata
               Document", Work in Progress, Internet-Draft, draft-ietf-
-              oauth-client-id-metadata-document-02, 6 July 2026,
+              oauth-client-id-metadata-document-03, 2 November 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
-              client-id-metadata-document-02>.
+              client-id-metadata-document-03>.
 
    [RFC9068]  Bertocci, V., "JSON Web Token (JWT) Profile for OAuth 2.0
               Access Tokens", RFC 9068, DOI 10.17487/RFC9068, October
