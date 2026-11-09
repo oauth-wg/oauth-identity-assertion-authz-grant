@@ -515,7 +515,7 @@ If the IdP Authorization Server supports an implementation-specific `audience` v
 
 In that case, the IdP Authorization Server resolves the requested `audience` value to `https://authorization-server.saas-tool.example/` and issues the ID-JAG with `aud` set to `https://authorization-server.saas-tool.example/`.
 
-Client authentication to the Resource Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
+Client authentication to the IdP Authorization Server is done using the standard mechanisms provided by OAuth 2.0. {{Section 2.3.1 of RFC6749}} defines password-based authentication of the client (`client_id` and `client_secret`), however, client authentication is extensible and other mechanisms are possible. For example, {{RFC7523}} defines client authentication using bearer JSON Web Tokens using `client_assertion` and `client_assertion_type`.
 
 ### Example: Token Exchange using ID Token {#token-exchange-id-token-example}
 
