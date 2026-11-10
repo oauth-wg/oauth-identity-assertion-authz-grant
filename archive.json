@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-08T00:02:58.488663+00:00",
+  "timestamp": "2026-11-10T00:02:41.136008+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3265,15 +3265,15 @@
       "id": "I_kwDOKv5r-s8AAAABLqLGhQ",
       "title": "Carry an optional client metadata digest so the IdP can vouch for the client's CIMD (JIT provisioning at the RAS)",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/121",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "mcguinness",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "## Problem\n\nID-JAG lets an IdP that both domains already trust assert a user's identity and a client's delegated authorization to a Resource Authorization Server (RAS). That trust gives the RAS a strong reason to believe the user and the delegation. It says nothing about the *client's metadata*: its name, `redirect_uris`, key material, and other registration attributes. The draft assumes the client is \"already known\" to the RAS, established out of band or via a client metadata document, and #113 notes that even the client's `client_id` at the boundary needs a normative identification story.\n\nWhere the client is identified by a Client ID Metadata Document (CIMD) URL, this leaves an open question the CIMD trust model does not itself answer: *who reviewed and vouches for this client's metadata?* CIMD anchors that the metadata authentically came from whoever controls the URL. It does not tell the RAS that a trusted party evaluated that metadata. In the ID-JAG deployment model the RAS already trusts exactly such a party: the IdP.\n\n## Solution sketch\n\nLet the IdP bind a digest of the client's CIMD document into the assertion it already signs, so the RAS can trust the client's metadata on the IdP's signature and provision the client just in time. Details are for the working group to choose:\n\n- Define an OPTIONAL `cimd_digest` claim carried in the ID-JAG, or established through the ID Token to ID-JAG chain. Its value is the unpadded base64url-encoded SHA-256 hash ([RFC 6234](https://www.rfc-editor.org/rfc/rfc6234.html)) of the client's retrieved CIMD representation body, taken after any content coding is removed and with no transcoding or normalization, so no JSON canonicalization is involved. Other drafts in the working group have defined this same `cimd_digest` binding; reusing the claim and its computation keeps it interoperable.\n- The `client_id` is the CIMD URL, consistent with CIMD and with the client-identification gap #113 raises.\n- The IdP is already relying on this document. When the client is CIMD-identified at the IdP, the IdP has already fetched and trusted the same CIMD, including its keys and `redirect_uris`, to authenticate the client and issue the ID Token and refresh token that underlie the identity assertion. Signing a `cimd_digest` attests a document the IdP already consumed and trusted for this exchange; it is the digest of what the IdP saw, not a new review it must run. The keys #113 relies on to key-bind the ID Token are the same keys carried in that vouched CIMD.\n- On redemption, a RAS that does not already know the client MAY provision it just in time: fetch the CIMD URL, verify the document's `client_id` equals the URL, recompute the digest, and compare it to the IdP-asserted `cimd_digest`. On a match, it provisions a client from that metadata and trusts it because the IdP it already trusts signed over that exact snapshot.\n- If the RAS must complete anything asynchronously first, for example a first-sighting review of a client it has never seen, it can defer the token response and let the client poll rather than defining new async machinery here. [Deferred Token Response](https://www.ietf.org/archive/id/draft-gerber-oauth-deferred-token-response-00.html) already defines this at the token endpoint: the server answers with `authorization_pending`, a `deferral_code`, and a polling interval, and the client polls a deferred grant until the token is ready. Because redeeming an ID-JAG is itself a token-endpoint exchange, it composes directly, with no addition to this draft.\n\nThe effect is that an ID-JAG carrying `cimd_digest` acts, for the client's metadata, almost like a software statement over the CIMD: the IdP signs over the digest, and the RAS gets trusted metadata plus a just-in-time client without a separate registration call or a separate issuer to configure.\n\n## Benefits\n\n- **Answers \"who vouches for the client's metadata\" inside the existing trust model.** The RAS already trusts the IdP for SSO and subject resolution; this lets the same trust cover the client's metadata, with no new issuer relationship to establish.\n- **Just-in-time provisioning of unknown clients.** A RAS can accept a client it has never registered, cross-domain, because the metadata arrives vouched for by the IdP and bound by digest to a CIMD the RAS can fetch and verify.\n- **Minimal, and built on existing reliance.** One optional claim on a JWT the IdP already issues, over a CIMD the IdP already fetched and trusted to issue the ID Token and refresh token. No new endpoint, artifact, or round trip, and no new review obligation for the CIMD-identified case.\n- **Composes** with CIMD (`client_id` = URL, digest binds the reviewed snapshot) and with [Deferred Token Response](https://www.ietf.org/archive/id/draft-gerber-oauth-deferred-token-response-00.html) for any asynchronous completion at the RAS.\n- **Reinforces #113.** That issue removes the confidential-client requirement when the client is key-bound and flags that the `client_id` still needs a normative identity. A CIMD URL vouched for by `cimd_digest` gives that identity a trusted, fetchable, IdP-attested form. Together, a key-bound public client (#113) whose CIMD the IdP vouches for (this issue) can be provisioned at the RAS with both authenticated key binding and trusted metadata.\n\n## Tradeoffs\n\n- **The IdP vouches for client metadata, not just user identity.** Where the client is CIMD-identified this formalizes reliance the IdP already had, but the assurance is still bounded by the IdP's process: a light \"we recognize this client\" is weaker than a real review, and the RAS can conclude only what the IdP actually did. The spec should name any review beyond the IdP's existing client authentication as deployment policy.\n- **It couples a client-metadata attestation onto a user-authorization grant.** Some deployments may prefer to keep \"who is the user\" and \"what is the client software\" in separate artifacts. A standalone establishment artifact is the better fit when there is no user in the loop or no shared IdP, which is out of scope here and is where other drafts' trust binding applies. This proposal is specifically for the case ID-JAG already serves.\n- **Digest-change semantics need a rule.** The digest is over the whole document, so a benign change (a fixed typo) and a material one (a new redirect URI) both break it. The draft would need to say whether a mismatch is a hard failure or a policy input, ideally distinguishing changes to attested versus unattested metadata.\n- **Trust must anchor to the configured IdP, not the CIMD's own keys.** Standard issuer-trust discipline; the cross-domain client ID handling caution in the draft and #113 applies.\n\n## Relation to #113\n\n#113 is about *authentication assurance*: relaxing the confidential-client requirement when the ID Token or ID-JAG is key-bound. This issue is about *metadata trust and provisioning*: letting the IdP vouch for the client's CIMD so the RAS can trust and JIT-provision it. They are independent but complementary and strongest together: #113 lets the client be public and key-bound; this lets the RAS know and trust that client's metadata without prior registration. #113 also leaves open how the `client_id` is identified in the public-client case, and a CIMD URL carried with `cimd_digest` is a concrete answer.\n\n## Asking for\n\nFeedback on whether this belongs in the base spec or a profile, whether `cimd_digest` should ride the ID-JAG or be established in the ID Token chain, and how strict RAS-side digest-mismatch handling should be. If the direction has interest, I am happy to work the processing rules (digest computation, JIT-provisioning validation, mismatch policy) into a PR.\n",
       "createdAt": "2026-08-06T03:50:14Z",
-      "updatedAt": "2026-08-26T14:40:25Z",
-      "closedAt": null,
+      "updatedAt": "2026-11-09T21:36:43Z",
+      "closedAt": "2026-11-09T21:36:43Z",
       "comments": [
         {
           "author": "meghnadubey",
@@ -3281,6 +3281,13 @@
           "body": "I think this belongs in the CIMD profile for the IdP and for the RAS. For the IdP, whether the IdP undertakes the responsibility of validating/managing/computing the cimd_digest and adding it to id-jag for all CIMD clients. For the RAS, whether it validates/trusts the CIMD digest in id-jag for granting granular policy based access. \nThe CIMD profile can also propose well-known CIMD metadata object update for both the IdP and the RAS to publish `cimd_digest` support. \n",
           "createdAt": "2026-08-26T14:39:17Z",
           "updatedAt": "2026-08-26T14:40:25Z"
+        },
+        {
+          "author": "mcguinness",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@meghnadubey Agreed, this belongs in a separate profile. I've moved it into [Client ID Metadata Document Vouching in Identity Assertion Grants](https://mcguinness.github.io/draft-mcguinness-oauth-cimd-sw-stmt/draft-mcguinness-oauth-cimd-sw-stmt-idjag.html), an editor's draft requiring no changes to base ID-JAG.\n\nIt covers both sides you raised. The IdP normally includes `cimd_digest` when the claim's conditions are met and its issuance decision covers the document. A RAS explicitly configured to delegate client admission to that issuer can admit a client it holds no registration for, for the token request that redeems the ID-JAG, after matching the digest and authenticating the client with a key the document carries. For a claim from such an issuer, a mismatch with a freshly retrieved copy of the document fails the request.\n\nAdmission itself creates no registration or refresh token, though the server can separately register the client under its own policy. A sender-constrained ID-JAG does not replace document-key authentication at the RAS.\n\nThe draft does not yet define server metadata advertising support. Let's continue that discussion in the [draft's repository](https://github.com/mcguinness/draft-mcguinness-oauth-cimd-sw-stmt/issues). I'll close this issue in favor of that work.\n",
+          "createdAt": "2026-11-09T21:36:35Z",
+          "updatedAt": "2026-11-09T21:36:35Z"
         }
       ]
     },
@@ -3697,6 +3704,22 @@
       "body": "Section 4.4 says the Resource Authorization Server \"SHOULD require client authentication\", and \"MUST reject a request that has neither client authentication nor a sender-constrained ID-JAG\". Section 9.1 says it \"can instead accept a sender-constrained ID-JAG from a Client that does not authenticate\".\n\nNeither section says which clients may use that path, and two rules limit it:\n\n- Section 5.1, for a mapped `client_id`: \"The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG\".\n- draft-ietf-oauth-client-id-metadata-document-03 Section 5: \"When a client declares private_key_jwt as a token endpoint auth method and the authorization server supports this method, the authorization server MUST require client authentication ...\".\n\nRead alone, Sections 4.4 and 9.1 allow accepting a DPoP-bound ID-JAG from such a client with no client authentication.\n\nOptions:\n\n1. Limit the path to clients that have no credential at the Resource Authorization Server (token endpoint authentication method `none`).\n2. State that a client's registered or published metadata can require client authentication, as CIMD Section 5 does, and reconcile Section 5.1 with Section 4.4.\n3. Add an informative pointer to CIMD Section 5 in Section 9.1.\n\nRelated: #85 (a public client at the Resource Authorization Server with a key-bound ID-JAG) and #113 (relaxing client authentication for key-bound ID Tokens).\n",
       "createdAt": "2026-11-06T18:00:32Z",
       "updatedAt": "2026-11-06T18:00:32Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 161,
+      "id": "I_kwDOKv5r-s8AAAABddpUkQ",
+      "title": "\u00a74.3.3 Processing Rules: \"SAML Audience matches the client_id\" is incompatible with \u00a74.5's required Audience\u2192Client ID mapping",
+      "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/issues/161",
+      "state": "OPEN",
+      "author": "otoinobuo",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "\u00a74.3.3 (Processing Rules) states:\n\n> the IdP MUST validate that the audience of the assertion (e.g. the aud claim of the ID Token or SAML Audience) matches the client_id of the client authentication of the request.\n\nRead on its own, as an implementer coding the Processing Rules would, \"matches ... SAML Audience ... the client_id\" is a string-equality check. But \u00a74.5 (SAML 2.0 Subject Token Interoperability) specifies, for the SAML case, a *mapping* rather than equality:\n\n> The IdP Authorization Server MUST map the SAML Audience to a Client ID ...\n\n> ... the Audience / SPEntityID maps to the OAuth Client ID that is authenticated ...\n\nand \u00a74.5's own example uses `<saml2:Audience>https://client.example.com/sp-entity-id</saml2:Audience>` \u2014 an SP entity-ID URI, which is not equal to an opaque OAuth `client_id`.\n\nConcrete example, using the draft's own values:\n\n- authenticated `client_id`: `f53f191f9311af35`\n- SAML `Audience`: `https://client.example.com/sp-entity-id`\n- \u00a74.3.3 \"matches\" \u2192 `\"https://client.example.com/sp-entity-id\" == \"f53f191f9311af35\"` \u2192 false \u2192 request rejected\n- \u00a74.5 \"maps to\" \u2192 configured mapping \u2192 accepted\n\nSo for the SAML subject-token path, \u00a74.3.3 and \u00a74.5 give opposite results, and nothing states that \u00a74.5's mapping overrides \u00a74.3.3's equality. An IdP implementing the \u00a74.3.3 Processing Rules literally would reject every SAML subject token.\n\nI understand \u00a74.5 is the intended behavior for SAML; this is a request to make \u00a74.3.3 consistent with it, so an implementer reading the Processing Rules in isolation doesn't code an equality check. Suggested wording:\n\n> ... matches \u2014 or, for a SAML assertion, maps to (as defined in \u00a74.5) \u2014 the client_id ...\n\n(This is distinct from #114, which concerns gateway/proxy topology with public clients, not the SAML Audience\u2192client_id mapping. A scan of the current issues/PRs didn't find this specific point raised.)",
+      "createdAt": "2026-11-08T14:59:29Z",
+      "updatedAt": "2026-11-08T14:59:29Z",
       "closedAt": null,
       "comments": []
     }
@@ -9765,24 +9788,26 @@
       "id": "PR_kwDOKv5r-s8AAAABL9cXeA",
       "title": "Fix the client authentication target in the Token Exchange section",
       "url": "https://github.com/oauth-wg/oauth-identity-assertion-authz-grant/pull/158",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "shlee1223",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Thanks for your work on this draft. I noticed a small mix-up while reading it.\n\nThe Token Exchange section says \"Client authentication to the Resource Authorization Server\", but this request goes to the IdP Authorization Server. The examples right below it send `client_assertion` to `acme.idp.example`, and the Processing Rules say \"The IdP MUST authenticate the Client\". Client authentication at the Resource Authorization Server is covered separately in the Access Token Request section.\n\nThis changes the sentence to \"Client authentication to the IdP Authorization Server\".",
       "createdAt": "2026-10-31T12:41:53Z",
-      "updatedAt": "2026-10-31T12:41:53Z",
+      "updatedAt": "2026-11-09T20:09:45Z",
       "baseRepository": "oauth-wg/oauth-identity-assertion-authz-grant",
       "baseRefName": "main",
       "baseRefOid": "6e1294a0b14b9f511bac2cf2582e09b039ff4728",
       "headRepository": "shlee1223/oauth-identity-assertion-authz-grant",
       "headRefName": "fix-token-exchange-client-auth-target",
       "headRefOid": "5f7d274aa4bc93ee8051e6cea6ae4c550e03fc4d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-11-09T20:09:45Z",
+      "mergedAt": "2026-11-09T20:09:45Z",
+      "mergedBy": "aaronpk",
+      "mergeCommit": {
+        "oid": "e47d7781fd85ac55660ed52af4e9e38d08b3368d"
+      },
       "comments": [],
       "reviews": []
     }
