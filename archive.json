@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-10T00:02:41.136008+00:00",
+  "timestamp": "2026-11-17T00:02:45.185558+00:00",
   "repo": "oauth-wg/oauth-identity-assertion-authz-grant",
   "labels": [
     {
@@ -3655,9 +3655,17 @@
       "labels": [],
       "body": "Raised in review of #140. #123 and #140 profile `resource` in the Token Exchange request and the `resource` claim, but not in the access token request to the Resource Authorization Server.\n\nRFC 8707 Section 2.2: \"When the \"resource\" parameter is used on an access token request made to the token endpoint, for all grant types, it indicates the target service or protected resource where the client intends to use the requested access token.\" The draft's access token request defines only `grant_type` and `assertion`, so one Resource Authorization Server may ignore `resource` sent with an ID-JAG, another may honor it, and a third may reject it.\n\nProposal:\n\n- A `resource` parameter in the access token request selects a subset of the resources in the ID-JAG's `resource` claim, for example to obtain one access token per resource from a multi-resource ID-JAG.\n- A value not in the claim is rejected with `invalid_target` (RFC 8707 Section 2).\n- If the ID-JAG has no `resource` claim, the Resource Authorization Server treats the parameter as in RFC 8707.\n",
       "createdAt": "2026-10-29T23:55:34Z",
-      "updatedAt": "2026-10-29T23:55:34Z",
+      "updatedAt": "2026-11-15T17:50:59Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ilja-radusch",
+          "authorAssociation": "NONE",
+          "body": "We implement this proposal at our RAS and it works as described:\n\n- every `resource` value in the ID-JAG claim must be a resource this RAS governs, else `invalid_grant`;\n- a `resource` request parameter selects one value from the claim, else `invalid_target`;\n- without a claim, plain RFC 8707 rules apply.\n\nOne detail worth stating: our resource lookup is path-based, so we compare the origin explicitly. Otherwise `https://partner.example/files` could match a local `/files`. Suggested sentence: \"The Resource Authorization Server MUST compare `resource` values as absolute URIs, including scheme and authority.\"\n",
+          "createdAt": "2026-11-15T17:50:58Z",
+          "updatedAt": "2026-11-15T17:50:58Z"
+        }
+      ]
     },
     {
       "number": 145,
@@ -3671,9 +3679,17 @@
       "labels": [],
       "body": "The examples issue one-day access tokens (`\"expires_in\": 86400`) from five-minute ID-JAGs (`\"expires_in\": 300`). RFC 7521 Section 4.1 says authorization servers \"SHOULD NOT issue access tokens with a lifetime that exceeds the validity period of the assertion by a significant period.\"\n\nThis matters more here than for a generic assertion grant. The ID-JAG replaces the refresh token (Section 4.4.4), so the access token lifetime sets how often the IdP re-evaluates its decision to broker access. With a one-day token, access withdrawn at the IdP stays usable for up to a day unless the Resource Authorization Server revokes it. The Introduction also says the Resource Authorization Server \"keeps independent control over its own access tokens\".\n\nOptions:\n\n1. Point to RFC 7521 Section 4.1 in the access token response, and fix the examples.\n2. Leave lifetime to Resource Authorization Server policy, add a security consideration on the trade-off, and fix the examples.\n3. Fix the examples only.\n\nRelated: #136.\n",
       "createdAt": "2026-10-30T04:47:38Z",
-      "updatedAt": "2026-10-30T04:47:38Z",
+      "updatedAt": "2026-11-15T21:52:32Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ilja-radusch",
+          "authorAssociation": "NONE",
+          "body": "Running code for option 1. Our RAS now caps an access token redeemed from an ID-JAG at `min(resource TTL, ID-JAG exp \u2212 now + grace)`, citing RFC 7521 \u00a74.1. Before that it issued the resource's normal TTL, which made the ID-JAG's 5-minute lifetime meaningless for revocation at the IdP. Because there is no refresh token on this path (\u00a74.4.4), the access-token lifetime is the IdP's re-evaluation interval. That is worth saying in a security consideration even if the normative text stays a SHOULD.\n",
+          "createdAt": "2026-11-15T21:52:32Z",
+          "updatedAt": "2026-11-15T21:52:32Z"
+        }
+      ]
     },
     {
       "number": 159,
@@ -3687,9 +3703,17 @@
       "labels": [],
       "body": "Section 4.4 requires `jwt-dpop` \"when the ID-JAG is bound to a DPoP key\". Section 9.11.1.1, step 2, says that for a valid DPoP proof the IdP \"MUST include a `cnf` claim\", unless it binds the ID-JAG to the client's X.509 certificate instead. draft-parecki-oauth-jwt-dpop-grant-02 Section 5.2 says a server that supports `jwt-dpop` \"MUST NOT accept a DPoP-bound JWT assertion\" as `jwt-bearer`.\n\nThe metadata rules name only `jwt-bearer`:\n\n- Section 8: a client \"MUST also include both `urn:ietf:params:oauth:grant-type:token-exchange` and `urn:ietf:params:oauth:grant-type:jwt-bearer` in its `grant_types`\".\n- Section 7.2: a Resource Authorization Server \"MUST also include `urn:ietf:params:oauth:grant-type:jwt-bearer` in `grant_types_supported`\".\n\nSo a client that sends DPoP proofs and lists only these grant types can be refused by a Resource Authorization Server that limits clients to their `grant_types`. RFC 7591 Section 2 defines those as the grant types the client \"can use at the token endpoint\". Meanwhile, a client or server that uses only DPoP-bound ID-JAGs must list a grant type it never uses.\n\nOptions:\n\n1. Also require `jwt-dpop`: in `grant_types` for a client that sends DPoP proofs, and in `grant_types_supported` for a Resource Authorization Server that accepts DPoP-bound ID-JAGs, at MUST or at the grant draft's SHOULD.\n2. Require the grant types each party uses: `jwt-bearer`, `jwt-dpop`, or both.\n3. Treat `jwt-bearer` in a client's `grant_types` as also permitting `jwt-dpop` for an ID-JAG redemption.\n\n#144 updated Section 4.4 only.\n",
       "createdAt": "2026-11-06T18:00:31Z",
-      "updatedAt": "2026-11-06T18:00:31Z",
+      "updatedAt": "2026-11-15T17:50:57Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ilja-radusch",
+          "authorAssociation": "NONE",
+          "body": "Running code for option 1. Our RAS advertises `urn:ietf:params:oauth:grant-type:jwt-dpop` in `grant_types_supported` next to `jwt-bearer`, only when DPoP validation is enabled at the token endpoint. A DPoP-bound ID-JAG presented as `jwt-bearer` is rejected, per jwt-dpop-grant \u00a75.2. Advertising both has caused no issue for clients that only use `jwt-bearer`. The client-side `grant_types` rule in \u00a78 should name `jwt-dpop` the same way.\n",
+          "createdAt": "2026-11-15T17:50:57Z",
+          "updatedAt": "2026-11-15T17:50:57Z"
+        }
+      ]
     },
     {
       "number": 160,
@@ -3703,9 +3727,17 @@
       "labels": [],
       "body": "Section 4.4 says the Resource Authorization Server \"SHOULD require client authentication\", and \"MUST reject a request that has neither client authentication nor a sender-constrained ID-JAG\". Section 9.1 says it \"can instead accept a sender-constrained ID-JAG from a Client that does not authenticate\".\n\nNeither section says which clients may use that path, and two rules limit it:\n\n- Section 5.1, for a mapped `client_id`: \"The Client still needs to authenticate using its registered credential with the Resource Authorization Server when presenting the ID-JAG\".\n- draft-ietf-oauth-client-id-metadata-document-03 Section 5: \"When a client declares private_key_jwt as a token endpoint auth method and the authorization server supports this method, the authorization server MUST require client authentication ...\".\n\nRead alone, Sections 4.4 and 9.1 allow accepting a DPoP-bound ID-JAG from such a client with no client authentication.\n\nOptions:\n\n1. Limit the path to clients that have no credential at the Resource Authorization Server (token endpoint authentication method `none`).\n2. State that a client's registered or published metadata can require client authentication, as CIMD Section 5 does, and reconcile Section 5.1 with Section 4.4.\n3. Add an informative pointer to CIMD Section 5 in Section 9.1.\n\nRelated: #85 (a public client at the Resource Authorization Server with a key-bound ID-JAG) and #113 (relaxing client authentication for key-bound ID Tokens).\n",
       "createdAt": "2026-11-06T18:00:32Z",
-      "updatedAt": "2026-11-06T18:00:32Z",
+      "updatedAt": "2026-11-15T21:52:31Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "ilja-radusch",
+          "authorAssociation": "NONE",
+          "body": "Running code for option 1. We had an opt-in path that let a client redeem a DPoP-bound ID-JAG without client authentication. As first shipped, it admitted any registered client the (mapped) `client_id` claim named. That included confidential clients and clients reached through a per-issuer `client_id` map, which is exactly the conflict with \u00a75.1 and CIMD-03 \u00a75 you describe. We now limit the path to clients that hold no credential at the RAS (`token_endpoint_auth_method: none`, and for CIMD no `private_key_jwt` / `jwks*`). A credentialed client presenting a key-bound ID-JAG without authenticating gets `invalid_client`.\n\nRelated data point on \u00a75: our IdP side needed a per-audience `client_id` map, and DCR makes that map unbounded. CIMD URL client_ids remove the map. With option 1, a mapped `client_id` always means a registered, credentialed client, so the \u00a75.1 rule and the key-bound path no longer overlap.\n",
+          "createdAt": "2026-11-15T21:52:31Z",
+          "updatedAt": "2026-11-15T21:52:31Z"
+        }
+      ]
     },
     {
       "number": 161,
